@@ -135,7 +135,7 @@ _build/
 app/
 *.yaml
 data/
-# *.db
+*.db
 *.out
 
 .requirements.txt
