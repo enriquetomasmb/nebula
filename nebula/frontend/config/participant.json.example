@@ -1,0 +1,152 @@
+{
+  "scenario_args": {
+    "name": "",
+    "start_time": "",
+    "federation": "DFL",
+    "rounds": 10,
+    "simulation": true,
+    "controller": "127.0.0.1:5000",
+    "random_seed": 42,
+    "n_nodes": 0,
+    "config_version": "development"
+  },
+  "device_args": {
+    "uid": "",
+    "idx": "",
+    "name": "",
+    "username": "pi",
+    "password": "pi",
+    "role": "aggregator",
+    "proxy": false,
+    "malicious": false,
+    "start": false,
+    "accelerator": "cpu",
+    "devices": 2,
+    "strategy": "ddp",
+    "logging": false
+  },
+  "security_args": {
+    "certfile": "",
+    "keyfile": "",
+    "cafile": ""
+  },
+  "federation_args": {
+    "round": 0
+  },
+  "network_args": {
+    "ip": "",
+    "port": 0,
+    "addr": "",
+    "neighbors": "",
+    "interface": "eth0",
+    "simulation": false,
+    "bandwidth": "5Gbps",
+    "delay": "0ms",
+    "delay-distro": "0ms",
+    "delay-distribution": "normal",
+    "loss": "0%",
+    "duplicate": "0%",
+    "corrupt": "0%",
+    "reordering": "0%"
+  },
+  "adaptive_args": {
+    "model_similarity": false
+  },
+  "mobility_args": {
+    "latitude": "",
+    "longitude": "",
+    "change_geo_interval": 5,
+    "grace_time_mobility": 60,
+    "random_geo": true,
+    "mobility": false,
+    "mobility_type": "topology",
+    "radius_federation": 1000,
+    "scheme_mobility": "random",
+    "round_frequency": 1,
+    "neighbors_distance": {},
+    "additional_node": {
+      "status": false,
+      "round_start": 0,
+      "scheme": "random"
+    }
+  },  
+  "data_args": {
+    "dataset": "MNIST",
+    "iid": false,
+    "num_workers": 0,
+    "partition_selection": "dirichlet",
+    "partition_parameter": 0.5
+  },
+  "model_args": {
+    "model": "MLP"
+  },
+  "training_args": {
+    "trainer": "lightning",
+    "epochs": 3
+  },
+  "aggregator_args": {
+    "algorithm": "FedAvg",
+    "aggregation_timeout": 300
+  },
+  "defense_args": {
+    "with_reputation": false,
+    "is_dynamic_topology": false,
+    "is_dynamic_aggregation": false,
+    "target_aggregation": false
+  },
+  "adversarial_args": {
+    "attacks": "No Attack",
+    "targeted": false,
+    "poisoned_sample_percent": 0,
+    "poisoned_ratio": 0,
+    "target_label": 0,
+    "noise_type": "salt",
+    "target_changed_label": 0    
+  },
+  "tracking_args": {
+    "enable_remote_tracking": false,
+    "local_tracking": "web",
+    "log_dir": "/Users/enrique/Documents/nebula/app/logs",
+    "config_dir": "/Users/enrique/Documents/nebula/app/config",
+    "run_hash": ""
+  },
+  "mender_args": {
+    "id": "",
+    "mac": "",
+    "device_type": ""
+  },
+  "message_args": {
+    "max_local_messages": 100000,
+    "compression": "zlib"
+  },
+  "reporter_args": {
+    "grace_time_reporter": 10,
+    "report_frequency": 5
+  },
+  "discoverer_args": {
+    "grace_time_discovery": 0,
+    "discovery_frequency": 10,
+    "discovery_interval": 0.2
+  },
+  "health_args": {
+    "grace_time_health": 60,
+    "health_interval": 15,
+    "send_alive_interval": 0.2,
+    "alive_timeout": 120
+  },
+  "forwarder_args": {
+    "forwarder_interval": 1,
+    "forward_messages_interval": 0,
+    "number_forwarded_messages": 100
+  },
+  "propagator_args": {
+    "propagate_interval": 3,
+    "propagate_model_interval": 0,
+    "propagation_early_stop": 3,
+    "history_size": 5
+  },
+  "misc_args": {
+    "grace_time_connection": 20,
+    "grace_time_start_federation": 20
+  } 
+}

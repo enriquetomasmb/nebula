@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>NEBULA: A Platform for Decentralized Federated Learning</title>
+    <meta name="description"
+        content="Innovative platform that facilitates the training of federated learning models in a decentralized fashion across many physical and virtualized devices">
+    <meta name="keywords"
+        content="decentralized, federated, learning, machine learning, platform, deep learning, collaborative training, communication mechanisms, cybersecurity">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://federatedlearning.inf.um.es">
+    <meta property="og:title" content="NEBULA: A Platform for Decentralized Federated Learning">
+    <meta property="og:description"
+        content="Innovative platform that facilitates the training of federated learning models in a decentralized fashion across many physical and virtualized devices">
+    <meta property="og:image" content="{{ url_for('static', filename='images/nebula-logo.jpg') }}">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://federatedlearning.inf.um.es">
+    <meta property="twitter:title" content="NEBULA: A Platform for Decentralized Federated Learning">
+    <meta property="twitter:description"
+        content="Innovative platform that facilitates the training of federated learning models in a decentralized fashion across many physical and virtualized devices">
+    <meta property="twitter:image" content="{{ url_for('static', filename='images/nebula-logo.jpg') }}">
+
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='images/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='images/favicon-32x32.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='images/favicon-16x16.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='images/site.webmanifest') }}">
+    <link rel="mask-icon" href="{{ url_for('static', filename='images/safari-pinned-tab.svg') }}" color="#5bbad5">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    <meta name="apple-mobile-web-app-title" content="NEBULA">
+    <meta name="application-name" content="NEBULA">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="msapplication-config" content="{{ url_for('static', filename='images/browserconfig.xml') }}">
+    <meta name="theme-color" content="#ffffff">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/leaflet.css') }}">
+
+    <!-- <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script> -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+        crossorigin="anonymous"></script>
+
+    <script src="{{ url_for('static', filename='js/leaflet.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/leaflet.moving.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/dat.gui.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/graph.js') }}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.157.0/three.min.js"
+        integrity="sha512-nogdM20cZX4FjsqU5H5ecK3vw8LjYN1AcUUWi7asLUVP3eJK5wldywvqFMW8CLd5/xoiJaIL3eXG82SlOWZkTA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://use.fontawesome.com/0f1b71cc74.js"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-CJMRTGSHND"></script>
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"
+        integrity="sha384-c79GN5VsunZvi+Q/WObgk2in0CbZsHnjEqvFxC5DxHn9lTfNce2WW6h2pH6u/kF+"
+        crossorigin="anonymous"></script>
+
+    <script>
+        function showAlert(category, message) {
+            // Create the alert element
+            const alert = document.createElement('div');
+            alert.classList.add('alert', `alert-${category}`, 'alert-dismissible', 'fade', 'show');
+            alert.setAttribute('role', 'alert');
+            alert.innerHTML = `
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                ${message}
+            `;
+
+            // Append the alert in the top of the page
+            const container = document.querySelector('.alerts');
+            container.insertBefore(alert, container.firstChild);
+
+            // Hide the alert after 3 seconds
+            setTimeout(() => {
+                alert.classList.remove('show');
+                setTimeout(() => {
+                    alert.remove();
+                }, 300);
+            }, 10000);
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Raleway:300,300i,400,400i,500,500i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i"
+        rel="stylesheet">
+
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+        gtag('config', 'G-CJMRTGSHND', {
+            'linker': {
+                'domains': ['federatedlearning.inf.um.es'],
+            }
+        });
+    </script>
+</head>
+
+<body>
+    <header id="header">
+        <div class="container d-flex align-items-center justify-content-between">
+
+            <h1 class="logo">
+                <a href="/nebula" style="white-space: nowrap;">
+                    <img src="{{ url_for('static', filename='images/nebula-icon-white.svg') }}" alt="Nebula Icon" style="height: 50px; margin-right: 5px;">
+                    NEBULA
+                </a>
+            </h1>
+
+            <nav id="navbar" class="navbar">
+                <ul>
+                    <li><a class="nav-link scrollto {% if request.path == '/' %}active{% endif %}" href="/nebula">Home</a>
+                    </li>
+                    <li><a class="nav-link scrollto" href="https://github.com/enriquetomasmb/nebula">Source Code</a></li>
+                    <li><a class="nav-link scrollto" href="https://nebula.enriquetomasmb.com/">Documentation</a></li>
+                    <li><a class="nav-link scrollto" href="https://federatedlearning.inf.um.es">Website</a></li>
+                    {% if not session.get("user", None) %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarLoginDropdown">Login</a>
+                        <ul>
+                            <li>
+                                <form id="login-form" action="/nebula/login" method="post" class="px-4 py-3">
+                                    <div class="mb-3">
+                                        <label for="dropdownLoginFormUsername">Username</label>
+                                        <input type="text" name="user" class="form-control"
+                                            id="dropdownLoginFormUsername" placeholder="Username" style="font-size: small;">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="dropdownLoginFormPassword">Password</label>
+                                        <input type="password" name="password" class="form-control"
+                                            id="dropdownLoginFormPassword" placeholder="Password" style="font-size: small;">
+                                    </div>
+                                    <button type="submit" class="btn btn-dark" style="width: 100%;">Log In</button>
+                                </form>
+                            </li>
+                            <li><a href="mailto:enriquetomas@um.es">New around here? Contact us</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown">Account <i
+                                class="fa fa-user"></i></a>
+                        <ul>
+                            <li><a style="background-color: #15222b17">User: {{ session.get("user") }} | Role: {{ session.get("role") }}</a></li>
+                            {% if session.get("role", None) == "admin" %}
+                            <li><a href="{{ url_for('nebula_admin') }}">Admin Dashboard</a></li>
+                            {% endif %}
+                            <li><a href="#">Settings</a></li>
+                            <li><a href="{{ url_for('nebula_logout') }}">Logout</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                    <li style="display: flex"><a class="getstarted scrollto" href="{{ url_for('nebula_dashboard') }}">Dashboard</a></li>
+                </ul>
+                <i class="bi bi-list mobile-nav-toggle"></i>
+            </nav>
+
+        </div>
+    </header>
+
+    <main id="main">
+        <div class="container alerts"></div>
+        <!-- <h1 id="page-title">{% block page_title %}{% endblock %}</h1> -->
+        {% block body %}{% endblock %}
+        <button type="button" id="btn-up" class="btn btn-dark" title="Go to top"><i class="fa fa-arrow-up"></i></button>
+    </main>
+    
+    {% block footer %}
+    <footer id="footer">
+        <div id="copyright" class="copyright"></div>
+    </footer>
+    {% endblock %}
+
+    <div id="preloader"></div>
+
+    <script>
+        $(function () {
+            $('[data-toggle="tooltip"]').tooltip();
+        });
+    </script>
+
+    <script>
+        const loginForm = document.getElementById("login-form");
+        if (loginForm) {
+
+            loginForm.addEventListener("submit", (event) => {
+                event.preventDefault();
+
+                const formData = new FormData(loginForm);
+
+                fetch("/nebula/login", {
+                    method: "POST",
+                    body: formData,
+                })
+                    .then((response) => {
+                        if (!response.ok) {
+                            showAlert('danger', 'Invalid credentials');
+                        } else {
+                            window.location.replace("/nebula");
+                        }
+                    })
+                    .catch((error) => {
+                        console.error(error);
+                    });
+            });
+        }
+
+    </script>
+
+    <script>
+        window.onscroll = function () {
+            scrollFunction();
+        };
+
+        function scrollFunction() {
+            var btn = document.getElementById("btn-up");
+            var scrollPosition = window.pageYOffset || document.documentElement.scrollTop;
+            if (scrollPosition > 20) {
+                btn.style.display = "block";
+            } else {
+                btn.style.display = "none";
+            }
+        }
+
+        document.getElementById("btn-up").onclick = function () {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+    </script>
+
+    <script src="{{ url_for('static', filename='js/custom.js') }}"></script>
+    
+</body>
+
+</html>

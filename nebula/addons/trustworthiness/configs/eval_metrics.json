@@ -1,0 +1,647 @@
+{
+    "robustness": {
+      "resilience_to_attacks": {
+        "weight": 0.4,
+        "metrics": {
+          "certified_robustness": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "performance/test_clever"
+              }
+            ],
+            "operation": "get_value",
+            "score_function": "get_range_score",
+            "type": "true_score",
+            "description": "Cross Lipschitz Extreme Value for network Robustness: attack-agnostic estimator of the lower bound βL",
+            "weight": 1
+          }
+        }
+      },
+      "algorithm_robustness": {
+        "weight": 0.4,
+        "metrics": {
+          "performance": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "performance/test_acc_avg"
+              }
+            ],
+            "operation": "get_value",
+            "score_function": "get_true_score",
+            "type": "true_score",
+            "description": "Average test accuracy of the global model on clients test data.",
+            "weight": 0.5
+          },
+          "personalization": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "configuration/personalization"
+              }
+            ],
+            "operation": "get_value",
+            "type": "true_score",
+            "description": "The use of personalized FL algorithm.",
+            "weight": 0.5
+          }
+        }
+      },
+      "client_reliability": {
+        "weight": 0.2,
+        "metrics": {
+          "scale": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "participants/client_num"
+              }
+            ],
+            "operation": "get_value",
+            "type": "ranges",
+            "direction": "desc",
+            "ranges": [5, 10, 15, 20, 25, 30, 35, 40, 45, 50],
+            "description": "The number of clients in the model.",
+            "weight": 1
+          }
+        }
+      }
+    },
+    "privacy": {
+      "technique": {
+        "weight": 0.2,
+        "metrics": {
+          "differential_privacy": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "configuration/differential_privacy"
+              }
+            ],
+            "operation": "get_value",
+            "type": "true_score",
+            "description": "The use of differential privacy.",
+            "weight": 1
+          }
+        }
+      },
+      "uncertainty": {
+        "weight": 0.6,
+        "metrics": {
+          "entropy": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "data/avg_entropy"
+              }
+            ],
+            "operation": "get_value",
+            "type": "true_score",
+            "description": "The measure of uncertainty in identifying a client.",
+            "weight": 1
+          }
+        }
+      },
+      "indistinguishability": {
+        "weight": 0.2,
+        "metrics": {
+          "global_privacy_risk": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "configuration/differential_privacy"
+              },
+              {
+                "source": "factsheet",
+                "field_path": "configuration/dp_epsilon"
+              },
+              {
+                "source": "factsheet",
+                "field_path": "participants/client_num"
+              }
+            ],
+            "operation": "get_global_privacy_risk",
+            "type": "true_score",
+            "direction": "desc",
+            "description": "A worst-case approximation of the maximal risk for distinguishing two clients.",
+            "weight": 1
+          }
+        }
+      }
+    },
+    "fairness": {
+      "selection_fairness": {
+        "weight": 0.3333,
+        "metrics": {
+          "selection_variation": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "fairness/selection_cv"
+              }
+            ],
+            "operation": "get_value",
+            "type": "true_score",
+            "direction": "asc",
+            "description": "Variation in selection rate among the clients.",
+            "weight": 1
+          }
+        }
+      },
+      "performance_fairness": {
+        "weight": 0.3333,
+        "metrics": {
+          "accuracy_variation": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "fairness/test_acc_cv"
+              }
+            ],
+            "operation": "get_value",
+            "type": "true_score",
+            "direction": "desc",
+            "description": "Variation of global model performance among the clients.",
+            "weight": 1
+          }
+        }
+      },
+      "class_distribution": {
+        "weight": 0.3333,
+        "metrics": {
+          "class_imbalance": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "fairness/class_imbalance"
+              }
+            ],
+            "operation": "get_value",
+            "type": "true_score",
+            "direction": "desc",
+            "description": "Variation of the sample size per class.",
+            "weight": 1
+          }
+        }
+      }
+    },
+    "explainability": {
+      "interpretability": {
+        "weight": 0.4,
+        "metrics": {
+          "algorithmic_transparency": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "configuration/training_model"
+              }
+            ],
+            "operation": "get_value",
+            "type": "score_mapping",
+            "score_map": {
+              "RandomForestClassifier": 4,
+              "KNeighborsClassifier": 3,
+              "SVC": 2,
+              "GaussianProcessClassifier": 3,
+              "DecisionTreeClassifier": 5,
+              "MLP": 1,
+              "AdaBoostClassifier": 3,
+              "GaussianNB": 3.5,
+              "QuadraticDiscriminantAnalysis": 3,
+              "LogisticRegression": 4,
+              "LinearRegression": 3.5,
+              "Sequential": 1,
+              "CNN": 1
+            },
+            "description": "Mapping of Learning techniques to the level of explainability based on on literature research and qualitative analysis of each learning technique.",
+            "weight": 0.6
+          },
+          "model_size": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "configuration/trainable_param_num"
+              }
+            ],
+            "operation": "get_value",
+            "type": "ranges",
+            "direction": "desc",
+            "ranges": [10e1, 10e2, 10e3, 10e4, 10e5, 10e6, 10e7, 10e8],
+            "description": "Ranges of how to map model size to a score from 1-5.",
+            "weight": 0.4
+          }
+        }
+      },
+      "post_hoc_methods": {
+        "weight": 0.6,
+        "metrics": {
+          "feature_importance": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "performance/test_feature_importance_cv"
+              }
+            ],
+            "operation": "get_value",
+            "type": "true_score",
+            "description": "Variation of feature importance scores of all the features.",
+            "weight": 0.5
+          },
+          "visualization": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "configuration/visualization"
+              }
+            ],
+            "operation": "get_value",
+            "type": "true_score",
+            "description": "The use of graphical capabilities to show the explainability.",
+            "weight": 0.5
+          }
+        }
+      }
+    },
+    "accountability": {
+      "factsheet_completeness": {
+        "weight": 1,
+        "metrics": {
+          "project_specs": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "project/overview"
+              },
+              {
+                "source": "factsheet",
+                "field_path": "project/purpose"
+              },
+              {
+                "source": "factsheet",
+                "field_path": "project/background"
+              }
+            ],
+            "operation": "check_properties",
+            "type": "property_check",
+            "description": "Specifications of the project.",
+            "weight": 0.1
+          },
+          "participants": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "participants/client_num"
+              },
+              {
+                "source": "factsheet",
+                "field_path": "participants/sample_client_rate"
+              },
+              {
+                "source": "factsheet",
+                "field_path": "participants/client_selector"
+              }
+            ],
+            "operation": "check_properties",
+            "type": "property_check",
+            "description": "Participants information.",
+            "weight": 0.1
+          },
+          "data": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "data/provenance"
+              },
+              {
+                "source": "factsheet",
+                "field_path": "data/preprocessing"
+              },
+              {
+                "source": "factsheet",
+                "field_path": "data/avg_entropy"
+              }
+            ],
+            "operation": "check_properties",
+            "type": "property_check",
+            "description": "Meta data about the data.",
+            "weight": 0.2
+          },
+          "configuration": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "configuration/optimization_algorithm"
+              },
+              {
+                "source": "factsheet",
+                "field_path": "configuration/training_model"
+              },
+              {
+                "source": "factsheet",
+                "field_path": "configuration/personalization"
+              },
+              {
+                "source": "factsheet",
+                "field_path": "configuration/differential_privacy"
+              },
+              {
+                "source": "factsheet",
+                "field_path": "configuration/dp_epsilon"
+              },
+              {
+                "source": "factsheet",
+                "field_path": "configuration/trainable_param_num"
+              },
+              {
+                "source": "factsheet",
+                "field_path": "configuration/total_round_num"
+              },
+              {
+                "source": "factsheet",
+                "field_path": "configuration/learning_rate"
+              },
+              {
+                "source": "factsheet",
+                "field_path": "configuration/local_update_steps"
+              }
+            ],
+            "operation": "check_properties",
+            "type": "property_check",
+            "description": "FL model configurations.",
+            "weight": 0.2
+          },
+          "performance": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "performance/test_loss_avg"
+              },
+              {
+                "source": "factsheet",
+                "field_path": "performance/test_acc_avg"
+              },
+              {
+                "source": "factsheet",
+                "field_path": "performance/test_feature_importance_cv"
+              },
+              {
+                "source": "factsheet",
+                "field_path": "performance/test_clever"
+              }
+            ],
+            "operation": "check_properties",
+            "type": "property_check",
+            "description": "Performance evaluation results.",
+            "weight": 0.2
+          },
+          "fairness": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "fairness/test_acc_cv"
+              },
+              {
+                "source": "factsheet",
+                "field_path": "fairness/selection_cv"
+              },
+              {
+                "source": "factsheet",
+                "field_path": "fairness/class_imbalance"
+              }
+            ],
+            "operation": "check_properties",
+            "type": "property_check",
+            "description": "Fairness metrics results.",
+            "weight": 0.1
+          },
+          "system": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "system/avg_time_minutes"
+              },
+              {
+                "source": "factsheet",
+                "field_path": "system/avg_model_size"
+              },
+              {
+                "source": "factsheet",
+                "field_path": "system/avg_upload_bytes"
+              },
+              {
+                "source": "factsheet",
+                "field_path": "system/avg_download_bytes"
+              }
+            ],
+            "operation": "check_properties",
+            "type": "property_check",
+            "description": "System usage information.",
+            "weight": 0.1
+          }
+        }
+      }
+    },
+    "architectural_soundness": {
+      "client_management": {
+        "weight": 0.5,
+        "metrics": {
+          "client_selector": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "participants/client_selector"
+              }
+            ],
+            "operation": "check_properties",
+            "type": "property_check",
+            "description": "The use of a client selector.",
+            "weight": 1
+          }
+        }
+      },
+      "optimization": {
+        "weight": 0.5,
+        "metrics": {
+          "algorithm": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "configuration/aggregation_algorithm"
+              }
+            ],
+            "operation": "get_value",
+            "type": "score_map_value",
+            "score_map": {
+              "FedAvg": 0.9509,
+              "Krum": 0.9535,
+              "TrimmedMean": 0.9595,
+              "Median": 0.9461  
+            },
+            "description": "The choice of a suitable aggregation algorithm.",
+            "weight": 1
+          }
+        }
+      }
+    },
+    "sustainability": {
+      "energy_source": {
+        "weight": 0.5,
+        "metrics": {
+          "carbon_intensity_clients": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "sustainability/avg_carbon_intensity_clients"
+              }
+            ],
+            "operation": "get_value",
+            "type": "scaled_score",
+            "direction": "desc",
+            "scale": [20, 795],
+            "description": "Carbon intensity of energy grid used by clients",
+            "weight": 0.5
+          },
+          "carbon_intensity_server": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "sustainability/avg_carbon_intensity_server"
+              }
+            ],
+            "operation": "get_value",
+            "type": "scaled_score",
+            "direction": "desc",
+            "scale": [20, 795],
+            "description": "Carbon intensity of energy grid used by server",
+            "weight": 0.5
+          }
+        }
+      },
+      "hardware_efficiency": {
+        "weight": 0.25,
+        "metrics": {
+          "avg_power_performance_clients": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "sustainability/avg_power_performance_clients"
+              }
+            ],
+            "operation": "get_value",
+            "type": "scaled_score",
+            "direction": "asc",
+            "scale": [20, 1447],
+            "description": "Average Power Performanc of Client CPUs or GPUs",
+            "weight": 0.5
+          },
+          "avg_power_performance_server": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "sustainability/avg_power_performance_server"
+              }
+            ],
+            "operation": "get_value",
+            "type": "scaled_score",
+            "direction": "asc",
+            "scale": [20, 1447],
+            "description": "Power Performanc of Server CPU or GPU",
+            "weight": 0.5
+          }
+        }
+      },
+      "federation_complexity": {
+        "weight": 0.25,
+        "metrics": {
+          "number_of_training_rounds": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "configuration/total_round_num"
+              }
+            ],
+            "operation": "get_value",
+            "type": "ranges",
+            "direction": "desc",
+            "ranges": [5, 10, 15, 20, 25, 30, 35, 40, 45, 50],
+            "description": "The total number of training rounds",
+            "weight": 0.16666666
+          },
+          "avg_model_size": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "configuration/trainable_param_num"
+              }
+            ],
+            "operation": "get_value",
+            "type": "ranges",
+            "direction": "desc",
+            "ranges":[10e4, 10e5, 10e6,10e7,10e8,10e9,10e10,10e11],
+            "description": "The size of the model",
+            "weight": 0.16666666
+          },
+          "client_selection_rate": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "participants/sample_client_rate"
+              }
+            ],
+            "operation": "get_value",
+            "type": "scaled_score",
+            "direction": "asc",
+            "scale": [
+              0.1,1
+            ],
+            "description": "The selection rate of clients for each training round",
+            "weight": 0.16666666
+          },
+          "number_of_clients": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "participants/client_num"
+              }
+            ],
+            "operation": "get_value",
+            "type": "ranges",
+            "direction": "desc",
+            "ranges": [5, 10, 15, 20, 25, 30, 35, 40, 45, 50],
+            "description": "The number of clients in the federation.",
+            "weight": 0.16666666
+          },
+          "local_training_rounds": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "configuration/local_update_steps"
+              }
+            ],
+            "operation": "get_value",
+            "type": "scaled_score",
+            "direction": "desc",
+            "scale": [1, 100],
+            "description": "The number of local training rounds.",
+            "weight": 0.16666666
+          },
+          "avg_dataset_size": {
+            "inputs": [
+              {
+                "source": "factsheet",
+                "field_path": "participants/avg_dataset_size"
+              }
+            ],
+            "operation": "get_value",
+            "type": "ranges",
+            "direction": "desc",
+            "ranges": [10e1, 10e2, 10e3, 10e4, 10e5],
+            "description": "The average number of training samples",
+            "weight": 0.16666666
+          }
+        }
+      }
+    }
+  }
+  

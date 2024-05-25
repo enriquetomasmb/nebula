@@ -1,0 +1,80 @@
+// NEBULA Protocol Buffers. This file defines the message types and RPC services for the NEBULA framework.
+// The protocol buffer compiler generates Python code from this file, which is used to serialize and deserialize messages.
+// Please, follow the instructions below to generate the Python code from this file.
+
+// Install the protocol buffer compiler (protoc):
+// MacOs: brew install protobuf
+// Linux: sudo apt-get install protobuf-compiler
+// Windows: https://www.geeksforgeeks.org/how-to-install-protocol-buffers-on-windows/ (example)
+
+// Run the following command to generate the Python code from the proto file (from the root directory of the project):
+// protoc -I=nebula/core/pb --python_out=nebula/core/pb nebula/core/pb/nebula.proto
+
+syntax = "proto3";
+package nebula;
+
+message Wrapper {
+  string source = 1;         // Unique identifier of the source node.
+  oneof message {
+    DiscoveryMessage discovery_message = 2;
+    ControlMessage control_message = 3;
+    FederationMessage federation_message = 4;
+    ModelMessage model_message = 5;
+    ConnectionMessage connection_message = 6;
+    ResponseMessage response_message = 7;
+  }
+}
+
+message DiscoveryMessage {
+  enum Action {
+    DISCOVER = 0;
+    REGISTER = 1;
+    DEREGISTER = 2;
+  }
+  Action action = 1;
+  float latitude = 2;
+  float longitude = 3;
+}
+
+message ControlMessage {
+  enum Action {
+    ALIVE = 0;
+    OVERHEAD = 1;
+    MOBILITY = 2;
+    RECOVERY = 3;
+    WEAK_LINK = 4;
+  }
+  Action action = 1;
+  string log = 2;
+}
+
+// FederationMessage encapsulates messages exchanged between nodes for various operational purposes.
+message FederationMessage {
+  enum Action {
+    FEDERATION_START = 0;
+    REPUTATION = 1;
+    FEDERATION_AGGREGATION_FINISHED = 2;
+  }
+  Action action = 1;
+  repeated string arguments = 2;  // Arguments or parameters associated with the action.
+  int32 round = 3;                // Identifies the communication round, particularly useful in iterative processes.
+}
+
+message ModelMessage {
+  bytes parameters = 1;       // Serialized form of the model parameters.
+  int64 weight = 2;           // Significance or weighting factor of this model update, e.g., based on sample size.
+  int32 round = 3;            // Identifies the communication round, particularly useful in iterative processes.
+}
+
+message ConnectionMessage {
+  enum Action {
+    CONNECT = 0;
+    DISCONNECT = 1;
+  }
+  Action action = 1;
+}
+
+// Response transmits the outcome of a requested operation, including any errors.
+message ResponseMessage {
+  string response = 1;      // Outcome of the requested operation.
+}

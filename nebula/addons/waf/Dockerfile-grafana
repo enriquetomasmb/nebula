@@ -1,0 +1,5 @@
+FROM grafana/grafana:latest
+
+COPY ./grafana/dashboard_config.yml /etc/grafana/provisioning/dashboards/local.yml
+COPY ./grafana/automatic.yml /etc/grafana/provisioning/datasources/automatic.yml
+COPY ./grafana/dashboard.json /var/lib/grafana/dashboards/dashboard.json

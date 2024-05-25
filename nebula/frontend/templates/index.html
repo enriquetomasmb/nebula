@@ -1,0 +1,64 @@
+{% extends "layout.html" %}
+{% block body %}
+{{ super() }}
+
+<section id="home" class="base">
+    <div class="container" style="text-align: center">
+        <h1 class="logo" style="text-align: center">NEBULA: A Platform for Decentralized Federated Learning</h1>
+        <p style="text-align: center" class="fst-italic">A cutting-edge platform designed to facilitate the training of
+            federated models within both centralized and decentralized architectures.</p>
+        <img id="nebula-logo" src="{{ url_for('static', filename='images/nebula-logo.jpg') }}" class="img-fluid"
+            alt="NEBULA Logo" title="NEBULA" style="max-width: 60%; margin: 20px auto;">
+    </div>
+</section>
+
+<p style="text-align: center" class="fst-italic">NEBULA is developed by <a href="https://enriquetomasmb.com"
+    target="_blank">Enrique Tomás Martínez Beltrán</a> in collaboration with the
+University of Murcia, Armasuisse, and the University of Zurich.</p>
+
+<section id="colaboration" class="colaboration">
+    <div class="container">
+        <div class="row">
+            <div
+                class="col-lg-12 col-md-12 col-12 d-flex flex-column align-items-center justify-content-center text-center">
+                <p class="mb-3 fs-4">Download the source code and contribute to the project on <i
+                        class="fa fa-github"></i></p>
+                <a href="https://github.com/enriquetomasmb/nebula" target="_blank" class="d-block">
+                    <img alt="enriquetomasmb/nebula"
+                        src="https://img.shields.io/github/stars/enriquetomasmb/nebula?style=for-the-badge&logo=github&label=NEBULA&color=success"
+                        class="img-fluid">
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="feedback" class="home">
+    <div class="container" style="text-align: center">
+        <h4 class="mb-4" style="text-align: center">What are you using NEBULA for?</h2>
+            <p style="text-align: center" class="fst-italic">Please let us know how you are
+                using NEBULA and what you think about it. We are open to future collaborations and improvements.</p>
+            <form id="feedback-form">
+                <div class="mb-3">
+                    <textarea id="feedbackInput" class="form-control" rows="4"
+                        placeholder="I'm using NEBULA to..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-dark" style="float: right">Send Feedback</button>
+            </form>
+    </div>
+</section>
+
+<script>
+    document.getElementById("feedback-form").addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevent the default form submit action
+
+        var feedback = document.getElementById("feedbackInput").value;
+        var subject = encodeURIComponent("Feedback on NEBULA");
+        var body = encodeURIComponent(feedback);
+        var recipientEmail = "enriquetomas@um.es";
+
+        window.location.href = `mailto:${recipientEmail}?subject=${subject}&body=${body}`;
+    });
+</script>
+
+{% endblock %}

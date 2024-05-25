@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+{% block body %}
+    {{ super() }}
+
+    <section id="home" class="home">
+        <div class="container" style="text-align: center">
+            <h1 class="logo" style="text-align: center">Private Area</h1>
+            <p style="text-align: center" class="fst-italic">This is the private area of the scenario <b>{{ scenario_name }}</b>.</p>
+        </div>
+    </section>
+
+{% endblock %}

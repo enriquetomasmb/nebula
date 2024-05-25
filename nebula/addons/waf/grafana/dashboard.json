@@ -1,0 +1,2093 @@
+{
+    "annotations": {
+      "list": [
+        {
+          "builtIn": 1,
+          "datasource": {
+            "type": "grafana",
+            "uid": "-- Grafana --"
+          },
+          "enable": true,
+          "hide": true,
+          "iconColor": "rgba(0, 211, 255, 1)",
+          "name": "Annotations & Alerts",
+          "type": "dashboard"
+        }
+      ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": 1,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+      {
+        "collapsed": false,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 0
+        },
+        "id": 7,
+        "panels": [],
+        "title": "Visitors",
+        "type": "row"
+      },
+      {
+        "datasource": {
+          "type": "loki",
+          "uid": "${lokiDataSourceUid}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "blue",
+                  "value": 5
+                },
+                {
+                  "color": "dark-red",
+                  "value": 10
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 13,
+          "w": 18,
+          "x": 0,
+          "y": 1
+        },
+        "id": 4,
+        "interval": "5m",
+        "options": {
+          "basemap": {
+            "config": {
+              "server": "streets"
+            },
+            "name": "Layer 0",
+            "opacity": 1,
+            "tooltip": true,
+            "type": "esri-xyz"
+          },
+          "controls": {
+            "mouseWheelZoom": false,
+            "showAttribution": false,
+            "showDebug": false,
+            "showMeasure": false,
+            "showScale": false,
+            "showZoom": true
+          },
+          "layers": [
+            {
+              "config": {
+                "showLegend": true,
+                "style": {
+                  "color": {
+                    "field": "Value (sum)",
+                    "fixed": "dark-green"
+                  },
+                  "opacity": 1,
+                  "rotation": {
+                    "fixed": 0,
+                    "max": 360,
+                    "min": -360,
+                    "mode": "mod"
+                  },
+                  "size": {
+                    "field": "Value (sum)",
+                    "fixed": 5,
+                    "max": 15,
+                    "min": 2
+                  },
+                  "symbol": {
+                    "fixed": "img/icons/marker/circle.svg",
+                    "mode": "fixed"
+                  },
+                  "symbolAlign": {
+                    "horizontal": "center",
+                    "vertical": "center"
+                  },
+                  "textConfig": {
+                    "fontSize": 12,
+                    "offsetX": 0,
+                    "offsetY": 0,
+                    "textAlign": "center",
+                    "textBaseline": "middle"
+                  }
+                }
+              },
+              "location": {
+                "lookup": "Metric",
+                "mode": "lookup"
+              },
+              "name": "Layer 1",
+              "tooltip": true,
+              "type": "markers"
+            }
+          ],
+          "tooltip": {
+            "mode": "details"
+          },
+          "view": {
+            "allLayers": true,
+            "id": "zero",
+            "lat": 0,
+            "lon": 0,
+            "zoom": 2
+          }
+        },
+        "pluginVersion": "10.2.2",
+        "targets": [
+          {
+            "datasource": {
+              "type": "loki",
+              "uid": "${lokiDataSourceUid}"
+            },
+            "editorMode": "code",
+            "expr": "sum by (geoip_country_code) (count_over_time({filename=\"/var/log/nginx/analytics.log\"} | json | status = 200 [$__interval])) ",
+            "legendFormat": "{{geoip_country_code}}",
+            "queryType": "range",
+            "refId": "A"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "seriesToRows",
+            "options": {}
+          },
+          {
+            "id": "groupBy",
+            "options": {
+              "fields": {
+                "Metric": {
+                  "aggregations": [],
+                  "operation": "groupby"
+                },
+                "Value": {
+                  "aggregations": [
+                    "sum"
+                  ],
+                  "operation": "aggregate"
+                },
+                "{geoip_country_code=\"Unknown\"}": {
+                  "aggregations": []
+                }
+              }
+            }
+          }
+        ],
+        "type": "geomap"
+      },
+      {
+        "datasource": {
+          "type": "loki",
+          "uid": "${lokiDataSourceUid}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "light-blue",
+                  "value": null
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 3,
+          "x": 18,
+          "y": 1
+        },
+        "id": 2,
+        "interval": "5m",
+        "options": {
+          "colorMode": "background",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "sum"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "auto",
+          "wideLayout": true
+        },
+        "pluginVersion": "10.2.2",
+        "targets": [
+          {
+            "datasource": {
+              "type": "loki",
+              "uid": "${lokiDataSourceUid}"
+            },
+            "editorMode": "code",
+            "expr": "sum by(host) (count_over_time({filename=\"/var/log/nginx/analytics.log\"}[$__interval]))  ",
+            "queryType": "range",
+            "refId": "A"
+          }
+        ],
+        "title": "Requests",
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "loki",
+          "uid": "${lokiDataSourceUid}"
+        },
+        "description": "Different IP addresses",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "light-blue",
+                  "value": null
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 3,
+          "w": 3,
+          "x": 21,
+          "y": 1
+        },
+        "id": 3,
+        "interval": "1h",
+        "options": {
+          "colorMode": "background",
+          "graphMode": "area",
+          "justifyMode": "auto",
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "mean"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "textMode": "auto",
+          "wideLayout": true
+        },
+        "pluginVersion": "10.2.2",
+        "targets": [
+          {
+            "datasource": {
+              "type": "loki",
+              "uid": "${lokiDataSourceUid}"
+            },
+            "editorMode": "code",
+            "expr": "count(sum by(remote_addr) (count_over_time({filename=\"/var/log/nginx/analytics.log\"} | json [$__auto])))",
+            "queryType": "range",
+            "refId": "A"
+          }
+        ],
+        "title": "Visitors per hour",
+        "type": "stat"
+      },
+      {
+        "datasource": {
+          "type": "datasource",
+          "uid": "-- Dashboard --"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "align": "auto",
+              "cellOptions": {
+                "type": "auto"
+              },
+              "inspect": false
+            },
+            "mappings": [
+              {
+                "options": {
+                  "AD": {
+                    "index": 1,
+                    "text": "🇦🇩 Andorra"
+                  },
+                  "AE": {
+                    "index": 2,
+                    "text": "🇦🇪 United Arab Emirates"
+                  },
+                  "AF": {
+                    "index": 3,
+                    "text": "🇦🇫 Afghanistan"
+                  },
+                  "AP": {
+                    "index": 4,
+                    "text": "Asia/Pacific Region"
+                  },
+                  "AR": {
+                    "index": 5,
+                    "text": "🇦🇷 Argentina"
+                  },
+                  "AT": {
+                    "index": 6,
+                    "text": "🇦🇹 Austria"
+                  },
+                  "AU": {
+                    "index": 7,
+                    "text": "🇦🇺 Australia"
+                  },
+                  "BE": {
+                    "index": 8,
+                    "text": "🇧🇪 Belgium"
+                  },
+                  "BG": {
+                    "index": 9,
+                    "text": "🇧🇬 Bulgaria"
+                  },
+                  "BR": {
+                    "index": 10,
+                    "text": "🇧🇷 Brazil"
+                  },
+                  "BT": {
+                    "index": 11,
+                    "text": "🇧🇹 Bhutan"
+                  },
+                  "CA": {
+                    "index": 12,
+                    "text": "🇨🇦 Canada"
+                  },
+                  "CH": {
+                    "index": 13,
+                    "text": "🇨🇭 Switzerland"
+                  },
+                  "CM": {
+                    "index": 14,
+                    "text": "🇨🇲 Cameroon"
+                  },
+                  "CN": {
+                    "index": 15,
+                    "text": "🇨🇳 China"
+                  },
+                  "CO": {
+                    "index": 16,
+                    "text": "🇨🇴 Colombia"
+                  },
+                  "CY": {
+                    "index": 17,
+                    "text": "🇨🇾 Cyprus"
+                  },
+                  "CZ": {
+                    "index": 18,
+                    "text": "🇨🇿 Czech Republic"
+                  },
+                  "DE": {
+                    "index": 19,
+                    "text": "🇩🇪 Germany"
+                  },
+                  "DK": {
+                    "index": 20,
+                    "text": "🇩🇰 Denmark"
+                  },
+                  "ES": {
+                    "index": 21,
+                    "text": "🇪🇸 Spain"
+                  },
+                  "EU": {
+                    "index": 22,
+                    "text": "European Union"
+                  },
+                  "FI": {
+                    "index": 23,
+                    "text": "🇫🇮 Finland"
+                  },
+                  "FR": {
+                    "index": 24,
+                    "text": "🇫🇷 France"
+                  },
+                  "GB": {
+                    "index": 25,
+                    "text": "🇬🇧 United Kingdom"
+                  },
+                  "GE": {
+                    "index": 26,
+                    "text": "🇬🇪 Georgia"
+                  },
+                  "GR": {
+                    "index": 27,
+                    "text": "🇬🇷 Greece"
+                  },
+                  "HK": {
+                    "index": 29,
+                    "text": "🇭🇰 Hong Kong"
+                  },
+                  "HN": {
+                    "index": 30,
+                    "text": "🇭🇳 Honduras"
+                  },
+                  "HR": {
+                    "index": 31,
+                    "text": "🇭🇷 Croatia"
+                  },
+                  "HU": {
+                    "index": 28,
+                    "text": "🇭🇺 Hungary"
+                  },
+                  "ID": {
+                    "index": 32,
+                    "text": "🇮🇩 Indonesia"
+                  },
+                  "IL": {
+                    "index": 33,
+                    "text": "🇮🇱 Israel"
+                  },
+                  "IN": {
+                    "index": 34,
+                    "text": "🇮🇳 India"
+                  },
+                  "IR": {
+                    "index": 35,
+                    "text": "🇮🇷 Iran"
+                  },
+                  "IS": {
+                    "index": 37,
+                    "text": "🇮🇸 Iceland"
+                  },
+                  "IT": {
+                    "index": 36,
+                    "text": "🇮🇹 Italy"
+                  },
+                  "JO": {
+                    "index": 38,
+                    "text": "🇯🇴 Jordan"
+                  },
+                  "JP": {
+                    "index": 39,
+                    "text": "🇯🇵 Japan"
+                  },
+                  "KH": {
+                    "index": 40,
+                    "text": "🇰🇭 Cambodia"
+                  },
+                  "KR": {
+                    "index": 41,
+                    "text": "🇰🇷 South Korea"
+                  },
+                  "KZ": {
+                    "index": 42,
+                    "text": "🇰🇿 Kazakhstan"
+                  },
+                  "LK": {
+                    "index": 43,
+                    "text": "🇱🇰 Sri Lanka"
+                  },
+                  "LT": {
+                    "index": 44,
+                    "text": "🇱🇹 Lithuania"
+                  },
+                  "LU": {
+                    "index": 45,
+                    "text": "🇱🇺 Luxembourg"
+                  },
+                  "LV": {
+                    "index": 46,
+                    "text": "🇱🇻 Latvia"
+                  },
+                  "MD": {
+                    "index": 47,
+                    "text": "🇲🇩 Moldova"
+                  },
+                  "MX": {
+                    "index": 48,
+                    "text": "🇲🇽 Mexico"
+                  },
+                  "MY": {
+                    "index": 49,
+                    "text": "🇲🇾 Malaysia"
+                  },
+                  "NA": {
+                    "index": 50,
+                    "text": "🇳🇦 Namibia"
+                  },
+                  "NL": {
+                    "index": 51,
+                    "text": "🇳🇱 Netherlands"
+                  },
+                  "NO": {
+                    "index": 53,
+                    "text": "🇳🇴 Norway"
+                  },
+                  "NP": {
+                    "index": 52,
+                    "text": "🇳🇵 Nepal"
+                  },
+                  "NZ": {
+                    "index": 54,
+                    "text": "🇳🇿 New Zealand"
+                  },
+                  "OM": {
+                    "index": 55,
+                    "text": "🇴🇲 Oman"
+                  },
+                  "PL": {
+                    "index": 56,
+                    "text": "🇵🇱 Poland"
+                  },
+                  "PT": {
+                    "index": 57,
+                    "text": "🇵🇹 Portugal"
+                  },
+                  "RO": {
+                    "index": 58,
+                    "text": "🇷🇴 Romania"
+                  },
+                  "RU": {
+                    "index": 59,
+                    "text": "🇷🇺 Russia"
+                  },
+                  "SC": {
+                    "index": 60,
+                    "text": "🇸🇨 Seychelles"
+                  },
+                  "SE": {
+                    "index": 61,
+                    "text": "🇸🇪 Sweden"
+                  },
+                  "SG": {
+                    "index": 63,
+                    "text": "🇸🇬 Singapore"
+                  },
+                  "SK": {
+                    "index": 62,
+                    "text": "🇸🇰 Slovakia"
+                  },
+                  "TH": {
+                    "index": 64,
+                    "text": "🇹🇭 Thailand"
+                  },
+                  "TN": {
+                    "index": 65,
+                    "text": "🇹🇳 Tunisia"
+                  },
+                  "TR": {
+                    "index": 66,
+                    "text": "🇹🇷 Turkey"
+                  },
+                  "TW": {
+                    "index": 67,
+                    "text": "🇹🇼 Taiwan"
+                  },
+                  "UA": {
+                    "index": 68,
+                    "text": "🇺🇦 Ukraine"
+                  },
+                  "US": {
+                    "index": 69,
+                    "text": "🇺🇸 United States"
+                  },
+                  "Unknown": {
+                    "index": 0,
+                    "text": "🏴‍☠️ Unknown"
+                  },
+                  "VN": {
+                    "index": 71,
+                    "text": "🇻🇳 Viet Nam"
+                  },
+                  "ZA": {
+                    "index": 70,
+                    "text": "🇿🇦 South Africa"
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Value (sum)"
+              },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "gauge"
+                  }
+                },
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "continuous-BlYlRd"
+                  }
+                },
+                {
+                  "id": "custom.width",
+                  "value": 200
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 10,
+          "w": 6,
+          "x": 18,
+          "y": 4
+        },
+        "id": 5,
+        "interval": "5m",
+        "options": {
+          "cellHeight": "sm",
+          "footer": {
+            "countRows": false,
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": false,
+          "sortBy": [
+            {
+              "desc": true,
+              "displayName": "Value (sum)"
+            }
+          ]
+        },
+        "pluginVersion": "10.2.2",
+        "targets": [
+          {
+            "datasource": {
+              "type": "datasource",
+              "uid": "-- Dashboard --"
+            },
+            "panelId": 4,
+            "refId": "A",
+            "withTransforms": true
+          }
+        ],
+        "transformations": [
+          {
+            "id": "seriesToRows",
+            "options": {}
+          },
+          {
+            "id": "groupBy",
+            "options": {
+              "fields": {
+                "Unknown": {
+                  "aggregations": [
+                    "sum"
+                  ],
+                  "operation": "aggregate"
+                }
+              }
+            }
+          }
+        ],
+        "type": "table"
+      },
+      {
+        "datasource": {
+          "type": "loki",
+          "uid": "${lokiDataSourceUid}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "align": "auto",
+              "cellOptions": {
+                "type": "auto"
+              },
+              "inspect": false
+            },
+            "mappings": [
+              {
+                "options": {
+                  "AD": {
+                    "index": 1,
+                    "text": "🇦🇩 Andorra"
+                  },
+                  "AE": {
+                    "index": 2,
+                    "text": "🇦🇪 United Arab Emirates"
+                  },
+                  "AF": {
+                    "index": 3,
+                    "text": "🇦🇫 Afghanistan"
+                  },
+                  "AP": {
+                    "index": 4,
+                    "text": "Asia/Pacific Region"
+                  },
+                  "AR": {
+                    "index": 5,
+                    "text": "🇦🇷 Argentina"
+                  },
+                  "AT": {
+                    "index": 6,
+                    "text": "🇦🇹 Austria"
+                  },
+                  "AU": {
+                    "index": 7,
+                    "text": "🇦🇺 Australia"
+                  },
+                  "BE": {
+                    "index": 8,
+                    "text": "🇧🇪 Belgium"
+                  },
+                  "BG": {
+                    "index": 9,
+                    "text": "🇧🇬 Bulgaria"
+                  },
+                  "BR": {
+                    "index": 10,
+                    "text": "🇧🇷 Brazil"
+                  },
+                  "BT": {
+                    "index": 11,
+                    "text": "🇧🇹 Bhutan"
+                  },
+                  "CA": {
+                    "index": 12,
+                    "text": "🇨🇦 Canada"
+                  },
+                  "CH": {
+                    "index": 13,
+                    "text": "🇨🇭 Switzerland"
+                  },
+                  "CM": {
+                    "index": 14,
+                    "text": "🇨🇲 Cameroon"
+                  },
+                  "CN": {
+                    "index": 15,
+                    "text": "🇨🇳 China"
+                  },
+                  "CO": {
+                    "index": 16,
+                    "text": "🇨🇴 Colombia"
+                  },
+                  "CY": {
+                    "index": 17,
+                    "text": "🇨🇾 Cyprus"
+                  },
+                  "CZ": {
+                    "index": 18,
+                    "text": "🇨🇿 Czech Republic"
+                  },
+                  "DE": {
+                    "index": 19,
+                    "text": "🇩🇪 Germany"
+                  },
+                  "DK": {
+                    "index": 20,
+                    "text": "🇩🇰 Denmark"
+                  },
+                  "ES": {
+                    "index": 21,
+                    "text": "🇪🇸 Spain"
+                  },
+                  "EU": {
+                    "index": 22,
+                    "text": "European Union"
+                  },
+                  "FI": {
+                    "index": 23,
+                    "text": "🇫🇮 Finland"
+                  },
+                  "FR": {
+                    "index": 24,
+                    "text": "🇫🇷 France"
+                  },
+                  "GB": {
+                    "index": 25,
+                    "text": "🇬🇧 United Kingdom"
+                  },
+                  "GE": {
+                    "index": 26,
+                    "text": "🇬🇪 Georgia"
+                  },
+                  "GR": {
+                    "index": 27,
+                    "text": "🇬🇷 Greece"
+                  },
+                  "HK": {
+                    "index": 29,
+                    "text": "🇭🇰 Hong Kong"
+                  },
+                  "HN": {
+                    "index": 30,
+                    "text": "🇭🇳 Honduras"
+                  },
+                  "HR": {
+                    "index": 31,
+                    "text": "🇭🇷 Croatia"
+                  },
+                  "HU": {
+                    "index": 28,
+                    "text": "🇭🇺 Hungary"
+                  },
+                  "ID": {
+                    "index": 32,
+                    "text": "🇮🇩 Indonesia"
+                  },
+                  "IL": {
+                    "index": 33,
+                    "text": "🇮🇱 Israel"
+                  },
+                  "IN": {
+                    "index": 34,
+                    "text": "🇮🇳 India"
+                  },
+                  "IR": {
+                    "index": 35,
+                    "text": "🇮🇷 Iran"
+                  },
+                  "IS": {
+                    "index": 37,
+                    "text": "🇮🇸 Iceland"
+                  },
+                  "IT": {
+                    "index": 36,
+                    "text": "🇮🇹 Italy"
+                  },
+                  "JO": {
+                    "index": 38,
+                    "text": "🇯🇴 Jordan"
+                  },
+                  "JP": {
+                    "index": 39,
+                    "text": "🇯🇵 Japan"
+                  },
+                  "KH": {
+                    "index": 40,
+                    "text": "🇰🇭 Cambodia"
+                  },
+                  "KR": {
+                    "index": 41,
+                    "text": "🇰🇷 South Korea"
+                  },
+                  "KZ": {
+                    "index": 42,
+                    "text": "🇰🇿 Kazakhstan"
+                  },
+                  "LK": {
+                    "index": 43,
+                    "text": "🇱🇰 Sri Lanka"
+                  },
+                  "LT": {
+                    "index": 44,
+                    "text": "🇱🇹 Lithuania"
+                  },
+                  "LU": {
+                    "index": 45,
+                    "text": "🇱🇺 Luxembourg"
+                  },
+                  "LV": {
+                    "index": 46,
+                    "text": "🇱🇻 Latvia"
+                  },
+                  "MD": {
+                    "index": 47,
+                    "text": "🇲🇩 Moldova"
+                  },
+                  "MX": {
+                    "index": 48,
+                    "text": "🇲🇽 Mexico"
+                  },
+                  "MY": {
+                    "index": 49,
+                    "text": "🇲🇾 Malaysia"
+                  },
+                  "NA": {
+                    "index": 50,
+                    "text": "🇳🇦 Namibia"
+                  },
+                  "NL": {
+                    "index": 51,
+                    "text": "🇳🇱 Netherlands"
+                  },
+                  "NO": {
+                    "index": 53,
+                    "text": "🇳🇴 Norway"
+                  },
+                  "NP": {
+                    "index": 52,
+                    "text": "🇳🇵 Nepal"
+                  },
+                  "NZ": {
+                    "index": 54,
+                    "text": "🇳🇿 New Zealand"
+                  },
+                  "OM": {
+                    "index": 55,
+                    "text": "🇴🇲 Oman"
+                  },
+                  "PL": {
+                    "index": 56,
+                    "text": "🇵🇱 Poland"
+                  },
+                  "PT": {
+                    "index": 57,
+                    "text": "🇵🇹 Portugal"
+                  },
+                  "RO": {
+                    "index": 58,
+                    "text": "🇷🇴 Romania"
+                  },
+                  "RU": {
+                    "index": 59,
+                    "text": "🇷🇺 Russia"
+                  },
+                  "SC": {
+                    "index": 60,
+                    "text": "🇸🇨 Seychelles"
+                  },
+                  "SE": {
+                    "index": 61,
+                    "text": "🇸🇪 Sweden"
+                  },
+                  "SG": {
+                    "index": 63,
+                    "text": "🇸🇬 Singapore"
+                  },
+                  "SK": {
+                    "index": 62,
+                    "text": "🇸🇰 Slovakia"
+                  },
+                  "TH": {
+                    "index": 64,
+                    "text": "🇹🇭 Thailand"
+                  },
+                  "TN": {
+                    "index": 65,
+                    "text": "🇹🇳 Tunisia"
+                  },
+                  "TR": {
+                    "index": 66,
+                    "text": "🇹🇷 Turkey"
+                  },
+                  "TW": {
+                    "index": 67,
+                    "text": "🇹🇼 Taiwan"
+                  },
+                  "UA": {
+                    "index": 68,
+                    "text": "🇺🇦 Ukraine"
+                  },
+                  "US": {
+                    "index": 69,
+                    "text": "🇺🇸 United States"
+                  },
+                  "Unknown": {
+                    "index": 0,
+                    "text": "🏴‍☠️ Unknown"
+                  },
+                  "VN": {
+                    "index": 71,
+                    "text": "🇻🇳 Viet Nam"
+                  },
+                  "ZA": {
+                    "index": 70,
+                    "text": "🇿🇦 South Africa"
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Value (sum)"
+              },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "gauge"
+                  }
+                },
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "continuous-BlYlRd"
+                  }
+                },
+                {
+                  "id": "custom.width",
+                  "value": 200
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 10,
+          "w": 10,
+          "x": 0,
+          "y": 14
+        },
+        "id": 11,
+        "interval": "5m",
+        "options": {
+          "cellHeight": "sm",
+          "footer": {
+            "countRows": false,
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true,
+          "sortBy": []
+        },
+        "pluginVersion": "10.2.2",
+        "targets": [
+          {
+            "datasource": {
+              "type": "loki",
+              "uid": "${lokiDataSourceUid}"
+            },
+            "editorMode": "code",
+            "expr": "sum by (request_uri) (count_over_time({filename=\"/var/log/nginx/analytics.log\"} | json | status = 200 [$__interval]))",
+            "legendFormat": "{{request_uri}}",
+            "queryType": "range",
+            "refId": "A"
+          }
+        ],
+        "title": "Successfully Requested Pages",
+        "transformations": [
+          {
+            "id": "seriesToRows",
+            "options": {}
+          },
+          {
+            "id": "groupBy",
+            "options": {
+              "fields": {
+                "Metric": {
+                  "aggregations": [],
+                  "operation": "groupby"
+                },
+                "Value": {
+                  "aggregations": [
+                    "sum"
+                  ],
+                  "operation": "aggregate"
+                }
+              }
+            }
+          }
+        ],
+        "type": "table"
+      },
+      {
+        "datasource": {
+          "type": "loki",
+          "uid": "${lokiDataSourceUid}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "palette-classic"
+            },
+            "custom": {
+              "axisBorderShow": false,
+              "axisCenteredZero": false,
+              "axisColorMode": "text",
+              "axisLabel": "",
+              "axisPlacement": "auto",
+              "barAlignment": 0,
+              "drawStyle": "bars",
+              "fillOpacity": 100,
+              "gradientMode": "hue",
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              },
+              "insertNulls": false,
+              "lineInterpolation": "linear",
+              "lineWidth": 1,
+              "pointSize": 5,
+              "scaleDistribution": {
+                "type": "linear"
+              },
+              "showPoints": "auto",
+              "spanNulls": false,
+              "stacking": {
+                "group": "A",
+                "mode": "none"
+              },
+              "thresholdsStyle": {
+                "mode": "off"
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 10,
+          "w": 14,
+          "x": 10,
+          "y": 14
+        },
+        "id": 1,
+        "interval": "5m",
+        "maxDataPoints": 24,
+        "options": {
+          "legend": {
+            "calcs": [],
+            "displayMode": "list",
+            "placement": "bottom",
+            "showLegend": true
+          },
+          "tooltip": {
+            "mode": "single",
+            "sort": "none"
+          }
+        },
+        "pluginVersion": "10.2.2",
+        "targets": [
+          {
+            "datasource": {
+              "type": "loki",
+              "uid": "${lokiDataSourceUid}"
+            },
+            "editorMode": "code",
+            "expr": "sum by (status) (count_over_time({filename=\"/var/log/nginx/analytics.log\"} | json [$__interval]))",
+            "legendFormat": "{{status}}",
+            "queryType": "range",
+            "refId": "A"
+          }
+        ],
+        "title": "Status",
+        "transformations": [
+          {
+            "id": "joinByField",
+            "options": {}
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {},
+              "indexByName": {},
+              "renameByName": {
+                "200": "OK",
+                "401": "",
+                "Time": ""
+              }
+            }
+          }
+        ],
+        "type": "timeseries"
+      },
+      {
+        "collapsed": false,
+        "gridPos": {
+          "h": 1,
+          "w": 24,
+          "x": 0,
+          "y": 24
+        },
+        "id": 6,
+        "panels": [],
+        "title": "Attackers",
+        "type": "row"
+      },
+      {
+        "datasource": {
+          "type": "loki",
+          "uid": "${lokiDataSourceUid}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "hideFrom": {
+                "legend": false,
+                "tooltip": false,
+                "viz": false
+              }
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "blue",
+                  "value": 5
+                },
+                {
+                  "color": "dark-red",
+                  "value": 10
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 14,
+          "w": 18,
+          "x": 0,
+          "y": 25
+        },
+        "id": 14,
+        "interval": "5m",
+        "options": {
+          "basemap": {
+            "config": {
+              "server": "streets"
+            },
+            "name": "Layer 0",
+            "opacity": 1,
+            "tooltip": true,
+            "type": "esri-xyz"
+          },
+          "controls": {
+            "mouseWheelZoom": false,
+            "showAttribution": false,
+            "showDebug": false,
+            "showMeasure": false,
+            "showScale": false,
+            "showZoom": true
+          },
+          "layers": [
+            {
+              "config": {
+                "showLegend": true,
+                "style": {
+                  "color": {
+                    "field": "Value (sum)",
+                    "fixed": "dark-green"
+                  },
+                  "opacity": 1,
+                  "rotation": {
+                    "fixed": 0,
+                    "max": 360,
+                    "min": -360,
+                    "mode": "mod"
+                  },
+                  "size": {
+                    "field": "Value (sum)",
+                    "fixed": 5,
+                    "max": 15,
+                    "min": 2
+                  },
+                  "symbol": {
+                    "fixed": "img/icons/marker/circle.svg",
+                    "mode": "fixed"
+                  },
+                  "symbolAlign": {
+                    "horizontal": "center",
+                    "vertical": "center"
+                  },
+                  "textConfig": {
+                    "fontSize": 12,
+                    "offsetX": 0,
+                    "offsetY": 0,
+                    "textAlign": "center",
+                    "textBaseline": "middle"
+                  }
+                }
+              },
+              "location": {
+                "lookup": "Metric",
+                "mode": "lookup"
+              },
+              "name": "Layer 1",
+              "tooltip": true,
+              "type": "markers"
+            }
+          ],
+          "tooltip": {
+            "mode": "details"
+          },
+          "view": {
+            "allLayers": true,
+            "id": "zero",
+            "lat": 0,
+            "lon": 0,
+            "zoom": 2
+          }
+        },
+        "pluginVersion": "10.2.2",
+        "targets": [
+          {
+            "datasource": {
+              "type": "loki",
+              "uid": "${lokiDataSourceUid}"
+            },
+            "editorMode": "code",
+            "expr": "sum by (geoip_country_code) (count_over_time({filename=\"/var/log/nginx/analytics.log\"} | json | status = 403 [$__interval]))",
+            "legendFormat": "{{geoip_country_code}}",
+            "queryType": "range",
+            "refId": "A"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "seriesToRows",
+            "options": {}
+          },
+          {
+            "id": "groupBy",
+            "options": {
+              "fields": {
+                "Metric": {
+                  "aggregations": [],
+                  "operation": "groupby"
+                },
+                "Value": {
+                  "aggregations": [
+                    "sum"
+                  ],
+                  "operation": "aggregate"
+                },
+                "{geoip_country_code=\"Unknown\"}": {
+                  "aggregations": []
+                }
+              }
+            }
+          }
+        ],
+        "type": "geomap"
+      },
+      {
+        "datasource": {
+          "type": "datasource",
+          "uid": "-- Dashboard --"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "custom": {
+              "align": "auto",
+              "cellOptions": {
+                "type": "auto"
+              },
+              "inspect": false
+            },
+            "mappings": [
+              {
+                "options": {
+                  "AD": {
+                    "index": 1,
+                    "text": "🇦🇩 Andorra"
+                  },
+                  "AE": {
+                    "index": 2,
+                    "text": "🇦🇪 United Arab Emirates"
+                  },
+                  "AF": {
+                    "index": 3,
+                    "text": "🇦🇫 Afghanistan"
+                  },
+                  "AP": {
+                    "index": 4,
+                    "text": "Asia/Pacific Region"
+                  },
+                  "AR": {
+                    "index": 5,
+                    "text": "🇦🇷 Argentina"
+                  },
+                  "AT": {
+                    "index": 6,
+                    "text": "🇦🇹 Austria"
+                  },
+                  "AU": {
+                    "index": 7,
+                    "text": "🇦🇺 Australia"
+                  },
+                  "BE": {
+                    "index": 8,
+                    "text": "🇧🇪 Belgium"
+                  },
+                  "BG": {
+                    "index": 9,
+                    "text": "🇧🇬 Bulgaria"
+                  },
+                  "BR": {
+                    "index": 10,
+                    "text": "🇧🇷 Brazil"
+                  },
+                  "BT": {
+                    "index": 11,
+                    "text": "🇧🇹 Bhutan"
+                  },
+                  "CA": {
+                    "index": 12,
+                    "text": "🇨🇦 Canada"
+                  },
+                  "CH": {
+                    "index": 13,
+                    "text": "🇨🇭 Switzerland"
+                  },
+                  "CM": {
+                    "index": 14,
+                    "text": "🇨🇲 Cameroon"
+                  },
+                  "CN": {
+                    "index": 15,
+                    "text": "🇨🇳 China"
+                  },
+                  "CO": {
+                    "index": 16,
+                    "text": "🇨🇴 Colombia"
+                  },
+                  "CY": {
+                    "index": 17,
+                    "text": "🇨🇾 Cyprus"
+                  },
+                  "CZ": {
+                    "index": 18,
+                    "text": "🇨🇿 Czech Republic"
+                  },
+                  "DE": {
+                    "index": 19,
+                    "text": "🇩🇪 Germany"
+                  },
+                  "DK": {
+                    "index": 20,
+                    "text": "🇩🇰 Denmark"
+                  },
+                  "ES": {
+                    "index": 21,
+                    "text": "🇪🇸 Spain"
+                  },
+                  "EU": {
+                    "index": 22,
+                    "text": "European Union"
+                  },
+                  "FI": {
+                    "index": 23,
+                    "text": "🇫🇮 Finland"
+                  },
+                  "FR": {
+                    "index": 24,
+                    "text": "🇫🇷 France"
+                  },
+                  "GB": {
+                    "index": 25,
+                    "text": "🇬🇧 United Kingdom"
+                  },
+                  "GE": {
+                    "index": 26,
+                    "text": "🇬🇪 Georgia"
+                  },
+                  "GR": {
+                    "index": 27,
+                    "text": "🇬🇷 Greece"
+                  },
+                  "HK": {
+                    "index": 29,
+                    "text": "🇭🇰 Hong Kong"
+                  },
+                  "HN": {
+                    "index": 30,
+                    "text": "🇭🇳 Honduras"
+                  },
+                  "HR": {
+                    "index": 31,
+                    "text": "🇭🇷 Croatia"
+                  },
+                  "HU": {
+                    "index": 28,
+                    "text": "🇭🇺 Hungary"
+                  },
+                  "ID": {
+                    "index": 32,
+                    "text": "🇮🇩 Indonesia"
+                  },
+                  "IL": {
+                    "index": 33,
+                    "text": "🇮🇱 Israel"
+                  },
+                  "IN": {
+                    "index": 34,
+                    "text": "🇮🇳 India"
+                  },
+                  "IR": {
+                    "index": 35,
+                    "text": "🇮🇷 Iran"
+                  },
+                  "IS": {
+                    "index": 37,
+                    "text": "🇮🇸 Iceland"
+                  },
+                  "IT": {
+                    "index": 36,
+                    "text": "🇮🇹 Italy"
+                  },
+                  "JO": {
+                    "index": 38,
+                    "text": "🇯🇴 Jordan"
+                  },
+                  "JP": {
+                    "index": 39,
+                    "text": "🇯🇵 Japan"
+                  },
+                  "KH": {
+                    "index": 40,
+                    "text": "🇰🇭 Cambodia"
+                  },
+                  "KR": {
+                    "index": 41,
+                    "text": "🇰🇷 South Korea"
+                  },
+                  "KZ": {
+                    "index": 42,
+                    "text": "🇰🇿 Kazakhstan"
+                  },
+                  "LK": {
+                    "index": 43,
+                    "text": "🇱🇰 Sri Lanka"
+                  },
+                  "LT": {
+                    "index": 44,
+                    "text": "🇱🇹 Lithuania"
+                  },
+                  "LU": {
+                    "index": 45,
+                    "text": "🇱🇺 Luxembourg"
+                  },
+                  "LV": {
+                    "index": 46,
+                    "text": "🇱🇻 Latvia"
+                  },
+                  "MD": {
+                    "index": 47,
+                    "text": "🇲🇩 Moldova"
+                  },
+                  "MX": {
+                    "index": 48,
+                    "text": "🇲🇽 Mexico"
+                  },
+                  "MY": {
+                    "index": 49,
+                    "text": "🇲🇾 Malaysia"
+                  },
+                  "NA": {
+                    "index": 50,
+                    "text": "🇳🇦 Namibia"
+                  },
+                  "NL": {
+                    "index": 51,
+                    "text": "🇳🇱 Netherlands"
+                  },
+                  "NO": {
+                    "index": 53,
+                    "text": "🇳🇴 Norway"
+                  },
+                  "NP": {
+                    "index": 52,
+                    "text": "🇳🇵 Nepal"
+                  },
+                  "NZ": {
+                    "index": 54,
+                    "text": "🇳🇿 New Zealand"
+                  },
+                  "OM": {
+                    "index": 55,
+                    "text": "🇴🇲 Oman"
+                  },
+                  "PL": {
+                    "index": 56,
+                    "text": "🇵🇱 Poland"
+                  },
+                  "PT": {
+                    "index": 57,
+                    "text": "🇵🇹 Portugal"
+                  },
+                  "RO": {
+                    "index": 58,
+                    "text": "🇷🇴 Romania"
+                  },
+                  "RU": {
+                    "index": 59,
+                    "text": "🇷🇺 Russia"
+                  },
+                  "SC": {
+                    "index": 60,
+                    "text": "🇸🇨 Seychelles"
+                  },
+                  "SE": {
+                    "index": 61,
+                    "text": "🇸🇪 Sweden"
+                  },
+                  "SG": {
+                    "index": 63,
+                    "text": "🇸🇬 Singapore"
+                  },
+                  "SK": {
+                    "index": 62,
+                    "text": "🇸🇰 Slovakia"
+                  },
+                  "TH": {
+                    "index": 64,
+                    "text": "🇹🇭 Thailand"
+                  },
+                  "TN": {
+                    "index": 65,
+                    "text": "🇹🇳 Tunisia"
+                  },
+                  "TR": {
+                    "index": 66,
+                    "text": "🇹🇷 Turkey"
+                  },
+                  "TW": {
+                    "index": 67,
+                    "text": "🇹🇼 Taiwan"
+                  },
+                  "UA": {
+                    "index": 68,
+                    "text": "🇺🇦 Ukraine"
+                  },
+                  "US": {
+                    "index": 69,
+                    "text": "🇺🇸 United States"
+                  },
+                  "Unknown": {
+                    "index": 0,
+                    "text": "🏴‍☠️ Unknown"
+                  },
+                  "VN": {
+                    "index": 71,
+                    "text": "🇻🇳 Viet Nam"
+                  },
+                  "ZA": {
+                    "index": 70,
+                    "text": "🇿🇦 South Africa"
+                  }
+                },
+                "type": "value"
+              }
+            ],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            }
+          },
+          "overrides": [
+            {
+              "matcher": {
+                "id": "byName",
+                "options": "Value (sum)"
+              },
+              "properties": [
+                {
+                  "id": "custom.cellOptions",
+                  "value": {
+                    "type": "gauge"
+                  }
+                },
+                {
+                  "id": "color",
+                  "value": {
+                    "mode": "continuous-BlYlRd"
+                  }
+                },
+                {
+                  "id": "custom.width",
+                  "value": 200
+                }
+              ]
+            }
+          ]
+        },
+        "gridPos": {
+          "h": 14,
+          "w": 6,
+          "x": 18,
+          "y": 25
+        },
+        "id": 13,
+        "interval": "5m",
+        "options": {
+          "cellHeight": "sm",
+          "footer": {
+            "countRows": false,
+            "fields": "",
+            "reducer": [
+              "sum"
+            ],
+            "show": false
+          },
+          "showHeader": true,
+          "sortBy": [
+            {
+              "desc": true,
+              "displayName": "Value (sum)"
+            }
+          ]
+        },
+        "pluginVersion": "10.2.2",
+        "targets": [
+          {
+            "datasource": {
+              "type": "datasource",
+              "uid": "-- Dashboard --"
+            },
+            "panelId": 14,
+            "refId": "A",
+            "withTransforms": true
+          }
+        ],
+        "transformations": [
+          {
+            "id": "seriesToRows",
+            "options": {}
+          },
+          {
+            "id": "groupBy",
+            "options": {
+              "fields": {
+                "Unknown": {
+                  "aggregations": [
+                    "sum"
+                  ],
+                  "operation": "aggregate"
+                }
+              }
+            }
+          }
+        ],
+        "type": "table"
+      },
+      {
+        "datasource": {
+          "type": "loki",
+          "uid": "${lokiDataSourceUid}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 39
+        },
+        "id": 9,
+        "options": {
+          "displayMode": "gradient",
+          "minVizHeight": 10,
+          "minVizWidth": 0,
+          "namePlacement": "auto",
+          "orientation": "horizontal",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "showUnfilled": true,
+          "valueMode": "color"
+        },
+        "pluginVersion": "10.2.2",
+        "targets": [
+          {
+            "datasource": {
+              "type": "loki",
+              "uid": "${lokiDataSourceUid}"
+            },
+            "editorMode": "code",
+            "expr": "sum by (client) (count_over_time({filename=\"/var/log/nginx/error.log\"} |= \"ModSecurity\" |= \"error\" | pattern \"<date> <time> [<level>] <_> ModSecurity: <modsec_action> [file \\\"/etc/modsecurity.d/owasp-crs/rules/<rule_set>.conf<_> [id \\\"<rule_id>\\\"<_> [msg \\\"<msg>\\\"] <_>[ver \\\"<owasp_version>\\\"]<_>] [tag <tags>] [host<_>, client: <client>, server: <server>, request: \\\"<request_method> <ressource> <http_version>\\\", <_>\" |  __error__=\"\" [$__interval]))",
+            "legendFormat": "{{.client}}",
+            "queryType": "range",
+            "refId": "A"
+          }
+        ],
+        "title": "Top Attackers",
+        "type": "bargauge"
+      },
+      {
+        "datasource": {
+          "type": "loki",
+          "uid": "${lokiDataSourceUid}"
+        },
+        "gridPos": {
+          "h": 16,
+          "w": 12,
+          "x": 12,
+          "y": 39
+        },
+        "id": 8,
+        "options": {
+          "dedupStrategy": "none",
+          "enableLogDetails": true,
+          "prettifyLogMessage": false,
+          "showCommonLabels": false,
+          "showLabels": false,
+          "showTime": false,
+          "sortOrder": "Descending",
+          "wrapLogMessage": false
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "loki",
+              "uid": "${lokiDataSourceUid}"
+            },
+            "editorMode": "code",
+            "expr": "{filename=\"/var/log/nginx/error.log\"} |= \"ModSecurity\" |= \"error\" | pattern \"<date> <time> [<level>] <_> ModSecurity: <modsec_action> [file \\\"/etc/modsecurity.d/owasp-crs/rules/<rule_set>.conf<_> [id \\\"<rule_id>\\\"<_> [msg \\\"<msg>\\\"] <_>[ver \\\"<owasp_version>\\\"]<_>] [tag <tags>] [host<_>, client: <client>, server: <server>, request: \\\"<request_method> <ressource> <http_version>\\\", <_>\"\r\n\r\n| line_format \" {{.date}} {{.time}} {{.server}} {{.request_method}} {{.ressource}} ❗️☠️ {{.client}} ☠️️❗️ \\n➡️ RuleSet: {{.rule_set}} RuleId: {{.rule_id}} {{.msg}}\\n [tag {{.tags}}]\"",
+            "queryType": "range",
+            "refId": "A"
+          }
+        ],
+        "title": "Error Logs  ➡️ only ModSecurity",
+        "type": "logs"
+      },
+      {
+        "datasource": {
+          "type": "loki",
+          "uid": "${lokiDataSourceUid}"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 80
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 8,
+          "w": 12,
+          "x": 0,
+          "y": 47
+        },
+        "id": 12,
+        "maxDataPoints": 1,
+        "options": {
+          "displayMode": "gradient",
+          "minVizHeight": 10,
+          "minVizWidth": 0,
+          "namePlacement": "auto",
+          "orientation": "horizontal",
+          "reduceOptions": {
+            "calcs": [
+              "sum"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "showUnfilled": true,
+          "valueMode": "color"
+        },
+        "pluginVersion": "10.2.2",
+        "targets": [
+          {
+            "datasource": {
+              "type": "loki",
+              "uid": "${lokiDataSourceUid}"
+            },
+            "editorMode": "code",
+            "expr": "sum by (ressource) (count_over_time({filename=\"/var/log/nginx/error.log\"} |= \"ModSecurity\" |= \"error\" | pattern \"<date> <time> [<level>] <_> ModSecurity: <modsec_action> [file \\\"/etc/modsecurity.d/owasp-crs/rules/<rule_set>.conf<_> [id \\\"<rule_id>\\\"<_> [msg \\\"<msg>\\\"] <_>[ver \\\"<owasp_version>\\\"]<_>] [tag <tags>] [host<_>, client: <client>, server: <server>, request: \\\"<request_method> <ressource> <http_version>\\\", <_>\" |  __error__=\"\" [$__interval]))",
+            "legendFormat": "{{ressource}}",
+            "queryType": "range",
+            "refId": "A"
+          }
+        ],
+        "title": "Attacks/Ressource",
+        "transformations": [],
+        "type": "bargauge"
+      },
+      {
+        "datasource": {
+          "type": "loki",
+          "uid": "${lokiDataSourceUid}"
+        },
+        "gridPos": {
+          "h": 12,
+          "w": 24,
+          "x": 0,
+          "y": 55
+        },
+        "id": 10,
+        "options": {
+          "dedupStrategy": "none",
+          "enableLogDetails": true,
+          "prettifyLogMessage": false,
+          "showCommonLabels": false,
+          "showLabels": false,
+          "showTime": false,
+          "sortOrder": "Descending",
+          "wrapLogMessage": false
+        },
+        "targets": [
+          {
+            "datasource": {
+              "type": "loki",
+              "uid": "P8E80F9AEF21F6940"
+            },
+            "editorMode": "code",
+            "expr": "{filename=\"/var/log/nginx/error.log\"}",
+            "queryType": "range",
+            "refId": "A"
+          }
+        ],
+        "title": "Error Logs All",
+        "type": "logs"
+      }
+    ],
+    "refresh": "",
+    "schemaVersion": 38,
+    "tags": [],
+    "templating": {
+      "list": [
+        {
+          "current": {
+            "selected": false,
+            "text": "Loki",
+            "value": "P8E80F9AEF21F6940"
+          },
+          "hide": 2,
+          "includeAll": false,
+          "multi": false,
+          "name": "lokiDataSourceUid",
+          "options": [],
+          "query": "loki",
+          "queryValue": "",
+          "refresh": 1,
+          "regex": "",
+          "skipUrlSync": false,
+          "type": "datasource"
+        }
+      ]
+    },
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "Fedstellar",
+    "uid": "b2eeb875-d84f-4646-881f-0c9b9753188d",
+    "version": 13,
+    "weekStart": ""
+  }

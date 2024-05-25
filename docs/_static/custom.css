@@ -1,0 +1,13 @@
+.bd-page-width {
+    max-width: 100%;
+}
+
+.bd-content {
+    flex-wrap: wrap !important;
+}
+
+@media (min-width: 1200px) {
+    .bd-main .bd-content .bd-article-container {
+        max-width: 100%;
+    }
+}

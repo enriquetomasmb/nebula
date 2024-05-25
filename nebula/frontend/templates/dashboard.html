@@ -1,0 +1,246 @@
+{% extends "layout.html" %}
+{% block body %}
+{{ super() }}
+
+<!-- Modal confirm -->
+<div class="modal fade" id="confirm-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div id="confirm-modal-body" class="modal-body"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                <button type="button" id="yes-button" class="btn btn-dark" data-bs-dismiss="modal">Yes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Model info -->
+<div class="modal fade" id="info-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div id="info-modal-body" class="modal-body"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Understand</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section id="home" class="home">
+    <div class="container" style="text-align: center">
+        <h1 class="logo" style="text-align: center">Dashboard</h1>
+        <p style="text-align: center" class="fst-italic">Deploy, analyze and monitor scenarios</p>
+    </div>
+</section>
+
+<section id="scenario-status" class="base">
+    <div class="container">
+        <div class="row p-3">
+            {% if scenario_running %}
+            {% if scenario_completed %}
+            <div style="text-align: center">
+                <h4 style="text-align: center"><strong>There is a scenario <span class="badge text-bg-success">completed</span></strong></h4>
+                <p style="color: #772953; font-weight: bold">The federation has reached the maximum number of rounds</p>
+            </div>
+            {% else %}
+            <div style="text-align: center">
+                <h4 style="text-align: center"><strong>There is a scenario <span class="badge text-bg-warning">running</span></strong></h4>
+                <p style="color: #772953; font-weight: bold">The federation is currently running</p>
+            </div>
+            {% endif %}
+            <hr>
+            <h5>Scenario name: <b id="scenario_name">{{ scenario_running[0] }}</b></h5>
+            <h5>Scenario title: <b id="scenario_title">{{ scenario_running[3] }}</b></h5>
+            <h5>Scenario description: <b id="scenario_description">{{ scenario_running[4] }}</b></h5>
+            <h5>Scenario start time: <b id="scenario_start_time">{{ scenario_running[1] }}</b></h5>
+            <div class="d-flex flex-row justify-content-start p-3">
+                <a id="new-scenario-btn" href="{{ url_for('nebula_dashboard_deployment') }}"
+                    class="btn btn-dark me-2">Deploy new scenario</a>
+                {% if scenarios %}
+                <a href="{{ url_for('nebula_dashboard_statistics') }}" class="btn btn-dark">Compare scenarios</a>
+                {% endif %}
+            </div>
+            {% else %}
+            <h4>There are no deployed scenarios</h4>
+            <div class="col-md-6">
+                <a href="{{ url_for('nebula_dashboard_deployment') }}" class="btn btn-dark">Deploy a scenario</a>
+                {% if scenarios %}
+                <a href="{{ url_for('nebula_dashboard_statistics') }}" class="btn btn-dark">Compare scenarios</a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+{% if scenarios %}
+<section id="scenarios" class="base">
+    <div class="container">
+        <div class="row p-3">
+            <h3>Scenarios in the database</h3>
+            <div class="table-responsive">
+                <table id="table-scenarios" class="table small">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Start time</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    {% for name, start_time, end_time, title, description, status, network_subnet, model, dataset,
+                    rounds, role in scenarios %}
+                    <tr id="scenario-vars">
+                        <td id="name">{{ name }}</td>
+                        <td id="start_time">{{ start_time }}</td>
+                        {% if status == "running" %}
+                        <td id="status"><span class="badge text-bg-warning">Running</span></td>
+                        {% elif status == "completed" %}
+                        <td id="status"><span class="badge text-bg-success">Completed</span></td>
+                        {% else %}
+                        <td id="status"><span class="badge text-bg-danger">Finished</span></td>
+                        {% endif %}
+                        <td class="td-icons">
+                            <a href="{{ url_for('nebula_dashboard_monitor', scenario_name=name) }}"
+                                class="label btn btn-dark">Monitor</a>
+                            <a href="{{ url_for('nebula_dashboard_statistics', scenario_name=name) }}"
+                                class="label btn btn-dark">Real-time metrics</a>
+                            <a id="note-btn-{{ name }}" data-scenario-name="{{ name }}" class="label btn btn-dark"><i class="fa fa-sticky-note" style="color: white;"></i></a>
+                            {% if status == "running" %}
+                            <a href="{{ url_for('nebula_stop_scenario', scenario_name=name) }}"
+                                class="label btn btn-danger">Stop scenario</a>
+                            {% elif status == "completed" %}
+                            <a href="{{ url_for('nebula_stop_scenario', scenario_name=name) }}"
+                                class="label btn btn-danger">Stop scenario</a>
+                            {% else %}
+                            <a id="remove-btn" data-scenario-name="{{ name }}" class="label btn btn-danger"><i
+                                    class="fa fa-trash"></i></a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr id="notes-row-{{ name }}" class="notes-row" style="display: none;">
+                        <td colspan="4">
+                            <textarea id="notes-text-{{ name }}" class="form-control" rows="3" style="font-size: small; width: 100%;"></textarea>
+                            <button id="save-note-{{ name }}" data-scenario-name="{{ name }}" class="btn btn-dark mt-2 save-note-btn" style="float: right;">Save</button>
+                        </td>
+                    </tr>                    
+                    {% endfor %}
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+
+{% if not user_logged_in %}
+<script>
+    showAlert('info', 'Some functionalities are disabled in the demo version. Please, log in to access all functionalities.');
+</script>
+{% endif %}
+
+<script>
+    $(document).on('click', '#remove-btn', function () {
+        var scenario_name = $(this).data('scenario-name');
+        $('#confirm-modal').modal('show');
+        $('#confirm-modal .modal-title').text('Remove scenario');
+        $('#confirm-modal #confirm-modal-body').html('Are you sure you want to remove the scenario ' + scenario_name + '?<br><br><p class="badge text-bg-danger">Warning: you will remove the scenario from the database</p>');
+        $('#confirm-modal #yes-button').click(function () {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/nebula/dashboard/' + scenario_name + '/remove', true);
+            xhr.send();
+            xhr.addEventListener("load", function () {
+                // When the request is done could be 401 or 301.
+                // If it is 401, the user is a demo and cannot remove the scenario.
+                // If it is 301, the scenario has been removed and the page is reloaded.
+                if (xhr.status != 401) {
+                    window.location.href = "/dashboard";
+                } else {
+                    // Hide the modal
+                    $('#confirm-modal').modal('hide');
+                    // If the user is a demo, show a modal with a message
+                    $('#confirm-modal').on('hidden.bs.modal', function () {
+                        $('#info-modal-body').html('You are not allowed to remove a scenario with demo role.');
+                        $('#info-modal').modal('show');
+                    });
+                }
+            });
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        document.querySelectorAll('[id^=note-btn]').forEach(button => {
+            button.addEventListener('click', function() {
+                toggleNotesRow(this.dataset.scenarioName);
+            });
+        });
+    
+        document.querySelectorAll('[id^=save-note]').forEach(button => {
+            button.addEventListener('click', function() {
+                saveNotes(this.dataset.scenarioName);
+            });
+        });
+    });
+    
+    async function toggleNotesRow(scenarioName) {
+        const notesRow = document.getElementById('notes-row-' + scenarioName);
+        const notesTextElement = document.getElementById('notes-text-' + scenarioName);
+    
+        if (notesRow.style.display === 'none') {
+            try {
+                const response = await fetch('/nebula/dashboard/' + scenarioName + '/notes');
+                const data = await response.json();
+                console.log(data);
+    
+                if (data.status === 'success') {
+                    notesTextElement.value = data.notes;
+                } else {
+                    notesTextElement.value = '';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while retrieving the notes.');
+                return;
+            }
+        }
+    
+        notesRow.style.display = notesRow.style.display === 'none' ? '' : 'none';
+    }    
+    
+    async function saveNotes(scenarioName) {
+        const notesText = document.getElementById('notes-text-' + scenarioName).value;
+        
+        const response = await fetch('/nebula/dashboard/' + scenarioName + '/save_note', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ notes: notesText }),
+        });
+
+        const data = await response.json();
+        // console.log(data);
+        if (data.status === 'success') {
+            showAlert('success', 'Notes saved successfully');
+        } else {
+            if (data.code === 401) {
+                showAlert('info', 'Some functionalities are disabled in the demo version. Please, log in to access all functionalities.');
+            } else {
+                showAlert('error', 'Failed to save notes');
+            }
+        }
+    }    
+</script>
+
+{% endblock %}

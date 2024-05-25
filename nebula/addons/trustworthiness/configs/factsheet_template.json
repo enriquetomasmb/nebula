@@ -1,0 +1,59 @@
+{
+	"project": {
+		"overview": "",
+		"purpose": "",
+		"background": ""
+	},
+	"data": {
+		"provenance": "",
+		"preprocessing": "",
+		"avg_entropy": ""
+	},
+	"participants": {
+		"client_num": "",
+		"sample_client_rate": "",
+		"client_selector": "",
+		"avg_dataset_size": ""
+	},
+	"configuration": {
+		"aggregation_algorithm": "",
+		"training_model": "",
+		"personalization": "",
+		"visualization": "",
+		"differential_privacy": "",
+		"dp_epsilon": "",
+		"trainable_param_num": "",
+		"total_round_num": "",
+		"learning_rate": "",
+		"local_update_steps": ""
+	},
+	"performance": {
+		"test_loss_avg": "",
+		"test_acc_avg": "",
+		"test_feature_importance_cv": "",
+		"test_clever": ""
+	},
+	"fairness": {
+		"test_acc_cv": "",
+		"selection_cv": "",
+		"class_imbalance": ""
+	},
+	"system": {
+		"avg_time_minutes": "",
+		"avg_model_size": "",
+		"total_upload_bytes": "",
+		"total_download_bytes":"",
+		"avg_upload_bytes": "",
+		"avg_download_bytes": ""
+	},
+	"sustainability": {
+		"avg_carbon_intensity_server": "",
+		"avg_carbon_intensity_clients": "",
+		"avg_power_performance_clients": "",
+		"avg_power_performance_server": "",
+		"emissions_training": "",
+		"emissions_aggregation": "",
+		"emissions_communication_uplink": "",
+		"emissions_communication_downlink": ""
+	}
+} 
