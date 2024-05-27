@@ -89,28 +89,28 @@
                                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                         <li>
                                             <a class="dropdown-item"
-                                                href="/dashboard/{{ scenario_name }}/node/{{ hash }}/metrics">
+                                                href="/nebula/dashboard/{{ scenario_name }}/node/{{ hash }}/metrics">
                                                 <i class="fa fa-bar-chart"></i>
                                                 Real-time metrics
                                             </a>
                                         </li>
                                         <li>
                                             <a class="dropdown-item download"
-                                                href="/dashboard/{{ scenario_name }}/node/{{ idx }}/infolog">
+                                                href="/nebula/dashboard/{{ scenario_name }}/node/{{ idx }}/infolog">
                                                 <i class="fa fa-download"></i>
                                                 Download INFO logs
                                             </a>
                                         </li>
                                         <li>
                                             <a class="dropdown-item download"
-                                                href="/dashboard/{{ scenario_name }}/node/{{ idx }}/debuglog">
+                                                href="/nebula/dashboard/{{ scenario_name }}/node/{{ idx }}/debuglog">
                                                 <i class="fa fa-download"></i>
                                                 Download DEBUG logs
                                             </a>
                                         </li>
                                         <li>
                                             <a class="dropdown-item download"
-                                                href="/dashboard/{{ scenario_name }}/node/{{ idx }}/errorlog">
+                                                href="/nebula/dashboard/{{ scenario_name }}/node/{{ idx }}/errorlog">
                                                 <i class="fa fa-download"></i>
                                                 Download ERROR logs
                                             </a>
@@ -622,7 +622,7 @@
         node_row[0].querySelector("#ip").innerHTML = nodeData.ip;
         node_row[0].querySelector("#round").innerHTML = nodeData.round;
         node_row[0].querySelector("#status").innerHTML = nodeData.status ? '<span class="badge text-bg-success">Online</span>' : '<span class="badge text-bg-danger">Offline</span>';
-        // Request /api/dashboard/{{ scenario_name }}/monitor to get only the status of the node
+        // Request /nebula/api/dashboard/{{ scenario_name }}/monitor to get only the status of the node
         fetch('/nebula/api/dashboard/' + nodeData.scenario_name + '/monitor')
             .then(function (response) {
                 if (!response.ok) {

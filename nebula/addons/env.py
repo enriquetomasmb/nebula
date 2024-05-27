@@ -41,6 +41,8 @@ def check_environment():
         logging.info("PyTorch version: " + torch.__version__)
     except ImportError:
         logging.info("PyTorch is not installed properly")
+    except Exception:
+        pass
 
     logging.info("======== CPU Configuration ========")
     try:
@@ -58,9 +60,11 @@ def check_environment():
         )
     except ImportError:
         logging.info("No CPU information available")
+    except Exception:
+        pass
 
-    logging.info("======== GPU Configuration ========")
     if sys.platform == "win32" or sys.platform == "linux":
+        logging.info("======== GPU Configuration ========")
         try:
             import pynvml
 
@@ -87,6 +91,7 @@ def check_environment():
                 logging.info(f"GPU{i} fan speed: {gpu_fan_speed}")
         except ImportError:
             logging.info("pynvml module not found, GPU information unavailable")
-
+        except Exception:
+            pass
     else:
         logging.info("GPU information unavailable")

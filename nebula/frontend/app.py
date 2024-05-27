@@ -360,9 +360,9 @@ def nebula_dashboard_monitor(scenario_name):
             else:
                 update_topology(scenario[0], nodes_list, nodes_config)
 
-            if request.path == "/nebula/dashboard/" + scenario_name + "/nebula/monitor":
+            if request.path == "/nebula/dashboard/" + scenario_name + "/monitor":
                 return render_template("monitor.html", scenario_name=scenario_name, scenario=scenario, nodes=nodes_table, user_logged_in=session.get("user"))
-            elif request.path == "/nebula/api/dashboard/" + scenario_name + "/nebula/monitor":
+            elif request.path == "/nebula/api/dashboard/" + scenario_name + "/monitor":
                 return (
                     jsonify(
                         {
@@ -379,9 +379,9 @@ def nebula_dashboard_monitor(scenario_name):
                 return abort(401)
         else:
             # There is a scenario but no nodes
-            if request.path == "/nebula/dashboard/" + scenario_name + "/nebula/monitor":
+            if request.path == "/nebula/dashboard/" + scenario_name + "/monitor":
                 return render_template("monitor.html", scenario_name=scenario_name, scenario=scenario, nodes=[], user_logged_in=session.get("user"))
-            elif request.path == "/nebula/api/dashboard/" + scenario_name + "/nebula/monitor":
+            elif request.path == "/nebula/api/dashboard/" + scenario_name + "/monitor":
                 return (
                     jsonify(
                         {
@@ -398,9 +398,9 @@ def nebula_dashboard_monitor(scenario_name):
                 return abort(401)
     else:
         # There is no scenario
-        if request.path == "/nebula/dashboard/" + scenario_name + "/nebula/monitor":
+        if request.path == "/nebula/dashboard/" + scenario_name + "/monitor":
             return render_template("monitor.html", scenario_name=scenario_name, scenario=None, nodes=[], user_logged_in=session.get("user"))
-        elif request.path == "/nebula/api/dashboard/" + scenario_name + "/nebula/monitor":
+        elif request.path == "/nebula/api/dashboard/" + scenario_name + "/monitor":
             return jsonify({"scenario_status": "not exists"}), 200
         else:
             return abort(401)

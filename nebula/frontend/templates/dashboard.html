@@ -163,7 +163,7 @@
                 // If it is 401, the user is a demo and cannot remove the scenario.
                 // If it is 301, the scenario has been removed and the page is reloaded.
                 if (xhr.status != 401) {
-                    window.location.href = "/dashboard";
+                    window.location.href = "/nebula/dashboard";
                 } else {
                     // Hide the modal
                     $('#confirm-modal').modal('hide');

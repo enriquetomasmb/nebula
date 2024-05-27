@@ -1283,7 +1283,7 @@
     <script>
         // Send configuration to the server for deployment
 
-        // When click "run-btn" button, create a POST request to /dashboard/deployment/run with JSON data
+        // When click "run-btn" button, create a POST request to /nebula/dashboard/deployment/run with JSON data
         document.getElementById("run-btn").addEventListener("click", function () {
 
             // Show the modal
@@ -1315,7 +1315,7 @@
                         if (xhr.status === 200) {
                             // Redirect to /dashboard
                             setTimeout(function () {
-                                window.location.href = "/dashboard";
+                                window.location.href = "/nebula/dashboard";
                             }, 10000);
                         } else {
                             document.querySelector(".overlay").style.display = "none";

@@ -132,5 +132,5 @@ class Reporter(threading.Thread):
                         f"GPU/GPU{i} fan speed": gpu_fan_speed,
                     }
                     self.trainer.logger.log_data(gpu_info)
-            except Exception as e:
-                logging.error(f"Error getting GPU usage: {e}")
+            except Exception:
+                pass
