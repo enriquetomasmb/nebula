@@ -371,7 +371,7 @@ class CommunicationsManager:
                 connection["tries"] += 1
                 await self.connect(connection["addr"])
 
-    async def verify_connections(self, neighbors):
+    def verify_connections(self, neighbors):
         # Return True if all neighbors are connected
         if all(neighbor in self.connections for neighbor in neighbors):
             return True
