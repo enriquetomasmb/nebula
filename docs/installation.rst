@@ -97,19 +97,13 @@ by listing the version of the NEBULA with the following command line::
 Building the nebula participant
 ====================================
 
-Docker image (CPU version)
+Docker image
 -------------------------
 You can build the docker image using the following command line in the root directory::
 
-    docker build -t nebula -f Dockerfile-cpu .
+    docker build -t nebula-core .
 
-Docker image (GPU version)
--------------------------
-You can build the docker image using the following command line in the root directory::
-
-    docker build -t nebula-gpu -f Dockerfile-gpu .
-
-Also, you have to follow the instructions in the following link to install nvidia-container-toolkit::
+In case of using GPU in the docker, you have to follow the instructions in the following link to install nvidia-container-toolkit::
 
 https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html
 
@@ -131,11 +125,12 @@ You can show the PARAMS using::
 
     python app/main.py --help
 
-The frontend will be available at http://127.0.0.1:5000 (by default)
+The frontend will be available at http://127.0.0.1:6060 (by default)
 
 To change the default port of the frontend, you can use the following command line::
 
     python app/main.py --webport [PORT]
+
 To change the default port of the statistics endpoint, you can use the following command line::
 
     python app/main.py --statsport [PORT]
@@ -206,3 +201,7 @@ Solution: Start the docker daemon
 If frontend is not working, restart docker daemon
 
     sudo systemctl restart docker
+
+===================================
+
+If the frontend is not working, check the logs in app/logs/server.log

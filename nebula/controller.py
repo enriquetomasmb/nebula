@@ -483,10 +483,10 @@ class Controller:
     def stop_participants():
         if sys.platform == "win32":
             try:
-                # kill all the docker containers which contain the word "nebula-node"
+                # kill all the docker containers which contain the word "nebula-core"
                 commands = [
-                    """docker kill $(docker ps -q --filter ancestor=nebula-node) | Out-Null""",
-                    """docker rm $(docker ps -a -q --filter ancestor=nebula-node) | Out-Null""",
+                    """docker kill $(docker ps -q --filter ancestor=nebula-core) | Out-Null""",
+                    """docker rm $(docker ps -a -q --filter ancestor=nebula-core) | Out-Null""",
                     """docker network rm $(docker network ls | Where-Object { ($_ -split '\s+')[1] -like 'nebula-net-scenario' } | ForEach-Object { ($_ -split '\s+')[0] }) | Out-Null""",
                 ]
 
@@ -500,8 +500,8 @@ class Controller:
         else:
             try:
                 commands = [
-                    """docker kill $(docker ps -q --filter ancestor=nebula-node) > /dev/null 2>&1""",
-                    """docker rm $(docker ps -a -q --filter ancestor=nebula-node) > /dev/null 2>&1""",
+                    """docker kill $(docker ps -q --filter ancestor=nebula-core) > /dev/null 2>&1""",
+                    """docker rm $(docker ps -a -q --filter ancestor=nebula-core) > /dev/null 2>&1""",
                     """docker network rm $(docker network ls | grep nebula-net-scenario | awk '{print $1}') > /dev/null 2>&1""",
                 ]
 
@@ -756,7 +756,7 @@ class Controller:
         participant_template = textwrap.dedent(
             """
             participant{}:
-                image: nebula-node
+                image: nebula-core
                 restart: no
                 volumes:
                     - {}:/nebula
@@ -781,7 +781,7 @@ class Controller:
         participant_gpu_template = textwrap.dedent(
             """
             participant{}:
-                image: nebula-node
+                image: nebula-core
                 environment:
                     - NVIDIA_DISABLE_REQUIRE=true
                 restart: no
