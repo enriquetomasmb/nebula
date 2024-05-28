@@ -410,9 +410,6 @@ class Engine:
         if params is not None:
             logging.info(f"_waiting_model_updates | Aggregation done for round {self.round}, including parameters in local model.")
             self.trainer.set_model_parameters(params)
-            logging.info(f"_waiting_model_updates | Broadcasting aggregation done for round {self.round}")
-            message = self.cm.mm.generate_federation_message(nebula_pb2.FederationMessage.Action.FEDERATION_AGGREGATION_FINISHED, [self.round])
-            await self.cm.send_message_to_neighbors(message)
         else:
             logging.error(f"Aggregation finished with no parameters")
 

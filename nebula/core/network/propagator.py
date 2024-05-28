@@ -142,6 +142,9 @@ class Propagator:
             
         if strategy_id == "initialization":
             return False
+        
+        if len(self.aggregator.get_nodes_pending_models_to_aggregate()) >= len(self.aggregator._federation_nodes):
+            return False
 
         await asyncio.sleep(self.interval)
         return True
