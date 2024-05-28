@@ -139,6 +139,9 @@ class Propagator:
                 else:
                     await self.cm.send_model(neighbor_addr, self.get_round(), serialized_model, weight)
             await asyncio.sleep(self.model_interval)
+            
+        if strategy_id == "initialization":
+            return False
 
         await asyncio.sleep(self.interval)
         return True
