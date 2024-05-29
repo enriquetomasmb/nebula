@@ -148,10 +148,9 @@ class Aggregator(ABC):
 
         self._add_pending_model(model, weight, source)
         
-        # TODO: Adapt the message format
         if len(self.get_nodes_pending_models_to_aggregate()) >= len(self._federation_nodes):
-            logging.info(f"🔄  include_model_in_buffer | Broadcasting ALL received models done for round {self.engine.get_round()}")
-            message = self.cm.mm.generate_federation_message(nebula_pb2.FederationMessage.Action.FEDERATION_AGGREGATION_FINISHED, [self.engine.get_round()])
+            logging.info(f"🔄  include_model_in_buffer | Broadcasting MODELS_INCLUDED for round {self.engine.get_round()}")
+            message = self.cm.mm.generate_federation_message(nebula_pb2.FederationMessage.Action.FEDERATION_MODELS_INCLUDED, [self.engine.get_round()])
             await self.cm.send_message_to_neighbors(message)
             
         return

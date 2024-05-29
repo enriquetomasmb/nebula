@@ -53,7 +53,7 @@ message FederationMessage {
   enum Action {
     FEDERATION_START = 0;
     REPUTATION = 1;
-    FEDERATION_AGGREGATION_FINISHED = 2;
+    FEDERATION_MODELS_INCLUDED = 2;
   }
   Action action = 1;
   repeated string arguments = 2;  // Arguments or parameters associated with the action.

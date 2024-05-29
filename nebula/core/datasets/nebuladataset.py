@@ -108,18 +108,12 @@ class NebulaDataset(Dataset, ABC):
             if self.iid:
                 plt.title(f"Participant {i+1} class distribution (IID)")
             else:
-                if self.partition == "dirichlet":
-                    plt.title(f"Participant {i+1} class distribution (Non-IID - Dirichlet \u03B1=0.1)")
-                elif self.partition == "percent":
-                    plt.title(f"Participant {i+1} class distribution (Non-IID - 20% imbalance)")
-                else:
-                    plt.title(f"Class distribution (Non-IID)")
+                plt.title(f"Participant {i+1} class distribution (Non-IID - {self.partition}) - {self.partition_parameter}")
             plt.tight_layout()
             path_to_save = f"{self.config.participant['tracking_args']['log_dir']}/{self.config.participant['scenario_args']['name']}/participant_{i+1}_class_distribution_{'iid' if self.iid else 'non_iid'}{'_' + self.partition if not self.iid else ''}.png"
             plt.savefig(path_to_save, dpi=300, bbox_inches="tight")
             plt.close()
 
-        # Plot a graph with the class distribution of the entire dataset (x-axis: partition, y-axis: class ID, size of the point: number of samples)
         plt.figure()
         max_point_size = 500
         min_point_size = 0
@@ -136,19 +130,14 @@ class NebulaDataset(Dataset, ABC):
             sizes = [(size / max_samples_partition) * (max_point_size - min_point_size) + min_point_size for size in class_counts]
             plt.scatter([i] * self.num_classes, range(self.num_classes), s=sizes, alpha=0.5)
 
-        plt.xlabel("Partition")
+        plt.xlabel("Participant")
         plt.ylabel("Class")
         plt.xticks(range(self.partitions_number))
         plt.yticks(range(self.num_classes))
         if self.iid:
-            plt.title(f"Class distribution (IID)")
+            plt.title(f"Participant {i+1} class distribution (IID)")
         else:
-            if self.partition == "dirichlet":
-                plt.title(f"Class distribution (Non-IID - Dirichlet \u03B1=0.1)")
-            elif self.partition == "percent":
-                plt.title(f"Class distribution (Non-IID - 20% imbalance)")
-            else:
-                plt.title(f"Class distribution (Non-IID)")
+            plt.title(f"Participant {i+1} class distribution (Non-IID - {self.partition}) - {self.partition_parameter}")
         plt.tight_layout()
 
         # Saves the distribution display with circles of different size
@@ -545,9 +534,9 @@ class NebulaDataset(Dataset, ABC):
         plt.hist(label_distribution, stacked=True, bins=np.arange(-0.5, num_clients + 1.5, 1), label=dataset.classes, rwidth=0.5)
         plt.xticks(np.arange(num_clients), ["Participant %d" % (c_id + 1) for c_id in range(num_clients)])
         plt.title("Distribution of splited datasets")
-        plt.xlabel("Participants")
-        plt.ylabel("Number of Samples")
-        plt.xticks(range(num_clients), [f" {i+1}" for i in range(num_clients)])
+        plt.xlabel("Participant")
+        plt.ylabel("Number of samples")
+        plt.xticks(range(num_clients), [f" {i}" for i in range(num_clients)])
         plt.legend(loc="upper right")
         plt.tight_layout()
 

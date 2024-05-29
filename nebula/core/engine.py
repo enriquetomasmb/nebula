@@ -153,7 +153,7 @@ class Engine:
                 self._connection_connect_callback,
                 self._connection_disconnect_callback,
                 self._start_federation_callback,
-                self._federation_aggregation_finished_callback,
+                self._federation_models_included_callback,
             ]
         )
 
@@ -263,8 +263,8 @@ class Engine:
                 if self.is_dynamic_aggregation and self.aggregator != self.target_aggregation:
                     await self._dynamic_aggregator(self.aggregator.get_nodes_pending_models_to_aggregate(), malicious_nodes)
 
-    @event_handler(nebula_pb2.FederationMessage, nebula_pb2.FederationMessage.Action.FEDERATION_AGGREGATION_FINISHED)
-    def _federation_aggregation_finished_callback(self, source, message):
+    @event_handler(nebula_pb2.FederationMessage, nebula_pb2.FederationMessage.Action.FEDERATION_MODELS_INCLUDED)
+    def _federation_models_included_callback(self, source, message):
         logging.info(f"📝  handle_federation_message | Trigger | Received aggregation finished message from {source}")
         try:
             self.cm.get_connections_lock().acquire()

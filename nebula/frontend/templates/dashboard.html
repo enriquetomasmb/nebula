@@ -93,6 +93,9 @@
                         <tr>
                             <th>Name</th>
                             <th>Start time</th>
+                            <th>Model</th>
+                            <th>Dataset</th>
+                            <th>Rounds</th>
                             <th>Status</th>
                             <th>Action</th>
                         </tr>
@@ -102,6 +105,9 @@
                     <tr id="scenario-vars">
                         <td id="name">{{ name }}</td>
                         <td id="start_time">{{ start_time }}</td>
+                        <td id="model">{{ model }}</td>
+                        <td id="dataset">{{ dataset }}</td>
+                        <td id="rounds">{{ rounds }}</td>
                         {% if status == "running" %}
                         <td id="status"><span class="badge text-bg-warning">Running</span></td>
                         {% elif status == "completed" %}

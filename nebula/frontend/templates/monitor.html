@@ -20,7 +20,7 @@
     <div class="container">
         <div class="row p-3">
             <div class="col-md-4">
-                <h3>Scenario definition</h3>
+                <h3>Scenario information</h3>
                 <h5>Title: <b id="scenario_title">{{ scenario[3] }}</b></h5>
                 <h5>Description: <b id="scenario_description">{{ scenario[4] }}</b></h5>
                 {% if scenario[5] == "running" %}
@@ -48,10 +48,6 @@
             </div>
             <div class="col-md-8">
                 <h3>Nodes in the database</h3>
-                <p class="text-muted">The following table shows the nodes that are in the database. The nodes that are
-                    online are marked
-                    with a green label.</p>
-
                 <div class="table-responsive">
                     <table id="table-nodes" class="table small">
                         <thead>
