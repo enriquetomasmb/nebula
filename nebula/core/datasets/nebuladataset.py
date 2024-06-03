@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
-import os
-import sys
+import time
 import numpy as np
 from sklearn.manifold import TSNE
 from torch.utils.data import Dataset
@@ -51,7 +50,17 @@ class NebulaDataset(Dataset, ABC):
 
         enable_deterministic(config)
 
-        self.initialize_dataset()
+        if self.partition_id == 0:
+            self.initialize_dataset()
+        else:
+            max_tries = 10
+            for i in range(max_tries):
+                try:
+                    self.initialize_dataset()
+                    break
+                except Exception as e:
+                    print(f"Error loading dataset: {e}. Retrying {i+1}/{max_tries} in 5 seconds...")
+                    time.sleep(5)
 
     @abstractmethod
     def initialize_dataset(self):

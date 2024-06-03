@@ -12,6 +12,7 @@ Prerequisites
 * pip3
 * Docker Engine 24.0.4 or higher (24.0.7 recommended, https://docs.docker.com/engine/install/)
 * Docker Compose 2.19.0 or higher (2.19.1 recommended, https://docs.docker.com/compose/install/)
+* For using NVIDIA GPUs, NVIDIA driver version >=525.60.13 (Linux) >=528.33 (Windows), and CUDA 12.1 (mandatory). For more information, see https://docs.nvidia.com/cuda/cuda-installation-guide-microsoft-windows/index.html (Windows) or https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html (Linux)
 
 .. _deploy_venv:
 
