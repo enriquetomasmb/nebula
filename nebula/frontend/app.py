@@ -138,6 +138,7 @@ def index():
 
 
 @app.route("/nebula")
+@app.route("/nebula/")
 def nebula_home():
     alerts = []
     return render_template("index.html", alerts=alerts)

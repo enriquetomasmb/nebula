@@ -163,7 +163,7 @@ def get_run_hashes_scenario(scenario_name):
         command = "SELECT DISTINCT idx, hash FROM nodes WHERE scenario = ?;"
         c.execute(command, (scenario_name,))
         result = c.fetchall()
-        result_hashes = [(f"participant_{node['idx']}", node["hash"]) for node in result]
+        result_hashes = [(f"participant_{node[0]}", node[1]) for node in result]
 
         return result_hashes
 

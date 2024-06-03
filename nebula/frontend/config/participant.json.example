@@ -132,6 +132,7 @@
     "grace_time_health": 60,
     "health_interval": 15,
     "send_alive_interval": 0.2,
+    "check_alive_interval": 5,
     "alive_timeout": 120
   },
   "forwarder_args": {

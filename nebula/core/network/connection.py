@@ -50,7 +50,7 @@ class Connection:
 
         self.EOT_CHAR = b"\x01\x02\x03\x04"
         self.COMPRESSION_CHAR = b"\x05\x06\x07\x08"
-        self.DATA_TYPE_PREFIXES = {"pb": b"\x10", "string": b"\x11", "json": b"\x12", "bytes": b"\x13"}
+        self.DATA_TYPE_PREFIXES = {"pb": b"\x10\x11\x12\x13", "string": b"\x14\x15\x16\x17", "json": b"\x18\x19\x20\x21", "bytes": b"\x22\x23\x24\x25"}
 
         logging.info(f"Connection [established]: {self.addr} (id: {self.id}) (active: {self.active}) (direct: {self.direct})")
 
@@ -204,16 +204,17 @@ class Connection:
 
     async def retrieve_message(self, message):
         try:
-            data_type_prefix = message[0:1]
-            message = message[1:]
+            data_type_prefix = message[0:4]
+            message = message[4:]
             if message[-len(self.COMPRESSION_CHAR) :] == self.COMPRESSION_CHAR:
                 message = await self.decompress(message[: -len(self.COMPRESSION_CHAR)])
                 if message is None:
                     return None
             if data_type_prefix == self.DATA_TYPE_PREFIXES["pb"]:
+                logging.debug(f"Received message (pb): {message}")
                 asyncio.create_task(self.cm.handle_incoming_message(message, self.addr), name=f"Connection {self.addr} message handler")
-            elif data_type_prefix == self.DATA_TYPE_PREFIXES["str"]:
-                logging.debug(f"Received message (str): {message.decode('utf-8')}")
+            elif data_type_prefix == self.DATA_TYPE_PREFIXES["string"]:
+                logging.debug(f"Received message (string): {message.decode('utf-8')}")
             elif data_type_prefix == self.DATA_TYPE_PREFIXES["json"]:
                 logging.debug(f"Received message (json): {json.loads(message.decode('utf-8'))}")
             elif data_type_prefix == self.DATA_TYPE_PREFIXES["bytes"]:

@@ -924,26 +924,3 @@ class Controller:
             logging.error("Unknown error while removing files")
             logging.error(e)
             raise e
-
-    # @classmethod
-    # def remove_files_by_run_hash(cls, hash_str):
-    #     for root, dirs, files in os.walk(f"{os.environ['NEBULA_LOGS_DIR']}/.aim", topdown=False):
-    #         for name in files:
-    #             if hash_str in name:
-    #                 full_path = os.path.join(root, name)
-    #                 print(f"Removing file: {full_path}")
-    #                 try:
-    #                     os.remove(full_path)
-    #                 except Exception as e:
-    #                     print(f"Error removing file: {full_path}")
-    #                     print(e)
-
-    #         for name in dirs:
-    #             if hash_str in name:
-    #                 full_dir_path = os.path.join(root, name)
-    #                 print(f"Removing directory: {full_dir_path}")
-    #                 try:
-    #                     shutil.rmtree(full_dir_path)
-    #                 except Exception as e:
-    #                     print(f"Error removing directory: {full_dir_path}")
-    #                     print(e)

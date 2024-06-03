@@ -226,15 +226,15 @@ class Engine:
                     logging.warning(f"🔍  Invalid geolocation received from {source}: latitude={message.latitude}, longitude={message.longitude}")
 
     @event_handler(nebula_pb2.ControlMessage, nebula_pb2.ControlMessage.Action.ALIVE)
-    def _control_alive_callback(self, source, message):
+    async def _control_alive_callback(self, source, message):
         logging.info(f"🔧  handle_control_message | Trigger | Received alive message from {source}")
-        if self.cm.connections[source] is not None:
+        if source in self.cm.get_addrs_current_connections(myself=True):
             try:
-                self.cm.health.alive(source)
+                await self.cm.health.alive(source)
             except Exception as e:
                 logging.error(f"Error updating alive status in connection: {e}")
         else:
-            logging.error(f"Connection not found for {source}")
+            logging.error(f"❗️  Connection {source} not found in connections...")
 
     @event_handler(nebula_pb2.ConnectionMessage, nebula_pb2.ConnectionMessage.Action.CONNECT)
     async def _connection_connect_callback(self, source, message):
@@ -249,7 +249,7 @@ class Engine:
         await self.cm.disconnect(source, mutual_disconnection=False)
 
     @event_handler(nebula_pb2.FederationMessage, nebula_pb2.FederationMessage.Action.FEDERATION_START)
-    def _start_federation_callback(self, source, message):
+    async def _start_federation_callback(self, source, message):
         logging.info(f"📝  handle_federation_message | Trigger | Received start federation message from {source}")
         self.create_trainer_service()
 

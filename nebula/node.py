@@ -217,6 +217,8 @@ async def main():
         ["reporter_args", "report_frequency"],
         ["discoverer_args", "discovery_frequency"],
         ["health_args", "health_interval"],
+        ["health_args", "grace_time_health"],
+        ["health_args", "check_alive_interval"],
         ["health_args", "send_alive_interval"],
         ["forwarder_args", "forwarder_interval"],
         ["forwarder_args", "forward_messages_interval"],
