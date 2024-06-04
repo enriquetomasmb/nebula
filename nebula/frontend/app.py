@@ -5,7 +5,6 @@ import io
 import json
 import logging
 import multiprocessing
-import multiprocessing
 import os
 import requests
 import signal
