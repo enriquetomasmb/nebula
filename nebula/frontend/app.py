@@ -4,6 +4,7 @@ import datetime
 import io
 import json
 import logging
+import multiprocessing
 import os
 import requests
 import signal
@@ -647,6 +648,21 @@ async def nebula_stop_scenario(scenario_name: str, request: Request, session: Di
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 
+@app.get("/nebula/dashboard/{scenario_name}/stopall")
+async def nebula_stop_all_scenarios(scenario_name: str, request: Request, session: Dict = Depends(get_session)):
+    if "user" in session.keys():
+        if session["role"] == "demo":
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+        elif session["role"] == "user":
+            if not check_scenario_with_role(session["role"], scenario_name):
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+        stop_event.set()
+        stop_all_scenarios()
+        return RedirectResponse(url="/nebula/dashboard")
+    else:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+
+
 def remove_scenario(scenario_name=None):
     from nebula.controller import Controller
     if settings.advanced_analytics:
@@ -970,7 +986,6 @@ def attack_node_assign(
 
 import math
 
-
 def mobility_assign(nodes, mobile_participants_percent):
     """Assign mobility to nodes"""
     import random
@@ -992,6 +1007,184 @@ def mobility_assign(nodes, mobile_participants_percent):
     return nodes
 
 
+def container_finished(event):
+    if event['status'] == 'die' and event['Actor']['Attributes']['name'].startswith('/fedstellar'):
+        return True
+    return False
+
+# Waits till the experiment is finished
+def wait_scenario_finished():
+    import docker
+
+    client = docker.from_env()
+    events = client.events(decode=True)
+    scenario_finished = False
+
+    try:
+        # Listen for docker events
+        for event in events:
+            if(container_finished(event)):
+                scenario_finished = True
+    except KeyboardInterrupt:
+        pass
+    finally:
+        # Close event iterator
+        events.close()
+        return scenario_finished
+
+# Stop all scenarios in the scenarios_list
+stop_event = multiprocessing.Event()
+
+def run_scenario(data, request, session):
+    from nebula.controller import Controller
+    nodes = data["nodes"]
+    scenario_name = f'nebula_{data["federation"]}_{datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}'
+
+    scenario_path = os.path.join(settings.config_dir, scenario_name)
+    os.makedirs(scenario_path, exist_ok=True)
+
+    scenario_file = os.path.join(scenario_path, "scenario.json")
+    with open(scenario_file, "w") as f:
+        json.dump(data, f, sort_keys=False, indent=2)
+
+    args_controller = {
+        "advanced_analytics": settings.advanced_analytics,
+        "scenario_name": scenario_name,
+        "config": settings.config_dir,
+        "logs": settings.log_dir,
+        "certs": settings.cert_dir,
+        "n_nodes": data["n_nodes"],
+        "matrix": data["matrix"],
+        "federation": data["federation"],
+        "topology": data["topology"],
+        "simulation": data["simulation"],
+        "env": None,
+        "root_path": settings.root_host_path,
+        "webport": request.url.port or 80,  # Get the port of the frontend, if not specified, use 80
+        "network_subnet": data["network_subnet"],
+        "use_blockchain": data["agg_algorithm"] == "BlockchainReputation",
+        "network_gateway": data["network_gateway"],
+    }
+
+    controller_file = os.path.join(settings.config_dir, scenario_name, "controller.json")
+    with open(controller_file, "w") as f:
+        json.dump(args_controller, f, sort_keys=False, indent=2)
+
+    attack = data["attacks"]
+    poisoned_node_percent = int(data["poisoned_node_percent"])
+    poisoned_sample_percent = int(data["poisoned_sample_percent"])
+    poisoned_noise_percent = int(data["poisoned_noise_percent"])
+    federation = data["federation"]
+
+    nodes, attack_matrix = attack_node_assign(
+        nodes,
+        federation,
+        attack,
+        poisoned_node_percent,
+        poisoned_sample_percent,
+        poisoned_noise_percent,
+    )
+
+    mobility_status = data["mobility"]
+    if mobility_status:
+        mobile_participants_percent = int(data["mobile_participants_percent"])
+        nodes = mobility_assign(nodes, mobile_participants_percent)
+    else:
+        nodes = mobility_assign(nodes, 0)
+
+    import shutil
+    for node in nodes:
+        node_config = nodes[node]
+        participant_file = os.path.join(settings.config_dir, scenario_name, f'participant_{node_config["id"]}.json')
+        os.makedirs(os.path.dirname(participant_file), exist_ok=True)
+        shutil.copy(
+            os.path.join(settings.config_frontend_dir, "participant.json.example"),
+            participant_file,
+        )
+        with open(participant_file) as f:
+            participant_config = json.load(f)
+        participant_config["network_args"]["ip"] = node_config["ip"]
+        participant_config["network_args"]["port"] = int(node_config["port"])
+        participant_config["device_args"]["idx"] = node_config["id"]
+        participant_config["device_args"]["start"] = node_config["start"]
+        participant_config["device_args"]["role"] = node_config["role"]
+        participant_config["device_args"]["proxy"] = node_config["proxy"]
+        participant_config["device_args"]["malicious"] = node_config["malicious"]
+        participant_config["scenario_args"]["rounds"] = int(data["rounds"])
+        participant_config["data_args"]["dataset"] = data["dataset"]
+        participant_config["data_args"]["iid"] = data["iid"]
+        participant_config["data_args"]["partition_selection"] = data["partition_selection"]
+        participant_config["data_args"]["partition_parameter"] = data["partition_parameter"]
+        participant_config["model_args"]["model"] = data["model"]
+        participant_config["training_args"]["epochs"] = int(data["epochs"])
+        participant_config["device_args"]["accelerator"] = data["accelerator"]
+        participant_config["device_args"]["logging"] = data["logginglevel"]
+        participant_config["aggregator_args"]["algorithm"] = data["agg_algorithm"]
+
+        participant_config["adversarial_args"]["attacks"] = node_config["attacks"]
+        participant_config["adversarial_args"]["poisoned_sample_percent"] = node_config["poisoned_sample_percent"]
+        participant_config["adversarial_args"]["poisoned_ratio"] = node_config["poisoned_ratio"]
+        participant_config["defense_args"]["with_reputation"] = data["with_reputation"]
+        participant_config["defense_args"]["is_dynamic_topology"] = data["is_dynamic_topology"]
+        participant_config["defense_args"]["is_dynamic_aggregation"] = data["is_dynamic_aggregation"]
+        participant_config["defense_args"]["target_aggregation"] = data["target_aggregation"]
+
+        participant_config["mobility_args"]["random_geo"] = data["random_geo"]
+        participant_config["mobility_args"]["latitude"] = data["latitude"]
+        participant_config["mobility_args"]["longitude"] = data["longitude"]
+        participant_config["mobility_args"]["mobility"] = node_config["mobility"]
+        participant_config["mobility_args"]["mobility_type"] = data["mobility_type"]
+        participant_config["mobility_args"]["radius_federation"] = data["radius_federation"]
+        participant_config["mobility_args"]["scheme_mobility"] = data["scheme_mobility"]
+        participant_config["mobility_args"]["round_frequency"] = data["round_frequency"]
+
+        with open(participant_file, "w") as f:
+            json.dump(participant_config, f, sort_keys=False, indent=2)
+
+    import argparse
+    import subprocess
+
+    args_controller = argparse.Namespace(**args_controller)
+    controller = Controller(args_controller)  # Generate an instance of controller in this new process
+    try:
+        if mobility_status:
+            additional_participants = data["additional_participants"]
+            schema_additional_participants = data["schema_additional_participants"]
+            controller.load_configurations_and_start_nodes(additional_participants, schema_additional_participants)
+        else:
+            controller.load_configurations_and_start_nodes()
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Error docker-compose up: {e}")
+        return RedirectResponse(url="/nebula/dashboard/deployment")
+    
+    scenario_update_record(
+        scenario_name=controller.scenario_name,
+        start_time=controller.start_date_scenario,
+        end_time="",
+        status="running",
+        title=data["scenario_title"],
+        description=data["scenario_description"],
+        network_subnet=data["network_subnet"],
+        model=data["model"],
+        dataset=data["dataset"],
+        rounds=data["rounds"],
+        role=session["role"],
+    )
+
+    nodes_registration[scenario_name] = {
+        "n_nodes": data["n_nodes"],
+        "nodes": set(),
+    }
+    nodes_registration[scenario_name]["condition"] = asyncio.Condition()
+    
+def run_scenarios(data, request, session):
+    for scenario_data in data:
+        if stop_event.is_set():
+            break
+        run_scenario(scenario_data, request, session)
+        if wait_scenario_finished():
+            pass
+
 @app.post("/nebula/dashboard/deployment/run")
 async def nebula_dashboard_deployment_run(request: Request, session: Dict = Depends(get_session)):
     from nebula.controller import Controller
@@ -1004,146 +1197,10 @@ async def nebula_dashboard_deployment_run(request: Request, session: Dict = Depe
         
         if request.headers.get("content-type") == "application/json":
             stop_all_scenarios()
+            stop_event.clear()
             data = await request.json()
-            nodes = data["nodes"]
-            scenario_name = f'nebula_{data["federation"]}_{datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}'
-
-            scenario_path = os.path.join(settings.config_dir, scenario_name)
-            os.makedirs(scenario_path, exist_ok=True)
-
-            scenario_file = os.path.join(scenario_path, "scenario.json")
-            with open(scenario_file, "w") as f:
-                json.dump(data, f, sort_keys=False, indent=2)
-
-            args_controller = {
-                "advanced_analytics": settings.advanced_analytics,
-                "scenario_name": scenario_name,
-                "config": settings.config_dir,
-                "logs": settings.log_dir,
-                "certs": settings.cert_dir,
-                "n_nodes": data["n_nodes"],
-                "matrix": data["matrix"],
-                "federation": data["federation"],
-                "topology": data["topology"],
-                "simulation": data["simulation"],
-                "env": None,
-                "root_path": settings.root_host_path,
-                "webport": request.url.port or 80,  # Get the port of the frontend, if not specified, use 80
-                "network_subnet": data["network_subnet"],
-                "use_blockchain": data["agg_algorithm"] == "BlockchainReputation",
-                "network_gateway": data["network_gateway"],
-            }
-
-            controller_file = os.path.join(settings.config_dir, scenario_name, "controller.json")
-            with open(controller_file, "w") as f:
-                json.dump(args_controller, f, sort_keys=False, indent=2)
-
-            attack = data["attacks"]
-            poisoned_node_percent = int(data["poisoned_node_percent"])
-            poisoned_sample_percent = int(data["poisoned_sample_percent"])
-            poisoned_noise_percent = int(data["poisoned_noise_percent"])
-            federation = data["federation"]
-
-            nodes, attack_matrix = attack_node_assign(
-                nodes,
-                federation,
-                attack,
-                poisoned_node_percent,
-                poisoned_sample_percent,
-                poisoned_noise_percent,
-            )
-
-            mobility_status = data["mobility"]
-            if mobility_status:
-                mobile_participants_percent = int(data["mobile_participants_percent"])
-                nodes = mobility_assign(nodes, mobile_participants_percent)
-            else:
-                nodes = mobility_assign(nodes, 0)
-
-            import shutil
-            for node in nodes:
-                node_config = nodes[node]
-                participant_file = os.path.join(settings.config_dir, scenario_name, f'participant_{node_config["id"]}.json')
-                os.makedirs(os.path.dirname(participant_file), exist_ok=True)
-                shutil.copy(
-                    os.path.join(settings.config_frontend_dir, "participant.json.example"),
-                    participant_file,
-                )
-                with open(participant_file) as f:
-                    participant_config = json.load(f)
-                participant_config["network_args"]["ip"] = node_config["ip"]
-                participant_config["network_args"]["port"] = int(node_config["port"])
-                participant_config["device_args"]["idx"] = node_config["id"]
-                participant_config["device_args"]["start"] = node_config["start"]
-                participant_config["device_args"]["role"] = node_config["role"]
-                participant_config["device_args"]["proxy"] = node_config["proxy"]
-                participant_config["device_args"]["malicious"] = node_config["malicious"]
-                participant_config["scenario_args"]["rounds"] = int(data["rounds"])
-                participant_config["data_args"]["dataset"] = data["dataset"]
-                participant_config["data_args"]["iid"] = data["iid"]
-                participant_config["data_args"]["partition_selection"] = data["partition_selection"]
-                participant_config["data_args"]["partition_parameter"] = data["partition_parameter"]
-                participant_config["model_args"]["model"] = data["model"]
-                participant_config["training_args"]["epochs"] = int(data["epochs"])
-                participant_config["device_args"]["accelerator"] = data["accelerator"]
-                participant_config["device_args"]["logging"] = data["logginglevel"]
-                participant_config["aggregator_args"]["algorithm"] = data["agg_algorithm"]
-
-                participant_config["adversarial_args"]["attacks"] = node_config["attacks"]
-                participant_config["adversarial_args"]["poisoned_sample_percent"] = node_config["poisoned_sample_percent"]
-                participant_config["adversarial_args"]["poisoned_ratio"] = node_config["poisoned_ratio"]
-                participant_config["defense_args"]["with_reputation"] = data["with_reputation"]
-                participant_config["defense_args"]["is_dynamic_topology"] = data["is_dynamic_topology"]
-                participant_config["defense_args"]["is_dynamic_aggregation"] = data["is_dynamic_aggregation"]
-                participant_config["defense_args"]["target_aggregation"] = data["target_aggregation"]
-
-                participant_config["mobility_args"]["random_geo"] = data["random_geo"]
-                participant_config["mobility_args"]["latitude"] = data["latitude"]
-                participant_config["mobility_args"]["longitude"] = data["longitude"]
-                participant_config["mobility_args"]["mobility"] = node_config["mobility"]
-                participant_config["mobility_args"]["mobility_type"] = data["mobility_type"]
-                participant_config["mobility_args"]["radius_federation"] = data["radius_federation"]
-                participant_config["mobility_args"]["scheme_mobility"] = data["scheme_mobility"]
-                participant_config["mobility_args"]["round_frequency"] = data["round_frequency"]
-
-                with open(participant_file, "w") as f:
-                    json.dump(participant_config, f, sort_keys=False, indent=2)
-
-            import argparse
-            import subprocess
-
-            args_controller = argparse.Namespace(**args_controller)
-            controller = Controller(args_controller)  # Generate an instance of controller in this new process
-            try:
-                if mobility_status:
-                    additional_participants = data["additional_participants"]
-                    schema_additional_participants = data["schema_additional_participants"]
-                    controller.load_configurations_and_start_nodes(additional_participants, schema_additional_participants)
-                else:
-                    controller.load_configurations_and_start_nodes()
-            except subprocess.CalledProcessError as e:
-                logging.error(f"Error docker-compose up: {e}")
-                return RedirectResponse(url="/nebula/dashboard/deployment")
-            
-            scenario_update_record(
-                scenario_name=controller.scenario_name,
-                start_time=controller.start_date_scenario,
-                end_time="",
-                status="running",
-                title=data["scenario_title"],
-                description=data["scenario_description"],
-                network_subnet=data["network_subnet"],
-                model=data["model"],
-                dataset=data["dataset"],
-                rounds=data["rounds"],
-                role=session["role"],
-            )
-
-            nodes_registration[scenario_name] = {
-                "n_nodes": data["n_nodes"],
-                "nodes": set(),
-            }
-            nodes_registration[scenario_name]["condition"] = asyncio.Condition()
+            p = multiprocessing.Process(target=lambda: run_scenarios(data, request, session))
+            p.start()
             return Response(content="Success", status_code=200)
         else:
             raise HTTPException(status_code=401)

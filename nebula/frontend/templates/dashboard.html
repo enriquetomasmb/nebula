@@ -48,12 +48,14 @@
             {% if scenario_running %}
             {% if scenario_completed %}
             <div style="text-align: center">
-                <h4 style="text-align: center"><strong>There is a scenario <span class="badge text-bg-success">completed</span></strong></h4>
+                <h4 style="text-align: center"><strong>There is a scenario <span
+                            class="badge text-bg-success">completed</span></strong></h4>
                 <p style="color: #772953; font-weight: bold">The federation has reached the maximum number of rounds</p>
             </div>
             {% else %}
             <div style="text-align: center">
-                <h4 style="text-align: center"><strong>There is a scenario <span class="badge text-bg-warning">running</span></strong></h4>
+                <h4 style="text-align: center"><strong>There is a scenario <span
+                            class="badge text-bg-warning">running</span></strong></h4>
                 <p style="color: #772953; font-weight: bold">The federation is currently running</p>
             </div>
             {% endif %}
@@ -120,13 +122,16 @@
                                 class="label btn btn-dark">Monitor</a>
                             <a href="{{ url_for('nebula_dashboard_statistics', scenario_name=name) }}"
                                 class="label btn btn-dark">Real-time metrics</a>
-                            <a id="note-btn-{{ name }}" data-scenario-name="{{ name }}" class="label btn btn-dark"><i class="fa fa-sticky-note" style="color: white;"></i></a>
+                            <a id="note-btn-{{ name }}" data-scenario-name="{{ name }}" class="label btn btn-dark"><i
+                                    class="fa fa-sticky-note" style="color: white;"></i></a>
                             {% if status == "running" %}
                             <a href="{{ url_for('nebula_stop_scenario', scenario_name=name) }}"
                                 class="label btn btn-danger">Stop scenario</a>
                             {% elif status == "completed" %}
                             <a href="{{ url_for('nebula_stop_scenario', scenario_name=name) }}"
                                 class="label btn btn-danger">Stop scenario</a>
+                            <a href="{{ url_for('nebula_stop_all_scenarios', scenario_name=name) }}"
+                                class="label btn btn-danger">Stop all</a>
                             {% else %}
                             <a id="remove-btn" data-scenario-name="{{ name }}" class="label btn btn-danger"><i
                                     class="fa fa-trash"></i></a>
@@ -135,10 +140,12 @@
                     </tr>
                     <tr id="notes-row-{{ name }}" class="notes-row" style="display: none;">
                         <td colspan="4">
-                            <textarea id="notes-text-{{ name }}" class="form-control" rows="3" style="font-size: small; width: 100%;"></textarea>
-                            <button id="save-note-{{ name }}" data-scenario-name="{{ name }}" class="btn btn-dark mt-2 save-note-btn" style="float: right;">Save</button>
+                            <textarea id="notes-text-{{ name }}" class="form-control" rows="3"
+                                style="font-size: small; width: 100%;"></textarea>
+                            <button id="save-note-{{ name }}" data-scenario-name="{{ name }}"
+                                class="btn btn-dark mt-2 save-note-btn" style="float: right;">Save</button>
                         </td>
-                    </tr>                    
+                    </tr>
                     {% endfor %}
                 </table>
             </div>
@@ -185,30 +192,30 @@
 </script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
+    document.addEventListener("DOMContentLoaded", function () {
         document.querySelectorAll('[id^=note-btn]').forEach(button => {
-            button.addEventListener('click', function() {
+            button.addEventListener('click', function () {
                 toggleNotesRow(this.dataset.scenarioName);
             });
         });
-    
+
         document.querySelectorAll('[id^=save-note]').forEach(button => {
-            button.addEventListener('click', function() {
+            button.addEventListener('click', function () {
                 saveNotes(this.dataset.scenarioName);
             });
         });
     });
-    
+
     async function toggleNotesRow(scenarioName) {
         const notesRow = document.getElementById('notes-row-' + scenarioName);
         const notesTextElement = document.getElementById('notes-text-' + scenarioName);
-    
+
         if (notesRow.style.display === 'none') {
             try {
                 const response = await fetch('/nebula/dashboard/' + scenarioName + '/notes');
                 const data = await response.json();
                 console.log(data);
-    
+
                 if (data.status === 'success') {
                     notesTextElement.value = data.notes;
                 } else {
@@ -220,13 +227,13 @@
                 return;
             }
         }
-    
+
         notesRow.style.display = notesRow.style.display === 'none' ? '' : 'none';
-    }    
-    
+    }
+
     async function saveNotes(scenarioName) {
         const notesText = document.getElementById('notes-text-' + scenarioName).value;
-        
+
         const response = await fetch('/nebula/dashboard/' + scenarioName + '/save_note', {
             method: 'POST',
             headers: {

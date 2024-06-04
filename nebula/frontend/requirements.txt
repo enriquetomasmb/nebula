@@ -24,3 +24,4 @@ cffi==1.16.0
 web3==6.15.1
 aim==3.20.1
 aiosqlite==0.20.0
+docker==6.1.3
