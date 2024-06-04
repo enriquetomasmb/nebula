@@ -127,6 +127,8 @@
                             {% if status == "running" %}
                             <a href="{{ url_for('nebula_stop_scenario', scenario_name=name) }}"
                                 class="label btn btn-danger">Stop scenario</a>
+                            <a href="{{ url_for('nebula_stop_all_scenarios', scenario_name=name) }}"
+                                class="label btn btn-danger">Stop all</a>
                             {% elif status == "completed" %}
                             <a href="{{ url_for('nebula_stop_scenario', scenario_name=name) }}"
                                 class="label btn btn-danger">Stop scenario</a>

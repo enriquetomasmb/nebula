@@ -63,6 +63,121 @@
     </div>
 </div>
 
+<!-- Generate Scenarios -->
+<div class="modal fade" id="gen-modal" tabindex="-1" aria-labelledby="exampleModalLabel-modal-title" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Scenario Generation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="info-modal-body">
+                <form>
+                    <h5>Advanced Deployment <i class="fa fa-cloud-upload"></i></h5>
+                    <div style="display: inline-block;">
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="radio" id="mod-cpu" name="adv-deployment" value="cpu" style="margin-right: 10px;" checked>CPU
+                        </label>
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="radio" id="mod-gpu" name="adv-deployment" value="gpu" style="margin-right: 10px; margin-left: 10px;">GPU
+                        </label>
+                    </div>
+                    <hr>
+                    <h5>Aggregation <i class="fa fa-calculator"></i>
+                        <input type="checkbox" id="mod-aggregation" style="margin-right: 10px; float: left;">
+                    </h5>
+                    <div style="display: inline-block;">
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="mod-fedavg" value="FedAvg" style="margin-right: 10px;" checked>FedAvg
+                        </label>
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="mod-krum" value="Krum" style="margin-right: 10px; margin-left: 10px;">Krum
+                        </label>
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="mod-trimmed" value="TrimmedMean" style="margin-right: 10px; margin-left: 10px;">TrimmedMean
+                        </label>
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="mod-median" value="Median" style="margin-right: 10px; margin-left: 10px;">Median
+                        </label>
+                    </div>
+                    <hr>
+                    <h5>Topology <i class="fa fa-sitemap"></i>
+                        <input type="checkbox" id="mod-topology" style="margin-right: 10px; float: left;">
+                    </h5>
+                    <div style="display: inline-block;">
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="mod-fully" value='Fully' style="margin-right: 10px;" checked>Fully
+                        </label>
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="mod-ring" value='Ring' style="margin-right: 10px; margin-left: 10px;">Ring
+                        </label>
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="mod-star" value='Star' style="margin-right: 10px; margin-left: 10px;">Star
+                        </label>
+                        <input type="number" id="mod-topology-nodes" placeholder="Nº nodes" min="0" value="3" style="display: inline; width: 40%; margin-left: 10px;">
+                    </div>
+                    <hr>
+                    <h5>Dataset <i class="fa fa-database"></i>
+                        <input type="checkbox" id="mod-dataset" style="margin-right: 10px; float: left;">
+                    </h5>
+                    <div style="display: inline-block;">
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="mod-mnist" value='MNIST' style="margin-right: 10px;" checked>MNIST
+                        </label>
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="mod-fmnist" value='FashionMNIST' style="margin-right: 10px; margin-left: 10px;">FashionMNIST
+                        </label>
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="mod-cifar10" value='CIFAR10' style="margin-right: 10px; margin-left: 10px;">CIFAR10
+                        </label>
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="mod-syscall" value='SYSCALL' style="margin-right: 10px; margin-left: 10px;">SYSCALL
+                        </label>
+                    </div>
+                    <hr>
+                    <h5>Robustness <i class="fa fa-shield"></i>
+                        <input type="checkbox" id="mod-robustness" style="margin-right: 10px; float: left;">
+                    </h5>
+                    <div class="wrapper" style="text-align: center; display: flex; justify-content: left; align-items: left;">
+                        <div class="col-md-5" style="display: inline-block;">
+                            <label>
+                                <input type="checkbox" id="mod-noattack" value='No Attack' checked>No Attack
+                            </label>
+                            <label>
+                                <input type="checkbox" id="mod-labelflipping" value='Label Flipping'>Label Flipping
+                            </label>
+                            <label>
+                                <input type="checkbox" id="mod-samplepoisoning" value='Sample Poisoning'>Sample Poisoning
+                            </label>
+                            <label>
+                                <input type="checkbox" id="mod-modelpoisoning" value='Model Poisoning'>Model Poisoning
+                            </label>
+                        </div>
+                        <div class="col-md-8" style="right: inherit;">
+                            <label>
+                                <input type="checkbox" id="mod-neuroninversion" value='GLLNeuronInversionAttack'>GLLNeuronInversionAttack
+                            </label>
+                            <label>
+                                <input type="checkbox" id="mod-noiseinjection" value='NoiseInjectionAttack'>NoiseInjectionAttack
+                            </label>
+                            <label>
+                                <input type="checkbox" id="mod-swappingweights" value='SwappingWeightsAttack'>SwappingWeightsAttack
+                            </label>
+                            <label>
+                                <input type="checkbox" id="mod-delayer" value='DelayerAttack'>DelayerAttack
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="gen-btn" id="generate-btn" class="btn btn-dark" data-bs-dismiss="modal">Generate</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="spinner"></div>
 
 
@@ -98,7 +213,7 @@
                     </div>
                 </div>
                 <div class="form-group row container-shadow tiny grey">
-                    <h5 class="step-number">Federation Architecture <i class="fa fa-connectdevelop"></i>
+                    <h5 class="step-number" >Federation Architecture <i class="fa fa-connectdevelop"></i>
                         <input type="checkbox" id="fedarch-lock" onchange="lock('federationArchitecture', checked)" style="display: none;">
                         <label for="fedarch-lock" class="icon-container" style="float: right;">
                             <i class="fa fa-lock"></i> 
@@ -296,7 +411,8 @@
                     style="margin-top: 10px; margin-left: 5px; float: right">Load</button>
                 <button id="save-config-btn" type="button" class="btn btn-dark"
                     style="margin-top: 10px; margin-left: 5px; float: right">Save</button>
-
+                <button id="open-gen-modal-btn" type="button" class="btn btn-dark" 
+                    style="margin-top: 10px; margin-left: 5px; float: right;"><i class="fa fa-list-ul" aria-hidden="true"></i></button>
             </div>
             <div id="expert-container" class="col-md-12 " style="display: none">
                 <div class="form-group row container-shadow tiny grey">
@@ -479,11 +595,11 @@
                 <div class="form-group row container-shadow tiny grey">
                     <h5 class="step-number">Mobility <i class="fa fa-car"></i>
                         <input type="checkbox" id="mobility-lock" onchange="lock('random-geo-btn', 'custom-location-btn', 'latitude', 'longitude',
-                        'open-map-btn', 'current-location-btn', 'without-mobility-btn', 'mobility-btn', 'mobilitySelect', 'radiusFederation',
-                        'roundFrequency', 'mobileParticipantsPercent', 'additionalParticipants', checked)" style="display: none;">
-                       <label for="mobility-lock" class="icon-container" style="float: right;">
-                           <i class="fa fa-lock"></i> 
-                       </label>
+                         'open-map-btn', 'current-location-btn', 'without-mobility-btn', 'mobility-btn', 'mobilitySelect', 'radiusFederation',
+                         'roundFrequency', 'mobileParticipantsPercent', 'additionalParticipants', checked)" style="display: none;">
+                        <label for="mobility-lock" class="icon-container" style="float: right;">
+                            <i class="fa fa-lock"></i> 
+                        </label>
                     </h5>
                     <h5 class="step-title">Select the default location for the participants</h5>
                     <div class="form-check form-check-inline">
@@ -1079,7 +1195,7 @@
                         updateScenariosPosition();
                         showAlert('info', 'Configuration file loaded successfully');
                     } catch (error) {
-                        alert("Error loading the configuration file")
+                        showAlert('info', 'Error loading the configuration file');
                         console.error(error)
                     }
 
@@ -1448,7 +1564,7 @@
                 actual_scenario : actual_scenario
             }
         })();
-        
+
         //Clear the fields of the page except the locks
         function clearFields(){
             console.log("--clear--")
@@ -1494,7 +1610,7 @@
             }
             // Step 9
             if(!document.getElementById("accelerator-lock").checked){
-                document.getElementById("resourceUsage").value = "gpu";
+                document.getElementById("resourceUsage").value = "cpu";
             }
             // Step 10
             if(!document.getElementById("distance-lock").checked){
@@ -1573,6 +1689,8 @@
         document.getElementById("add-btn").addEventListener("click", function(){
             scenarioStorage.saveScenario();
             scenarioStorage.actual_scenario = scenarioStorage.scenariosList.length - 1;
+
+            sessionStorage.setItem("ScenarioList", JSON.stringify(scenarioStorage.scenariosList));
 
             updateScenariosPosition();
 
@@ -1654,7 +1772,7 @@
         document.getElementById("prev-btn").addEventListener("click", function(){
             //Save actual scenario in the list
             scenarioStorage.replaceScenario();
-            
+
             //Show previous scenario
             scenarioStorage.actual_scenario = scenarioStorage.actual_scenario - 1;            
             var actual_scenario = scenarioStorage.scenariosList[scenarioStorage.actual_scenario];
@@ -1666,6 +1784,150 @@
             }
             document.getElementById("new-btn").style.display = "none";
             document.getElementById("next-btn").style.display = "inline-block";
+        });
+    </script>
+
+    <script>
+        //Scenario generataion
+
+        function atLeastOneChecked(checkboxIds) {
+            return checkboxIds.some(function(id) {
+                var checkbox = document.getElementById(id);
+                return checkbox && checkbox.checked;
+            });
+        }
+
+        //Select all options
+        function selectALL(checkboxIds, checked) {
+            for (var i = 0; i < checkboxIds.length; i++){
+                document.getElementById(checkboxIds[i]).checked = checked;
+            }
+        }
+
+        // Show the modal
+        document.getElementById("open-gen-modal-btn").addEventListener("click", function () {
+            $('#gen-modal').modal('show');
+        });
+
+        //Check all the options
+        document.getElementById("mod-aggregation").addEventListener("change", function() {
+            selectALL(['mod-fedavg', 'mod-krum', 'mod-trimmed', 'mod-median'], document.getElementById("mod-aggregation").checked);
+        });
+        document.getElementById("mod-topology").addEventListener("change", function() {
+            selectALL(['mod-fully', 'mod-ring', 'mod-star'], document.getElementById("mod-topology").checked);
+        });
+        document.getElementById("mod-dataset").addEventListener("change", function() {
+            selectALL(['mod-mnist', 'mod-fmnist', 'mod-cifar10', 'mod-syscall'], document.getElementById("mod-dataset").checked);
+        });
+        document.getElementById("mod-robustness").addEventListener("change", function() {
+            selectALL(['mod-noattack', 'mod-labelflipping', 'mod-samplepoisoning', 'mod-modelpoisoning', 'mod-neuroninversion', 'mod-noiseinjection',
+             'mod-swappingweights', 'mod-delayer'], document.getElementById("mod-robustness").checked);
+        });
+    
+        //Generate a scenario
+        function generateScenarios(){
+
+            //selected accelerator
+            if(document.getElementById("mod-cpu").checked){
+                document.getElementById("resourceUsage").value = "cpu";
+            }
+            else{
+                document.getElementById("resourceUsage").value = "gpu";
+            }
+
+            //One or more options selected in every case
+            var aggregation_methods = ['mod-fedavg', 'mod-krum', 'mod-trimmed', 'mod-median'];
+            if (!atLeastOneChecked(aggregation_methods)) {
+                alert("Please, select one aggregation method at least.");
+                return;
+            }
+
+            var topologys = ['mod-fully', 'mod-ring', 'mod-star'];
+            if (!atLeastOneChecked(topologys)) {
+                alert("Please, select one topology at least.");
+                return;
+            }
+
+            var datasets = ['mod-mnist', 'mod-fmnist', 'mod-cifar10', 'mod-syscall'];
+            if (!atLeastOneChecked(datasets)) {
+                alert("Please, select one dataset at least.");
+                return;
+            }
+
+            var attacks = ['mod-noattack', 'mod-labelflipping', 'mod-samplepoisoning', 'mod-modelpoisoning', 'mod-neuroninversion', 'mod-noiseinjection',
+             'mod-swappingweights', 'mod-delayer'];
+            if (!atLeastOneChecked(attacks)) {
+                alert("Please, select one robustness option at least.");
+                return;
+            }
+
+            //Generate scenarios with all aggregation methods selected
+            for (var it1 = 0; it1 < aggregation_methods.length; it1++) {
+                var aggregation_checkbox = document.getElementById(aggregation_methods[it1]);
+                if (aggregation_checkbox.checked) {
+                    document.getElementById("aggregationSelect").value = aggregation_checkbox.value;
+
+                    //Generate topologys
+                    //Selected topology
+                    for (var it2 = 0; it2 < topologys.length; it2++) {
+                        var topology_checkbox = document.getElementById(topologys[it2]);
+                        if (topology_checkbox.checked) {
+                            document.getElementById("predefined-topology-select").value = topology_checkbox.value;
+                            document.getElementById("predefined-topology-nodes").value = document.getElementById("mod-topology-nodes").value;
+                            document.getElementById("networkTopologyRandom").click();
+
+                            //Generate datasets
+                            //Selected dataset
+                            for (var it3 = 0; it3 < datasets.length; it3++){
+                                var dataset_checkbox = document.getElementById(datasets[it3]);
+                                if(dataset_checkbox.checked){
+                                    document.getElementById("datasetSelect").value = dataset_checkbox.value;
+                                    updateModelOptions();
+
+                                    //Generate attacks
+                                    //Selected attack
+                                    for (var it4 = 0; it4 < attacks.length; it4++){
+                                        var attacks_checkbox = document.getElementById(attacks[it4]);
+                                        if(attacks_checkbox.checked){
+                                            document.getElementById("poisoning-attack-select").value = attacks_checkbox.value;
+
+                                            //Set scenario title
+                                            document.getElementById("scenario-title").value = document.getElementById("aggregationSelect").value + "_" + 
+                                            document.getElementById("predefined-topology-select").value + "_nodes" + 
+                                            document.getElementById("predefined-topology-nodes").value + "_" + 
+                                            document.getElementById("datasetSelect").value + "_" + document.getElementById("poisoning-attack-select").value;
+
+
+                                            //Save generated scenario
+                                            scenarioStorage.saveScenario();
+                                            scenarioStorage.actual_scenario = scenarioStorage.scenariosList.length - 1;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            //Show buttons
+            updateScenariosPosition();
+
+            if(scenarioStorage.scenariosList.length == 1){
+                document.getElementById("prev-btn").style.display = "none";
+                document.getElementById("next-btn").style.display = "none";
+            }
+            else{
+                document.getElementById("prev-btn").style.display = "inline-block";
+            }
+            document.getElementById("new-btn").style.display = "inline-block";
+            document.getElementById("del-btn").style.display = "inline-block";
+            document.getElementById("add-btn").style.display = "none";
+        }
+
+        //Generate and save scenarios
+        document.getElementById("generate-btn").addEventListener("click", function(){
+            generateScenarios();
         });
     </script>
 
@@ -2688,8 +2950,8 @@
             }
             // Fill the matrix
             for (let i = 0; i < links.length; i++) {
-                const source = links[i].source.id;
-                const target = links[i].target.id;
+                const source = typeof links[i].source === 'object' ? links[i].source.id : links[i].source;
+                const target = typeof links[i].target === 'object' ? links[i].target.id : links[i].target;
                 matrix[source][target] = 1;
                 matrix[target][source] = 1;
             }
