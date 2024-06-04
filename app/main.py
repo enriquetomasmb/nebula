@@ -98,6 +98,14 @@ argparser.add_argument(
     help="Debug mode",
 )
 argparser.add_argument(
+    "-ad",
+    "--advanced",
+    dest="advanced_analytics",
+    action="store_true",
+    default=False,
+    help="Advanced analytics",
+)
+argparser.add_argument(
     "-v",
     "--version",
     action="version",

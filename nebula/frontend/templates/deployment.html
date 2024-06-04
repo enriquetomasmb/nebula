@@ -182,8 +182,8 @@
                     </div>
                     <h5 class="step-title">Parameter setting</h5>
                     <div id="partitionBlock" class="form-check form-check-inline">
-                        <input type="number" step="0.1" class="form-control" id="partitionParameter" style="display: inline; width: 50%"
-                            value="0.5">
+                        <input type="number" step="0.1" class="form-control" id="partitionParameter"
+                            style="display: inline; width: 50%" value="0.5">
                         <small id="parameterSettingHelp" class="form-text text-muted">
                             <i id="parameterSettingHelpIcon" class="fa fa-info-circle"></i>
                         </small>
@@ -1256,16 +1256,16 @@
             // Change the source of the methodtip image based on the selected option
             switch (partitionSelect.value) {
                 case "dirichlet":
-                    methodtipImage.src = "{{ url_for('static', filename='images/dirichlet_noniid.png') }}";
+                    methodtipImage.src = "{{ url_for('static', path='images/dirichlet_noniid.png') }}";
                     break;
                 case "percent":
-                    methodtipImage.src = "{{ url_for('static', filename='images/percentage.png') }}";
+                    methodtipImage.src = "{{ url_for('static', path='images/percentage.png') }}";
                     break;
                 case "balancediid":
-                    methodtipImage.src = "{{ url_for('static', filename='images/balancediid.png') }}";
+                    methodtipImage.src = "{{ url_for('static', path='images/balancediid.png') }}";
                     break;
                 case "unbalancediid":
-                    methodtipImage.src = "{{ url_for('static', filename='images/unbalanceiid.png') }}";
+                    methodtipImage.src = "{{ url_for('static', path='images/unbalanceiid.png') }}";
                     break;
             }
 
@@ -1726,7 +1726,7 @@
                 const participantItem_img = document.createElement("img");
                 participantItem_img.id = `participant-img-${i}`;
                 participantItem_img.setAttribute("data-id", i.toString());
-                participantItem_img.src = "{{ url_for('static', filename='images/device.png') }}";
+                participantItem_img.src = "{{ url_for('static', path='images/device.png') }}";
                 participantItem_img.width = 50
                 participantItem_img.height = 50
                 participantItem_img.style.marginRight = "10px";

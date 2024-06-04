@@ -21,22 +21,27 @@ if [ "$NEBULA_DEV" = "True" ]; then
     NEBULA_SOCK=nebula.sock
 fi
 
+NEBULA_FRONTEND_STATIC_DIR=/nebula/nebula/frontend/static
+NEBULA_FRONTEND_TEMPLATES_DIR=/nebula/nebula/frontend/templates
 DEBUG=$NEBULA_DEBUG
 echo "DEBUG: $DEBUG"
 if [ "$DEBUG" = "True" ]; then
     echo "Starting Gunicorn in debug mode..."
-    gunicorn --worker-class eventlet --workers 1 --bind unix:/tmp/$NEBULA_SOCK --access-logfile $SERVER_LOG --error-logfile $SERVER_LOG  --reload --reload-extra-file $NEBULA_FRONTEND_DIR --capture-output --log-level debug app:app &
+    uvicorn app:app --uds /tmp/$NEBULA_SOCK --reload --reload-dir $NEBULA_FRONTEND_DIR --log-level debug --proxy-headers --forwarded-allow-ips "*" &
 else
     echo "Starting Gunicorn in production mode..."
-    gunicorn --worker-class eventlet --workers 1 --bind unix:/tmp/$NEBULA_SOCK --access-logfile $SERVER_LOG app:app &
+    uvicorn app:app --uds /tmp/$NEBULA_SOCK --reload --reload-dir $NEBULA_FRONTEND_DIR --log-level info --proxy-headers --forwarded-allow-ips "*" &
 fi
 
-tensorboard --host 0.0.0.0 --port 8080 --logdir $NEBULA_LOGS_DIR --window_title "NEBULA Statistics" --reload_interval 30 --max_reload_threads 10 --reload_multifile true &
-
-# Start statistics dashboard
-# aim init --repo $NEBULA_LOGS_DIR
-# --dev flag is used to enable development mode
-# aim server --repo $NEBULA_LOGS_DIR --port 8085 &
-# aim up --repo $NEBULA_LOGS_DIR --port 8080 --base-path /statistics --dev &
+if [ "$NEBULA_ADVANCED_ANALYTICS" = "False" ]; then
+    echo "Starting Tensorboard analytics"
+    tensorboard --host 0.0.0.0 --port 8080 --logdir $NEBULA_LOGS_DIR --window_title "NEBULA Statistics" --reload_interval 30 --max_reload_threads 10 --reload_multifile true &
+else
+    echo "Starting Aim analytics"
+    # --dev flag is used to enable development mode
+    # aim server --repo $NEBULA_LOGS_DIR --port 8085 &
+    aim init --repo $NEBULA_LOGS_DIR
+    aim up --repo $NEBULA_LOGS_DIR --port 8080 --base-path /nebula/statistics &
+fi
 
 tail -f /dev/null

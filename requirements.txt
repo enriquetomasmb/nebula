@@ -38,3 +38,4 @@ nvidia-ml-py==12.550.52
 web3==6.15.1
 tabulate==0.9.0
 retry==0.9.2
+aim==3.20.1

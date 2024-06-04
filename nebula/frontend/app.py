@@ -1,10 +1,10 @@
 import argparse
+import asyncio
 import datetime
 import io
 import json
 import logging
 import os
-import threading
 import requests
 import signal
 import sys
@@ -14,24 +14,10 @@ from urllib.parse import urlencode
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 
+logging.basicConfig(level=logging.INFO)
+
 from ansi2html import Ansi2HTMLConverter
 
-from flask import (
-    Flask,
-    session,
-    url_for,
-    redirect,
-    render_template,
-    request,
-    abort,
-    flash,
-    send_file,
-    make_response,
-    jsonify,
-    Response,
-)
-from flask_socketio import SocketIO
-from werkzeug.utils import secure_filename
 from nebula.frontend.database import (
     list_users,
     verify,
@@ -56,41 +42,99 @@ from nebula.frontend.database import (
     remove_note,
 )
 
-import eventlet
+from fastapi import FastAPI, Request, Depends, HTTPException, status, Form, Response, WebSocket, WebSocketDisconnect
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse, FileResponse, PlainTextResponse, StreamingResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from typing import Any, Dict
 
-eventlet.monkey_patch()
-async_mode = "eventlet"
+class Settings:
+    debug: bool = os.environ.get("NEBULA_DEBUG", "False") == 'True'
+    advanced_analytics: bool = os.environ.get("NEBULA_ADVANCED_ANALYTICS", "False") == 'True'
+    log_dir: str = os.environ.get("NEBULA_LOGS_DIR")
+    config_dir: str = os.environ.get("NEBULA_CONFIG_DIR")
+    cert_dir: str = os.environ.get("NEBULA_CERTS_DIR")
+    root_host_path: str = os.environ.get("NEBULA_ROOT_HOST")
+    config_frontend_dir: str = os.environ.get("FEDELLAR_CONFIG_FRONTEND_DIR", "config")
+    statistics_port: int = os.environ.get("NEBULA_STATISTICS_PORT", 8080)
+    secret_key: str = os.environ.get("SECRET_KEY", os.urandom(24).hex())
+    PERMANENT_SESSION_LIFETIME: datetime.timedelta = datetime.timedelta(minutes=60)
+    templates_dir: str = "templates"
+    
+settings = Settings()
 
-app = Flask(__name__, static_url_path='/nebula/static')
-app.config["DEBUG"] = os.environ.get("NEBULA_DEBUG", False)
-app.config["log_dir"] = os.environ.get("NEBULA_LOGS_DIR")
-app.config["config_dir"] = os.environ.get("NEBULA_CONFIG_DIR")
-app.config["cert_dir"] = os.environ.get("NEBULA_CERTS_DIR")
-app.config["root_host_path"] = os.environ.get("NEBULA_ROOT_HOST")
-app.config["config_frontend_dir"] = os.environ.get("FEDELLAR_CONFIG_FRONTEND_DIR", "config")
-app.config["statistics_port"] = os.environ.get("NEBULA_STATISTICS_PORT", 8080)
-app.secret_key = os.environ.get("SECRET_KEY", os.urandom(24))
-app.config["PERMANENT_SESSION_LIFETIME"] = datetime.timedelta(minutes=60)
-socketio = SocketIO(
-    app,
-    async_mode=async_mode,
-    logger=False,
-    engineio_logger=False,
-    cors_allowed_origins="*",
+logging.info(f"NEBULA_DEBUG: {settings.debug}")
+logging.info(f"NEBULA_ADVANCED_ANALYTICS: {settings.advanced_analytics}")
+
+app = FastAPI()
+app.add_middleware(SessionMiddleware, secret_key=settings.secret_key)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
-
-nodes_registration = {}
-
-
-# Detect CTRL+C from parent process
-def signal_handler(signal, frame):
-    app.logger.info("You pressed Ctrl+C [frontend]!")
-    scenario_set_all_status_to_finished()
-    sys.exit(0)
+app.mount("/nebula/static", StaticFiles(directory="static"), name="static")
 
 
-signal.signal(signal.SIGINT, signal_handler)
+class ConnectionManager:
+    def __init__(self):
+        self.active_connections: list[WebSocket] = []
 
+    async def connect(self, websocket: WebSocket):
+        await websocket.accept()
+        self.active_connections.append(websocket)
+        message = {
+            "type": "control",
+            "message": f"Client #{len(self.active_connections)} connected"
+        }
+        await self.broadcast(json.dumps(message))
+
+    def disconnect(self, websocket: WebSocket):
+        self.active_connections.remove(websocket)
+
+    async def send_personal_message(self, message: str, websocket: WebSocket):
+        await websocket.send_text(message)
+
+    async def broadcast(self, message: str):
+        for connection in self.active_connections:
+            await connection.send_text(message)
+
+manager = ConnectionManager()
+
+@app.websocket("/nebula/ws/{client_id}")
+async def websocket_endpoint(websocket: WebSocket, client_id: int):
+    await manager.connect(websocket)
+    try:
+        while True:
+            data = await websocket.receive_text()
+            message = {
+                "type": "control",
+                "message": f"Client #{client_id} says: {data}"
+            }
+            await manager.broadcast(json.dumps(message))
+            # await manager.send_personal_message(f"You wrote: {data}", websocket)
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
+        message = {
+            "type": "control",
+            "message": f"Client #{client_id} left the chat"
+        }
+        await manager.broadcast(json.dumps(message))
+        
+templates = Jinja2Templates(directory=settings.templates_dir)
+
+def datetimeformat(value, format="%B %d, %Y %H:%M"):
+    return datetime.datetime.strptime(value, "%Y-%m-%d %H:%M:%S").strftime(format)
+
+templates.env.filters["datetimeformat"] = datetimeformat
+
+def get_session(request: Request) -> Dict:
+    return request.session
 
 def set_default_user():
     username = os.environ.get("NEBULA_DEFAULT_USER", "admin")
@@ -98,229 +142,223 @@ def set_default_user():
     if not list_users():
         add_user(username, password, "admin")
 
+@app.on_event("startup")
+async def startup_event():
+    set_default_user()
 
-set_default_user()
+nodes_registration = {}
 
-
-@app.errorhandler(401)
-def nebula_401(error):
-    return render_template("401.html"), 401
-
-
-@app.errorhandler(403)
-def nebula_403(error):
-    return render_template("403.html"), 403
-
-
-@app.errorhandler(404)
-def nebula_404(error):
-    return render_template("404.html"), 404
+# Detect CTRL+C from parent process
+def signal_handler(signal, frame):
+    logging.info("You pressed Ctrl+C [frontend]!")
+    scenario_set_all_status_to_finished()
+    sys.exit(0)
 
 
-@app.errorhandler(405)
-def nebula_405(error):
-    return render_template("405.html"), 405
+signal.signal(signal.SIGINT, signal_handler)
+
+@app.exception_handler(StarletteHTTPException)
+async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException):
+    context = {"request": request, "session": request.session}
+    if exc.status_code == status.HTTP_401_UNAUTHORIZED:
+        return templates.TemplateResponse("401.html", context, status_code=exc.status_code)
+    elif exc.status_code == status.HTTP_403_FORBIDDEN:
+        return templates.TemplateResponse("403.html", context, status_code=exc.status_code)
+    elif exc.status_code == status.HTTP_404_NOT_FOUND:
+        return templates.TemplateResponse("404.html", context, status_code=exc.status_code)
+    elif exc.status_code == status.HTTP_405_METHOD_NOT_ALLOWED:
+        return templates.TemplateResponse("405.html", context, status_code=exc.status_code)
+    elif exc.status_code == status.HTTP_413_REQUEST_ENTITY_TOO_LARGE:
+        return templates.TemplateResponse("413.html", context, status_code=exc.status_code)
+    return await request.app.default_exception_handler(request, exc)
 
 
-@app.errorhandler(413)
-def nebula_413(error):
-    return render_template("413.html"), 413
+@app.get("/", response_class=HTMLResponse)
+async def index():
+    return RedirectResponse(url="/nebula")
 
 
-@app.template_filter("datetimeformat")
-def datetimeformat(value, format="%B %d, %Y %H:%M"):
-    return datetime.datetime.strptime(value, "%Y-%m-%d %H:%M:%S").strftime(format)
-
-
-@app.route("/")
-def index():
-    return redirect(url_for("nebula_home"))
-
-
-@app.route("/nebula")
-@app.route("/nebula/")
-def nebula_home():
+@app.get("/nebula", response_class=HTMLResponse)
+@app.get("/nebula/", response_class=HTMLResponse)
+async def nebula_home(request: Request):
     alerts = []
-    return render_template("index.html", alerts=alerts)
+    return templates.TemplateResponse("index.html", {"request": request, "alerts": alerts})
 
 
-@app.route("/nebula/dashboard/<scenario_name>/private")
-def nebula_dashboard_private(scenario_name):
-    if "user" in session.keys():
-        return render_template(
+@app.get("/nebula/dashboard/{scenario_name}/private", response_class=HTMLResponse)
+async def nebula_dashboard_private(request: Request, scenario_name: str, session: Dict = Depends(get_session)):
+    if "user" in session:
+        return templates.TemplateResponse(
             "private.html",
-            scenario_name=scenario_name,
+            {"request": request, "scenario_name": scenario_name}
         )
     else:
-        return abort(401)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 
-@app.route("/nebula/admin")
-def nebula_admin():
+@app.get("/nebula/admin", response_class=HTMLResponse)
+async def nebula_admin(request: Request, session: Dict = Depends(get_session)):
     if session.get("role") == "admin":
         user_list = list_users(all_info=True)
         user_table = zip(range(1, len(user_list) + 1), [user[0] for user in user_list], [user[2] for user in user_list])
-        return render_template("admin.html", users=user_table)
+        return templates.TemplateResponse("admin.html", {"request": request, "users": user_table})
     else:
-        return abort(401)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    
 
-
-def send_from_directory(directory, filename, **options):
-    """Sends a file from a given directory with :func:`send_file`.
-
-    :param directory: the directory to look for the file in.
-    :param filename: the name of the file to send.
-    :param options: the options to forward to :func:`send_file`.
-    """
-    return send_file(os.path.join(directory, filename), **options)
-
-
-@app.route("/nebula/dashboard/<scenario_name>/save_note", methods=["POST"])
-def save_note_for_scenario(scenario_name):
-    if "user" in session.keys():
-        data = request.get_json()
+@app.post("/nebula/dashboard/{scenario_name}/save_note")
+async def save_note_for_scenario(scenario_name: str, request: Request, session: Dict = Depends(get_session)):
+    if "user" in session:
+        data = await request.json()
         notes = data["notes"]
-
         try:
             save_notes(scenario_name, notes)
-            return jsonify({"status": "success"})
+            return JSONResponse({"status": "success"})
         except Exception as e:
-            app.logger.error(e)
-            return jsonify({"status": "error", "message": "Could not save the notes"}), 500
+            logging.error(e)
+            return JSONResponse({"status": "error", "message": "Could not save the notes"}, status_code=500)
     else:
-        return jsonify({"status": "error", "message": "User not logged in"}), 401
+        return JSONResponse({"status": "error", "message": "User not logged in"}, status_code=401)
 
 
-@app.route("/nebula/dashboard/<scenario_name>/notes", methods=["GET"])
-def get_notes_for_scenario(scenario_name):
+@app.get("/nebula/dashboard/{scenario_name}/notes")
+async def get_notes_for_scenario(scenario_name: str):
     notes_record = get_notes(scenario_name)
     if notes_record:
         notes_data = dict(zip(notes_record.keys(), notes_record))
-        return jsonify({"status": "success", "notes": notes_data["scenario_notes"]})
+        return JSONResponse({"status": "success", "notes": notes_data["scenario_notes"]})
     else:
-        return jsonify({"status": "error", "message": "Notes not found for the specified scenario"})
+        return JSONResponse({"status": "error", "message": "Notes not found for the specified scenario"})
 
 
-@app.route("/nebula/login", methods=["POST"])
-def nebula_login():
-    user_submitted = request.form.get("user").upper()
-    if (user_submitted in list_users()) and verify(user_submitted, request.form.get("password")):
+@app.post("/nebula/login")
+async def nebula_login(request: Request, session: Dict = Depends(get_session), user: str = Form(...), password: str = Form(...)):
+    user_submitted = user.upper()
+    if (user_submitted in list_users()) and verify(user_submitted, password):
         user_info = get_user_info(user_submitted)
         session["user"] = user_submitted
         session["role"] = user_info[2]
-        return "Login successful", 200
+        return JSONResponse({"message": "Login successful"}, status_code=200)
     else:
-        # flash(u'Invalid password provided', 'error')
-        abort(401)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 
-@app.route("/nebula/logout")
-def nebula_logout():
+@app.get("/nebula/logout")
+async def nebula_logout(request: Request, session: Dict = Depends(get_session)):
     session.pop("user", None)
-    return redirect(url_for("nebula_home"))
+    return RedirectResponse(url="/nebula")
 
 
-@app.route("/nebula/user/delete/<user>/", methods=["GET"])
-def nebula_delete_user(user):
-    if session.get("role", None) == "admin":
+@app.get("/nebula/user/delete/{user}/")
+async def nebula_delete_user(user: str, request: Request, session: Dict = Depends(get_session)):
+    if session.get("role") == "admin":
         if user == "ADMIN":  # ADMIN account can't be deleted.
-            return abort(403)
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
         if user == session["user"]:  # Current user can't delete himself.
-            return abort(403)
-
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+        
         delete_user_from_db(user)
-        return redirect(url_for("nebula_admin"))
+        return RedirectResponse(url="/nebula/admin")
     else:
-        return abort(401)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 
-@app.route("/nebula/user/add", methods=["POST"])
-def nebula_add_user():
-    if session.get("role", None) == "admin":  # only Admin should be able to add user.
-        # before we add the user, we need to ensure this doesn't exit in database. We also need to ensure the id is valid.
+@app.post("/nebula/user/add")
+async def nebula_add_user(
+    request: Request, 
+    session: Dict = Depends(get_session),
+    user: str = Form(...), 
+    password: str = Form(...), 
+    role: str = Form(...)
+):
+    if session.get("role") == "admin":  # only Admin should be able to add user.
         user_list = list_users(all_info=True)
-        if request.form.get("user").upper() in user_list:
-            return redirect(url_for("nebula_admin"))
-        elif " " in request.form.get("user") or "'" in request.form.get("user") or '"' in request.form.get("user"):
-            return redirect(url_for("nebula_admin"))
+        if user.upper() in user_list:
+            return RedirectResponse(url="/nebula/admin")
+        elif " " in user or "'" in user or '"' in user:
+            return RedirectResponse(url="/nebula/admin")
         else:
-            add_user(
-                request.form.get("user"),
-                request.form.get("password"),
-                request.form.get("role"),
-            )
-            return redirect(url_for("nebula_admin"))
+            add_user(user, password, role)
+            return RedirectResponse(url="/nebula/admin")
     else:
-        return abort(401)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 
-@app.route("/nebula/user/update", methods=["POST"])
-def nebula_update_user():
-    if session.get("role", None) == "admin":
-        user = request.form.get("user")
-        password = request.form.get("password")
-        role = request.form.get("role")
-
+@app.post("/nebula/user/update")
+async def nebula_update_user(
+    request: Request, 
+    session: Dict = Depends(get_session),
+    user: str = Form(...), 
+    password: str = Form(...), 
+    role: str = Form(...)
+):
+    if session.get("role") == "admin":
         user_list = list_users()
         if user not in user_list:
-            return redirect(url_for("nebula_admin"))
+            return RedirectResponse(url="/nebula/admin")
         else:
             update_user(user, password, role)
-            return redirect(url_for("nebula_admin"))
+            return RedirectResponse(url="/nebula/admin")
     else:
-        return abort(401)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 
-@app.route("/nebula/api/dashboard", methods=["GET"])
-@app.route("/nebula/dashboard", methods=["GET"])
-def nebula_dashboard():
-    # Get the list of scenarios
+@app.get("/nebula/api/dashboard", response_class=JSONResponse)
+@app.get("/nebula/dashboard", response_class=HTMLResponse)
+async def nebula_dashboard(request: Request, session: Dict = Depends(get_session)):
     if "user" in session.keys():
         scenarios = get_all_scenarios_and_check_completed()  # Get all scenarios after checking if they are completed
         scenario_running = get_running_scenario()
     else:
         scenarios = None
         scenario_running = None
-    # Check if status of scenario_running is "completed"
+    
     bool_completed = False
     if scenario_running:
         bool_completed = scenario_running[5] == "completed"
+    
     if scenarios:
-        if request.path == "/nebula/dashboard":
-            return render_template(
+        if request.url.path == "/nebula/dashboard":
+            return templates.TemplateResponse(
                 "dashboard.html",
-                scenarios=scenarios,
-                scenario_running=scenario_running,
-                scenario_completed=bool_completed,
-                user_logged_in=session.get("user"),
+                {
+                    "request": request,
+                    "scenarios": scenarios,
+                    "scenario_running": scenario_running,
+                    "scenario_completed": bool_completed,
+                    "user_logged_in": session.get("user"),
+                }
             )
-        elif request.path == "/nebula/api/dashboard":
+        elif request.url.path == "/nebula/api/dashboard":
             scenarios_as_dict = [dict(row) for row in scenarios]
-            return jsonify(scenarios_as_dict), 200
+            return JSONResponse(scenarios_as_dict)
         else:
-            return abort(401)
-
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     else:
-        if request.path == "/nebula/dashboard":
-            return render_template("dashboard.html", user_logged_in=session.get("user"))
-        elif request.path == "/nebula/api/dashboard":
-            return jsonify({"scenarios_status": "not found in database"}), 200
+        if request.url.path == "/nebula/dashboard":
+            return templates.TemplateResponse(
+                "dashboard.html",
+                {
+                    "request": request,
+                    "user_logged_in": session.get("user"),
+                }
+            )
+        elif request.url.path == "/nebula/api/dashboard":
+            return JSONResponse({"scenarios_status": "not found in database"})
         else:
-            return abort(401)
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 
-@app.route("/nebula/api/dashboard/<scenario_name>/monitor", methods=["GET"])
-@app.route("/nebula/dashboard/<scenario_name>/monitor", methods=["GET"])
-def nebula_dashboard_monitor(scenario_name):
+@app.get("/nebula/api/dashboard/{scenario_name}/monitor", response_class=JSONResponse)
+@app.get("/nebula/dashboard/{scenario_name}/monitor", response_class=HTMLResponse)
+async def nebula_dashboard_monitor(scenario_name: str, request: Request, session: Dict = Depends(get_session)):
     scenario = get_scenario_by_name(scenario_name)
     if scenario:
         nodes_list = list_nodes_by_scenario_name(scenario_name)
         if nodes_list:
-            # Get json data from each node configuration file
             nodes_config = []
-            # Generate an array with True for each node that is running
             nodes_status = []
-            for i, node in enumerate(nodes_list):
+            for node in nodes_list:
                 nodes_config.append((node[2], node[3], node[4]))  # IP, Port, Role
                 if datetime.datetime.now() - datetime.datetime.strptime(node[8], "%Y-%m-%d %H:%M:%S.%f") > datetime.timedelta(seconds=25):
                     nodes_status.append(False)
@@ -343,68 +381,84 @@ def nebula_dashboard_monitor(scenario_name):
                 nodes_status,  # Status
             )
 
-            if os.path.exists(os.path.join(app.config["config_dir"], scenario_name, "topology.png")):
-                if os.path.getmtime(os.path.join(app.config["config_dir"], scenario_name, "topology.png")) < max(
+            topology_path = os.path.join(settings.config_dir, scenario_name, "topology.png")
+            if os.path.exists(topology_path):
+                latest_participant_file_mtime = max(
                     [
                         os.path.getmtime(
-                            os.path.join(
-                                app.config["config_dir"],
-                                scenario_name,
-                                f"participant_{node[1]}.json",
-                            )
+                            os.path.join(settings.config_dir, scenario_name, f"participant_{node[1]}.json")
                         )
                         for node in nodes_list
                     ]
-                ):
-                    # Update the 3D topology and image
+                )
+                if os.path.getmtime(topology_path) < latest_participant_file_mtime:
                     update_topology(scenario[0], nodes_list, nodes_config)
             else:
                 update_topology(scenario[0], nodes_list, nodes_config)
 
-            if request.path == "/nebula/dashboard/" + scenario_name + "/monitor":
-                return render_template("monitor.html", scenario_name=scenario_name, scenario=scenario, nodes=nodes_table, user_logged_in=session.get("user"))
-            elif request.path == "/nebula/api/dashboard/" + scenario_name + "/monitor":
-                return (
-                    jsonify(
-                        {
-                            "scenario_status": scenario[5],
-                            "nodes_table": list(nodes_table),
-                            "scenario_name": scenario[0],
-                            "scenario_title": scenario[3],
-                            "scenario_description": scenario[4],
-                        }
-                    ),
-                    200,
+            if request.url.path == f"/nebula/dashboard/{scenario_name}/monitor":
+                return templates.TemplateResponse(
+                    "monitor.html",
+                    {
+                        "request": request,
+                        "scenario_name": scenario_name,
+                        "scenario": scenario,
+                        "nodes": nodes_table,
+                        "user_logged_in": session.get("user"),
+                    }
+                )
+            elif request.url.path == f"/nebula/api/dashboard/{scenario_name}/monitor":
+                return JSONResponse(
+                    {
+                        "scenario_status": scenario[5],
+                        "nodes_table": list(nodes_table),
+                        "scenario_name": scenario[0],
+                        "scenario_title": scenario[3],
+                        "scenario_description": scenario[4],
+                    }
                 )
             else:
-                return abort(401)
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
         else:
-            # There is a scenario but no nodes
-            if request.path == "/nebula/dashboard/" + scenario_name + "/monitor":
-                return render_template("monitor.html", scenario_name=scenario_name, scenario=scenario, nodes=[], user_logged_in=session.get("user"))
-            elif request.path == "/nebula/api/dashboard/" + scenario_name + "/monitor":
-                return (
-                    jsonify(
-                        {
-                            "scenario_status": scenario[5],
-                            "nodes_table": [],
-                            "scenario_name": scenario[0],
-                            "scenario_title": scenario[3],
-                            "scenario_description": scenario[4],
-                        }
-                    ),
-                    200,
+            if request.url.path == f"/nebula/dashboard/{scenario_name}/monitor":
+                return templates.TemplateResponse(
+                    "monitor.html",
+                    {
+                        "request": request,
+                        "scenario_name": scenario_name,
+                        "scenario": scenario,
+                        "nodes": [],
+                        "user_logged_in": session.get("user"),
+                    }
+                )
+            elif request.url.path == f"/nebula/api/dashboard/{scenario_name}/monitor":
+                return JSONResponse(
+                    {
+                        "scenario_status": scenario[5],
+                        "nodes_table": [],
+                        "scenario_name": scenario[0],
+                        "scenario_title": scenario[3],
+                        "scenario_description": scenario[4],
+                    }
                 )
             else:
-                return abort(401)
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     else:
-        # There is no scenario
-        if request.path == "/nebula/dashboard/" + scenario_name + "/monitor":
-            return render_template("monitor.html", scenario_name=scenario_name, scenario=None, nodes=[], user_logged_in=session.get("user"))
-        elif request.path == "/nebula/api/dashboard/" + scenario_name + "/monitor":
-            return jsonify({"scenario_status": "not exists"}), 200
+        if request.url.path == f"/nebula/dashboard/{scenario_name}/monitor":
+            return templates.TemplateResponse(
+                "monitor.html",
+                {
+                    "request": request,
+                    "scenario_name": scenario_name,
+                    "scenario": None,
+                    "nodes": [],
+                    "user_logged_in": session.get("user"),
+                }
+            )
+        elif request.url.path == f"/nebula/api/dashboard/{scenario_name}/monitor":
+            return JSONResponse({"scenario_status": "not exists"})
         else:
-            return abort(401)
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 
 def update_topology(scenario_name, nodes_list, nodes_config):
@@ -426,18 +480,17 @@ def update_topology(scenario_name, nodes_list, nodes_config):
 
     tm = TopologyManager(n_nodes=len(nodes_list), topology=matrix, scenario_name=scenario_name)
     tm.update_nodes(nodes_config)
-    tm.draw_graph(path=os.path.join(app.config["config_dir"], scenario_name, f"topology.png"))
+    tm.draw_graph(path=os.path.join(settings.config_dir, scenario_name, f"topology.png"))
 
 
-@app.route("/nebula/dashboard/<scenario_name>/node/update", methods=["POST"])
-def nebula_update_node(scenario_name):
+@app.post("/nebula/dashboard/{scenario_name}/node/update")
+async def nebula_update_node(scenario_name: str, request: Request, session: Dict = Depends(get_session)):
     if request.method == "POST":
-        # Check if the post request is a json, if not, return 400
-        if request.is_json:
-            config = request.get_json()
+        if request.headers.get("content-type") == "application/json":
+            config = await request.json()
             timestamp = datetime.datetime.now()
             # Update the node in database
-            update_node_record(
+            await update_node_record(
                 str(config["device_args"]["uid"]),
                 str(config["device_args"]["idx"]),
                 str(config["network_args"]["ip"]),
@@ -456,6 +509,7 @@ def nebula_update_node(scenario_name):
             neighbors_distance = config["mobility_args"]["neighbors_distance"]
 
             node_update = {
+                "type": "node_update",
                 "scenario_name": scenario_name,
                 "uid": config["device_args"]["uid"],
                 "idx": config["device_args"]["idx"],
@@ -473,105 +527,94 @@ def nebula_update_node(scenario_name):
                 "neighbors_distance": neighbors_distance,
             }
 
-            # Send notification to each connected users
             try:
-                socketio.emit("node_update", node_update)
+                await manager.broadcast(json.dumps(node_update))
             except Exception as e:
-                app.logger.error(f"Error sending node_update to socketio: {e}")
+                logging.error(f"Error sending node_update to socketio: {e}")
                 pass
 
-            # Return only the code 200
-            return jsonify({"message": "Node updated", "status": "success"}), 200
-
+            return JSONResponse({"message": "Node updated", "status": "success"}, status_code=200)
         else:
-            return abort(400)
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
 
 
-@app.route("/nebula/dashboard/<scenario_name>/node/register", methods=["POST"])
-def nebula_register_node(scenario_name):
-    if request.method == "POST":
-        if request.is_json:
-            data = request.get_json()
-            node = data["node"]
-            with nodes_registration[scenario_name]["condition"]:
-                nodes_registration[scenario_name]["nodes"].add(node)
-                app.logger.info(f"Node {node} registered")
-                if len(nodes_registration[scenario_name]["nodes"]) == nodes_registration[scenario_name]["n_nodes"]:
-                    nodes_registration[scenario_name]["condition"].notify_all()
-                    app.logger.info("All nodes registered")
-
-            # Return only the code 200
-            return jsonify({"message": "Node registered", "status": "success"}), 200
-
-        else:
-            return abort(400)
-
-
-@app.route("/nebula/dashboard/<scenario_name>/node/wait", methods=["GET"])
-def nebula_wait_nodes(scenario_name):
-    if scenario_name not in nodes_registration:
-        return jsonify({"message": "Scenario not found", "status": "error"}), 404
-
-    with nodes_registration[scenario_name]["condition"]:
-        while len(nodes_registration[scenario_name]["nodes"]) < nodes_registration[scenario_name]["n_nodes"]:
-            nodes_registration[scenario_name]["condition"].wait()
-        return jsonify({"message": "All nodes registered", "status": "success"}), 200
-
-
-@app.route("/nebula/dashboard/<scenario_name>/node/<id>/infolog", methods=["GET"])
-def nebula_monitor_log(scenario_name, id):
-    logs = os.path.join(app.config["log_dir"], scenario_name, f"participant_{id}.log")
-    if os.path.exists(logs):
-        return send_file(logs, mimetype="text/plain", as_attachment=True)
+@app.post("/nebula/dashboard/{scenario_name}/node/register")
+async def nebula_register_node(scenario_name: str, request: Request):
+    if request.headers.get("content-type") == "application/json":
+        data = await request.json()
+        node = data["node"]
+        logging.info(f"Registering node {node} for scenario {scenario_name}")
+        async with nodes_registration[scenario_name]["condition"]:
+            nodes_registration[scenario_name]["nodes"].add(node)
+            logging.info(f"Node {node} registered")
+            if len(nodes_registration[scenario_name]["nodes"]) == nodes_registration[scenario_name]["n_nodes"]:
+                nodes_registration[scenario_name]["condition"].notify_all()
+                logging.info("All nodes registered")
+        
+        return JSONResponse({"message": "Node registered", "status": "success"}, status_code=200)
     else:
-        abort(404)
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
 
 
-@app.route("/nebula/dashboard/<scenario_name>/node/<id>/infolog/<number>", methods=["GET"])
-def nebula_monitor_log_x(scenario_name, id, number):
-    # Send file (is not a json file) with the log
-    logs = os.path.join(app.config["log_dir"], scenario_name, f"participant_{id}.log")
+@app.get("/nebula/dashboard/{scenario_name}/node/wait")
+async def nebula_wait_nodes(scenario_name: str):
+    if scenario_name not in nodes_registration:
+        return JSONResponse({"message": "Scenario not found", "status": "error"}, status_code=404)
+
+    async with nodes_registration[scenario_name]["condition"]:
+        while len(nodes_registration[scenario_name]["nodes"]) < nodes_registration[scenario_name]["n_nodes"]:
+            await nodes_registration[scenario_name]["condition"].wait()
+        return JSONResponse({"message": "All nodes registered", "status": "success"}, status_code=200)
+
+
+@app.get("/nebula/dashboard/{scenario_name}/node/{id}/infolog")
+async def nebula_monitor_log(scenario_name: str, id: str):
+    logs = os.path.join(settings.log_dir, scenario_name, f"participant_{id}.log")
     if os.path.exists(logs):
-        # Open file maintaining the file format
+        return FileResponse(logs, media_type="text/plain", filename=f"participant_{id}.log")
+    else:
+        raise HTTPException(status_code=404, detail="Log file not found")
+
+
+@app.get("/nebula/dashboard/{scenario_name}/node/{id}/infolog/{number}", response_class=PlainTextResponse)
+async def nebula_monitor_log_x(scenario_name: str, id: str, number: int):
+    logs = os.path.join(settings.log_dir, scenario_name, f"participant_{id}.log")
+    if os.path.exists(logs):
         with open(logs, "r") as f:
-            # Read the last n lines of the file
-            lines = f.readlines()[-int(number) :]
-            # Join the lines in a single string
+            lines = f.readlines()[-number:]
             lines = "".join(lines)
-            # Convert the ANSI escape codes to HTML
             converter = Ansi2HTMLConverter()
             html_text = converter.convert(lines, full=False)
-            # Return the string
-            return Response(html_text, mimetype="text/plain")
+            return Response(content=html_text, media_type="text/plain")
     else:
-        return Response("No logs available", mimetype="text/plain")
+        return Response(content="No logs available", media_type="text/plain")
 
 
-@app.route("/nebula/dashboard/<scenario_name>/node/<id>/debuglog", methods=["GET"])
-def nebula_monitor_log_debug(scenario_name, id):
-    logs = os.path.join(app.config["log_dir"], scenario_name, f"participant_{id}_debug.log")
+@app.get("/nebula/dashboard/{scenario_name}/node/{id}/debuglog")
+async def nebula_monitor_log_debug(scenario_name: str, id: str):
+    logs = os.path.join(settings.log_dir, scenario_name, f"participant_{id}_debug.log")
     if os.path.exists(logs):
-        return send_file(logs, mimetype="text/plain", as_attachment=True)
+        return FileResponse(logs, media_type="text/plain", filename=f"participant_{id}_debug.log")
     else:
-        abort(404)
+        raise HTTPException(status_code=404, detail="Log file not found")
 
 
-@app.route("/nebula/dashboard/<scenario_name>/node/<id>/errorlog", methods=["GET"])
-def nebula_monitor_log_error(scenario_name, id):
-    logs = os.path.join(app.config["log_dir"], scenario_name, f"participant_{id}_error.log")
+@app.get("/nebula/dashboard/{scenario_name}/node/{id}/errorlog")
+async def nebula_monitor_log_error(scenario_name: str, id: str):
+    logs = os.path.join(settings.log_dir, scenario_name, f"participant_{id}_error.log")
     if os.path.exists(logs):
-        return send_file(logs, mimetype="text/plain", as_attachment=True)
+        return FileResponse(logs, media_type="text/plain", filename=f"participant_{id}_error.log")
     else:
-        abort(404)
+        raise HTTPException(status_code=404, detail="Log file not found")
 
 
-@app.route("/nebula/dashboard/<scenario_name>/topology/image/", methods=["GET"])
-def nebula_monitor_image(scenario_name):
-    topology_image = os.path.join(app.config["config_dir"], scenario_name, f"topology.png")
+@app.get("/nebula/dashboard/{scenario_name}/topology/image/")
+async def nebula_monitor_image(scenario_name: str):
+    topology_image = os.path.join(settings.config_dir, scenario_name, "topology.png")
     if os.path.exists(topology_image):
-        return send_file(topology_image, mimetype="image/png")
+        return FileResponse(topology_image, media_type="image/png")
     else:
-        abort(404)
+        raise HTTPException(status_code=404, detail="Topology image not found")
 
 
 def stop_scenario(scenario_name):
@@ -590,47 +633,40 @@ def stop_all_scenarios():
     scenario_set_all_status_to_finished()
 
 
-@app.route("/nebula/dashboard/<scenario_name>/stop", methods=["GET"])
-def nebula_stop_scenario(scenario_name):
-    # Stop the scenario
+@app.get("/nebula/dashboard/{scenario_name}/stop")
+async def nebula_stop_scenario(scenario_name: str, request: Request, session: Dict = Depends(get_session)):
     if "user" in session.keys():
         if session["role"] == "demo":
-            return abort(401)
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
         elif session["role"] == "user":
             if not check_scenario_with_role(session["role"], scenario_name):
-                return abort(401)
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
         stop_scenario(scenario_name)
-        return redirect(url_for("nebula_dashboard"))
+        return RedirectResponse(url="/nebula/dashboard")
     else:
-        return abort(401)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 
 def remove_scenario(scenario_name=None):
     from nebula.controller import Controller
-
-    # TODO: AIM START
-    # try:
-    #     repo = Repo.from_path(f"{app.config['log_dir']}")
-    #     list_tuples_participant_hash = get_run_hashes_scenario(scenario_name)
-    #     hashes = [tuple[1] for tuple in list_tuples_participant_hash]
-    #     app.logger.info(f"Removing statistics from {scenario_name}: {hashes}")
-    #     for hash in hashes:
-    #         run = repo.get_run(hash)
-    #         run.close()
-    #     success, remaining_runs = repo.delete_runs(hashes)
-    #     if success:
-    #         app.logger.info(f'Successfully deleted {len(hashes)} runs.')
-    #     else:
-    #         app.logger.info('Something went wrong while deleting runs.')
-    #         app.logger.info(f'Remaining runs: {remaining_runs}')
-    # except Exception as e:
-    #     app.logger.error(f"Error removing statistics from {scenario_name}: {e}")
-    #     pass
-
-    # Remove all files and folders (recursively) which contain the previous hashes in the name
-    # for hash in hashes:
-    #     Controller.remove_files_by_run_hash(hash)
-    # TODO: AIM END
+    if settings.advanced_analytics:
+        from aim.sdk.repo import Repo
+        # NEBULALOGGER START
+        try:
+            repo = Repo.from_path(f"{settings.log_dir}")
+            list_tuples_participant_hash = get_run_hashes_scenario(scenario_name)
+            hashes = [tuple[1] for tuple in list_tuples_participant_hash]
+            logging.info(f"Removing statistics from {scenario_name}: {hashes}")
+            success, remaining_runs = repo.delete_runs(hashes)
+            if success:
+                logging.info(f'Successfully deleted {len(hashes)} runs.')
+            else:
+                logging.info('Something went wrong while deleting runs.')
+                logging.info(f'Remaining runs: {remaining_runs}')
+        except Exception as e:
+            logging.error(f"Error removing statistics from {scenario_name}: {e}")
+            pass
+        # NEBULALOGGER END
     # Remove registered nodes and conditions
     nodes_registration.pop(scenario_name, None)
     remove_nodes_by_scenario_name(scenario_name)
@@ -639,197 +675,198 @@ def remove_scenario(scenario_name=None):
     Controller.remove_files_by_scenario(scenario_name)
 
 
-@app.route("/nebula/dashboard/<scenario_name>/remove", methods=["GET"])
-def nebula_remove_scenario(scenario_name):
-    # Remove the scenario
+@app.get("/nebula/dashboard/{scenario_name}/remove")
+async def nebula_remove_scenario(scenario_name: str, request: Request, session: Dict = Depends(get_session)):
     if "user" in session.keys():
         if session["role"] == "demo":
-            return abort(401)
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
         elif session["role"] == "user":
             if not check_scenario_with_role(session["role"], scenario_name):
-                return abort(401)
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
         remove_scenario(scenario_name)
-        return redirect(url_for("nebula_dashboard"))
+        return RedirectResponse(url="/nebula/dashboard")
     else:
-        return abort(401)
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 
-# TODO: AIM START
+if settings.advanced_analytics:
+    logging.info("Advanced analytics enabled")
+    # NEBULALOGGER START
+    def get_tracking_hash_scenario(scenario_name):
+        import requests
+        url = f"http://127.0.0.1:{settings.statistics_port}/nebula/statistics/api/experiments"
+        # Get JSON data from the URL
+        response = requests.get(url)
+        if response.status_code == 200:
+            experiments = response.json()
+            for experiment in experiments:
+                if experiment["name"] == scenario_name:
+                    return experiment["id"]
 
-# def get_tracking_hash_scenario(scenario_name):
-#     import requests
-#     url = f"http://127.0.0.1:{app.config['statistics_port']}/statistics/api/experiments"
-#     # Get JSON data from the URL
-#     response = requests.get(url)
-#     if response.status_code == 200:
-#         experiments = response.json()
-#         for experiment in experiments:
-#             if experiment["name"] == scenario_name:
-#                 return experiment["id"]
+        return None
 
-#     return None
+    @app.get("/nebula/dashboard/statistics/", response_class=HTMLResponse)
+    @app.get("/nebula/dashboard/{scenario_name}/statistics/", response_class=HTMLResponse)
+    async def nebula_dashboard_statistics(request: Request, scenario_name: str = None):
+        statistics_url = "/nebula/statistics/"
+        if scenario_name is not None:
+            experiment_hash = get_tracking_hash_scenario(scenario_name=scenario_name)
+            statistics_url += f"experiments/{experiment_hash}/runs"
 
-# @app.route("/nebula/dashboard/statistics/", methods=["GET"])
-# @app.route("/nebula/dashboard/<scenario_name>/statistics/", methods=["GET"])
-# def nebula_dashboard_statistics(scenario_name=None):
-#     # Adjust the filter to the scenario name
-#     statistics_url = "/nebula/statistics/"
-#     if scenario_name is not None:
-#         experiment_hash = get_tracking_hash_scenario(scenario_name=scenario_name)
-#         statistics_url += f"experiments/{experiment_hash}/runs"
-
-#     return render_template("statistics.html", statistics_url=statistics_url)
-
-# @app.route("/nebula/dashboard/<scenario_name>/node/<hash>/metrics", methods=["GET"])
-# def nebula_dashboard_node_metrics(scenario_name, hash):
-#     # Get the metrics of a node
-#     statistics_url = f"/nebula/statistics/runs/{hash}/metrics"
-#     return render_template("statistics.html", statistics_url=statistics_url)
-
-# @app.route("/nebula/statistics/", methods=["GET", "POST"])
-# @app.route("/nebula/statistics/<path:path>", methods=["GET", "POST"])
-# def statistics_proxy(path=None):
-#     if "user" in session.keys():
-#         query_string = urlencode(request.args)
-
-#         url = f"http://127.0.0.1:{app.config['statistics_port']}/statistics"
-
-#         url = f"{url}{('/' + path) if path else '/'}" + (
-#             "?" + query_string if query_string else ""
-#         )
-
-#         response = requests.request(
-#             method=request.method,
-#             url=url,
-#             headers={key: value for (key, value) in request.headers if key != "Host"},
-#             data=request.get_data(),
-#             cookies=request.cookies,
-#             allow_redirects=False,
-#         )
-
-#         excluded_headers = [
-#             "content-encoding",
-#             "content-length",
-#             "transfer-encoding",
-#             "connection",
-#         ]
-#         headers = [
-#             (name, value)
-#             for (name, value) in response.raw.headers.items()
-#             if name.lower() not in excluded_headers
-#         ]
-
-#         response = Response(response.content, response.status_code, headers)
-#         return response
-#     else:
-#         return abort(401)
-
-# @app.route("/nebula/dashboard/<scenario_name>/download/metrics", methods=["GET"])
-# def nebula_dashboard_download_metrics(scenario_name):
-#     if "user" in session.keys():
-#         # Get the metrics of the scenario
-#         os.makedirs(os.path.join(app.config["log_dir"], scenario_name, "metrics"), exist_ok=True)
-
-#         aim_repo = Repo.from_path("/nebula/nebula/app/logs")
-#         query = "run.experiment == '{}'".format(scenario_name)
-#         df = aim_repo.query_metrics(query).dataframe()
-
-#         hash_to_participant = {hash: participant for participant, hash in get_run_hashes_scenario(scenario_name)}
-#         df["participant"] = df["run.hash"].map(hash_to_participant)
-#         df.drop(columns=["run", "run.hash", "metric.context", "epoch"], axis=1, inplace=True)
-#         cols = df.columns.tolist()
-#         cols.remove("participant")
-#         cols.remove("metric.name")
-#         df = df.reindex(columns=["participant", "metric.name"] + cols)
-
-#         for name, group in df.groupby("participant"):
-#             group.to_csv(
-#                 os.path.join(app.config["log_dir"], scenario_name, "metrics", f"{name}.csv"),
-#                 index=True,
-#             )
-
-#         # Create a zip file with the metrics, send it to the user and delete it
-#         memory_file = io.BytesIO()
-#         with zipfile.ZipFile(memory_file, "w", zipfile.ZIP_DEFLATED) as zipf:
-#             zipdir(os.path.join(app.config["log_dir"], scenario_name, "metrics"), zipf)
-
-#         memory_file.seek(0)
-
-#         return send_file(
-#             memory_file,
-#             mimetype="application/zip",
-#             as_attachment=True,
-#             download_name=f"{scenario_name}_metrics.zip",
-#         )
-#     else:
-#         return abort(401)
-
-# TODO: AIM END
+        return templates.TemplateResponse("statistics.html", {"request": request, "statistics_url": statistics_url})
 
 
-# TODO: TENSORBOARD START
-@app.route("/nebula/dashboard/statistics/", methods=["GET"])
-@app.route("/nebula/dashboard/<scenario_name>/statistics/", methods=["GET"])
-def nebula_dashboard_statistics(scenario_name=None):
-    # Adjust the filter to the scenario name
-    tensorboard_url = "/nebula/statistics/"
-    if scenario_name is not None:
-        tensorboard_url += f"?smoothing=0&runFilter={scenario_name}"
-
-    return render_template("statistics.html", statistics_url=tensorboard_url)
+    @app.get("/nebula/dashboard/{scenario_name}/node/{hash}/metrics", response_class=HTMLResponse)
+    async def nebula_dashboard_node_metrics(request: Request, scenario_name: str, hash: str):
+        statistics_url = f"/nebula/statistics/runs/{hash}/metrics"
+        return templates.TemplateResponse("statistics.html", {"request": request, "statistics_url": statistics_url})
 
 
-@app.route("/nebula/statistics/", methods=["GET", "POST"])
-@app.route("/nebula/statistics/<path:path>", methods=["GET", "POST"])
-def statistics_proxy(path=None):
-    import requests
+    @app.api_route("/nebula/statistics/", methods=["GET", "POST"])
+    @app.api_route("/nebula/statistics/{path:path}", methods=["GET", "POST"])
+    async def statistics_proxy(request: Request, path: str = None, session: Dict = Depends(get_session)):
+        if "user" in session.keys():
+            query_string = urlencode(request.query_params)
 
-    query_string = urlencode(request.args)
-    # Internal port of statistics service
-    url = f"http://localhost:8080"
+            url = f"http://127.0.0.1:{settings.statistics_port}/nebula/statistics"
+            url = f"{url}{('/' + path) if path else '/'}" + (f"?{query_string}" if query_string else "")
 
-    tensorboard_url = f"{url}{('/' + path) if path else ''}" + ("?" + query_string if query_string else "")
+            headers = {key: value for key, value in request.headers.items() if key.lower() != "host"}
+            
+            response = requests.request(
+                method=request.method,
+                url=url,
+                headers=headers,
+                data=await request.body(),
+                cookies=request.cookies,
+                allow_redirects=False,
+            )
 
-    response = requests.request(
-        method=request.method,
-        url=tensorboard_url,
-        headers={key: value for (key, value) in request.headers if key != "Host"},
-        data=request.get_data(),
-        cookies=request.cookies,
-        allow_redirects=False,
-    )
+            excluded_headers = [
+                "content-encoding",
+                "content-length",
+                "transfer-encoding",
+                "connection",
+            ]
+            filtered_headers = [
+                (name, value)
+                for name, value in response.raw.headers.items()
+                if name.lower() not in excluded_headers
+            ]
 
-    excluded_headers = [
-        "content-encoding",
-        "content-length",
-        "transfer-encoding",
-        "connection",
-    ]
-    headers = [(name, value) for (name, value) in response.raw.headers.items() if name.lower() not in excluded_headers]
-
-    if "text/html" in response.headers["Content-Type"]:
-        # Replace the resources URLs to point to the proxy
-        content = response.text
-        content = content.replace("url(/", f"url(/statistics/")
-        response = Response(content, response.status_code, headers)
-        return response
-
-    # Construye y envía la respuesta
-    response = Response(response.content, response.status_code, headers)
-    return response
+            return Response(content=response.content, status_code=response.status_code, headers=dict(filtered_headers))
+        else:
+            raise HTTPException(status_code=401)
 
 
-@app.route("/nebula/experiment/<path:path>", methods=["GET", "POST"])
-def experiment_proxy(path=None):
-    query_string = request.query_string.decode("utf-8")
-    new_url = url_for("statistics_proxy", path="experiment/" + path)
-    if query_string:
-        new_url += "?" + query_string
+    @app.get("/nebula/dashboard/{scenario_name}/download/metrics")
+    async def nebula_dashboard_download_metrics(scenario_name: str, request: Request, session: Dict = Depends(get_session)):
+        from aim.sdk.repo import Repo
+        if "user" in session.keys():
+            # Obtener las métricas del escenario
+            os.makedirs(os.path.join(settings.log_dir, scenario_name, "metrics"), exist_ok=True)
 
-    return redirect(new_url)
+            aim_repo = Repo.from_path("/nebula/nebula/app/logs")
+            query = "run.experiment == '{}'".format(scenario_name)
+            df = aim_repo.query_metrics(query).dataframe()
+
+            hash_to_participant = {hash: participant for participant, hash in get_run_hashes_scenario(scenario_name)}
+            df["participant"] = df["run.hash"].map(hash_to_participant)
+            df.drop(columns=["run", "run.hash", "metric.context", "epoch"], axis=1, inplace=True)
+            cols = df.columns.tolist()
+            cols.remove("participant")
+            cols.remove("metric.name")
+            df = df.reindex(columns=["participant", "metric.name"] + cols)
+
+            for name, group in df.groupby("participant"):
+                group.to_csv(
+                    os.path.join(settings.log_dir, scenario_name, "metrics", f"{name}.csv"),
+                    index=True,
+                )
+
+            # Crear un archivo zip con las métricas, enviarlo al usuario y eliminarlo
+            memory_file = io.BytesIO()
+            with zipfile.ZipFile(memory_file, "w", zipfile.ZIP_DEFLATED) as zipf:
+                zipdir(os.path.join(settings.log_dir, scenario_name, "metrics"), zipf)
+
+            memory_file.seek(0)
+
+            return StreamingResponse(
+                memory_file,
+                media_type="application/zip",
+                headers={"Content-Disposition": f"attachment; filename={scenario_name}_metrics.zip"}
+            )
+        else:
+            raise HTTPException(status_code=401)
+    # NEBULALOGGER END
+else:
+    logging.info("Advanced analytics disabled")
+    # TENSORBOARD START
+    @app.get("/nebula/dashboard/statistics/", response_class=HTMLResponse)
+    @app.get("/nebula/dashboard/{scenario_name}/statistics/", response_class=HTMLResponse)
+    async def nebula_dashboard_statistics(request: Request, scenario_name: str = None):
+        statistics_url = "/nebula/statistics/"
+        if scenario_name is not None:
+            statistics_url += f"?smoothing=0&runFilter={scenario_name}"
+
+        return templates.TemplateResponse("statistics.html", {"request": request, "statistics_url": statistics_url})
 
 
-# TODO: TENSORBOARD END
+    @app.api_route("/nebula/statistics/", methods=["GET", "POST"])
+    @app.api_route("/nebula/statistics/{path:path}", methods=["GET", "POST"])
+    async def statistics_proxy(request: Request, path: str = None, session: Dict = Depends(get_session)):
+        if "user" in session.keys():
+            query_string = urlencode(request.query_params)
+
+            url = f"http://localhost:8080"
+            tensorboard_url = f"{url}{('/' + path) if path else ''}" + ("?" + query_string if query_string else "")
+            
+            headers = {key: value for key, value in request.headers.items() if key.lower() != "host"}
+            
+            response = requests.request(
+                method=request.method,
+                url=tensorboard_url,
+                headers=headers,
+                data=await request.body(),
+                cookies=request.cookies,
+                allow_redirects=False,
+            )
+
+            excluded_headers = [
+                "content-encoding",
+                "content-length",
+                "transfer-encoding",
+                "connection",
+            ]
+            
+            filtered_headers = [
+                (name, value)
+                for name, value in response.raw.headers.items()
+                if name.lower() not in excluded_headers
+            ]
+                        
+            if "text/html" in response.headers["Content-Type"]:
+                content = response.text
+                content = content.replace("url(/", f"url(/nebula/statistics/")
+                response = Response(content, response.status_code, dict(filtered_headers))
+                return response
+
+            return Response(response.content, response.status_code, dict(filtered_headers))
+
+        else:
+            raise HTTPException(status_code=401)
+
+
+    @app.get("/nebula/statistics/experiment/{path}")
+    @app.post("/nebula/statistics/experiment/{path}")
+    async def experiment_proxy(path: str = None, request: Request = None):
+        query_params = request.query_params
+        new_url = "/nebula/statistics/experiment/" + path
+        if query_params:
+            new_url += "?" + urlencode(query_params)
+
+        return RedirectResponse(url=new_url)
+    # TENSORBOARD END
 
 
 def zipdir(path, ziph):
@@ -842,13 +879,13 @@ def zipdir(path, ziph):
             )
 
 
-@app.route("/nebula/dashboard/<scenario_name>/download/logs", methods=["GET"])
-def nebula_dashboard_download_logs_metrics(scenario_name):
+@app.get("/nebula/dashboard/{scenario_name}/download/logs")
+async def nebula_dashboard_download_logs_metrics(scenario_name: str, request: Request, session: Dict = Depends(get_session)):
     if "user" in session.keys():
-        log_folder = os.path.join(app.config["log_dir"], scenario_name)
-        config_folder = os.path.join(app.config["config_dir"], scenario_name)
+        log_folder = os.path.join(settings.log_dir, scenario_name)
+        config_folder = os.path.join(settings.config_dir, scenario_name)
         if os.path.exists(log_folder) and os.path.exists(config_folder):
-            # Create a zip file with the logs and the config files, send it to the user and delete it
+            # Crear un archivo zip con los logs y los archivos de configuración, enviarlo al usuario
             memory_file = io.BytesIO()
             with zipfile.ZipFile(memory_file, "w", zipfile.ZIP_DEFLATED) as zipf:
                 zipdir(log_folder, zipf)
@@ -856,20 +893,28 @@ def nebula_dashboard_download_logs_metrics(scenario_name):
 
             memory_file.seek(0)
 
-            return send_file(
+            return StreamingResponse(
                 memory_file,
-                mimetype="application/zip",
-                as_attachment=True,
-                download_name=f"{scenario_name}.zip",
+                media_type="application/zip",
+                headers={"Content-Disposition": f"attachment; filename={scenario_name}.zip"}
             )
+        else:
+            raise HTTPException(status_code=404, detail="Log or config folder not found")
     else:
-        return abort(401)
+        raise HTTPException(status_code=401)
 
 
-@app.route("/nebula/dashboard/deployment/", methods=["GET"])
-def nebula_dashboard_deployment():
+@app.get("/nebula/dashboard/deployment/", response_class=HTMLResponse)
+async def nebula_dashboard_deployment(request: Request, session: Dict = Depends(get_session)):
     scenario_running = get_running_scenario()
-    return render_template("deployment.html", scenario_running=scenario_running, user_logged_in=session.get("user"))
+    return templates.TemplateResponse(
+        "deployment.html", 
+        {
+            "request": request, 
+            "scenario_running": scenario_running, 
+            "user_logged_in": session.get("user")
+        }
+    )
 
 
 def attack_node_assign(
@@ -947,26 +992,23 @@ def mobility_assign(nodes, mobile_participants_percent):
     return nodes
 
 
-@app.route("/nebula/dashboard/deployment/run", methods=["POST"])
-def nebula_dashboard_deployment_run():
+@app.post("/nebula/dashboard/deployment/run")
+async def nebula_dashboard_deployment_run(request: Request, session: Dict = Depends(get_session)):
     from nebula.controller import Controller
-
     if "user" in session.keys():
         if session["role"] == "demo":
-            return abort(401)
+            raise HTTPException(status_code=401)
         elif session["role"] == "user":
-            # If there is a scenario running, abort
             if get_running_scenario():
-                return abort(401)
-        # Receive a JSON data with the scenario configuration
-        if request.is_json:
-            # Stop the running scenario
+                raise HTTPException(status_code=401)
+        
+        if request.headers.get("content-type") == "application/json":
             stop_all_scenarios()
-            data = request.get_json()
+            data = await request.json()
             nodes = data["nodes"]
             scenario_name = f'nebula_{data["federation"]}_{datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}'
 
-            scenario_path = os.path.join(app.config["config_dir"], scenario_name)
+            scenario_path = os.path.join(settings.config_dir, scenario_name)
             os.makedirs(scenario_path, exist_ok=True)
 
             scenario_file = os.path.join(scenario_path, "scenario.json")
@@ -974,34 +1016,34 @@ def nebula_dashboard_deployment_run():
                 json.dump(data, f, sort_keys=False, indent=2)
 
             args_controller = {
+                "advanced_analytics": settings.advanced_analytics,
                 "scenario_name": scenario_name,
-                "config": app.config["config_dir"],
-                "logs": app.config["log_dir"],
-                "certs": app.config["cert_dir"],
+                "config": settings.config_dir,
+                "logs": settings.log_dir,
+                "certs": settings.cert_dir,
                 "n_nodes": data["n_nodes"],
                 "matrix": data["matrix"],
                 "federation": data["federation"],
                 "topology": data["topology"],
                 "simulation": data["simulation"],
                 "env": None,
-                "root_path": app.config["root_host_path"],
-                "webport": request.host.split(":")[1] if ":" in request.host else 80,  # Get the port of the frontend, if not specified, use 80
+                "root_path": settings.root_host_path,
+                "webport": request.url.port or 80,  # Get the port of the frontend, if not specified, use 80
                 "network_subnet": data["network_subnet"],
                 "use_blockchain": data["agg_algorithm"] == "BlockchainReputation",
                 "network_gateway": data["network_gateway"],
             }
-            # Save args in a file
-            controller_file = os.path.join(app.config["config_dir"], scenario_name, "controller.json")
+
+            controller_file = os.path.join(settings.config_dir, scenario_name, "controller.json")
             with open(controller_file, "w") as f:
                 json.dump(args_controller, f, sort_keys=False, indent=2)
 
-            # Get attack info
             attack = data["attacks"]
             poisoned_node_percent = int(data["poisoned_node_percent"])
             poisoned_sample_percent = int(data["poisoned_sample_percent"])
             poisoned_noise_percent = int(data["poisoned_noise_percent"])
             federation = data["federation"]
-            # Get attack matrix
+
             nodes, attack_matrix = attack_node_assign(
                 nodes,
                 federation,
@@ -1013,36 +1055,20 @@ def nebula_dashboard_deployment_run():
 
             mobility_status = data["mobility"]
             if mobility_status:
-                # Mobility parameters (selecting mobile nodes)
                 mobile_participants_percent = int(data["mobile_participants_percent"])
-                # Assign mobility to nodes depending on the percentage
                 nodes = mobility_assign(nodes, mobile_participants_percent)
             else:
-                # Assign mobility to nodes depending on the percentage
                 nodes = mobility_assign(nodes, 0)
 
-            # For each node, create a new file in config directory
             import shutil
-
-            # Loop dictionary of nodes
             for node in nodes:
                 node_config = nodes[node]
-                # Create a copy of participant.json.example and update the file with the update values
-                participant_file = os.path.join(
-                    app.config["config_dir"],
-                    scenario_name,
-                    f'participant_{node_config["id"]}.json',
-                )
+                participant_file = os.path.join(settings.config_dir, scenario_name, f'participant_{node_config["id"]}.json')
                 os.makedirs(os.path.dirname(participant_file), exist_ok=True)
-                # Create a copy of participant.json.example
                 shutil.copy(
-                    os.path.join(
-                        app.config["config_frontend_dir"],
-                        f"participant.json.example",
-                    ),
+                    os.path.join(settings.config_frontend_dir, "participant.json.example"),
                     participant_file,
                 )
-                # Update IP, port, and role
                 with open(participant_file) as f:
                     participant_config = json.load(f)
                 participant_config["network_args"]["ip"] = node_config["ip"]
@@ -1074,7 +1100,6 @@ def nebula_dashboard_deployment_run():
                 participant_config["mobility_args"]["random_geo"] = data["random_geo"]
                 participant_config["mobility_args"]["latitude"] = data["latitude"]
                 participant_config["mobility_args"]["longitude"] = data["longitude"]
-                # Get mobility config for each node (after applying the percentage from the frontend)
                 participant_config["mobility_args"]["mobility"] = node_config["mobility"]
                 participant_config["mobility_args"]["mobility_type"] = data["mobility_type"]
                 participant_config["mobility_args"]["radius_federation"] = data["radius_federation"]
@@ -1084,7 +1109,6 @@ def nebula_dashboard_deployment_run():
                 with open(participant_file, "w") as f:
                     json.dump(participant_config, f, sort_keys=False, indent=2)
 
-            # Create a argparse object
             import argparse
             import subprocess
 
@@ -1092,15 +1116,15 @@ def nebula_dashboard_deployment_run():
             controller = Controller(args_controller)  # Generate an instance of controller in this new process
             try:
                 if mobility_status:
-                    additional_participants = data["additional_participants"]  # List of additional participants with dict("round": int). Example: [{"round": 1}, {"round": 2}]
+                    additional_participants = data["additional_participants"]
                     schema_additional_participants = data["schema_additional_participants"]
                     controller.load_configurations_and_start_nodes(additional_participants, schema_additional_participants)
                 else:
                     controller.load_configurations_and_start_nodes()
             except subprocess.CalledProcessError as e:
-                app.logger.error(f"Error docker-compose up: {e}")
-                return redirect(url_for("nebula_dashboard_deployment"))
-            # Generate/Update the scenario in the database
+                logging.error(f"Error docker-compose up: {e}")
+                return RedirectResponse(url="/nebula/dashboard/deployment")
+            
             scenario_update_record(
                 scenario_name=controller.scenario_name,
                 start_time=controller.start_date_scenario,
@@ -1114,28 +1138,24 @@ def nebula_dashboard_deployment_run():
                 rounds=data["rounds"],
                 role=session["role"],
             )
-            # Update nodes_ready variable
+
             nodes_registration[scenario_name] = {
                 "n_nodes": data["n_nodes"],
                 "nodes": set(),
             }
-            nodes_registration[scenario_name]["condition"] = threading.Condition()
-            return redirect(url_for("nebula_dashboard"))
+            nodes_registration[scenario_name]["condition"] = asyncio.Condition()
+            return Response(content="Success", status_code=200)
         else:
-            return abort(401)
+            raise HTTPException(status_code=401)
     else:
-        return abort(401)
-
-
+        raise HTTPException(status_code=401)
+    
+    
 if __name__ == "__main__":
     # Parse args from command line
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", type=int, default=5000, help="Port to run the frontend on.")
     args = parser.parse_args()
-    app.logger.info(f"Starting frontend on port {args.port}")
-    # app.run(debug=True, host="0.0.0.0", port=int(args.port))
-    gunicorn_logger = logging.getLogger("gunicorn.error")
-    app.logger.handlers = gunicorn_logger.handlers
-    app.logger.setLevel(gunicorn_logger.level)
-    # Get env variables
-    socketio.run(app, debug=True, host="0.0.0.0", port=int(args.port))
+    logging.info(f"Starting frontend on port {args.port}")
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=args.port)

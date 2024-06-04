@@ -4,14 +4,15 @@ import sqlite3
 import datetime
 import hashlib
 import sqlite3
-import threading
+import asyncio
+import aiosqlite
 
 user_db_file_location = "databases/users.db"
 node_db_file_location = "databases/nodes.db"
 scenario_db_file_location = "databases/scenarios.db"
 notes_db_file_location = "databases/notes.db"
 
-_node_lock = threading.Lock()
+_node_lock = asyncio.Lock()
 
 
 def enable_wal_mode(db_file):
@@ -120,27 +121,29 @@ def list_nodes_by_scenario_name(scenario_name):
         return None
 
 
-def update_node_record(node_uid, idx, ip, port, role, neighbors, latitude, longitude, timestamp, federation, federation_round, scenario, run_hash):
+async def update_node_record(node_uid, idx, ip, port, role, neighbors, latitude, longitude, timestamp, federation, federation_round, scenario, run_hash):
     # Check if the node record with node_uid and scenario already exists in the database
     # If it does, update the record
     # If it does not, create a new record
     # _conn = sqlite3.connect(node_db_file_location)
     global _node_lock
-    with _node_lock:
-        with sqlite3.connect(node_db_file_location) as conn:
-            _c = conn.cursor()
+    async with _node_lock:
+        async with aiosqlite.connect(node_db_file_location) as conn:
+            _c = await conn.cursor()
 
             command = "SELECT * FROM nodes WHERE uid = ? AND scenario = ?;"
-            _c.execute(command, (node_uid, scenario))
-            result = _c.fetchone()
+            await _c.execute(command, (node_uid, scenario))
+            result = await _c.fetchone()
 
             if result is None:
                 # Create a new record
-                _c.execute("INSERT INTO nodes VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (node_uid, idx, ip, port, role, neighbors, latitude, longitude, timestamp, federation, federation_round, scenario, run_hash))
+                await _c.execute("INSERT INTO nodes VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (node_uid, idx, ip, port, role, neighbors, latitude, longitude, timestamp, federation, federation_round, scenario, run_hash))
             else:
                 # Update the record
                 command = "UPDATE nodes SET idx = ?, ip = ?, port = ?, role = ?, neighbors = ?, latitude = ?, longitude = ?, timestamp = ?, federation = ?, round = ?, hash = ? WHERE uid = ? AND scenario = ?;"
-                _c.execute(command, (idx, ip, port, role, neighbors, latitude, longitude, timestamp, federation, federation_round, run_hash, node_uid, scenario))
+                await _c.execute(command, (idx, ip, port, role, neighbors, latitude, longitude, timestamp, federation, federation_round, run_hash, node_uid, scenario))
+            
+            await conn.commit()
 
 
 def remove_all_nodes():

@@ -43,7 +43,7 @@
                     <a href="{{ url_for('nebula_dashboard_download_logs_metrics', scenario_name=scenario[0]) }}"
                         class="col-md-5 btn btn-dark" style="margin: 5px">Download logs/metrics</a>
                     <a href="{{ url_for('nebula_dashboard_download_logs_metrics', scenario_name=scenario[0]) }}"
-                    class="col-md-5 btn btn-dark" style="margin: 5px">Download metrics</a>
+                        class="col-md-5 btn btn-dark" style="margin: 5px">Download metrics</a>
                 </div>
             </div>
             <div class="col-md-8">
@@ -83,6 +83,7 @@
                                         <i class="fa fa-bars"></i>
                                     </button>
                                     <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                        {% if hash %}
                                         <li>
                                             <a class="dropdown-item"
                                                 href="/nebula/dashboard/{{ scenario_name }}/node/{{ hash }}/metrics">
@@ -90,6 +91,7 @@
                                                 Real-time metrics
                                             </a>
                                         </li>
+                                        {% endif %}
                                         <li>
                                             <a class="dropdown-item download"
                                                 href="/nebula/dashboard/{{ scenario_name }}/node/{{ idx }}/infolog">
@@ -185,13 +187,11 @@
     } else {
         console.log("WebSocket NOT supported by your Browser!");
     }
-
-    // If url is http io.connect() should be used with http, if url is https io.connect() should be used with https
-    if (window.location.protocol === 'https:') {
-        var socket = io.connect('https://' + document.domain + ':' + location.port);
-    } else {
-        var socket = io.connect('http://' + document.domain + ':' + location.port);
-    }
+    var client_id = Date.now()
+    var host = window.location.hostname;
+    var port = window.location.port ? ':' + window.location.port : '';
+    var protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    var socket = new WebSocket(protocol + '//' + host + port + '/nebula/ws/' + client_id);
 </script>
 
 <script>
@@ -533,27 +533,62 @@
                 var latlngs = Array();
 
                 data['nodes_table'].forEach(function (node) {
-                    var node_row = document.querySelectorAll("#node-" + node[0]);
-                    for (var i = 0; i < node_row.length; i++) {
-                        var uid_row = node_row[i].querySelector("#uid").innerHTML.trim();
-                        if (uid_row === node[0]) {
-                            node_row[i].querySelector("#idx").innerHTML = node[1];
-                            node_row[i].querySelector("#ip").innerHTML = node[2];
-                            node_row[i].querySelector("#round").innerHTML = node[10];
-                            if (node[13]) {
-                                node_row[i].querySelector("#status").innerHTML = '<span class="badge text-bg-success">Online</span>';
-                                if (offlineNodes.has(node[2] + ":" + node[3])) {
-                                    offlineNodes.delete(node[2] + ":" + node[3]);
-                                }
-                            } else {
-                                offlineNodes.add(node[2] + ":" + node[3]);
-                                console.log("Offline nodes");
-                                console.log(offlineNodes);
-                                node_row[i].querySelector("#status").innerHTML = '<span class="badge text-bg-danger">Offline</span>';
-                            }
-                            break;
-                        }
+                    var node_row = document.querySelector("#node-" + node[0]);
+                    if (!node_row) {
+                        node_row = document.createElement("tr");
+                        node_row.id = "node-" + node[0];
+                        document.querySelector("#table-nodes").appendChild(node_row);
                     }
+                    var uid_row = node_row.querySelector("#uid");
+                    if (!uid_row) {
+                        uid_row = document.createElement("td");
+                        uid_row.id = "uid";
+                        node_row.appendChild(uid_row);
+                    }
+                    uid_row.innerHTML = node[0].trim();
+
+                    var idx = node_row.querySelector("#idx");
+                    var ip = node_row.querySelector("#ip");
+                    var round = node_row.querySelector("#round");
+                    var status = node_row.querySelector("#status");
+
+                    if (!idx) {
+                        idx = document.createElement("td");
+                        idx.id = "idx";
+                        node_row.appendChild(idx);
+                    }
+                    if (!ip) {
+                        ip = document.createElement("td");
+                        ip.id = "ip";
+                        node_row.appendChild(ip);
+                    }
+                    if (!round) {
+                        round = document.createElement("td");
+                        round.id = "round";
+                        node_row.appendChild(round);
+                    }
+                    if (!status) {
+                        status = document.createElement("td");
+                        status.id = "status";
+                        node_row.appendChild(status);
+                    }
+
+                    idx.innerHTML = node[1];
+                    ip.innerHTML = node[2];
+                    round.innerHTML = node[10];
+
+                    if (node[13]) {
+                        status.innerHTML = '<span class="badge text-bg-success">Online</span>';
+                        if (offlineNodes.has(node[2] + ":" + node[3])) {
+                            offlineNodes.delete(node[2] + ":" + node[3]);
+                        }
+                    } else {
+                        offlineNodes.add(node[2] + ":" + node[3]);
+                        console.log("Offline nodes");
+                        console.log(offlineNodes);
+                        status.innerHTML = '<span class="badge text-bg-danger">Offline</span>';
+                    }
+
                     data_json = {
                         uid: node[0],
                         ip: node[2] + ":" + node[3],
@@ -563,7 +598,6 @@
                         status: node[13],
                     };
                     updateQueue.push(data_json);
-
                 });
 
                 // Add data to the Graph topology
@@ -600,6 +634,8 @@
                     }).flat()
                 };
                 updateGraph(gData);
+            }).catch(function (error) {
+                console.log("Error: " + error);
             });
         })
 </script>
@@ -613,11 +649,52 @@
         console.log("updateNode");
         console.log(nodeData);
         // Get row (node-{uid}) using nodeData.uid and update the row with the values of nodeData
-        var node_row = document.querySelectorAll("#node-" + nodeData.uid);
-        node_row[0].querySelector("#idx").innerHTML = nodeData.idx;
-        node_row[0].querySelector("#ip").innerHTML = nodeData.ip;
-        node_row[0].querySelector("#round").innerHTML = nodeData.round;
-        node_row[0].querySelector("#status").innerHTML = nodeData.status ? '<span class="badge text-bg-success">Online</span>' : '<span class="badge text-bg-danger">Offline</span>';
+        var node_row = document.querySelector("#node-" + nodeData.uid);
+        if (!node_row) {
+            node_row = document.createElement("tr");
+            node_row.id = "node-" + nodeData.uid;
+            document.querySelector("#table-nodes").appendChild(node_row);
+        }
+
+        var uid_row = node_row.querySelector("#uid");
+        if (!uid_row) {
+            uid_row = document.createElement("td");
+            uid_row.id = "uid";
+            node_row.appendChild(uid_row);
+        }
+        uid_row.innerHTML = nodeData.uid;
+
+        var idx = node_row.querySelector("#idx");
+        if (!idx) {
+            idx = document.createElement("td");
+            idx.id = "idx";
+            node_row.appendChild(idx);
+        }
+        idx.innerHTML = nodeData.idx;
+
+        var ip = node_row.querySelector("#ip");
+        if (!ip) {
+            ip = document.createElement("td");
+            ip.id = "ip";
+            node_row.appendChild(ip);
+        }
+        ip.innerHTML = nodeData.ip;
+
+        var round = node_row.querySelector("#round");
+        if (!round) {
+            round = document.createElement("td");
+            round.id = "round";
+            node_row.appendChild(round);
+        }
+        round.innerHTML = nodeData.round;
+
+        var status = node_row.querySelector("#status");
+        if (!status) {
+            status = document.createElement("td");
+            status.id = "status";
+            node_row.appendChild(status);
+        }
+        status.innerHTML = nodeData.status ? '<span class="badge text-bg-success">Online</span>' : '<span class="badge text-bg-danger">Offline</span>';
         // Request /nebula/api/dashboard/{{ scenario_name }}/monitor to get only the status of the node
         fetch('/nebula/api/dashboard/' + nodeData.scenario_name + '/monitor')
             .then(function (response) {
@@ -677,130 +754,143 @@
 </script>
 
 <script type="text/javascript">
-    socket.on('node_update', function (data) {
-        console.log("--> [!] Received node_update from WebSocket");
-        console.log(data);
-
-        // Increase randomlly the latitude and longitude of the node
-        // data.latitude = data.latitude + randomFloatFromInterval(2, 10);
-        // data.longitude = data.longitude + randomFloatFromInterval(2, 12);
-
-        //console.log("gData before updating the node");
-        //console.log(gData);
-
-        // Update the table and the map
-        updateNode(data);
-
-        // Update the graph
-        // Add the new node to the gData and update the graph (if the node is not already in the graph)
-        var nodeExists = false;
-        for (var i = 0; i < gData.nodes.length; i++) {
-            // Check if the node is already in the graph (using ip:port)
-            if (gData.nodes[i].ipport === data.ip + ":" + data.port) {
-                nodeExists = true;
-                break;
-            }
+    socket.onmessage = function (event) {
+        console.log("--> [!] Received message from WebSocket");
+        console.log(event.data);
+        try {
+            var data = JSON.parse(event.data);
+        } catch (e) {
+            console.log("Error parsing JSON data");
+            return;
         }
-        if (!nodeExists) {
-            console.log("Adding new node to the graph")
-            showAlert("success", "New node (" + data.ip + ":" + data.port + ") added to the graph")
-            gData.nodes.push({
-                id: data.idx,
-                ip: data.ip,
-                port: data.port,
-                ipport: data.ip + ":" + data.port,
-                role: data.role,
-                color: offlineNodes.has(data.ip + ":" + data.port) ? 'grey' :
-                    (data.role === "trainer" ? '#7570b3'
-                        : (data.role === "aggregator" ? '#d95f02' : undefined)),
-            });
-            // Create a link between the new node and its neighbors
-            var links = [];
-            if (data.neighbors !== "") {
-                var neighbors = data.neighbors.split(" ");
-                neighbors.forEach(function (neighbor) {
-                    links.push({
-                        source: data.ip + ":" + data.port,
-                        target: neighbor,
-                        value: offlineNodes.has(data.ip + ":" + data.port) || offlineNodes.has(neighbor) ? 0 : randomFloatFromInterval(1.0, 1.3),
-                    });
-                });
-            }
-            gData.links.push(links);
-            // Update the graph
-            //console.log("gData after adding the new node");
+        if (data.type === "node_update") {
+            console.log("--> [!] Received node_update from WebSocket");
+            console.log(data);
+
+            // Increase randomlly the latitude and longitude of the node
+            // data.latitude = data.latitude + randomFloatFromInterval(2, 10);
+            // data.longitude = data.longitude + randomFloatFromInterval(2, 12);
+
+            //console.log("gData before updating the node");
             //console.log(gData);
-            updateGraph(gData);
-        } else {
-            console.log("Node already exists in the graph")
-        }
 
-        // Assuming gData is your graph data structure containing nodes and links
-        console.log("Updating node links based on new neighbors");
+            // Update the table and the map
+            updateNode(data);
 
-        // Find the node in question based on data received
-        var node = gData.nodes.find(n => n.ipport === data.ip + ":" + data.port);
-
-        // Split the new neighbors list from the data
-        var newNeighbors = data.neighbors.split(" ");
-
-        // Step 1: Remove outdated links
-        // Filter out links that are no longer present in the new neighbors list
-        gData.links = gData.links.filter(link => {
-            // Check if the link involves the node in question
-            if (link.source.ipport === node.ipport) {
-                return newNeighbors.includes(link.target.ipport);
-            } else if (link.target.ipport === node.ipport) {
-                return newNeighbors.includes(link.source.ipport);
-            }
-            // Keep the link if it doesn't involve the node in question
-            return true;
-        });
-
-        // Step 2: Add new links
-        // For each neighbor, check if a link already exists, and if not, create it
-        newNeighbors.forEach(neighborIpPort => {
-            let neighborNode = gData.nodes.find(n => n.ipport === neighborIpPort);
-            // Proceed if the neighbor node exists in the graph
-            if (neighborNode) {
-                let linkExists = gData.links.some(link => 
-                    (link.source.ipport === node.ipport && link.target.ipport === neighborNode.ipport) ||
-                    (link.source.ipport === neighborNode.ipport && link.target.ipport === node.ipport)
-                );
-                // If the link doesn't exist, create it
-                if (!linkExists) {
-                    gData.links.push({
-                        source: node,
-                        target: neighborNode
-                    });
+            // Update the graph
+            // Add the new node to the gData and update the graph (if the node is not already in the graph)
+            var nodeExists = false;
+            for (var i = 0; i < gData.nodes.length; i++) {
+                // Check if the node is already in the graph (using ip:port)
+                if (gData.nodes[i].ipport === data.ip + ":" + data.port) {
+                    nodeExists = true;
+                    break;
                 }
             }
-        });
-
-        // Finally, update the graph to reflect changes
-        updateGraph(gData);
-
-
-    });
-
-    socket.on('node_remove', function (data) {
-        console.log("--> [!] Received node_remove from WebSocket");
-        console.log(data);
-
-        updateNode(data);
-
-        // Remove the link between the node and its neighbor
-        for (var i = 0; i < gData.links.length; i++) {
-            if (gData.links[i].source.ipport === data.ip + ":" + data.port || gData.links[i].target.ipport === data.ip + ":" + data.port) {
-                gData.links.splice(i, 1);
-                showAlert("warning", "Link removed from the graph")
-                console.log("Link removed from the graph");
+            if (!nodeExists) {
+                console.log("Adding new node to the graph")
+                showAlert("success", "New node (" + data.ip + ":" + data.port + ") added to the graph")
+                gData.nodes.push({
+                    id: data.idx,
+                    ip: data.ip,
+                    port: data.port,
+                    ipport: data.ip + ":" + data.port,
+                    role: data.role,
+                    color: offlineNodes.has(data.ip + ":" + data.port) ? 'grey' :
+                        (data.role === "trainer" ? '#7570b3'
+                            : (data.role === "aggregator" ? '#d95f02' : undefined)),
+                });
+                // Create a link between the new node and its neighbors
+                var links = [];
+                if (data.neighbors !== "") {
+                    var neighbors = data.neighbors.split(" ");
+                    neighbors.forEach(function (neighbor) {
+                        links.push({
+                            source: data.ip + ":" + data.port,
+                            target: neighbor,
+                            value: offlineNodes.has(data.ip + ":" + data.port) || offlineNodes.has(neighbor) ? 0 : randomFloatFromInterval(1.0, 1.3),
+                        });
+                    });
+                }
+                gData.links.push(links);
+                // Update the graph
+                //console.log("gData after adding the new node");
+                //console.log(gData);
+                updateGraph(gData);
+            } else {
+                console.log("Node already exists in the graph")
             }
-        }
-        // Update the graph
-        updateGraph(gData);
 
-    });
+            // Assuming gData is your graph data structure containing nodes and links
+            console.log("Updating node links based on new neighbors");
+
+            // Find the node in question based on data received
+            var node = gData.nodes.find(n => n.ipport === data.ip + ":" + data.port);
+
+            // Split the new neighbors list from the data
+            var newNeighbors = data.neighbors.split(" ");
+
+            // Step 1: Remove outdated links
+            // Filter out links that are no longer present in the new neighbors list
+            gData.links = gData.links.filter(link => {
+                // Check if the link involves the node in question
+                if (link.source.ipport === node.ipport) {
+                    return newNeighbors.includes(link.target.ipport);
+                } else if (link.target.ipport === node.ipport) {
+                    return newNeighbors.includes(link.source.ipport);
+                }
+                // Keep the link if it doesn't involve the node in question
+                return true;
+            });
+
+            // Step 2: Add new links
+            // For each neighbor, check if a link already exists, and if not, create it
+            newNeighbors.forEach(neighborIpPort => {
+                let neighborNode = gData.nodes.find(n => n.ipport === neighborIpPort);
+                // Proceed if the neighbor node exists in the graph
+                if (neighborNode) {
+                    let linkExists = gData.links.some(link =>
+                        (link.source.ipport === node.ipport && link.target.ipport === neighborNode.ipport) ||
+                        (link.source.ipport === neighborNode.ipport && link.target.ipport === node.ipport)
+                    );
+                    // If the link doesn't exist, create it
+                    if (!linkExists) {
+                        gData.links.push({
+                            source: node,
+                            target: neighborNode
+                        });
+                    }
+                }
+            });
+
+            // Finally, update the graph to reflect changes
+            updateGraph(gData);
+        }
+        else if (data.type === "node_remove") {
+            console.log("--> [!] Received node_remove from WebSocket");
+            console.log(data);
+
+            updateNode(data);
+
+            // Remove the link between the node and its neighbor
+            for (var i = 0; i < gData.links.length; i++) {
+                if (gData.links[i].source.ipport === data.ip + ":" + data.port || gData.links[i].target.ipport === data.ip + ":" + data.port) {
+                    gData.links.splice(i, 1);
+                    showAlert("warning", "Link removed from the graph")
+                    console.log("Link removed from the graph");
+                }
+            }
+            // Update the graph
+            updateGraph(gData);
+        }
+        else if (data.type === "control") {
+            console.log("--> [!] Received control from WebSocket");
+            console.log(data);
+        }
+        else {
+            console.log("Unknown message type: " + data.type);
+        }
+    };
 </script>
 
 {% endif %}

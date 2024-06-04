@@ -9,6 +9,7 @@ from nebula.core.eventmanager import EventManager, event_handler
 from nebula.core.network.communications import CommunicationsManager
 from nebula.core.pb import nebula_pb2
 from nebula.core.utils.nebulalogger_tensorboard import NebulaTensorBoardLogger
+from nebula.core.utils.nebulalogger import NebulaLogger
 from nebula.core.utils.locker import Locker
 
 logging.getLogger("requests").setLevel(logging.WARNING)
@@ -101,17 +102,18 @@ class Engine:
 
         if self.config.participant["tracking_args"]["local_tracking"] == "csv":
             nebulalogger = CSVLogger(f"{self.log_dir}", name="metrics", version=f"participant_{self.idx}")
-        elif self.config.participant["tracking_args"]["local_tracking"] == "web":
-            # nebulalogger = NebulaLogger(config=self.config, engine=self, scenario_start_time=self.config.participant["scenario_args"]["start_time"], repo=f"{self.config.participant['tracking_args']['log_dir']}",
-            #                                    experiment=self.experiment_name, run_name=f"participant_{self.idx}",
-            #                                    train_metric_prefix='train_', test_metric_prefix='test_', val_metric_prefix='val_', log_system_params=False)
+        elif self.config.participant["tracking_args"]["local_tracking"] == "basic":
+            nebulalogger = NebulaTensorBoardLogger(self.config.participant["scenario_args"]["start_time"], f"{self.log_dir}", name="metrics", version=f"participant_{self.idx}", log_graph=True)
+        elif self.config.participant["tracking_args"]["local_tracking"] == "advanced":
+            nebulalogger = NebulaLogger(config=self.config, engine=self, scenario_start_time=self.config.participant["scenario_args"]["start_time"], repo=f"{self.config.participant['tracking_args']['log_dir']}",
+                                                experiment=self.experiment_name, run_name=f"participant_{self.idx}",
+                                                train_metric_prefix='train_', test_metric_prefix='test_', val_metric_prefix='val_', log_system_params=False)
             # nebulalogger_aim = NebulaLogger(config=self.config, engine=self, scenario_start_time=self.config.participant["scenario_args"]["start_time"], repo=f"aim://nebula-frontend:8085",
             #                                     experiment=self.experiment_name, run_name=f"participant_{self.idx}",
             #                                     train_metric_prefix='train_', test_metric_prefix='test_', val_metric_prefix='val_', log_system_params=False)
-            # Experiment hash is used to identify the experiment in the controller
-            # self.config.participant["tracking_args"]["run_hash"] = nebulalogger.experiment.hash
-            nebulalogger_tensorboard = NebulaTensorBoardLogger(self.config.participant["scenario_args"]["start_time"], f"{self.log_dir}", name="metrics", version=f"participant_{self.idx}", log_graph=True)
-            nebulalogger = nebulalogger_tensorboard
+            self.config.participant["tracking_args"]["run_hash"] = nebulalogger.experiment.hash
+        else:
+            nebulalogger = None
         self._trainer = trainer(model, dataset, config=self.config, logger=nebulalogger)
         self._aggregator = create_aggregator(config=self.config, engine=self)
 

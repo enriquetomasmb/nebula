@@ -73,6 +73,7 @@ class Controller:
         self.env_path = args.env
         self.waf = args.waf if hasattr(args, "waf") else False
         self.debug = args.debug if hasattr(args, "debug") else False
+        self.advanced_analytics = args.advanced_analytics if hasattr(args, "advanced_analytics") else False
         self.matrix = args.matrix if hasattr(args, "matrix") else None
         self.root_path = args.root_path if hasattr(args, "root_path") else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -335,6 +336,7 @@ class Controller:
                 environment:
                     - NEBULA_DEV=True
                     - NEBULA_DEBUG={debug}
+                    - NEBULA_ADVANCED_ANALYTICS={advanced_analytics}
                     - SERVER_LOG=/nebula/app/logs/server.log
                     - NEBULA_LOGS_DIR=/nebula/app/logs/
                     - NEBULA_CONFIG_DIR=/nebula/app/config/
@@ -380,7 +382,7 @@ class Controller:
 
         # Generate the Docker Compose file dynamically
         services = ""
-        services += frontend_template.format(debug=self.debug, path=self.root_path, gw="192.168.10.1", ip="192.168.10.100", frontend_port=self.frontend_port, statistics_port=self.statistics_port)
+        services += frontend_template.format(debug=self.debug, advanced_analytics=self.advanced_analytics, path=self.root_path, gw="192.168.10.1", ip="192.168.10.100", frontend_port=self.frontend_port, statistics_port=self.statistics_port)
         docker_compose_file = docker_compose_template.format(services)
 
         if self.waf:
@@ -606,7 +608,7 @@ class Controller:
                     participant_config["mobility_args"]["longitude"],
                 ) = TopologyManager.get_coordinates(random_geo=True)
             # If not, use the given coordinates in the frontend
-
+            participant_config["tracking_args"]["local_tracking"] = "advanced" if self.advanced_analytics else "basic"
             participant_config["tracking_args"]["log_dir"] = self.log_dir
             participant_config["tracking_args"]["config_dir"] = self.config_dir
 
