@@ -647,8 +647,8 @@ async def nebula_stop_scenario(scenario_name: str, request: Request, session: Di
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     
-@app.route("/nebula//dashboard/{scenario_name}/stopall", methods=["GET"])
-def fedstellar_stop_all_scenarios(scenario_name: str, session: Dict = Depends(get_session)):
+@app.route("/nebula/dashboard/{scenario_name}/stopall", methods=["GET"])
+async def nebula_stop_all_scenarios(scenario_name: str, session: Dict = Depends(get_session)):
     # Stop all the scenarios
     if "user" in session.keys():
         if session["role"] == "demo":
@@ -1034,6 +1034,7 @@ def wait_scenario_finished():
 def run_scenario(scenario_data, request, role):
     from nebula.controller import Controller
     
+    nodes = scenario_data["nodes"]
     scenario_name = f'nebula_{scenario_data["federation"]}_{datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}'
 
     scenario_path = os.path.join(settings.config_dir, scenario_name)
@@ -1071,8 +1072,6 @@ def run_scenario(scenario_data, request, role):
     poisoned_sample_percent = int(scenario_data["poisoned_sample_percent"])
     poisoned_noise_percent = int(scenario_data["poisoned_noise_percent"])
     federation = scenario_data["federation"]
-
-    #TODO Fix nodes not accessible
 
     nodes, attack_matrix = attack_node_assign(
         nodes,
