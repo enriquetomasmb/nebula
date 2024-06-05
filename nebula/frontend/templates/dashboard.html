@@ -123,16 +123,16 @@
                             <a href="{{ url_for('nebula_dashboard_statistics', scenario_name=name) }}"
                                 class="label btn btn-dark">Real-time metrics</a>
                             <a id="note-btn-{{ name }}" data-scenario-name="{{ name }}" class="label btn btn-dark"><i
-                                    class="fa fa-sticky-note" style="color: white;"></i></a>
+                                class="fa fa-sticky-note" style="color: white;"></i></a>
                             {% if status == "running" %}
-                            <a href="{{ url_for('nebula_stop_scenario', scenario_name=name) }}"
+                            <a href="{{ url_for('nebula_stop_scenario', scenario_name=name, stop_all=False) }}"
                                 class="label btn btn-danger">Stop scenario</a>
-                            <a href="{{ url_for('nebula_stop_all_scenarios', scenario_name=name) }}"
+                            <a href="{{ url_for('nebula_stop_scenario', scenario_name='all', stop_all=True) }}"
                                 class="label btn btn-danger">Stop all</a>
                             {% elif status == "completed" %}
-                            <a href="{{ url_for('nebula_stop_scenario', scenario_name=name) }}"
+                            <a href="{{ url_for('nebula_stop_scenario', scenario_name=name, stop_all=False) }}"
                                 class="label btn btn-danger">Stop scenario</a>
-                            <a href="{{ url_for('nebula_stop_all_scenarios', scenario_name=name) }}"
+                            <a href="{{ url_for('nebula_stop_scenario', scenario_name='all', stop_all=True) }}"
                                 class="label btn btn-danger">Stop all</a>
                             {% else %}
                             <a id="remove-btn" data-scenario-name="{{ name }}" class="label btn btn-danger"><i

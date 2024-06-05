@@ -634,33 +634,37 @@ def stop_all_scenarios():
     scenario_set_all_status_to_finished()
 
 
-@app.get("/nebula/dashboard/{scenario_name}/stop")
-async def nebula_stop_scenario(scenario_name: str, request: Request, session: Dict = Depends(get_session)):
+@app.get("/nebula/dashboard/{scenario_name}/stop/{stop_all}")
+async def nebula_stop_scenario(scenario_name: str, stop_all: bool, request: Request, session: Dict = Depends(get_session)):
     if "user" in session.keys():
         if session["role"] == "demo":
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
         elif session["role"] == "user":
             if not check_scenario_with_role(session["role"], scenario_name):
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-        stop_scenario(scenario_name)
+        if(stop_all):
+            stop_event.set()
+            stop_all_scenarios()
+        else:
+            stop_scenario(scenario_name)
         return RedirectResponse(url="/nebula/dashboard")
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     
-@app.route("/nebula/dashboard/{scenario_name}/stopall", methods=["GET"])
-async def nebula_stop_all_scenarios(scenario_name: str, session: Dict = Depends(get_session)):
-    # Stop all the scenarios
-    if "user" in session.keys():
-        if session["role"] == "demo":
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-        elif session["role"] == "user":
-            if not check_scenario_with_role(session["role"], scenario_name):
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-        stop_event.set()
-        stop_all_scenarios()
-        return RedirectResponse(url="/nebula/dashboard")
-    else:
-        return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+# @app.route("/nebula/dashboard/{scenario_name}/stopall")
+# async def nebula_stop_all_scenarios(scenario_name: str, request: Request, session: Dict = Depends(get_session)):
+#     # Stop all the scenarios
+#     if "user" in session.keys():
+#         if session["role"] == "demo":
+#             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+#         elif session["role"] == "user":
+#             if not check_scenario_with_role(session["role"], scenario_name):
+#                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+#         stop_event.set()
+#         stop_all_scenarios()
+#         return RedirectResponse(url="/nebula/dashboard")
+#     else:
+#         return HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 
 def remove_scenario(scenario_name=None):
