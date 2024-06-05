@@ -131,7 +131,7 @@
                             <input type="checkbox" id="mod-cifar10" value='CIFAR10' style="margin-right: 10px; margin-left: 10px;">CIFAR10
                         </label>
                         <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
-                            <input type="checkbox" id="mod-syscall" value='SYSCALL' style="margin-right: 10px; margin-left: 10px;">SYSCALL
+                            <input type="checkbox" id="mod-militarysar" value='MilitarySAR' style="margin-right: 10px; margin-left: 10px;">MilitarySAR
                         </label>
                     </div>
                     <hr>
@@ -153,7 +153,7 @@
                                 <input type="checkbox" id="mod-modelpoisoning" value='Model Poisoning'>Model Poisoning
                             </label>
                         </div>
-                        <div class="col-md-8" style="right: inherit;">
+                        <div class="col-md-7" style="right: inherit;">
                             <label>
                                 <input type="checkbox" id="mod-neuroninversion" value='GLLNeuronInversionAttack'>GLLNeuronInversionAttack
                             </label>
@@ -1823,7 +1823,7 @@
             selectALL(['mod-fully', 'mod-ring', 'mod-star'], document.getElementById("mod-topology").checked);
         });
         document.getElementById("mod-dataset").addEventListener("change", function() {
-            selectALL(['mod-mnist', 'mod-fmnist', 'mod-cifar10', 'mod-syscall'], document.getElementById("mod-dataset").checked);
+            selectALL(['mod-mnist', 'mod-fmnist', 'mod-cifar10', 'mod-militarysar'], document.getElementById("mod-dataset").checked);
         });
         document.getElementById("mod-robustness").addEventListener("change", function() {
             selectALL(['mod-noattack', 'mod-labelflipping', 'mod-samplepoisoning', 'mod-modelpoisoning', 'mod-neuroninversion', 'mod-noiseinjection',
@@ -1854,7 +1854,7 @@
                 return;
             }
 
-            var datasets = ['mod-mnist', 'mod-fmnist', 'mod-cifar10', 'mod-syscall'];
+            var datasets = ['mod-mnist', 'mod-fmnist', 'mod-cifar10', 'mod-militarysar'];
             if (!atLeastOneChecked(datasets)) {
                 alert("Please, select one dataset at least.");
                 return;
