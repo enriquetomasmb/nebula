@@ -43,7 +43,7 @@ from nebula.frontend.database import (
     remove_note,
 )
 
-from fastapi import FastAPI, Request, Depends, HTTPException, status, Form, Response, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Request, Depends, HTTPException, status, Form, Response, WebSocket, WebSocketDisconnect, BackgroundTasks
 from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse, FileResponse, PlainTextResponse, StreamingResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
@@ -1178,6 +1178,7 @@ stop_event = multiprocessing.Event()
 #Deploy the list of scenarios
 def run_scenarios(data, request, role):
     for scenario_data in data:
+        logging.info(f"Running scenario {scenario_data['scenario_title']}")
         if stop_event.is_set():
             break
         run_scenario(scenario_data, request, role)
@@ -1185,7 +1186,7 @@ def run_scenarios(data, request, role):
             pass
 
 @app.post("/nebula/dashboard/deployment/run")
-async def nebula_dashboard_deployment_run(request: Request, session: Dict = Depends(get_session)):
+async def nebula_dashboard_deployment_run(request: Request, background_tasks: BackgroundTasks, session: Dict = Depends(get_session)):
     from nebula.controller import Controller
     if "user" in session.keys():
         if session["role"] == "demo":
@@ -1198,8 +1199,8 @@ async def nebula_dashboard_deployment_run(request: Request, session: Dict = Depe
             stop_all_scenarios()
             stop_event.clear()
             data = await request.json()
-            p = multiprocessing.Process(target=run_scenarios, args=(data, request.url.port, session["role"]))
-            p.start()
+            logging.info(f"Running deployment with {len(data)} scenarios")
+            background_tasks.add_task(run_scenarios, data, request.url.port, session["role"])
             return Response(content="Success", status_code=200)
         else:
             raise HTTPException(status_code=401)
