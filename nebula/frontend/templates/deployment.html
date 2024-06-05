@@ -1186,8 +1186,10 @@
                         //Show buttons to move through the list
                         if (scenarioStorage.scenariosList.length > 1){
                             document.getElementById("prev-btn").style.display = "inline-block";
+                            document.getElementById("run-btn").disabled = false;
                         }else{
                             document.getElementById("prev-btn").style.display = "none";
+                            document.getElementById("run-btn").disabled = true;
                         }
                         
                         document.getElementById("new-btn").style.display = "inline-block";

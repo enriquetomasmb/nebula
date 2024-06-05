@@ -28,6 +28,8 @@ from nebula.core.training.lightning import Lightning
 
 from nebula.core.utils.helper import cosine_metric
 
+from nebula.controller import Controller
+
 import sys
 import pdb
 
@@ -82,6 +84,7 @@ class Engine:
         self.addr = config.participant["network_args"]["addr"]
         self.role = config.participant["device_args"]["role"]
         self.name = config.participant["device_args"]["name"]
+        self.docker_id = config.participant["device_args"]["docker_id"]
 
         print_banner()
 
@@ -443,6 +446,8 @@ class Engine:
         self.total_rounds = None
         self.get_federation_ready_lock().acquire()
         print_msg_box(msg=f"Federated Learning process has been completed.", indent=2, title="End of the experiment")
+        # Kill itself
+        Controller.stop_node(self.docker_id)
 
     async def _extended_learning_cycle(self):
         """

@@ -6,6 +6,10 @@ import json
 import logging
 import multiprocessing
 import os
+import threading
+import time
+import docker
+import docker.utils
 import requests
 import signal
 import sys
@@ -996,29 +1000,38 @@ def mobility_assign(nodes, mobile_participants_percent):
     return nodes
 
 def container_finished(event):
-    if event['status'] == 'die' and event['Actor']['Attributes']['name'].startswith('/fedstellar'):
-        return True
-    return False
+    try:
+        if (event.get('status') == 'kill' or event.get('status') == 'die'):
+            return True
+        return False
+    except KeyError as e:
+        print(f"KeyError: {e}")
+        return False
+
+# Checks if a scenario exists
+def check_docker_container(scenario_name):
+    client = docker.from_env()
+    containers = client.containers.list()
+    for container in containers:
+        if scenario_name.lower() in container.name.lower():
+            return True
+        return False
 
 # Waits till the experiment is finished
-def wait_scenario_finished():
-    import docker
-    
+def wait_scenario_finished(scenario_name):    
     client = docker.from_env()
     events = client.events(decode=True)
-    scenario_finished = False
     
     try:
         # Listen for docker events
+        events = client.events(decode=True)
         for event in events:
-            if(container_finished(event)):
-                scenario_finished = True
+            if(container_finished(event) and not check_docker_container(scenario_name)):
+                events.close()
+                logging.info(f"Scenario {scenario_name} finished")
+                return True
     except KeyboardInterrupt:
         pass
-    finally:
-        # Close event iterator
-        events.close()
-        return scenario_finished
     
 def run_scenario(scenario_data, request, role):
     from nebula.controller import Controller
@@ -1161,17 +1174,21 @@ def run_scenario(scenario_data, request, role):
     }
     nodes_registration[scenario_name]["condition"] = asyncio.Condition()
     
+    return scenario_name
+    
 # Stop all scenarios in the scenarios_list
 stop_event = multiprocessing.Event()
 
-#Deploy the list of scenarios
+# Deploy the list of scenarios
 def run_scenarios(data, request, role):
     for scenario_data in data:
         logging.info(f"Running scenario {scenario_data['scenario_title']}")
         if stop_event.is_set():
             break
-        run_scenario(scenario_data, request, role)
-        if wait_scenario_finished():
+        scenario_name = run_scenario(scenario_data, request, role)
+        # Waits till the scenario is completed
+        if(wait_scenario_finished(scenario_name)):
+            stop_scenario(scenario_name)
             pass
 
 @app.post("/nebula/dashboard/deployment/run")

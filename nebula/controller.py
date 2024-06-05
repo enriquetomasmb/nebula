@@ -516,6 +516,17 @@ class Controller:
                 raise Exception("Error while killing docker containers: {}".format(e))
 
     @staticmethod
+    def stop_node(docker_id):
+        try:
+            # Run the command to stop the Docker container
+            os.system(f"docker stop {docker_id}")
+        except subprocess.CalledProcessError as e:
+            print(f"Error stopping docker container with ID {docker_id}: {e}")
+            print(f"Error output: {e.stderr}")
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+
+    @staticmethod
     def stop_waf():
         if sys.platform == "win32":
             try:
@@ -745,6 +756,28 @@ class Controller:
             raise e
 
     def start_nodes_docker(self):
+        import subprocess
+
+        try:
+            # First, get the list of IDs of exited containers
+            result_ps = subprocess.run("docker ps -aq -f status=exited", shell=True, check=True, capture_output=True, text=True)
+
+            # Get the container IDs
+            container_ids = result_ps.stdout.strip()
+
+            if container_ids:
+                # Run the command to remove the containers
+                result_rm = subprocess.run(f"docker rm $(docker ps -aq -f status=exited)", shell=True, check=True, capture_output=True, text=True)
+                print(f"Dangling containers removed successfully: {result_rm.stdout.strip()}.")
+            else:
+                print("No dangling containers to remove.")
+        except subprocess.CalledProcessError as e:
+            print(f"Error removing stopped containers: {e}")
+            print(f"Error output: {e.stderr}")
+        except Exception as e:
+            print(f"Unexpected error: {e}")
+
+        
         logging.info("Starting nodes using Docker Compose...")
         logging.info("env path: {}".format(self.env_path))
 
@@ -762,6 +795,7 @@ class Controller:
                 restart: no
                 volumes:
                     - {}:/nebula
+                    - /var/run/docker.sock:/var/run/docker.sock
                 extra_hosts:
                     - "host.docker.internal:host-gateway"
                 ipc: host
@@ -867,20 +901,7 @@ class Controller:
         # Write the Docker Compose file in config directory
         with open(f"{self.config_dir}/docker-compose.yml", "w") as f:
             f.write(docker_compose_file)
-
-        # Change log and config directory in dockers to /nebula/app, and change controller endpoint
-        for node in self.config.participants:
-            # Print the configuration of the node
-            node["tracking_args"]["log_dir"] = "/nebula/app/logs"
-            node["tracking_args"]["config_dir"] = f"/nebula/app/config/{self.scenario_name}"
-            node["scenario_args"]["controller"] = "nebula-frontend"
-            node["security_args"]["certfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_cert.pem"
-            node["security_args"]["keyfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_key.pem"
-            node["security_args"]["cafile"] = f"/nebula/app/certs/ca_cert.pem"
-
-            # Write the config file in config directory
-            with open(f"{self.config_dir}/participant_{node['device_args']['idx']}.json", "w") as f:
-                json.dump(node, f, indent=4)
+        
         # Start the Docker Compose file, catch error if any
         try:
             subprocess.check_call(
@@ -896,6 +917,55 @@ class Controller:
             )
         except subprocess.CalledProcessError as e:
             raise Exception("Docker Compose failed to start, please check if Docker Compose is installed (https://docs.docker.com/compose/install/) and Docker Engine is running.")
+
+        container_ids = None
+
+        #Obtain container IDs
+        try:
+            # Obtain docker ids
+            result = subprocess.run(
+                [
+                    "docker",
+                    "compose",
+                    "-f",
+                    f"{self.config_dir}/docker-compose.yml",
+                    "ps",
+                    "-q"
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+
+            if result.returncode != 0:
+                raise Exception(f"Error obtaining docker IDs: {result.stderr}")
+
+            container_ids = result.stdout.strip().split('\n')
+
+        except subprocess.CalledProcessError as e:
+            raise Exception(
+                "Docker Compose failed to start, please check if Docker Compose is installed "
+                "(https://docs.docker.com/compose/install/) and Docker Engine is running."
+            )
+
+        if not container_ids or len(container_ids) != len(self.config.participants):
+            raise Exception("The number of container IDs does not match the number of participants.")
+
+        # Change log and config directory in dockers to /nebula/app, and change controller endpoint
+        for idx, node in enumerate(self.config.participants):
+            #Assign docker ID to node
+            node["device_args"]["docker_id"] = container_ids[idx]
+            # Print the configuration of the node
+            node["tracking_args"]["log_dir"] = "/nebula/app/logs"
+            node["tracking_args"]["config_dir"] = f"/nebula/app/config/{self.scenario_name}"
+            node["scenario_args"]["controller"] = "nebula-frontend"
+            node["security_args"]["certfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_cert.pem"
+            node["security_args"]["keyfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_key.pem"
+            node["security_args"]["cafile"] = f"/nebula/app/certs/ca_cert.pem"
+
+            # Write the config file in config directory
+            with open(f"{self.config_dir}/participant_{node['device_args']['idx']}.json", "w") as f:
+                json.dump(node, f, indent=4)
 
     @classmethod
     def remove_files_by_scenario(cls, scenario_name):
