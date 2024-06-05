@@ -404,7 +404,7 @@
                     <i class="fa fa-trash" aria-hidden="true"></i> 
                 </button>
                 <button id="run-btn" type="button" class="btn btn-dark"
-                    style="margin-top: 10px; margin-left: 15px; float: right">Run
+                    style="margin-top: 10px; margin-left: 15px; float: right" disabled="true">Run
                     NEBULA
                 </button>
                 <button id="load-config-btn" type="button" class="btn btn-dark"
@@ -1707,6 +1707,11 @@
             }
             document.getElementById("new-btn").style.display = "inline-block";
             document.getElementById("del-btn").style.display = "inline-block";
+
+            //Enable run
+            if(document.getElementById("run-btn").disabled){
+                document.getElementById("run-btn").disabled = false;
+            }
         });
 
         //When click "del-btn" button, delete actual scenario from the list
@@ -1727,6 +1732,7 @@
                 document.getElementById("add-btn").style.display = "inline-block";
                 document.getElementById("new-btn").style.display = "none";
                 document.getElementById("del-btn").style.display = "none";
+                document.getElementById("run-btn").disabled = true;
             }
             //Only one scenario in the list
             else if(scenarioStorage.scenariosList.length == 1){
