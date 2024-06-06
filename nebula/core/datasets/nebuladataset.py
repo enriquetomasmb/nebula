@@ -341,14 +341,20 @@ class NebulaDataset(Dataset, ABC):
         clients_data = {i: [] for i in range(num_clients)}
 
         # Get the labels from the dataset
-        labels = [dataset.targets[idx] for idx in range(len(dataset))]
-        label_counts = {label: labels.count(label) for label in set(labels)}
+        if isinstance(dataset.targets, np.ndarray):
+            labels = dataset.targets
+        elif hasattr(dataset.targets, "numpy"):  # Check if it's a tensor with .numpy() method
+            labels = dataset.targets.numpy()
+        else:  # If it's a list
+            labels = np.asarray(dataset.targets)
 
-        min_label, min_count = min(label_counts.items(), key=lambda x: x[1])
+        label_counts = np.bincount(labels)
+        min_label = label_counts.argmin()
+        min_count = label_counts[min_label]
 
         for label in range(self.num_classes):
             # Get the indices of the same label samples
-            label_indices = np.where(np.array(labels) == label)[0]
+            label_indices = np.where(labels == label)[0]
             np.random.shuffle(label_indices)
 
             # Split the data based on their labels
@@ -356,7 +362,6 @@ class NebulaDataset(Dataset, ABC):
 
             for i in range(num_clients):
                 start_idx = i * samples_per_client
-                # end_idx = (i + 1) * samples_per_client if i != num_clients - 1 else len(label_indices)
                 end_idx = (i + 1) * samples_per_client
                 clients_data[i].extend(label_indices[start_idx:end_idx])
 
@@ -398,10 +403,11 @@ class NebulaDataset(Dataset, ABC):
         clients_data = {i: [] for i in range(num_clients)}
 
         # Get the labels from the dataset
-        labels = [dataset.targets[idx] for idx in range(len(dataset))]
-        label_counts = {label: labels.count(label) for label in set(labels)}
+        labels = np.array([dataset.targets[idx] for idx in range(len(dataset))])
+        label_counts = np.bincount(labels)
 
-        min_label, min_count = min(label_counts.items(), key=lambda x: x[1])
+        min_label = label_counts.argmin()
+        min_count = label_counts[min_label]
 
         # Set the initial_subset_size
         initial_subset_size = min_count // num_clients
@@ -411,17 +417,9 @@ class NebulaDataset(Dataset, ABC):
         for i in range(1, num_clients):
             subset_sizes.append(int(subset_sizes[i - 1] * ((imbalance_factor - 1) / imbalance_factor)))
 
-        # # Ensure the sum of subset_sizes is not greater than min_count
-        # while sum(subset_sizes) > min_count:
-        # # If so, scale down each subset_size proportionally
-        #     scale_factor = min_count / sum(subset_sizes)
-        #     subset_sizes = [int(scale_factor * size) for size in subset_sizes]
-
-        # subset_sizes[-1] = min_count - sum(subset_sizes[:-1])  # Ensure the sum of subset sizes equals min_count
-
         for label in range(self.num_classes):
             # Get the indices of the same label samples
-            label_indices = np.where(np.array(labels) == label)[0]
+            label_indices = np.where(labels == label)[0]
             np.random.shuffle(label_indices)
 
             # Split the data based on their labels
@@ -478,10 +476,11 @@ class NebulaDataset(Dataset, ABC):
         class_indices = {i: np.where(y_train == i)[0] for i in range(num_classes)}
 
         # Get the labels from the dataset
-        labels = [dataset.targets[idx] for idx in range(len(dataset))]
-        label_counts = {label: labels.count(label) for label in set(labels)}
+        labels = np.array([dataset.targets[idx] for idx in range(len(dataset))])
+        label_counts = np.bincount(labels)
 
-        min_label, min_count = min(label_counts.items(), key=lambda x: x[1])
+        min_label = label_counts.argmin()
+        min_count = label_counts[min_label]
 
         classes_per_subset = int(num_classes * percentage / 100)
         if classes_per_subset < 1:
@@ -500,14 +499,8 @@ class NebulaDataset(Dataset, ABC):
                 # Select approximately 50% of the indices
                 subset_indices[i].extend(indices[: min_count // 2])
 
-                # half_count = len(indices) // 2
-                # subset_indices[i].extend(indices[:half_count])
-
-            class_counts = [0] * num_classes
-            for idx in subset_indices[i]:
-                label = dataset.targets[idx]
-                class_counts[label] += 1
-            print(f"Partition {i+1} class distribution: {class_counts}")
+            class_counts = np.bincount(np.array([dataset.targets[idx] for idx in subset_indices[i]]))
+            print(f"Partition {i+1} class distribution: {class_counts.tolist()}")
 
         partitioned_datasets = {i: subset_indices[i] for i in range(num_subsets)}
 
