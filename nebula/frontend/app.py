@@ -647,7 +647,7 @@ async def nebula_stop_scenario(scenario_name: str, stop_all: bool, request: Requ
             if not check_scenario_with_role(session["role"], scenario_name):
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
         if(stop_all):
-            stop_event.set()
+            stop_all_scenarios_event.set()
             stop_all_scenarios()
         else:
             stop_scenario(scenario_name)
@@ -999,39 +999,31 @@ def mobility_assign(nodes, mobile_participants_percent):
         nodes[node]["mobility"] = node_mob
     return nodes
 
-def container_finished(event):
-    try:
-        if (event.get('status') == 'kill' or event.get('status') == 'die'):
-            return True
-        return False
-    except KeyError as e:
-        print(f"KeyError: {e}")
-        return False
+# Stop all scenarios in the scenarios_list
+stop_all_scenarios_event = multiprocessing.Event()
 
-# Checks if a scenario exists
-def check_docker_container(scenario_name):
-    client = docker.from_env()
-    containers = client.containers.list()
-    for container in containers:
-        if scenario_name.lower() in container.name.lower():
-            return True
-        return False
+# Finish actual scenario
+finish_scenario_event = multiprocessing.Event()
 
-# Waits till the experiment is finished
-def wait_scenario_finished(scenario_name):    
-    client = docker.from_env()
-    events = client.events(decode=True)
-    
-    try:
-        # Listen for docker events
-        events = client.events(decode=True)
-        for event in events:
-            if(container_finished(event) and not check_docker_container(scenario_name)):
-                events.close()
-                logging.info(f"Scenario {scenario_name} finished")
-                return True
-    except KeyboardInterrupt:
-        pass
+# Nodes that completed the experiment
+nodes_finished = []
+
+# Recieve a stopped node
+@app.post("/nebula/dashboard/{scenario_name}/node/done")
+async def node_stopped(scenario_name: str, request: Request):
+    if request.headers.get("content-type") == "application/json":
+        data = await request.json()
+        nodes_finished.append(data['ip'])
+        nodes_list = list_nodes_by_scenario_name(scenario_name)
+        finished = True
+        # Check if all the nodes of the scenario have finished the experiment
+        for node in nodes_list:
+            if node[2] not in nodes_finished:
+                finished = False
+        
+        if finished:
+            nodes_finished.clear()
+            finish_scenario_event.set()
     
 def run_scenario(scenario_data, request, role):
     from nebula.controller import Controller
@@ -1175,25 +1167,24 @@ def run_scenario(scenario_data, request, role):
     nodes_registration[scenario_name]["condition"] = asyncio.Condition()
     
     return scenario_name
-    
-# Stop all scenarios in the scenarios_list
-stop_event = multiprocessing.Event()
 
 # Deploy the list of scenarios
 def run_scenarios(data, request, role):
     for scenario_data in data:
         logging.info(f"Running scenario {scenario_data['scenario_title']}")
-        if stop_event.is_set():
+        if stop_all_scenarios_event.is_set():
             break
         scenario_name = run_scenario(scenario_data, request, role)
         # Waits till the scenario is completed
-        if(wait_scenario_finished(scenario_name)):
-            stop_scenario(scenario_name)
-            pass
-
+        while not finish_scenario_event.is_set():
+            time.sleep(10)
+        finish_scenario_event.clear()
+        stop_scenario(scenario_name)
+        time.sleep(10)
+        pass
+    
 @app.post("/nebula/dashboard/deployment/run")
 async def nebula_dashboard_deployment_run(request: Request, background_tasks: BackgroundTasks, session: Dict = Depends(get_session)):
-    from nebula.controller import Controller
     if "user" in session.keys():
         if session["role"] == "demo":
             raise HTTPException(status_code=401)
@@ -1203,7 +1194,7 @@ async def nebula_dashboard_deployment_run(request: Request, background_tasks: Ba
         
         if request.headers.get("content-type") == "application/json":
             stop_all_scenarios()
-            stop_event.clear()
+            stop_all_scenarios_event.clear()
             data = await request.json()
             logging.info(f"Running deployment with {len(data)} scenarios")
             background_tasks.add_task(run_scenarios, data, request.url.port, session["role"])

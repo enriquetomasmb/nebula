@@ -516,17 +516,6 @@ class Controller:
                 raise Exception("Error while killing docker containers: {}".format(e))
 
     @staticmethod
-    def stop_node(docker_id):
-        try:
-            # Run the command to stop the Docker container
-            os.system(f"docker stop {docker_id}")
-        except subprocess.CalledProcessError as e:
-            print(f"Error stopping docker container with ID {docker_id}: {e}")
-            print(f"Error output: {e.stderr}")
-        except Exception as e:
-            print(f"Unexpected error: {e}")
-
-    @staticmethod
     def stop_waf():
         if sys.platform == "win32":
             try:
@@ -760,14 +749,14 @@ class Controller:
 
         try:
             # First, get the list of IDs of exited containers
-            result_ps = subprocess.run("docker ps -aq -f status=exited", shell=True, check=True, capture_output=True, text=True)
+            result_ps = subprocess.run("docker ps -aq -f status=exited --filter 'name=nebula'", shell=True, check=True, capture_output=True, text=True)
 
             # Get the container IDs
             container_ids = result_ps.stdout.strip()
 
             if container_ids:
                 # Run the command to remove the containers
-                result_rm = subprocess.run(f"docker rm $(docker ps -aq -f status=exited)", shell=True, check=True, capture_output=True, text=True)
+                result_rm = subprocess.run(f"docker rm $(docker ps -aq -f status=exited --filter 'name=nebula')", shell=True, check=True, capture_output=True, text=True)
                 print(f"Dangling containers removed successfully: {result_rm.stdout.strip()}.")
             else:
                 print("No dangling containers to remove.")

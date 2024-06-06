@@ -37,6 +37,24 @@ class Reporter(threading.Thread):
             self.__report_resources()
             self.__report_data_queue()
 
+    def report_scenario_finished(self):
+        try:
+            response = requests.post(
+                url = f'http://{self.config.participant["scenario_args"]["controller"]}/nebula/dashboard/{self.config.participant["scenario_args"]["name"]}/node/done',
+                data = json.dumps({"ip": self.config.participant["network_args"]["ip"] , "port": self.config.participant["network_args"]["port"]}),
+                headers={
+                    "Content-Type": "application/json",
+                    "User-Agent": f'NEBULA Participant {self.config.participant["device_args"]["idx"]}',
+                },
+            )
+        except requests.exceptions.ConnectionError:
+            logging.error(f"Error connecting to the controller at {self.url}")
+            return
+        if response.status_code != 200:
+            logging.error(f"Error received from controller: {response.status_code} (probably there is overhead in the controller, trying again in the next round)")
+            logging.debug(response.text)
+            return                
+
     def __report_data_queue(self):
         try:
             while not self.data_queue.empty():

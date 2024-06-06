@@ -446,8 +446,14 @@ class Engine:
         self.total_rounds = None
         self.get_federation_ready_lock().acquire()
         print_msg_box(msg=f"Federated Learning process has been completed.", indent=2, title="End of the experiment")
+        # Report 
+        self.reporter.report_scenario_finished()
         # Kill itself
-        Controller.stop_node(self.docker_id)
+        try:
+            # Run the command to stop the Docker container
+            os.system(f"docker stop {self.docker_id}")
+        except Exception as e:
+            print(f"Error stopping docker container with ID {self.docker_id}: {e}")
 
     async def _extended_learning_cycle(self):
         """
