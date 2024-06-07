@@ -64,7 +64,7 @@
                 <p style="color: #772953; font-weight: bold; padding-top: 6px;">Scenarios queue {{ scenarios_finished }}/{{ scenarios_list_length }}</p>
                 {% if scenarios_finished != scenarios_list_length %}
                 <a href="{{ url_for('nebula_stop_scenario', scenario_name='all', stop_all=True) }}"
-                class="label btn btn-danger" style="float: left; margin-left: 10px; margin-bottom: 10px;">Stop all</a>
+                class="label btn btn-danger" style="float: left; margin-left: 10px; margin-bottom: 10px;">Stop scenario queue</a>
                 {% endif %}
             </div>
             {% endif %}
@@ -93,7 +93,7 @@
                 <p style="color: #772953; font-weight: bold; padding-top: 6px;">Scenarios queue {{ scenarios_finished }}/{{ scenarios_list_length }}</p>
                 {% if scenarios_finished != scenarios_list_length %}
                 <a href="{{ url_for('nebula_stop_scenario', scenario_name='all', stop_all=True) }}"
-                class="label btn btn-danger" style="float: left; margin-left: 10px; margin-bottom: 10px;">Stop all</a>
+                class="label btn btn-danger" style="float: left; margin-left: 10px; margin-bottom: 10px;">Stop scenario queue</a>
                 {% endif %}
             </div>
             {% endif %}
@@ -149,7 +149,7 @@
                             <a href="{{ url_for('nebula_stop_scenario', scenario_name=name, stop_all=False) }}"
                                 class="label btn btn-danger">Stop scenario</a>
                             <a href="{{ url_for('nebula_stop_scenario', scenario_name='all', stop_all=True) }}"
-                                class="label btn btn-danger">Stop all</a>
+                                class="label btn btn-danger">Stop scenario queue</a>
                             {% else %}
                             <a id="remove-btn" data-scenario-name="{{ name }}" class="label btn btn-danger"><i
                                     class="fa fa-trash"></i></a>

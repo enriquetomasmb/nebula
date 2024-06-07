@@ -141,30 +141,30 @@
                     <div class="wrapper" style="text-align: center; display: flex; justify-content: left; align-items: left;">
                         <div class="col-md-5" style="display: inline-block;">
                             <label>
-                                <input type="checkbox" id="mod-noattack" value='No Attack' checked>No Attack
+                                <input type="checkbox" id="mod-noattack" value='No Attack' style="margin-right: 10px;" checked>No Attack
                             </label>
                             <label>
-                                <input type="checkbox" id="mod-labelflipping" value='Label Flipping'>Label Flipping
+                                <input type="checkbox" id="mod-labelflipping" value='Label Flipping' style="margin-right: 10px;">Label Flipping
                             </label>
                             <label>
-                                <input type="checkbox" id="mod-samplepoisoning" value='Sample Poisoning'>Sample Poisoning
+                                <input type="checkbox" id="mod-samplepoisoning" value='Sample Poisoning' style="margin-right: 10px;">Sample Poisoning
                             </label>
                             <label>
-                                <input type="checkbox" id="mod-modelpoisoning" value='Model Poisoning'>Model Poisoning
+                                <input type="checkbox" id="mod-modelpoisoning" value='Model Poisoning' style="margin-right: 10px;">Model Poisoning
                             </label>
                         </div>
                         <div class="col-md-7" style="right: inherit;">
                             <label>
-                                <input type="checkbox" id="mod-neuroninversion" value='GLLNeuronInversionAttack'>GLLNeuronInversionAttack
+                                <input type="checkbox" id="mod-neuroninversion" value='GLLNeuronInversionAttack' style="margin-right: 10px;">GLLNeuronInversionAttack
                             </label>
                             <label>
-                                <input type="checkbox" id="mod-noiseinjection" value='NoiseInjectionAttack'>NoiseInjectionAttack
+                                <input type="checkbox" id="mod-noiseinjection" value='NoiseInjectionAttack' style="margin-right: 10px;">NoiseInjectionAttack
                             </label>
                             <label>
-                                <input type="checkbox" id="mod-swappingweights" value='SwappingWeightsAttack'>SwappingWeightsAttack
+                                <input type="checkbox" id="mod-swappingweights" value='SwappingWeightsAttack' style="margin-right: 10px;">SwappingWeightsAttack
                             </label>
                             <label>
-                                <input type="checkbox" id="mod-delayer" value='DelayerAttack'>DelayerAttack
+                                <input type="checkbox" id="mod-delayer" value='DelayerAttack' style="margin-right: 10px;">DelayerAttack
                             </label>
                         </div>
                     </div>
@@ -942,6 +942,7 @@
                 var option = new Option(options[i], options[i]);
                 modelSelect.options.add(option);
             }
+            return options[0] //Return first option
         }
 
         function populateDatasets() {
@@ -1182,6 +1183,7 @@
                         scenarioStorage.actual_scenario = scenarioStorage.scenariosList.length - 1;
                         var last_scenario = scenarioStorage.scenariosList[scenarioStorage.actual_scenario];
                         setScenarioData(last_scenario);
+                        updateModelOptions();
 
                         //Show buttons to move through the list
                         if (scenarioStorage.scenariosList.length > 1){
@@ -1768,6 +1770,7 @@
             //Show next scenario
             scenarioStorage.actual_scenario = scenarioStorage.actual_scenario + 1;
             setScenarioData(scenarioStorage.scenariosList[scenarioStorage.actual_scenario]);
+            updateModelOptions();
             updateScenariosPosition();
 
             if(scenarioStorage.actual_scenario == scenarioStorage.scenariosList.length - 1){
@@ -1786,6 +1789,7 @@
             scenarioStorage.actual_scenario = scenarioStorage.actual_scenario - 1;            
             var actual_scenario = scenarioStorage.scenariosList[scenarioStorage.actual_scenario];
             setScenarioData(actual_scenario);
+            updateModelOptions();
             updateScenariosPosition();
 
             if(scenarioStorage.actual_scenario == 0){
@@ -1891,7 +1895,7 @@
                                 var dataset_checkbox = document.getElementById(datasets[it3]);
                                 if(dataset_checkbox.checked){
                                     document.getElementById("datasetSelect").value = dataset_checkbox.value;
-                                    updateModelOptions();
+                                    document.getElementById("modelSelect").value = updateModelOptions();
 
                                     //Generate attacks
                                     //Selected attack
