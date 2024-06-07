@@ -809,10 +809,10 @@ class Controller:
                 image: nebula-core
                 environment:
                     - NVIDIA_DISABLE_REQUIRE=true
-                    - /var/run/docker.sock:/var/run/docker.sock
                 restart: no
                 volumes:
                     - {}:/nebula
+                    - /var/run/docker.sock:/var/run/docker.sock
                 extra_hosts:
                     - "host.docker.internal:host-gateway"
                 ipc: host
