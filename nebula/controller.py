@@ -809,6 +809,7 @@ class Controller:
                 image: nebula-core
                 environment:
                     - NVIDIA_DISABLE_REQUIRE=true
+                    - /var/run/docker.sock:/var/run/docker.sock
                 restart: no
                 volumes:
                     - {}:/nebula
