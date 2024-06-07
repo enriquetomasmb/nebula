@@ -63,6 +63,121 @@
     </div>
 </div>
 
+<!-- Generate Scenarios -->
+<div class="modal fade" id="gen-modal" tabindex="-1" aria-labelledby="exampleModalLabel-modal-title" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Scenario Generation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="info-modal-body">
+                <form>
+                    <h5>Advanced Deployment <i class="fa fa-cloud-upload"></i></h5>
+                    <div style="display: inline-block;">
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="radio" id="mod-cpu" name="adv-deployment" value="cpu" style="margin-right: 10px;" checked>CPU
+                        </label>
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="radio" id="mod-gpu" name="adv-deployment" value="gpu" style="margin-right: 10px; margin-left: 10px;">GPU
+                        </label>
+                    </div>
+                    <hr>
+                    <h5>Aggregation <i class="fa fa-calculator"></i>
+                        <input type="checkbox" id="mod-aggregation" style="margin-right: 10px; float: left;">
+                    </h5>
+                    <div style="display: inline-block;">
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="mod-fedavg" value="FedAvg" style="margin-right: 10px;" checked>FedAvg
+                        </label>
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="mod-krum" value="Krum" style="margin-right: 10px; margin-left: 10px;">Krum
+                        </label>
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="mod-trimmed" value="TrimmedMean" style="margin-right: 10px; margin-left: 10px;">TrimmedMean
+                        </label>
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="mod-median" value="Median" style="margin-right: 10px; margin-left: 10px;">Median
+                        </label>
+                    </div>
+                    <hr>
+                    <h5>Topology <i class="fa fa-sitemap"></i>
+                        <input type="checkbox" id="mod-topology" style="margin-right: 10px; float: left;">
+                    </h5>
+                    <div style="display: inline-block;">
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="mod-fully" value='Fully' style="margin-right: 10px;" checked>Fully
+                        </label>
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="mod-ring" value='Ring' style="margin-right: 10px; margin-left: 10px;">Ring
+                        </label>
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="mod-star" value='Star' style="margin-right: 10px; margin-left: 10px;">Star
+                        </label>
+                        <input type="number" id="mod-topology-nodes" placeholder="Nº nodes" min="0" value="3" style="display: inline; width: 40%; margin-left: 10px;">
+                    </div>
+                    <hr>
+                    <h5>Dataset <i class="fa fa-database"></i>
+                        <input type="checkbox" id="mod-dataset" style="margin-right: 10px; float: left;">
+                    </h5>
+                    <div style="display: inline-block;">
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="mod-mnist" value='MNIST' style="margin-right: 10px;" checked>MNIST
+                        </label>
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="mod-fmnist" value='FashionMNIST' style="margin-right: 10px; margin-left: 10px;">FashionMNIST
+                        </label>
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="mod-cifar10" value='CIFAR10' style="margin-right: 10px; margin-left: 10px;">CIFAR10
+                        </label>
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="mod-militarysar" value='MilitarySAR' style="margin-right: 10px; margin-left: 10px;">MilitarySAR
+                        </label>
+                    </div>
+                    <hr>
+                    <h5>Robustness <i class="fa fa-shield"></i>
+                        <input type="checkbox" id="mod-robustness" style="margin-right: 10px; float: left;">
+                    </h5>
+                    <div class="wrapper" style="text-align: center; display: flex; justify-content: left; align-items: left;">
+                        <div class="col-md-5" style="display: inline-block;">
+                            <label>
+                                <input type="checkbox" id="mod-noattack" value='No Attack' style="margin-right: 10px;" checked>No Attack
+                            </label>
+                            <label>
+                                <input type="checkbox" id="mod-labelflipping" value='Label Flipping' style="margin-right: 10px;">Label Flipping
+                            </label>
+                            <label>
+                                <input type="checkbox" id="mod-samplepoisoning" value='Sample Poisoning' style="margin-right: 10px;">Sample Poisoning
+                            </label>
+                            <label>
+                                <input type="checkbox" id="mod-modelpoisoning" value='Model Poisoning' style="margin-right: 10px;">Model Poisoning
+                            </label>
+                        </div>
+                        <div class="col-md-7" style="right: inherit;">
+                            <label>
+                                <input type="checkbox" id="mod-neuroninversion" value='GLLNeuronInversionAttack' style="margin-right: 10px;">GLLNeuronInversionAttack
+                            </label>
+                            <label>
+                                <input type="checkbox" id="mod-noiseinjection" value='NoiseInjectionAttack' style="margin-right: 10px;">NoiseInjectionAttack
+                            </label>
+                            <label>
+                                <input type="checkbox" id="mod-swappingweights" value='SwappingWeightsAttack' style="margin-right: 10px;">SwappingWeightsAttack
+                            </label>
+                            <label>
+                                <input type="checkbox" id="mod-delayer" value='DelayerAttack' style="margin-right: 10px;">DelayerAttack
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="gen-btn" id="generate-btn" class="btn btn-dark" data-bs-dismiss="modal">Generate</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div id="spinner"></div>
 
 
@@ -98,7 +213,12 @@
                     </div>
                 </div>
                 <div class="form-group row container-shadow tiny grey">
-                    <h5 class="step-number">Federation Architecture <i class="fa fa-connectdevelop"></i></h5>
+                    <h5 class="step-number" >Federation Architecture <i class="fa fa-connectdevelop"></i>
+                        <input type="checkbox" id="fedarch-lock" onchange="lock('federationArchitecture', checked)" style="display: none;">
+                        <label for="fedarch-lock" class="icon-container" style="float: right;">
+                            <i class="fa fa-lock"></i> 
+                        </label>
+                    </h5>
                     <h5 class="step-title">Federation approach</h5>
                     <div class="form-check form-check-inline">
                         <select class="form-control" id="federationArchitecture" name="federation"
@@ -113,7 +233,12 @@
                     </div>
                 </div>
                 <div id="networkTopologyForm" class="form-group row container-shadow tiny grey">
-                    <h5 class="step-number">Network Topology <i class="fa fa-sitemap"></i></h5>
+                    <h5 class="step-number">Network Topology <i class="fa fa-sitemap"></i>
+                        <input type="checkbox" id="topology-lock" onchange="lock('custom-topology-btn', 'predefined-topology-btn', 'predefined-topology-select', 'predefined-topology-nodes', checked)" style="display: none;">
+                        <label for="topology-lock" class="icon-container" style="float: right;">
+                            <i class="fa fa-lock"></i> 
+                        </label>
+                    </h5>
                     <h5 class="step-title">Topology generation</h5>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="inlineNetworkTopology"
@@ -145,7 +270,12 @@
                     </div>
                 </div>
                 <div class="form-group row container-shadow tiny grey">
-                    <h5 class="step-number">Dataset <i class="fa fa-database"></i></h5>
+                    <h5 class="step-number">Dataset <i class="fa fa-database"></i>
+                        <input type="checkbox" id="dataset-lock" onchange="lock('datasetSelect', 'iidSelect', 'partitionSelect', 'partitionParameter', checked)" style="display: none;">
+                        <label for="dataset-lock" class="icon-container" style="float: right;">
+                            <i class="fa fa-lock"></i> 
+                        </label>
+                    </h5>
                     <h5 class="step-title">Federated dataset</h5>
                     <div class="form-check form-check-inline">
                         <select class="form-control" id="datasetSelect" name="dataset"
@@ -182,15 +312,20 @@
                     </div>
                     <h5 class="step-title">Parameter setting</h5>
                     <div id="partitionBlock" class="form-check form-check-inline">
-                        <input type="number" step="0.1" class="form-control" id="partitionParameter"
-                            style="display: inline; width: 50%" value="0.5">
+                        <input type="number" step="0.1" class="form-control" id="partitionParameter" style="display: inline; width: 50%"
+                            value="0.5">
                         <small id="parameterSettingHelp" class="form-text text-muted">
                             <i id="parameterSettingHelpIcon" class="fa fa-info-circle"></i>
                         </small>
                     </div>
                 </div>
                 <div class="form-group row container-shadow tiny grey">
-                    <h5 class="step-number">Training <i class="fa fa-cogs"></i></h5>
+                    <h5 class="step-number">Training <i class="fa fa-cogs"></i>
+                        <input type="checkbox" id="model-lock" onchange="lock('modelSelect', checked)" style="display: none;">
+                        <label for="model-lock" class="icon-container" style="float: right;">
+                            <i class="fa fa-lock"></i> 
+                        </label>
+                    </h5>
                     <h5 class="step-title">Model</h5>
                     <div class="form-check form-check-inline">
                         <select class="form-control" id="modelSelect" name="model" style="display: inline; width: 50%">
@@ -201,7 +336,12 @@
                     </div>
                 </div>
                 <div class="form-group row container-shadow tiny grey">
-                    <h5 class="step-number">Aggregation <i class="fa fa-calculator"></i></h5>
+                    <h5 class="step-number">Aggregation <i class="fa fa-calculator"></i>
+                        <input type="checkbox" id="aggregation-lock" onchange="lock('aggregationSelect', checked)" style="display: none;">
+                        <label for="aggregation-lock" class="icon-container" style="float: right;">
+                            <i class="fa fa-lock"></i> 
+                        </label>
+                    </h5>
                     <h5 class="step-title">Aggregation algorithm</h5>
                     <div class="form-check form-check-inline">
                         <select class="form-control" id="aggregationSelect" name="aggregation"
@@ -248,19 +388,40 @@
                 </div>
                 <button id="mode-btn" type="button" class="btn btn-dark" style="margin-top: 10px">Advanced mode
                 </button>
+                <button id="prev-btn" type="button" class="btn btn-dark" style="margin-top: 10px; display: none;">&lt;
+                </button>
+                <div id="scenarios-position" style="display: inline-block;">
+                </div>
+                <button id="next-btn" type="button" class="btn btn-dark" style="margin-top: 10px; display: none;">&gt;
+                </button>
+                <button id="new-btn" type="button" class="btn btn-dark" style="margin-top: 10px; display: none;">
+                    <i class="fa fa-plus" aria-hidden="true"></i> 
+                </button>
+                <button id="add-btn" type="button" class="btn btn-dark" style="margin-top: 10px;">
+                    <i class="fa fa-floppy-o" aria-hidden="true"></i> 
+                </button>
+                <button id="del-btn" type="button" class="btn btn-dark" style="margin-top: 10px; background-color: red; border-color: red; display: none;">
+                    <i class="fa fa-trash" aria-hidden="true"></i> 
+                </button>
                 <button id="run-btn" type="button" class="btn btn-dark"
-                    style="margin-top: 10px; margin-left: 15px; float: right">Run
+                    style="margin-top: 10px; margin-left: 15px; float: right" disabled="true">Run
                     NEBULA
                 </button>
                 <button id="load-config-btn" type="button" class="btn btn-dark"
                     style="margin-top: 10px; margin-left: 5px; float: right">Load</button>
                 <button id="save-config-btn" type="button" class="btn btn-dark"
                     style="margin-top: 10px; margin-left: 5px; float: right">Save</button>
-
+                <button id="open-gen-modal-btn" type="button" class="btn btn-dark" 
+                    style="margin-top: 10px; margin-left: 5px; float: right;"><i class="fa fa-list-ul" aria-hidden="true"></i></button>
             </div>
             <div id="expert-container" class="col-md-12 " style="display: none">
                 <div class="form-group row container-shadow tiny grey">
-                    <h5 class="step-number">Participants <i class="fa fa-users"></i></h5>
+                    <h5 class="step-number">Participants <i class="fa fa-users"></i>
+                        <input type="checkbox" id="participants-lock" onchange="lock('rounds', 'loggingLevel', checked)" style="display: none;">
+                        <label for="participants-lock" class="icon-container" style="float: right;">
+                            <i class="fa fa-lock"></i> 
+                        </label>
+                    </h5>
                     <h5 class="step-title">Number of rounds</h5>
                     <div class="form-check form-check-inline">
                         <input type="number" class="form-control" id="rounds" placeholder="Number of rounds" value="10"
@@ -270,8 +431,8 @@
                     <div class="form-check form-check-inline">
                         <select class="form-control" id="loggingLevel" name="logginglevel"
                             style="display: inline; width: 20%">
-                            <option value="false" selected>Only alerts</option>
-                            <option value="true">Alerts and logs</option>
+                            <option value="false">Only alerts</option>
+                            <option value="true" selected>Alerts and logs</option>
                         </select>
                     </div>
                     <h5 class="step-title">Individual participants</h5>
@@ -279,7 +440,12 @@
                 </div>
                 <!-- Advanced Deployment -->
                 <div class="form-group row container-shadow tiny grey">
-                    <h5 class="step-number">Advanced Deployment <i class="fa fa-cloud-upload"></i></h5>
+                    <h5 class="step-number">Advanced Deployment <i class="fa fa-cloud-upload"></i>
+                        <input type="checkbox" id="accelerator-lock" onchange="lock('resourceUsage', checked)" style="display: none;">
+                        <label for="accelerator-lock" class="icon-container" style="float: right;">
+                            <i class="fa fa-lock"></i> 
+                        </label>
+                    </h5>
                     <h5 class="step-title">Accelerator definition</h5>
                     <div class="form-check">
                         <select class="form-control" id="resourceUsage" name="resources"
@@ -291,7 +457,12 @@
                 </div>
                 <!-- Advanced Topology -->
                 <div class="form-group row container-shadow tiny grey">
-                    <h5 class="step-number">Advanced Topology <i class="fa fa-sitemap"></i></h5>
+                    <h5 class="step-number">Advanced Topology <i class="fa fa-sitemap"></i>
+                        <input type="checkbox" id="distance-lock" onchange="lock('distanceInput', 'distanceValue', checked)" style="display: none;">
+                        <label for="distance-lock" class="icon-container" style="float: right;">
+                            <i class="fa fa-lock"></i> 
+                        </label>
+                    </h5>
                     <div>
                         <h5 class="step-title">Distance between participants</h5>
                         <input type="range" class="form-range" id="distanceInput" min="0" max="1000" value="50"
@@ -302,7 +473,12 @@
                 </div>
                 <!-- Advanced Communications -->
                 <div class="form-group row container-shadow tiny grey">
-                    <h5 class="step-number">Advanced Communications <i class="fa fa-wifi"></i></h5>
+                    <h5 class="step-number">Advanced Communications <i class="fa fa-wifi"></i>
+                        <input type="checkbox" id="comms-lock" onchange="lock('network-subnet', 'network-gateway', checked)" style="display: none;">
+                        <label for="comms-lock" class="icon-container" style="float: right;">
+                            <i class="fa fa-lock"></i> 
+                        </label>
+                    </h5>
                     <h5 class="step-title">Network address</h5>
                     <div class="form-check form-check-inline">
                         <input type="text" class="form-control" id="network-subnet" style="width: 80%"
@@ -316,7 +492,12 @@
                 </div>
                 <!-- Advanced Training -->
                 <div class="form-group row container-shadow tiny grey">
-                    <h5 class="step-number">Advanced Training <i class="fa fa-cogs"></i></h5>
+                    <h5 class="step-number">Advanced Training <i class="fa fa-cogs"></i>
+                        <input type="checkbox" id="epochs-lock" onchange="lock('epochs', checked)" style="display: none;">
+                        <label for="epochs-lock" class="icon-container" style="float: right;">
+                            <i class="fa fa-lock"></i> 
+                        </label>
+                    </h5>
                     <h5 class="step-title">Number of Epochs</h5>
                     <div class="form-check form-check-inline">
                         <input type="number" class="form-control" id="epochs" placeholder="Number of Epochs" value="1"
@@ -325,7 +506,12 @@
                 </div>
                 <!-- Advanced Robustness -->
                 <div class="form-group row container-shadow tiny grey">
-                    <h5 class="step-number">Robustness <i class="fa fa-shield"></i></h5>
+                    <h5 class="step-number">Robustness <i class="fa fa-shield"></i>
+                        <input type="checkbox" id="robustness-lock" onchange="lock('poisoning-attack-select', 'poisoned-node-percent', 'poisoned-sample-percent', 'poisoned-noise-percent', checked)" style="display: none;">
+                        <label for="robustness-lock" class="icon-container" style="float: right;">
+                            <i class="fa fa-lock"></i> 
+                        </label>
+                    </h5>
                     <h5 class="step-title">Attack Type</h5>
                     <div class="form-check form-check-inline">
                         <select class="form-control" id="poisoning-attack-select" name="poisoning-attack"
@@ -360,7 +546,12 @@
                 </div>
                 <!-- Advanced Defense -->
                 <div class="form-group row container-shadow tiny grey">
-                    <h5 class="step-number">Defense <i class="fa fa-wrench"></i></h5>
+                    <h5 class="step-number">Defense <i class="fa fa-wrench"></i>
+                        <input type="checkbox" id="defense-lock" onchange="lock('without-reputation-btn', 'with-reputation-btn', 'dynamic-topology-btn', 'dynamic-aggregation-btn', 'targetAggregationSelect', checked)" style="display: none;">
+                        <label for="defense-lock" class="icon-container" style="float: right;">
+                            <i class="fa fa-lock"></i> 
+                        </label>
+                    </h5>
                     <h5 class="step-title">Reputation System</h5>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="reputationSystem" id="without-reputation-btn"
@@ -402,7 +593,14 @@
                 </div>
                 <!-- Mobility -->
                 <div class="form-group row container-shadow tiny grey">
-                    <h5 class="step-number">Mobility <i class="fa fa-car"></i></h5>
+                    <h5 class="step-number">Mobility <i class="fa fa-car"></i>
+                        <input type="checkbox" id="mobility-lock" onchange="lock('random-geo-btn', 'custom-location-btn', 'latitude', 'longitude',
+                         'open-map-btn', 'current-location-btn', 'without-mobility-btn', 'mobility-btn', 'mobilitySelect', 'radiusFederation',
+                         'roundFrequency', 'mobileParticipantsPercent', 'additionalParticipants', checked)" style="display: none;">
+                        <label for="mobility-lock" class="icon-container" style="float: right;">
+                            <i class="fa fa-lock"></i> 
+                        </label>
+                    </h5>
                     <h5 class="step-title">Select the default location for the participants</h5>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="locationRadioOptions" id="random-geo-btn"
@@ -530,6 +728,20 @@
             text-align: center;
             margin-right: 10px;
             font-size: 15px;
+        }
+
+        /* Lock icons */
+
+        .icon-container {
+            cursor: pointer;
+        }
+
+        input[type="checkbox"][id$="-lock"]:checked + .icon-container i::before {
+            content: "\f023"; 
+        }
+
+        input[type="checkbox"][id$="-lock"]:not(:checked) + .icon-container i::before {
+            content: "\f09c"; 
         }
 
         #expert-container .step-number::before {
@@ -691,6 +903,20 @@
         }
     </style>
 
+    <script>
+        // When a lock is checked, disable options
+        function lock(...args) {
+            var checked = args.pop();
+            for(var i = 0; i < args.length; i++){
+                if (checked == true){
+                    document.getElementById(args[i]).disabled = true;
+                } else {
+                    document.getElementById(args[i]).disabled = false;
+                }
+            }
+        }
+    </script>
+
     {% if not user_logged_in %}
     <script>
         showAlert('info', 'Some functionalities are disabled in the demo version. Please, log in to access all functionalities.');
@@ -716,6 +942,7 @@
                 var option = new Option(options[i], options[i]);
                 modelSelect.options.add(option);
             }
+            return options[0] //Return first option
         }
 
         function populateDatasets() {
@@ -818,7 +1045,10 @@
             console.log("----")
             console.log(Graph.graphData())
             try {
-                document.getElementById("mode-btn").click();
+                resetModeBtn();
+                if(data["logginglevel"] == true){
+                    document.getElementById("mode-btn").click();
+                }
                 // Step 1
                 document.getElementById("scenario-title").value = data["scenario_title"];
                 document.getElementById("scenario-description").value = data["scenario_description"];
@@ -907,9 +1137,7 @@
                         document.getElementById("roundsAdditionalParticipant" + i).value = data["additional_participants"][i]["round"];
                     }
                 }
-                showAlert('info', 'Configuration loaded successfully');
             } catch (error) {
-                showAlert('info', 'Error loading the configuration');
                 console.error(error);
             }
         }
@@ -918,9 +1146,8 @@
     <script>
         // When click on "save-config-btn" button, create a JSON file with the name "config.json" with the all parameters of the scenario
         $('#save-config-btn').click(function () {
-            var data = getScenarioData()
             var filename = "config.json";
-            var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'text/json;charset=utf-8;' });
+            var blob = new Blob([JSON.stringify(scenarioStorage.scenariosList, null, 2)], { type: 'text/json;charset=utf-8;' });
             if (navigator.msSaveBlob) { // IE 10+
                 navigator.msSaveBlob(blob, filename);
             } else {
@@ -952,10 +1179,28 @@
                 reader.onload = readerEvent => {
                     var content = readerEvent.target.result; // this is the content!
                     try {
-                        var data = JSON.parse(content)
-                        setScenarioData(data)
+                        scenarioStorage.scenariosList = JSON.parse(content);
+                        scenarioStorage.actual_scenario = scenarioStorage.scenariosList.length - 1;
+                        var last_scenario = scenarioStorage.scenariosList[scenarioStorage.actual_scenario];
+                        setScenarioData(last_scenario);
+                        updateModelOptions();
+
+                        //Show buttons to move through the list
+                        if (scenarioStorage.scenariosList.length > 1){
+                            document.getElementById("prev-btn").style.display = "inline-block";
+                            document.getElementById("run-btn").disabled = false;
+                            document.getElementById("del-btn").style.display = "inline-block";
+                        }else{
+                            document.getElementById("prev-btn").style.display = "none";
+                            document.getElementById("run-btn").disabled = true;
+                        }
+                        
+                        document.getElementById("new-btn").style.display = "inline-block";
+                        document.getElementById("add-btn").style.display = "none";
+                        updateScenariosPosition();
+                        showAlert('info', 'Configuration file loaded successfully');
                     } catch (error) {
-                        alert("Error loading the configuration file")
+                        showAlert('info', 'Error loading the configuration file');
                         console.error(error)
                     }
 
@@ -1110,6 +1355,17 @@
     </script>
 
     <script>
+        function resetModeBtn(){
+                document.getElementById("mode-btn").innerHTML = "Advanced mode";
+                document.getElementById("mode-btn").classList.remove("btn-light");
+                document.getElementById("mode-btn").classList.add("btn-dark");
+                document.getElementById("expert-container").style.display = "none";
+                document.getElementById("expert-container").style.visibility = "hidden";
+                document.getElementById("expert-container").style.opacity = "0";
+                document.getElementById("expert-container").style.transition = "all 0.5s ease-in-out";
+                document.getElementById("loggingLevel").value = "false";
+        }
+
         var modeBtn = document.getElementById('mode-btn');
         modeBtn.addEventListener("click", function () {
             var mode = modeBtn.innerHTML.trim();
@@ -1123,14 +1379,7 @@
                 document.getElementById("expert-container").style.transition = "all 0.5s ease-in-out";
                 document.getElementById("loggingLevel").value = "true";
             } else {
-                document.getElementById("mode-btn").innerHTML = "Advanced mode";
-                document.getElementById("mode-btn").classList.remove("btn-light");
-                document.getElementById("mode-btn").classList.add("btn-dark");
-                document.getElementById("expert-container").style.display = "none";
-                document.getElementById("expert-container").style.visibility = "hidden";
-                document.getElementById("expert-container").style.opacity = "0";
-                document.getElementById("expert-container").style.transition = "all 0.5s ease-in-out";
-                document.getElementById("loggingLevel").value = "false";
+                resetModeBtn();
             }
         });
     </script>
@@ -1281,6 +1530,422 @@
     </script>
 
     <script>
+        //Save an array of multiple scenarios to deploy
+        var scenarioStorage = (function(){
+            var scenariosList = [];
+            var actual_scenario = 0;
+
+            //Save current scenario
+            function saveScenario(){
+                //Save scenario data
+                var data = getScenarioData();
+
+                // Save the data to the scenarios list
+                scenarioStorage.scenariosList.push(data);
+                console.log("Scenario saved:", data);
+            }
+
+            //Delete actual scenario
+            function deleteScenario(){
+                scenarioStorage.scenariosList.splice(scenarioStorage.actual_scenario, 1);
+            }
+
+            //Replace a modified scenario
+            function replaceScenario(){
+                //Actual scenario data
+                var data = getScenarioData();
+
+                //Replace actual scenario data if modified
+                if(JSON.stringify(scenarioStorage.scenariosList[scenarioStorage.actual_scenario]) !== JSON.stringify(data)){
+                    scenarioStorage.scenariosList[scenarioStorage.actual_scenario] = data;
+                }
+            }
+
+            return{
+                saveScenario: saveScenario,
+                replaceScenario : replaceScenario,
+                deleteScenario : deleteScenario,
+                scenariosList: scenariosList,
+                actual_scenario : actual_scenario
+            }
+        })();
+
+        //Clear the fields of the page except the locks
+        function clearFields(){
+            console.log("--clear--")
+
+            // Step 1
+            document.getElementById("scenario-title").value = document.getElementById("scenario-title").defaultValue;
+            document.getElementById("scenario-description").value = document.getElementById("scenario-description").value;
+            // Step 2
+            document.getElementById("simulation-radio").checked = document.getElementById("simulation-radio").defaultValue;
+            // Step 3
+            if(!document.getElementById("fedarch-lock").checked){
+                document.getElementById("federationArchitecture").value = "DFL";
+                $('#federationArchitecture').change();
+            }
+            // Step 4
+            if(!document.getElementById("topology-lock").checked){
+                document.getElementById("custom-topology-btn").checked = true;
+                document.getElementById("predefined-topology-btn").checked = false;
+                document.getElementById("predefined-topology-select").value = "Fully";
+                document.getElementById("predefined-topology-nodes").value = 3;
+                document.getElementById("networkTopologyRandom").click();
+                document.getElementById("custom-topology-btn").click();
+            }
+            // Step 5
+            if(!document.getElementById("dataset-lock").checked){
+                document.getElementById("datasetSelect").value = "MNIST";
+                document.getElementById("iidSelect").value = false;
+                document.getElementById("partitionSelect").value = "dirichlet";
+                document.getElementById("partitionParameter").value = 0.5;
+            }
+            // Step 6
+            if(!document.getElementById("model-lock").checked){
+                $('#datasetSelect').change();
+            }
+            // Step 7
+            if(!document.getElementById("aggregation-lock").checked){
+                document.getElementById("aggregationSelect").value = "FedAvg";
+            }
+            // Step 8
+            if(!document.getElementById("participants-lock").checked){
+                document.getElementById("rounds").value = document.getElementById("rounds").defaultValue;
+                document.getElementById("loggingLevel").value = false;
+            }
+            // Step 9
+            if(!document.getElementById("accelerator-lock").checked){
+                document.getElementById("resourceUsage").value = "cpu";
+            }
+            // Step 10
+            if(!document.getElementById("distance-lock").checked){
+                document.getElementById("distanceInput").value = document.getElementById("distanceInput").defaultValue;
+                document.getElementById("distanceValue").value = document.getElementById("distanceValue").defaultValue;
+            }
+            // Step 11
+            if(!document.getElementById("comms-lock").checked){
+                document.getElementById("network-subnet").value = document.getElementById("network-subnet").defaultValue;
+                document.getElementById("network-gateway").value = document.getElementById("network-gateway").defaultValue;
+            }
+            // Step 12
+            if(!document.getElementById("epochs-lock").checked){
+                document.getElementById("epochs").value = document.getElementById("epochs").defaultValue;
+            }
+            // Step 13
+            if(!document.getElementById("robustness-lock").checked){
+                document.getElementById("poisoning-attack-select").value = "No Attack";
+                document.getElementById("poisoned-sample-percent").value = document.getElementById("poisoned-sample-percent").defaultValue;
+                document.getElementById("poisoned-noise-percent").value = document.getElementById("poisoned-noise-percent").defaultValue;
+                document.getElementById("poisoned-node-percent").value = document.getElementById("poisoned-node-percent").defaultValue;
+            }
+            // Step 14
+            if(!document.getElementById("defense-lock").checked){
+                document.getElementById("without-reputation-btn").checked = true;
+                document.getElementById("dynamic-aggregation-btn").checked = false;
+                document.getElementById("targetAggregationSelect").value = "Krum";
+                $('#dynamic-aggregation-btn').change();
+                document.getElementById("without-reputation-btn").click();
+                document.getElementById("dynamic-topology-btn").checked = false;
+            }
+            // Step 15
+            if(!document.getElementById("mobility-lock").checked){
+                document.getElementById("random-geo-btn").checked = true;
+                document.getElementById("longitude").value =  document.getElementById("longitude").defaultValue;
+                document.getElementById("random-geo-btn").click();
+                document.getElementById("without-mobility-btn").checked = true;
+                document.getElementById("mobilitySelect").value = "both";
+                document.getElementById("radiusFederation").value = document.getElementById("radiusFederation").defaultValue;
+                document.getElementById("roundFrequency").value = document.getElementById("roundFrequency").defaultValue;
+                document.getElementById("mobileParticipantsPercent").value = document.getElementById("mobileParticipantsPercent").defaultValue;
+                document.getElementById("additionalParticipants").value = document.getElementById("additionalParticipants").defaultValue;
+                $('#additionalParticipants').change();
+                document.getElementById("without-mobility-btn").click();
+                document.getElementById("latitude").value =  document.getElementById("latitude").defaultValue;
+            }
+        }
+
+        //Update the actual position in the list of scenarios
+        function updateScenariosPosition(add=false){
+            var scenarioPosition = document.getElementById("scenarios-position")
+            if(add || scenarioStorage.scenariosList.length < 1){
+                scenarioPosition.style.display = "none";
+            }else{
+                scenarioPosition.style.display = "inline-block";
+                scenarioPosition.textContent = `\n Scenario ${scenarioStorage.actual_scenario + 1} / ${scenarioStorage.scenariosList.length}`;
+            }
+        }
+
+        //When click "new-btn" button, clear fields to define new Scenario
+        document.getElementById("new-btn").addEventListener("click", function(){
+            //Save actual scenario in the list
+            scenarioStorage.replaceScenario();
+
+            clearFields();
+            updateScenariosPosition(true);
+
+            document.getElementById("new-btn").style.display = "none";
+            document.getElementById("prev-btn").style.display = "none";
+            document.getElementById("next-btn").style.display = "none";
+            document.getElementById("del-btn").style.display = "none";
+            document.getElementById("add-btn").style.display = "inline-block";
+        });
+
+        //When click "add-btn" button, save actual scenario in the list of scenarios
+        document.getElementById("add-btn").addEventListener("click", function(){
+            scenarioStorage.saveScenario();
+            scenarioStorage.actual_scenario = scenarioStorage.scenariosList.length - 1;
+
+            sessionStorage.setItem("ScenarioList", JSON.stringify(scenarioStorage.scenariosList));
+
+            updateScenariosPosition();
+
+            var actual_scenario = scenarioStorage.scenariosList[scenarioStorage.actual_scenario];
+            setScenarioData(actual_scenario);
+
+            document.getElementById("add-btn").style.display = "none";
+            if(scenarioStorage.scenariosList.length == 1){
+                document.getElementById("prev-btn").style.display = "none";
+                document.getElementById("next-btn").style.display = "none";
+            }
+            else{
+                document.getElementById("prev-btn").style.display = "inline-block";
+            }
+            document.getElementById("new-btn").style.display = "inline-block";
+            document.getElementById("del-btn").style.display = "inline-block";
+
+            //Enable run
+            if(document.getElementById("run-btn").disabled){
+                document.getElementById("run-btn").disabled = false;
+            }
+        });
+
+        //When click "del-btn" button, delete actual scenario from the list
+        document.getElementById("del-btn").addEventListener("click", function(){
+            //Delete actual scenario
+            scenarioStorage.deleteScenario();
+
+            //Last scenario deleted reduce actual scenario in 1
+            if(scenarioStorage.actual_scenario > scenarioStorage.scenariosList.length - 1){
+                scenarioStorage.actual_scenario = scenarioStorage.actual_scenario - 1;
+            }
+
+            //No scenarios in the list
+            if(scenarioStorage.scenariosList.length < 1){
+                clearFields();
+
+                updateScenariosPosition(true);
+                document.getElementById("add-btn").style.display = "inline-block";
+                document.getElementById("new-btn").style.display = "none";
+                document.getElementById("del-btn").style.display = "none";
+                document.getElementById("run-btn").disabled = true;
+            }
+            //Only one scenario in the list
+            else if(scenarioStorage.scenariosList.length == 1){
+                setScenarioData(scenarioStorage.scenariosList[0]);
+
+                updateScenariosPosition();
+                document.getElementById("new-btn").style.display = "inline-block"; 
+                document.getElementById("next-btn").style.display = "none"; 
+                document.getElementById("prev-btn").style.display = "none"; 
+            }
+            //Multiple scenarios in the list
+            else{
+                setScenarioData(scenarioStorage.scenariosList[scenarioStorage.actual_scenario]);
+
+                updateScenariosPosition();
+                //Last scenario in the list is displayed
+                if(!(scenarioStorage.actual_scenario < scenarioStorage.scenariosList.length -1)){
+                    document.getElementById("prev-btn").style.display = "inline-block";
+                    document.getElementById("new-btn").style.display = "inline-block";  
+                    document.getElementById("next-btn").style.display = "none";
+                }
+            }
+        });
+
+        //When click "next-btn" button, show next scenario
+        document.getElementById("next-btn").addEventListener("click", function(){
+            //Save actual scenario in the list
+            scenarioStorage.replaceScenario();
+
+            //Show next scenario
+            scenarioStorage.actual_scenario = scenarioStorage.actual_scenario + 1;
+            setScenarioData(scenarioStorage.scenariosList[scenarioStorage.actual_scenario]);
+            updateModelOptions();
+            updateScenariosPosition();
+
+            if(scenarioStorage.actual_scenario == scenarioStorage.scenariosList.length - 1){
+                document.getElementById("next-btn").style.display = "none";
+                document.getElementById("new-btn").style.display = "inline-block";
+            }
+            document.getElementById("prev-btn").style.display = "inline-block";
+        });
+
+        //When click "prev-btn" button, show previous scenario
+        document.getElementById("prev-btn").addEventListener("click", function(){
+            //Save actual scenario in the list
+            scenarioStorage.replaceScenario();
+
+            //Show previous scenario
+            scenarioStorage.actual_scenario = scenarioStorage.actual_scenario - 1;            
+            var actual_scenario = scenarioStorage.scenariosList[scenarioStorage.actual_scenario];
+            setScenarioData(actual_scenario);
+            updateModelOptions();
+            updateScenariosPosition();
+
+            if(scenarioStorage.actual_scenario == 0){
+                document.getElementById("prev-btn").style.display = "none";
+            }
+            document.getElementById("new-btn").style.display = "none";
+            document.getElementById("next-btn").style.display = "inline-block";
+        });
+    </script>
+
+    <script>
+        //Scenario generataion
+
+        function atLeastOneChecked(checkboxIds) {
+            return checkboxIds.some(function(id) {
+                var checkbox = document.getElementById(id);
+                return checkbox && checkbox.checked;
+            });
+        }
+
+        //Select all options
+        function selectALL(checkboxIds, checked) {
+            for (var i = 0; i < checkboxIds.length; i++){
+                document.getElementById(checkboxIds[i]).checked = checked;
+            }
+        }
+
+        // Show the modal
+        document.getElementById("open-gen-modal-btn").addEventListener("click", function () {
+            $('#gen-modal').modal('show');
+        });
+
+        //Check all the options
+        document.getElementById("mod-aggregation").addEventListener("change", function() {
+            selectALL(['mod-fedavg', 'mod-krum', 'mod-trimmed', 'mod-median'], document.getElementById("mod-aggregation").checked);
+        });
+        document.getElementById("mod-topology").addEventListener("change", function() {
+            selectALL(['mod-fully', 'mod-ring', 'mod-star'], document.getElementById("mod-topology").checked);
+        });
+        document.getElementById("mod-dataset").addEventListener("change", function() {
+            selectALL(['mod-mnist', 'mod-fmnist', 'mod-cifar10', 'mod-militarysar'], document.getElementById("mod-dataset").checked);
+        });
+        document.getElementById("mod-robustness").addEventListener("change", function() {
+            selectALL(['mod-noattack', 'mod-labelflipping', 'mod-samplepoisoning', 'mod-modelpoisoning', 'mod-neuroninversion', 'mod-noiseinjection',
+             'mod-swappingweights', 'mod-delayer'], document.getElementById("mod-robustness").checked);
+        });
+    
+        //Generate a scenario
+        function generateScenarios(){
+
+            //selected accelerator
+            if(document.getElementById("mod-cpu").checked){
+                document.getElementById("resourceUsage").value = "cpu";
+            }
+            else{
+                document.getElementById("resourceUsage").value = "gpu";
+            }
+
+            //One or more options selected in every case
+            var aggregation_methods = ['mod-fedavg', 'mod-krum', 'mod-trimmed', 'mod-median'];
+            if (!atLeastOneChecked(aggregation_methods)) {
+                alert("Please, select one aggregation method at least.");
+                return;
+            }
+
+            var topologys = ['mod-fully', 'mod-ring', 'mod-star'];
+            if (!atLeastOneChecked(topologys)) {
+                alert("Please, select one topology at least.");
+                return;
+            }
+
+            var datasets = ['mod-mnist', 'mod-fmnist', 'mod-cifar10', 'mod-militarysar'];
+            if (!atLeastOneChecked(datasets)) {
+                alert("Please, select one dataset at least.");
+                return;
+            }
+
+            var attacks = ['mod-noattack', 'mod-labelflipping', 'mod-samplepoisoning', 'mod-modelpoisoning', 'mod-neuroninversion', 'mod-noiseinjection',
+             'mod-swappingweights', 'mod-delayer'];
+            if (!atLeastOneChecked(attacks)) {
+                alert("Please, select one robustness option at least.");
+                return;
+            }
+
+            //Generate scenarios with all aggregation methods selected
+            for (var it1 = 0; it1 < aggregation_methods.length; it1++) {
+                var aggregation_checkbox = document.getElementById(aggregation_methods[it1]);
+                if (aggregation_checkbox.checked) {
+                    document.getElementById("aggregationSelect").value = aggregation_checkbox.value;
+
+                    //Generate topologys
+                    //Selected topology
+                    for (var it2 = 0; it2 < topologys.length; it2++) {
+                        var topology_checkbox = document.getElementById(topologys[it2]);
+                        if (topology_checkbox.checked) {
+                            document.getElementById("predefined-topology-select").value = topology_checkbox.value;
+                            document.getElementById("predefined-topology-nodes").value = document.getElementById("mod-topology-nodes").value;
+                            document.getElementById("networkTopologyRandom").click();
+
+                            //Generate datasets
+                            //Selected dataset
+                            for (var it3 = 0; it3 < datasets.length; it3++){
+                                var dataset_checkbox = document.getElementById(datasets[it3]);
+                                if(dataset_checkbox.checked){
+                                    document.getElementById("datasetSelect").value = dataset_checkbox.value;
+                                    document.getElementById("modelSelect").value = updateModelOptions();
+
+                                    //Generate attacks
+                                    //Selected attack
+                                    for (var it4 = 0; it4 < attacks.length; it4++){
+                                        var attacks_checkbox = document.getElementById(attacks[it4]);
+                                        if(attacks_checkbox.checked){
+                                            document.getElementById("poisoning-attack-select").value = attacks_checkbox.value;
+
+                                            //Set scenario title
+                                            document.getElementById("scenario-title").value = document.getElementById("aggregationSelect").value + "_" + 
+                                            document.getElementById("predefined-topology-select").value + "_nodes" + 
+                                            document.getElementById("predefined-topology-nodes").value + "_" + 
+                                            document.getElementById("datasetSelect").value + "_" + document.getElementById("poisoning-attack-select").value;
+
+
+                                            //Save generated scenario
+                                            scenarioStorage.saveScenario();
+                                            scenarioStorage.actual_scenario = scenarioStorage.scenariosList.length - 1;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            //Show buttons
+            updateScenariosPosition();
+
+            if(scenarioStorage.scenariosList.length == 1){
+                document.getElementById("prev-btn").style.display = "none";
+                document.getElementById("next-btn").style.display = "none";
+            }
+            else{
+                document.getElementById("prev-btn").style.display = "inline-block";
+            }
+            document.getElementById("run-btn").disabled = false;
+            document.getElementById("new-btn").style.display = "inline-block";
+            document.getElementById("del-btn").style.display = "inline-block";
+            document.getElementById("add-btn").style.display = "none";
+        }
+
+        //Generate and save scenarios
+        document.getElementById("generate-btn").addEventListener("click", function(){
+            generateScenarios();
+        });
+    </script>
+
+    <script>
         // Send configuration to the server for deployment
 
         // When click "run-btn" button, create a POST request to /nebula/dashboard/deployment/run with JSON data
@@ -1300,7 +1965,7 @@
 
                 document.getElementById("yes-button").addEventListener("click", function () {
 
-                    var data = getScenarioData();
+                    var data = scenarioStorage.scenariosList;
 
                     var xhr = new XMLHttpRequest();
                     xhr.open("POST", "/nebula/dashboard/deployment/run", true);
@@ -1560,10 +2225,11 @@
             var n_nodes_predefined = document.getElementById("predefined-topology-nodes").value;
             n_nodes_predefined = parseInt(n_nodes_predefined);
 
-            // Remove all nodes in the graph
-            gData.nodes.splice(0, Graph.graphData().nodes.length);
-            // Remove all links in the graph
-            gData.links.splice(0, Graph.graphData().links.length);
+            // Remove all nodes and links in the graph
+            gData = {
+                nodes: [],
+                links: []
+            };
 
             gData = {
                 nodes: [...Array(n_nodes_predefined).keys()].map(i => ({
@@ -2298,8 +2964,8 @@
             }
             // Fill the matrix
             for (let i = 0; i < links.length; i++) {
-                const source = links[i].source.id;
-                const target = links[i].target.id;
+                const source = typeof links[i].source === 'object' ? links[i].source.id : links[i].source;
+                const target = typeof links[i].target === 'object' ? links[i].target.id : links[i].target;
                 matrix[source][target] = 1;
                 matrix[target][source] = 1;
             }

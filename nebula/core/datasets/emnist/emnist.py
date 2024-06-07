@@ -1,4 +1,3 @@
-from math import floor
 import os
 from nebula.core.datasets.nebuladataset import NebulaDataset
 from torchvision import transforms
@@ -91,8 +90,11 @@ class EMNISTDataset(NebulaDataset):
             partitions_map = self.balanced_iid_partition(dataset)
         elif partition == "unbalancediid":
             partitions_map = self.unbalanced_iid_partition(dataset, imbalance_factor=partition_parameter)
+        else:
+            raise ValueError(f"Partition {partition} is not supported for IID map")
 
         if self.partition_id == 0:
             self.plot_data_distribution(dataset, partitions_map)
             self.plot_all_data_distribution(dataset, partitions_map)
+            
         return partitions_map[self.partition_id]

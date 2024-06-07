@@ -1,6 +1,8 @@
 import asyncio
 import logging
 import os
+
+import docker
 from nebula.addons.functions import print_msg_box
 from nebula.addons.attacks.attacks import create_attack
 from nebula.addons.reporter import Reporter
@@ -82,6 +84,8 @@ class Engine:
         self.addr = config.participant["network_args"]["addr"]
         self.role = config.participant["device_args"]["role"]
         self.name = config.participant["device_args"]["name"]
+        self.docker_id = config.participant["device_args"]["docker_id"]
+        self.client = docker.from_env()
 
         print_banner()
 
@@ -443,6 +447,14 @@ class Engine:
         self.total_rounds = None
         self.get_federation_ready_lock().acquire()
         print_msg_box(msg=f"Federated Learning process has been completed.", indent=2, title="End of the experiment")
+        # Report 
+        self.reporter.report_scenario_finished()
+        # Kill itself
+        try:
+            self.client.containers.get(self.docker_id).stop()
+            print(f"Docker container with ID {self.docker_id} stopped successfully.")
+        except Exception as e:
+            print(f"Error stopping Docker container with ID {self.docker_id}: {e}")
 
     async def _extended_learning_cycle(self):
         """
