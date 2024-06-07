@@ -1187,6 +1187,7 @@
                         if (scenarioStorage.scenariosList.length > 1){
                             document.getElementById("prev-btn").style.display = "inline-block";
                             document.getElementById("run-btn").disabled = false;
+                            document.getElementById("del-btn").style.display = "inline-block";
                         }else{
                             document.getElementById("prev-btn").style.display = "none";
                             document.getElementById("run-btn").disabled = true;
@@ -1928,6 +1929,7 @@
             else{
                 document.getElementById("prev-btn").style.display = "inline-block";
             }
+            document.getElementById("run-btn").disabled = false;
             document.getElementById("new-btn").style.display = "inline-block";
             document.getElementById("del-btn").style.display = "inline-block";
             document.getElementById("add-btn").style.display = "none";

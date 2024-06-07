@@ -153,6 +153,10 @@ async def startup_event():
 
 nodes_registration = {}
 
+scenarios_list_length = 0
+
+scenarios_finished = 0
+
 # Detect CTRL+C from parent process
 def signal_handler(signal, frame):
     logging.info("You pressed Ctrl+C [frontend]!")
@@ -329,6 +333,8 @@ async def nebula_dashboard(request: Request, session: Dict = Depends(get_session
                 {
                     "request": request,
                     "scenarios": scenarios,
+                    "scenarios_list_length": scenarios_list_length,
+                    "scenarios_finished" : scenarios_finished,
                     "scenario_running": scenario_running,
                     "scenario_completed": bool_completed,
                     "user_logged_in": session.get("user"),
@@ -648,8 +654,13 @@ async def nebula_stop_scenario(scenario_name: str, stop_all: bool, request: Requ
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
         if(stop_all):
             stop_all_scenarios_event.set()
-            stop_all_scenarios()
+            global scenarios_list_length
+            global scenarios_finished
+            scenarios_list_length = 0
+            scenarios_finished = 0
+            stop_scenario(scenario_name)
         else:
+            finish_scenario_event.set()
             stop_scenario(scenario_name)
         return RedirectResponse(url="/nebula/dashboard")
     else:
@@ -1172,15 +1183,19 @@ def run_scenario(scenario_data, request, role):
 def run_scenarios(data, request, role):
     for scenario_data in data:
         logging.info(f"Running scenario {scenario_data['scenario_title']}")
-        if stop_all_scenarios_event.is_set():
-            break
         scenario_name = run_scenario(scenario_data, request, role)
         # Waits till the scenario is completed
-        while not finish_scenario_event.is_set():
-            time.sleep(10)
+        while not finish_scenario_event.is_set() and not stop_all_scenarios_event.is_set():
+            time.sleep(1)
+        if stop_all_scenarios_event.is_set():
+            stop_all_scenarios_event.clear()
+            stop_scenario(scenario_name)
+            return
         finish_scenario_event.clear()
+        global scenarios_finished
+        scenarios_finished = scenarios_finished +1
         stop_scenario(scenario_name)
-        time.sleep(10)
+        time.sleep(1)
         pass
     
 @app.post("/nebula/dashboard/deployment/run")
@@ -1194,8 +1209,14 @@ async def nebula_dashboard_deployment_run(request: Request, background_tasks: Ba
         
         if request.headers.get("content-type") == "application/json":
             stop_all_scenarios()
+            finish_scenario_event.clear()
             stop_all_scenarios_event.clear()
+            data = None
             data = await request.json()
+            global scenarios_finished
+            scenarios_finished = 0
+            global scenarios_list_length 
+            scenarios_list_length = len(data)
             logging.info(f"Running deployment with {len(data)} scenarios")
             background_tasks.add_task(run_scenarios, data, request.url.port, session["role"])
             return Response(content="Success", status_code=200)

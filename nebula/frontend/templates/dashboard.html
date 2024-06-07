@@ -59,6 +59,15 @@
                 <p style="color: #772953; font-weight: bold">The federation is currently running</p>
             </div>
             {% endif %}
+            {% if scenarios_list_length > 1 %}
+            <div style="text-align: center; display: flex;justify-content: center;" class="col">
+                <p style="color: #772953; font-weight: bold; padding-top: 6px;">Scenarios queue {{ scenarios_finished }}/{{ scenarios_list_length }}</p>
+                {% if scenarios_finished != scenarios_list_length %}
+                <a href="{{ url_for('nebula_stop_scenario', scenario_name='all', stop_all=True) }}"
+                class="label btn btn-danger" style="float: left; margin-left: 10px; margin-bottom: 10px;">Stop all</a>
+                {% endif %}
+            </div>
+            {% endif %}
             <hr>
             <h5>Scenario name: <b id="scenario_name">{{ scenario_running[0] }}</b></h5>
             <h5>Scenario title: <b id="scenario_title">{{ scenario_running[3] }}</b></h5>
@@ -74,11 +83,20 @@
             {% else %}
             <h4>There are no deployed scenarios</h4>
             <div class="col-md-6">
-                <a href="{{ url_for('nebula_dashboard_deployment') }}" class="btn btn-dark">Deploy a scenario</a>
+                <a id="a-scenario-btn" href="{{ url_for('nebula_dashboard_deployment') }}" class="btn btn-dark">Deploy a scenario</a>
                 {% if scenarios %}
                 <a href="{{ url_for('nebula_dashboard_statistics') }}" class="btn btn-dark">Compare scenarios</a>
                 {% endif %}
             </div>
+            {% if scenarios_list_length is defined and scenarios_list_length > 1 %}
+            <div style="text-align: center; display: flex;justify-content: center;" class="col">
+                <p style="color: #772953; font-weight: bold; padding-top: 6px;">Scenarios queue {{ scenarios_finished }}/{{ scenarios_list_length }}</p>
+                {% if scenarios_finished != scenarios_list_length %}
+                <a href="{{ url_for('nebula_stop_scenario', scenario_name='all', stop_all=True) }}"
+                class="label btn btn-danger" style="float: left; margin-left: 10px; margin-bottom: 10px;">Stop all</a>
+                {% endif %}
+            </div>
+            {% endif %}
             {% endif %}
         </div>
     </div>
@@ -127,8 +145,6 @@
                             {% if status == "running" %}
                             <a href="{{ url_for('nebula_stop_scenario', scenario_name=name, stop_all=False) }}"
                                 class="label btn btn-danger">Stop scenario</a>
-                            <a href="{{ url_for('nebula_stop_scenario', scenario_name='all', stop_all=True) }}"
-                                class="label btn btn-danger">Stop all</a>
                             {% elif status == "completed" %}
                             <a href="{{ url_for('nebula_stop_scenario', scenario_name=name, stop_all=False) }}"
                                 class="label btn btn-danger">Stop scenario</a>
@@ -256,6 +272,44 @@
             }
         }
     }    
+</script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var scenarios_finished = parseInt("{{scenarios_finished}}");
+        var scenarios_list_length = parseInt("{{scenarios_list_length}}");
+
+        var newScenarioBtn = document.getElementById("new-scenario-btn");
+        var aScenarioBtn = document.getElementById("a-scenario-btn");
+
+        if (scenarios_finished < scenarios_list_length) {
+            if(newScenarioBtn){
+                newScenarioBtn.style.pointerEvents = 'none';
+                newScenarioBtn.style.backgroundColor = 'grey';
+                newScenarioBtn.style.borderColor = 'grey'; 
+                newScenarioBtn.style.cursor = 'default';
+            }
+
+            if(aScenarioBtn){
+                aScenarioBtn.style.pointerEvents = 'none';
+                aScenarioBtn.style.backgroundColor = 'grey'; 
+                aScenarioBtn.style.borderColor = 'grey'; 
+                aScenarioBtn.style.cursor = 'default';
+            }
+        } else {
+            if(newScenarioBtn){
+                newScenarioBtn.style.pointerEvents = 'auto';
+                newScenarioBtn.style.backgroundColor = ''; 
+                newScenarioBtn.style.cursor = 'pointer'; 
+            }
+
+            if(aScenarioBtn){
+                aScenarioBtn.style.pointerEvents = 'auto';
+                aScenarioBtn.style.backgroundColor = ''; 
+                aScenarioBtn.style.cursor = 'pointer';
+            }
+        }
+    });
 </script>
 
 {% endblock %}

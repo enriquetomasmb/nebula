@@ -1,6 +1,8 @@
 import asyncio
 import logging
 import os
+
+import docker
 from nebula.addons.functions import print_msg_box
 from nebula.addons.attacks.attacks import create_attack
 from nebula.addons.reporter import Reporter
@@ -27,8 +29,6 @@ from nebula.config.config import Config
 from nebula.core.training.lightning import Lightning
 
 from nebula.core.utils.helper import cosine_metric
-
-from nebula.controller import Controller
 
 import sys
 import pdb
@@ -85,6 +85,7 @@ class Engine:
         self.role = config.participant["device_args"]["role"]
         self.name = config.participant["device_args"]["name"]
         self.docker_id = config.participant["device_args"]["docker_id"]
+        self.client = docker.from_env()
 
         print_banner()
 
@@ -450,10 +451,10 @@ class Engine:
         self.reporter.report_scenario_finished()
         # Kill itself
         try:
-            # Run the command to stop the Docker container
-            os.system(f"docker stop {self.docker_id}")
+            self.client.containers.get(self.docker_id).stop()
+            print(f"Docker container with ID {self.docker_id} stopped successfully.")
         except Exception as e:
-            print(f"Error stopping docker container with ID {self.docker_id}: {e}")
+            print(f"Error stopping Docker container with ID {self.docker_id}: {e}")
 
     async def _extended_learning_cycle(self):
         """
