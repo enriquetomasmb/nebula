@@ -754,6 +754,8 @@
 </script>
 
 <script type="text/javascript">
+    var scenario_name = document.getElementById('scenario_name').innerHTML;
+
     socket.onmessage = function (event) {
         console.log("--> [!] Received message from WebSocket");
         console.log(event.data);
@@ -763,16 +765,12 @@
             console.log("Error parsing JSON data");
             return;
         }
+        if (data.scenario_name !== scenario_name) {
+            return;
+        }
         if (data.type === "node_update") {
             console.log("--> [!] Received node_update from WebSocket");
             console.log(data);
-
-            // Increase randomlly the latitude and longitude of the node
-            // data.latitude = data.latitude + randomFloatFromInterval(2, 10);
-            // data.longitude = data.longitude + randomFloatFromInterval(2, 12);
-
-            //console.log("gData before updating the node");
-            //console.log(gData);
 
             // Update the table and the map
             updateNode(data);
