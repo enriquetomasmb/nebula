@@ -8,7 +8,6 @@ Subpackages
    :maxdepth: 4
 
    nebula.addons.blockchain.chaincode
-   nebula.addons.blockchain.experiments
    nebula.addons.blockchain.geth
    nebula.addons.blockchain.oracle
 
