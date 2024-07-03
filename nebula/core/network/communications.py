@@ -17,6 +17,7 @@ from nebula.core.network.propagator import Propagator
 from nebula.core.pb import nebula_pb2
 from nebula.core.network.messages import MessagesManager
 from nebula.core.network.connection import Connection
+from nebula.core.network.nebulaconnection import NebulaConnectionService
 
 from nebula.core.utils.locker import Locker
 from nebula.core.utils.helper import (
@@ -71,6 +72,14 @@ class CommunicationsManager:
         self.connections_reconnect = []
         self.max_connections = 1000
         self.network_engine = None
+        
+        # Connection service to communicate with external devices
+        self._external_connection_service = None
+        
+        # The line below is neccesary when mobility would be set up
+        #if self.config.participant["mobility_args"]["mobility"] and not self.config.participant["mobility_args"]["late_creation"]:
+        self._external_connection_service = NebulaConnectionService(self.addr)
+        self.ecs.start()
 
         self.stop_network_engine = asyncio.Event()
 
@@ -105,6 +114,10 @@ class CommunicationsManager:
     @property
     def mobility(self):
         return self._mobility
+    
+    @property
+    def ecs(self):
+        return self._external_connection_service
 
     async def handle_incoming_message(self, data, addr_from):
         try:
@@ -226,6 +239,23 @@ class CommunicationsManager:
             await self.engine.event_manager.trigger_event(source, message)
         except Exception as e:
             logging.error(f"🔗  handle_connection_message | Error while processing: {message.action} | {e}")
+
+    def _start_external_connection_service(self):
+        self.ecs = NebulaConnectionService(self.addr)
+        self.ecs.start()
+        
+    async def establish_connection_with_federation(self, message):
+        """
+            Using ExternalConnectionService to get addrs on local network, after that
+            stablishment of TCP connection and send the message broadcasted
+
+        Args:
+            message to be sent
+        """
+        addrs = self.ecs.find_federation()
+        for addr in addrs:
+            await self.cm.connect(addr, direct=False)
+            await self.send_message(addr, message)
 
     def get_connections_lock(self):
         return self.connections_lock
