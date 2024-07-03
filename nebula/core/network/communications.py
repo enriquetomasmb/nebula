@@ -17,7 +17,7 @@ from nebula.core.network.propagator import Propagator
 from nebula.core.pb import nebula_pb2
 from nebula.core.network.messages import MessagesManager
 from nebula.core.network.connection import Connection
-from nebula.core.network.nebulaconnection import NebulaConnectionService
+from nebula.core.network.nebulamulticasting import NebulaConnectionService
 
 from nebula.core.utils.locker import Locker
 from nebula.core.utils.helper import (
