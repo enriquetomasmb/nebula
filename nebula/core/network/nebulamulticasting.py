@@ -56,8 +56,8 @@ class NebulaServer(threading.Thread):
                 else:
                     if self._is_nebula_message(data): 
                         self.respond(addr)
-                    time.sleep(1)
-                    self.stop()
+                    #time.sleep(1)
+                    #self.stop()
         except Exception as e:
             logging.info('Error in Nebula npnp server listening: %s', e)
 
@@ -172,7 +172,6 @@ class NebulaConnectionService(ExternalConnectionService):
         self.client.stop()
               
     def response_recieved(self, data, addr):
-        print("NebulaMulticastingService: Response recieved")
         msg_str = data.decode('utf-8')
         self._add_addr(msg_str)
         

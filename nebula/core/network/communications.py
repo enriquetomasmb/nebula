@@ -244,6 +244,13 @@ class CommunicationsManager:
         self.ecs = NebulaConnectionService(self.addr)
         self.ecs.start()
         
+    def stop_external_connection_service(self):
+        self.ecs.stop()    
+        
+    def init_external_connection_service(self):
+        self.ecs = NebulaConnectionService(self.addr)
+        self.start_external_connection_service()    
+        
     async def establish_connection_with_federation(self, message):
         """
             Using ExternalConnectionService to get addrs on local network, after that
