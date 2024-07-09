@@ -33,7 +33,8 @@ class Reporter(threading.Thread):
         time.sleep(self.grace_time)
         while True:
             time.sleep(self.frequency)
-            self.__report_status_to_controller()
+            if self.config.participant["scenario_args"]["controller"] == "nebula-frontend":
+                self.__report_status_to_controller()
             self.__report_resources()
             self.__report_data_queue()
 
@@ -135,7 +136,7 @@ class Reporter(threading.Thread):
                     gpu_percent = pynvml.nvmlDeviceGetUtilizationRates(handle).gpu
                     gpu_temp = pynvml.nvmlDeviceGetTemperature(handle, pynvml.NVML_TEMPERATURE_GPU)
                     gpu_mem = pynvml.nvmlDeviceGetMemoryInfo(handle)
-                    gpu_mem_percent = gpu_mem.used / gpu_mem.total * 100
+                    gpu_mem_percent = round(gpu_mem.used / gpu_mem.total * 100, 3)
                     gpu_power = pynvml.nvmlDeviceGetPowerUsage(handle) / 1000.0
                     gpu_clocks = pynvml.nvmlDeviceGetClockInfo(handle, pynvml.NVML_CLOCK_SM)
                     gpu_memory_clocks = pynvml.nvmlDeviceGetClockInfo(handle, pynvml.NVML_CLOCK_MEM)

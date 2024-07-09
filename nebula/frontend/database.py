@@ -14,20 +14,26 @@ notes_db_file_location = "databases/notes.db"
 
 _node_lock = asyncio.Lock()
 
+PRAGMA_SETTINGS = [
+    "PRAGMA journal_mode=WAL;",
+    "PRAGMA synchronous=NORMAL;",
+    "PRAGMA journal_size_limit=1048576;",
+    "PRAGMA cache_size=10000;",
+    "PRAGMA temp_store=MEMORY;",
+    "PRAGMA cache_spill=0;"
+]
 
-def enable_wal_mode(db_file):
-    with sqlite3.connect(db_file) as conn:
-        cursor = conn.cursor()
-        cursor.execute("PRAGMA journal_mode=WAL;")
-        mode = cursor.fetchone()
-        print(f"Journal mode: {mode[0]}")
+async def setup_database(db_file_location):
+    async with aiosqlite.connect(db_file_location) as db:
+        for pragma in PRAGMA_SETTINGS:
+            await db.execute(pragma)
+        await db.commit()
 
-
-# enable_wal_mode(user_db_file_location)
-# enable_wal_mode(node_db_file_location)
-# enable_wal_mode(scenario_db_file_location)
-# enable_wal_mode(notes_db_file_location)
-
+async def initialize_databases():
+    await setup_database(user_db_file_location)
+    await setup_database(node_db_file_location)
+    await setup_database(scenario_db_file_location)
+    await setup_database(notes_db_file_location)
 
 def list_users(all_info=False):
     with sqlite3.connect(user_db_file_location) as conn:

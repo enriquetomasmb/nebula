@@ -6,10 +6,7 @@ import json
 import logging
 import multiprocessing
 import os
-import threading
 import time
-import docker
-import docker.utils
 import requests
 import signal
 import sys
@@ -24,6 +21,7 @@ logging.basicConfig(level=logging.INFO)
 from ansi2html import Ansi2HTMLConverter
 
 from nebula.frontend.database import (
+    initialize_databases,
     list_users,
     verify,
     delete_user_from_db,
@@ -70,6 +68,7 @@ class Settings:
     templates_dir: str = "templates"
     
 settings = Settings()
+initialize_databases()
 
 logging.info(f"NEBULA_DEBUG: {settings.debug}")
 logging.info(f"NEBULA_ADVANCED_ANALYTICS: {settings.advanced_analytics}")
@@ -629,18 +628,18 @@ async def nebula_monitor_image(scenario_name: str):
 
 
 def stop_scenario(scenario_name):
-    from nebula.controller import Controller
+    from nebula.scenarios import ScenarioManagement
 
-    Controller.stop_participants()
-    Controller.stop_blockchain()
+    ScenarioManagement.stop_participants()
+    ScenarioManagement.stop_blockchain()
     scenario_set_status_to_finished(scenario_name)
 
 
 def stop_all_scenarios():
-    from nebula.controller import Controller
+    from nebula.scenarios import ScenarioManagement
 
-    Controller.stop_participants()
-    Controller.stop_blockchain()
+    ScenarioManagement.stop_participants()
+    ScenarioManagement.stop_blockchain()
     scenario_set_all_status_to_finished()
 
 
@@ -668,7 +667,7 @@ async def nebula_stop_scenario(scenario_name: str, stop_all: bool, request: Requ
 
 
 def remove_scenario(scenario_name=None):
-    from nebula.controller import Controller
+    from nebula.scenarios import ScenarioManagement
     if settings.advanced_analytics:
         from aim.sdk.repo import Repo
         # NEBULALOGGER START
@@ -692,7 +691,7 @@ def remove_scenario(scenario_name=None):
     remove_nodes_by_scenario_name(scenario_name)
     remove_scenario_by_name(scenario_name)
     remove_note(scenario_name)
-    Controller.remove_files_by_scenario(scenario_name)
+    ScenarioManagement.remove_files_by_scenario(scenario_name)
 
 
 @app.get("/nebula/dashboard/{scenario_name}/remove")
@@ -1036,130 +1035,28 @@ async def node_stopped(scenario_name: str, request: Request):
             nodes_finished.clear()
             finish_scenario_event.set()
     
-def run_scenario(scenario_data, request, role):
-    from nebula.controller import Controller
-    
-    nodes = scenario_data["nodes"]
-    scenario_name = f'nebula_{scenario_data["federation"]}_{datetime.datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}'
-
-    scenario_path = os.path.join(settings.config_dir, scenario_name)
-    os.makedirs(scenario_path, exist_ok=True)
-
-    scenario_file = os.path.join(scenario_path, "scenario.json")
-    with open(scenario_file, "w") as f:
-        json.dump(scenario_data, f, sort_keys=False, indent=2)
-
-    args_controller = {
-        "advanced_analytics": settings.advanced_analytics,
-        "scenario_name": scenario_name,
-        "config": settings.config_dir,
-        "logs": settings.log_dir,
-        "certs": settings.cert_dir,
-        "n_nodes": scenario_data["n_nodes"],
-        "matrix": scenario_data["matrix"],
-        "federation": scenario_data["federation"],
-        "topology": scenario_data["topology"],
-        "simulation": scenario_data["simulation"],
-        "env": None,
-        "root_path": settings.root_host_path,
-        "webport": request or 80,  # Get the port of the frontend, if not specified, use 80
-        "network_subnet": scenario_data["network_subnet"],
-        "use_blockchain": scenario_data["agg_algorithm"] == "BlockchainReputation",
-        "network_gateway": scenario_data["network_gateway"],
-    }
-
-    controller_file = os.path.join(settings.config_dir, scenario_name, "controller.json")
-    with open(controller_file, "w") as f:
-        json.dump(args_controller, f, sort_keys=False, indent=2)
-
-    attack = scenario_data["attacks"]
-    poisoned_node_percent = int(scenario_data["poisoned_node_percent"])
-    poisoned_sample_percent = int(scenario_data["poisoned_sample_percent"])
-    poisoned_noise_percent = int(scenario_data["poisoned_noise_percent"])
-    federation = scenario_data["federation"]
-
-    nodes, attack_matrix = attack_node_assign(
-        nodes,
-        federation,
-        attack,
-        poisoned_node_percent,
-        poisoned_sample_percent,
-        poisoned_noise_percent,
-    )
-
-    mobility_status = scenario_data["mobility"]
-    if mobility_status:
-        mobile_participants_percent = int(scenario_data["mobile_participants_percent"])
-        nodes = mobility_assign(nodes, mobile_participants_percent)
-    else:
-        nodes = mobility_assign(nodes, 0)
-
-    import shutil
-    for node in nodes:
-        node_config = nodes[node]
-        participant_file = os.path.join(settings.config_dir, scenario_name, f'participant_{node_config["id"]}.json')
-        os.makedirs(os.path.dirname(participant_file), exist_ok=True)
-        shutil.copy(
-            os.path.join(settings.config_frontend_dir, "participant.json.example"),
-            participant_file,
-        )
-        with open(participant_file) as f:
-            participant_config = json.load(f)
-        participant_config["network_args"]["ip"] = node_config["ip"]
-        participant_config["network_args"]["port"] = int(node_config["port"])
-        participant_config["device_args"]["idx"] = node_config["id"]
-        participant_config["device_args"]["start"] = node_config["start"]
-        participant_config["device_args"]["role"] = node_config["role"]
-        participant_config["device_args"]["proxy"] = node_config["proxy"]
-        participant_config["device_args"]["malicious"] = node_config["malicious"]
-        participant_config["scenario_args"]["rounds"] = int(scenario_data["rounds"])
-        participant_config["data_args"]["dataset"] = scenario_data["dataset"]
-        participant_config["data_args"]["iid"] = scenario_data["iid"]
-        participant_config["data_args"]["partition_selection"] = scenario_data["partition_selection"]
-        participant_config["data_args"]["partition_parameter"] = scenario_data["partition_parameter"]
-        participant_config["model_args"]["model"] = scenario_data["model"]
-        participant_config["training_args"]["epochs"] = int(scenario_data["epochs"])
-        participant_config["device_args"]["accelerator"] = scenario_data["accelerator"]
-        participant_config["device_args"]["logging"] = scenario_data["logginglevel"]
-        participant_config["aggregator_args"]["algorithm"] = scenario_data["agg_algorithm"]
-        participant_config["adversarial_args"]["attacks"] = node_config["attacks"]
-        participant_config["adversarial_args"]["poisoned_sample_percent"] = node_config["poisoned_sample_percent"]
-        participant_config["adversarial_args"]["poisoned_ratio"] = node_config["poisoned_ratio"]
-        participant_config["defense_args"]["with_reputation"] = scenario_data["with_reputation"]
-        participant_config["defense_args"]["is_dynamic_topology"] = scenario_data["is_dynamic_topology"]
-        participant_config["defense_args"]["is_dynamic_aggregation"] = scenario_data["is_dynamic_aggregation"]
-        participant_config["defense_args"]["target_aggregation"] = scenario_data["target_aggregation"]
-        participant_config["mobility_args"]["random_geo"] = scenario_data["random_geo"]
-        participant_config["mobility_args"]["latitude"] = scenario_data["latitude"]
-        participant_config["mobility_args"]["longitude"] = scenario_data["longitude"]
-        participant_config["mobility_args"]["mobility"] = node_config["mobility"]
-        participant_config["mobility_args"]["mobility_type"] = scenario_data["mobility_type"]
-        participant_config["mobility_args"]["radius_federation"] = scenario_data["radius_federation"]
-        participant_config["mobility_args"]["scheme_mobility"] = scenario_data["scheme_mobility"]
-        participant_config["mobility_args"]["round_frequency"] = scenario_data["round_frequency"]
-        
-        with open(participant_file, "w") as f:
-            json.dump(participant_config, f, sort_keys=False, indent=2)
-
-    import argparse
+def run_scenario(scenario_data, role):
+    from nebula.scenarios import ScenarioManagement   
     import subprocess
     
-    args_controller = argparse.Namespace(**args_controller)
-    controller = Controller(args_controller)  # Generate an instance of controller in this new process
+    # Manager for the actual scenario
+    scenarioManagement = ScenarioManagement(scenario_data, "nebula-frontend")
+    
+    # Run the actual scenario
     try:
-        if mobility_status:
+        if scenarioManagement.scenario.mobility:
             additional_participants = scenario_data["additional_participants"]
             schema_additional_participants = scenario_data["schema_additional_participants"]
-            controller.load_configurations_and_start_nodes(additional_participants, schema_additional_participants)
+            scenarioManagement.load_configurations_and_start_nodes(additional_participants, schema_additional_participants)
         else:
-            controller.load_configurations_and_start_nodes()
+            scenarioManagement.load_configurations_and_start_nodes()
     except subprocess.CalledProcessError as e:
         logging.error(f"Error docker-compose up: {e}")
         return RedirectResponse(url="/nebula/dashboard/deployment")
-            
+        
     scenario_update_record(
-        scenario_name=controller.scenario_name,
-        start_time=controller.start_date_scenario,
+        scenario_name=scenarioManagement.scenario_name,
+        start_time=scenarioManagement.start_date_scenario,
         end_time="",
         status="running",
         title=scenario_data["scenario_title"],
@@ -1171,19 +1068,21 @@ def run_scenario(scenario_data, request, role):
         role=role,
     )
     
-    nodes_registration[scenario_name] = {
+    
+    nodes_registration[scenarioManagement.scenario_name] = {
         "n_nodes": scenario_data["n_nodes"],
         "nodes": set(),
     }
-    nodes_registration[scenario_name]["condition"] = asyncio.Condition()
     
-    return scenario_name
+    nodes_registration[scenarioManagement.scenario_name]["condition"] = asyncio.Condition()
+    
+    return scenarioManagement.scenario_name
 
 # Deploy the list of scenarios
-def run_scenarios(data, request, role):
+def run_scenarios(data, role):
     for scenario_data in data:
         logging.info(f"Running scenario {scenario_data['scenario_title']}")
-        scenario_name = run_scenario(scenario_data, request, role)
+        scenario_name = run_scenario(scenario_data, role)
         # Waits till the scenario is completed
         while not finish_scenario_event.is_set() and not stop_all_scenarios_event.is_set():
             time.sleep(1)
@@ -1218,7 +1117,7 @@ async def nebula_dashboard_deployment_run(request: Request, background_tasks: Ba
             global scenarios_list_length 
             scenarios_list_length = len(data)
             logging.info(f"Running deployment with {len(data)} scenarios")
-            background_tasks.add_task(run_scenarios, data, request.url.port, session["role"])
+            background_tasks.add_task(run_scenarios, data, session["role"])
             return Response(content="Success", status_code=200)
         else:
             raise HTTPException(status_code=401)

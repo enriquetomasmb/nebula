@@ -11,6 +11,7 @@ nginx &
 
 # Change directory to where app.py is located
 NEBULA_FRONTEND_DIR=/nebula/nebula/frontend
+#NEBULA_DATABASES_DIR=/nebula/nebula/frontend/databases
 cd $NEBULA_FRONTEND_DIR
 
 # Start Gunicorn
@@ -27,10 +28,10 @@ DEBUG=$NEBULA_DEBUG
 echo "DEBUG: $DEBUG"
 if [ "$DEBUG" = "True" ]; then
     echo "Starting Gunicorn in debug mode..."
-    uvicorn app:app --uds /tmp/$NEBULA_SOCK --reload --reload-dir $NEBULA_FRONTEND_DIR --log-level debug --proxy-headers --forwarded-allow-ips "*" &
+    uvicorn app:app --uds /tmp/$NEBULA_SOCK --reload --reload-dir $NEBULA_FRONTEND_DIR --reload-exclude '*.db' --reload-exclude '*.db-journal' --log-level debug --proxy-headers --forwarded-allow-ips "*" &
 else
     echo "Starting Gunicorn in production mode..."
-    uvicorn app:app --uds /tmp/$NEBULA_SOCK --reload --reload-dir $NEBULA_FRONTEND_DIR --log-level info --proxy-headers --forwarded-allow-ips "*" &
+    uvicorn app:app --uds /tmp/$NEBULA_SOCK --reload --reload-dir $NEBULA_FRONTEND_DIR --reload-exclude '*.db' --reload-exclude '*.db-journal' --log-level info --proxy-headers --forwarded-allow-ips "*" &
 fi
 
 if [ "$NEBULA_ADVANCED_ANALYTICS" = "False" ]; then
