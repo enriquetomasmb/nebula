@@ -305,8 +305,9 @@ class Engine:
         logging.info(f"💤  Cold start time: {self.config.participant['misc_args']['grace_time_connection']} seconds before connecting to the network")
         await asyncio.sleep(self.config.participant["misc_args"]["grace_time_connection"])
         await self.cm.start()
-        await self.cm.register()
-        await self.cm.wait_for_controller()
+        if self.config.participant["scenario_args"]["controller"] == "nebula-frontend":
+            await self.cm.register()
+            await self.cm.wait_for_controller()
         initial_neighbors = self.config.participant["network_args"]["neighbors"].split()
         for i in initial_neighbors:
             addr = f"{i.split(':')[0]}:{i.split(':')[1]}"
@@ -447,8 +448,11 @@ class Engine:
         self.total_rounds = None
         self.get_federation_ready_lock().acquire()
         print_msg_box(msg=f"Federated Learning process has been completed.", indent=2, title="End of the experiment")
+        # Enable loggin info
+        logging.getLogger().disabled = True
         # Report 
-        self.reporter.report_scenario_finished()
+        if self.config.participant["scenario_args"]["controller"] == "nebula-frontend":
+            self.reporter.report_scenario_finished()
         # Kill itself
         try:
             self.client.containers.get(self.docker_id).stop()

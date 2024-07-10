@@ -111,6 +111,8 @@ class CommunicationsManager:
             message_wrapper = nebula_pb2.Wrapper()
             message_wrapper.ParseFromString(data)
             source = message_wrapper.source
+            if source == self.addr:
+                return
             if message_wrapper.HasField("discovery_message"):
                 if self.include_received_message_hash(hashlib.md5(data).hexdigest()):
                     self.forwarder.forward(data, addr_from=addr_from)
@@ -649,7 +651,7 @@ class CommunicationsManager:
                 self.config.add_neighbor_from_config(addr)
                 return True
             except Exception as e:
-                logging.error(f"❗️  [outgoing] Error adding direct connected neighbor {addr}: {str(e)}")
+                logging.info(f"❗️  [outgoing] Error adding direct connected neighbor {addr}: {str(e)}")
                 return False
             finally:
                 if addr in self.pending_connections:

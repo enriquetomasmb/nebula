@@ -20,6 +20,8 @@ class NebulaTensorBoardLogger(TensorBoardLogger):
         # logging.debug(f"Logging data for global step {step} | local step {self.local_step} | global step {self.global_step}")
         try:
             super().log_metrics(data, step)
+        except ValueError as e:
+            pass
         except Exception as e:
             logging.error(f"Error logging statistics data [{data}] for step [{step}]: {e}")
 
