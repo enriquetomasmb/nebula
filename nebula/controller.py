@@ -13,7 +13,7 @@ from nebula.config.config import Config
 from nebula.config.mender import Mender
 from nebula import __version__
 from nebula.scenarios import ScenarioManagement
-from nebula.tests import test
+from nebula.tests import main as deploy_tests
 
 
 # Setup controller logger
@@ -417,7 +417,7 @@ class Controller:
             raise Exception("Error while starting the frontend: {}".format(e))
 
     def run_test(self):
-        test.start()
+        deploy_tests.start()
         
     @staticmethod
     def stop_frontend():

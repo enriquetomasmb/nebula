@@ -9,40 +9,34 @@ import docker
 # Constants
 TIMEOUT = 3600
 
+
 # Detect CTRL+C from parent process
 def signal_handler(signal, frame):
     logging.info("You pressed Ctrl+C [test]!")
     sys.exit(0)
+
 
 # Create nebula netbase if it does not exist
 def create_docker_network():
     client = docker.from_env()
 
     try:
-        ipam_pool = docker.types.IPAMPool(
-            subnet="192.168.10.0/24",
-            gateway="192.168.10.1"
-        )
-        ipam_config = docker.types.IPAMConfig(
-            pool_configs=[ipam_pool]
-        )
+        ipam_pool = docker.types.IPAMPool(subnet="192.168.10.0/24", gateway="192.168.10.1")
+        ipam_config = docker.types.IPAMConfig(pool_configs=[ipam_pool])
 
-        client.networks.create(
-            "nebula-net-base",
-            driver="bridge",
-            ipam=ipam_config
-        )
+        client.networks.create("nebula-net-base", driver="bridge", ipam=ipam_config)
         print("Docker network created successfully.")
     except docker.errors.APIError as e:
         print(f"Error creating Docker network: {e}")
 
+
 # To add a new test create the option in the menu and a [test].json file in tests folder
 def menu():
-    #clear terminal
-    if os.name == 'nt':
-        os.system('cls')
+    # clear terminal
+    if os.name == "nt":
+        os.system("cls")
     else:
-        os.system('clear')
+        os.system("clear")
 
     banner = """
 ███╗   ██╗███████╗██████╗ ██╗   ██╗██╗      █████╗
@@ -82,28 +76,29 @@ CTRL + C to exit
         else:
             print("Choose a valid option")
 
+
 # Check for error logs
 def check_error_logs(test_name, scenario_name):
     try:
-        log_dir = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'app', 'logs'))
+        log_dir = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "app", "logs"))
         current_log = os.path.join(log_dir, scenario_name)
-        test_dir = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'app', 'tests'))
+        test_dir = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "app", "tests"))
         output_log_path = os.path.join(test_dir, test_name + ".log")
-        
+
         if not os.path.exists(test_dir):
             try:
                 os.mkdir(test_dir)
             except Exception as e:
                 logging.error(f"Error creating test directory: {e}")
-        
-        with open(output_log_path, 'a', encoding='utf-8') as f:
+
+        with open(output_log_path, "a", encoding="utf-8") as f:
             f.write(f"Scenario: {scenario_name}\n")
-            
+
             for log_file in os.listdir(current_log):
                 if log_file.endswith("_error.log"):
                     log_file_path = os.path.join(current_log, log_file)
                     try:
-                        with open(log_file_path, 'r', encoding='utf-8') as file:
+                        with open(log_file_path, "r", encoding="utf-8") as file:
                             content = file.read().strip()
                             if content:
                                 f.write(f"{log_file} ❌ Errors found:\n{content}\n")
@@ -111,55 +106,58 @@ def check_error_logs(test_name, scenario_name):
                                 f.write(f"{log_file} ✅ No errors found\n")
                     except Exception as e:
                         f.write(f"Error reading {log_file}: {e}\n")
-                            
-            f.write('-' * os.get_terminal_size().columns + "\n")
-            
+
+            f.write("-" * os.get_terminal_size().columns + "\n")
+
     except Exception as e:
         print(f"Failed to write to log file {test_name + '.log'}: {e}")
-        
+
     return output_log_path
+
 
 # Load test from .json file
 def load_test(test_path):
-    with open(test_path, 'r', encoding='utf-8') as file:
+    with open(test_path, "r", encoding="utf-8") as file:
         scenarios = json.load(file)
     return scenarios
+
 
 # Run selected test
 def run_test(test_path):
     test_name = f"test_nebula_{os.path.splitext(os.path.basename(test_path))[0]}_" + datetime.now().strftime("%d_%m_%Y_%H_%M_%S")
-    
+
     for scenario in load_test(test_path):
         scenarioManagement = run_scenario(scenario)
         finished = scenarioManagement.scenario_finished(TIMEOUT)
-        
+
         if finished:
             test_log_path = check_error_logs(test_name, scenarioManagement.scenario_name)
-        else:         
-                test_dir = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'app', 'tests'))
-                output_log_path = os.path.join(test_dir, test_name + ".log")
-                
-                if not os.path.exists(test_dir):
-                    try:
-                        os.mkdir(test_dir)
-                    except Exception as e:
-                        logging.error(f"Error creating test directory: {e}")
-                        
-                try:          
-                    with open(output_log_path, 'a', encoding='utf-8') as f:
-                        f.write(f"Scenario: {scenarioManagement.scenario_name} \n")
-                        f.write(f"🕒❌ Timeout reached \n")
-                        f.write('-' * os.get_terminal_size().columns + "\n")
+        else:
+            test_dir = os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "app", "tests"))
+            output_log_path = os.path.join(test_dir, test_name + ".log")
+
+            if not os.path.exists(test_dir):
+                try:
+                    os.mkdir(test_dir)
                 except Exception as e:
-                    print(f"Failed to write to log file {test_name + '.log'}: {e}")
-                pass
-    
+                    logging.error(f"Error creating test directory: {e}")
+
+            try:
+                with open(output_log_path, "a", encoding="utf-8") as f:
+                    f.write(f"Scenario: {scenarioManagement.scenario_name} \n")
+                    f.write(f"🕒❌ Timeout reached \n")
+                    f.write("-" * os.get_terminal_size().columns + "\n")
+            except Exception as e:
+                print(f"Failed to write to log file {test_name + '.log'}: {e}")
+            pass
+
     print("Results:")
     try:
-        with open(test_log_path, 'r', encoding='utf-8') as f:
+        with open(test_log_path, "r", encoding="utf-8") as f:
             print(f.read())
     except Exception as e:
         print(f"Failed to read the log file {test_name + '.log'}: {e}")
+
 
 # Run a single scenario
 def run_scenario(scenario):
@@ -182,9 +180,7 @@ def run_scenario(scenario):
 
     return scenarioManagement
 
-def start():
-    create_docker_network()
-    menu()
 
 if __name__ == "__main__":
-    start()
+    create_docker_network()
+    menu()
