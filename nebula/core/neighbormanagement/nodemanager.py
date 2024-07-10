@@ -136,13 +136,13 @@ class NodeManager():
     def get_nodes_known(self, neighbors_too=False):
         return self.neighbor_policy.get_nodes_known(neighbors_too)
     
-    def accept_model(source, decoded_model, rounds, round, epochs, n_neighbors, loss): 
+    def accept_model(self, source, decoded_model, rounds, round, epochs, n_neighbors, loss): 
         if not self.accept_candidates_lock().locked():
             self.model_handler.accept_model(decoded_model)
             self.model_handler.setConfig(config=(rounds, round, epochs))    
             self.candidate_selector.add_candidate((source, n_neighbors, loss))
 
-    def add_candidate(source, n_neighbors, loss):
+    def add_candidate(self,source, n_neighbors, loss):
         if not self.accept_candidates_lock().locked():
             self.candidate_selector.add_candidate((source, n_neighbors, loss))
 
