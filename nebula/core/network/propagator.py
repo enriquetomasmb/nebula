@@ -156,3 +156,25 @@ class Propagator:
             if not propagated:
                 logging.info("Exiting continuous propagation...")
                 return
+            
+    async def get_model_information(self, dest_addr, strategy_id: str):
+        if strategy_id not in self.strategies:
+            logging.info(f"Strategy {strategy_id} not found.")
+            return None
+        if self.get_round() is None:
+            logging.info("Propagation halted: round is not set.")
+            return None
+        
+        strategy = self.strategies[strategy_id]
+        logging.info(f"Preparing model information with strategy to make an offer: {strategy_id}")
+
+        serialized_model, weight = strategy.prepare_model_payload(dest_addr)
+
+        if serialized_model:
+            serialized_model = serialized_model if isinstance(serialized_model, bytes) else self.trainer.serialize_model(serialized_model)
+            if strategy_id == "initialization":
+                return (serialized_model, weight, -1)
+            else:
+                return (serialized_model, weight, self.get_round())
+                
+        return None

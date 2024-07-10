@@ -77,9 +77,9 @@ class CommunicationsManager:
         self._external_connection_service = None
         
         # The line below is neccesary when mobility would be set up
-        #if self.config.participant["mobility_args"]["mobility"] and not self.config.participant["mobility_args"]["late_creation"]:
-        self._external_connection_service = NebulaConnectionService(self.addr)
-        self.ecs.start()
+        if self.config.participant["mobility_args"]["mobility"] and not self.config.participant["mobility_args"]["late_creation"]:
+            self._external_connection_service = NebulaConnectionService(self.addr)
+            self.ecs.start()
 
         self.stop_network_engine = asyncio.Event()
 
@@ -144,6 +144,15 @@ class CommunicationsManager:
                     await self.handle_model_message(source, message_wrapper.model_message)
             elif message_wrapper.HasField("connection_message"):
                 await self.handle_connection_message(source, message_wrapper.connection_message)
+            elif message_wrapper.HasField("discover_message"):
+                if self.include_received_message_hash(hashlib.md5(data).hexdigest()):
+                    await self.handle_discover_message(source, message_wrapper.discover_message)
+            elif message_wrapper.HasField("offer_message"):
+                if self.include_received_message_hash(hashlib.md5(data).hexdigest()):
+                    await self.handle_offer_message(source, message_wrapper.offer_message)
+            elif message_wrapper.HasField("link_message"):
+                if self.include_received_message_hash(hashlib.md5(data).hexdigest()):
+                    await self.handle_offer_message(source, message_wrapper.link_message)
             else:
                 logging.info(f"Unknown handler for message: {message_wrapper}")
         except Exception as e:
@@ -240,7 +249,28 @@ class CommunicationsManager:
         except Exception as e:
             logging.error(f"🔗  handle_connection_message | Error while processing: {message.action} | {e}")
 
-    def _start_external_connection_service(self):
+    async def handle_discover_message(self, source, message):
+        logging.info(f"🔍  handle_discover_message | Received [Action {message.action}] from {source}")
+        try:
+            await self.engine.event_manager.trigger_event(source, message)
+        except Exception as e:
+            logging.error(f"🔍  handle_discover_message | Error while processing: {e}")
+
+    async def handle_offer_message(self, source, message):
+        logging.info(f"🔍  handle_offer_message | Received [Action {message.action}] from {source} with arguments {message.arguments}")
+        try:
+            await self.engine.event_manager.trigger_event(source, message)
+        except Exception as e:
+            logging.error(f"🔍  handle_offer_message | Error while processing: {message.action} {message.arguments} | {e}")
+
+    async def handle_link_message(self, source, message):
+        logging.info(f"🔍  handle_link_message | Received [Action {message.action}] from {source} with arguments {message.arguments}")
+        try:
+            await self.engine.event_manager.trigger_event(source, message)
+        except Exception as e:
+            logging.error(f"🔍  handle_link_message | Error while processing: {message.action} {message.arguments} | {e}")
+
+    def start_external_connection_service(self):
         self.ecs = NebulaConnectionService(self.addr)
         self.ecs.start()
         

@@ -22,6 +22,9 @@ message Wrapper {
     ModelMessage model_message = 5;
     ConnectionMessage connection_message = 6;
     ResponseMessage response_message = 7;
+    DiscoverMessage discover_message = 8;
+    OfferMessage offer_message = 9;
+    LinkMessage link_message = 10;
   }
 }
 
@@ -70,8 +73,41 @@ message ConnectionMessage {
   enum Action {
     CONNECT = 0;
     DISCONNECT = 1;
+    LATE_CONNECT = 2;         // Message send when late connection to federation
+    RESTRUCTURE = 3;          // Message to notify connection is because restructuration of topology
   }
   Action action = 1;
+}
+
+message DiscoverMessage {
+  enum Action {
+    DISCOVER_JOIN = 0;        // Message to discover nodes on federation when i'm new
+    DISCOVER_NODES = 1;       // Message to discover nodes on federation when i'm already in
+  }
+  Action action = 1;
+}
+
+message OfferMessage{
+    enum Action {
+        OFFER_MODEL = 0;      // Message to offer model info to a new node
+        OFFER_METRIC = 1;     // Message to offer metrics info to a node on federation
+    }
+    Action action = 1;
+    float n_neighbors = 2;
+    float loss = 3;
+    bytes parameters = 4;       
+    int32 rounds = 5;           
+    int32 round = 6;
+    int32 epochs = 7; 
+}
+
+message LinkMessage {
+    enum Action {
+        CONNECT_TO = 0;         // Message to tell a node who to connect to
+        DISCONNECT_FROM = 1;    // Message to tell a node who to disconnect 
+    }
+    Action action = 1;
+    string addrs = 2;
 }
 
 // Response transmits the outcome of a requested operation, including any errors.

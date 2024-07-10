@@ -81,3 +81,42 @@ class MessagesManager:
         message_wrapper.reputation_message.CopyFrom(message)
         data = message_wrapper.SerializeToString()
         return data
+    
+    def generate_discover_message(self, action):
+        message = nebula_pb2.DiscoverMessage(
+            action=action,
+        )
+        message_wrapper = nebula_pb2.Wrapper()
+        message_wrapper.source = self.addr
+        message_wrapper.discovery_message.CopyFrom(message)
+        data = message_wrapper.SerializeToString()
+        return data
+
+
+    def generate_offer_message(self, action, n_neighbors, loss, serialized_model=None, rounds=1, round=-1, epochs = 1):
+        message = nebula_pb2.OfferMessage(
+            action=action,
+            n_neighbors = n_neighbors,
+            loss = loss,
+            parameters = serialized_model,
+            rounds = rounds,
+            round = round,
+            epochs = epochs
+        )
+        message_wrapper = nebula_pb2.Wrapper()
+        message_wrapper.source = self.addr
+        message_wrapper.discovery_message.CopyFrom(message)
+        data = message_wrapper.SerializeToString()
+        return data
+
+
+    def generate_link_message(self, action, addrs):
+        message = nebula_pb2.LinkMessage(
+            action=action,
+            addrs = addrs,
+        )
+        message_wrapper = nebula_pb2.Wrapper()
+        message_wrapper.source = self.addr
+        message_wrapper.link_message.CopyFrom(message)
+        data = message_wrapper.SerializeToString()
+        return data

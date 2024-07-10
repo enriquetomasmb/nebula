@@ -13,6 +13,7 @@ from nebula.core.pb import nebula_pb2
 from nebula.core.utils.nebulalogger_tensorboard import NebulaTensorBoardLogger
 from nebula.core.utils.nebulalogger import NebulaLogger
 from nebula.core.utils.locker import Locker
+from nebula.core.neighbormanagement.nodemanager import NodeManager
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -165,15 +166,39 @@ class Engine:
 
         # Register additional callbacks
         self._event_manager.register_event((nebula_pb2.FederationMessage, nebula_pb2.FederationMessage.Action.REPUTATION), self._reputation_callback)
+        
+        self._event_manager.register_event((nebula_pb2.DiscoverMessage, nebula_pb2.DiscoverMessage.Action.DISCOVER_JOIN), self._discover_discover_join_callback)
+        self._event_manager.register_event((nebula_pb2.DiscoverMessage, nebula_pb2.DiscoverMessage.Action.DISCOVER_NODE), self._discover_discover_node_callback)
+        
+        self._event_manager.register_event((nebula_pb2.OfferMessage, nebula_pb2.OfferMessage.Action.OFFER_METRIC), self._offer_offer_metric_callback)
+        self._event_manager.register_event((nebula_pb2.OfferMessage, nebula_pb2.OfferMessage.Action.OFFER_MODEL), self._offer_offer_model_callback)
+        
+        self._event_manager.register_event((nebula_pb2.ConnectionMessage, nebula_pb2.ConnectionMessage.Action.LATE_CONNECT), self._connection_late_connect_callback)
+        self._event_manager.register_event((nebula_pb2.ConnectionMessage, nebula_pb2.ConnectionMessage.Action.RESTRUCTURE), self._connection_late_connect_callback)
+        
+        self._event_manager.register_event((nebula_pb2.LinkMessage, nebula_pb2.LinkMessage.Action.CONNECT_TO), self._link_connect_to_callback)
+        self._event_manager.register_event((nebula_pb2.LinkMessage, nebula_pb2.LinkMessage.Action.DISCONNECT_FROM), self._link_disconnect_from_callback)
         # ...
 
         # Thread for the trainer service, it is created when the learning starts
         self.trainer_service = None
+        
+        if self.config.participant["mobility_args"]["mobility"]:
+            topology = self.config.participant["mobility_args"]["mobility_type"]
+            model_handler = self.config.participant["mobility_args"]["model_handler"]
+            self._node_manager = NodeManager(topology, model_handler, engine=self)
+            if self.config.participant["mobility_args"]["late_creation"]:
+                self._init_late_node()
+            
 
     @property
     def cm(self):
         return self._cm
 
+    @property
+    def nm(self):
+        return self._node_manager
+    
     @property
     def reporter(self):
         return self._reporter
@@ -248,11 +273,13 @@ class Engine:
         if source not in self.cm.get_addrs_current_connections(myself=True):
             logging.info(f"🔗  handle_connection_message | Trigger | Connecting to {source}")
             await self.cm.connect(source, direct=True)
+            self.nm.update_neighbors(source)
 
     @event_handler(nebula_pb2.ConnectionMessage, nebula_pb2.ConnectionMessage.Action.DISCONNECT)
     async def _connection_disconnect_callback(self, source, message):
         logging.info(f"🔗  handle_connection_message | Trigger | Received disconnection message from {source}")
         await self.cm.disconnect(source, mutual_disconnection=False)
+        self.nm.update_neighbors(source, remove=True)
 
     @event_handler(nebula_pb2.FederationMessage, nebula_pb2.FederationMessage.Action.FEDERATION_START)
     async def _start_federation_callback(self, source, message):
@@ -287,10 +314,111 @@ class Engine:
         finally:
             self.cm.get_connections_lock().release()
 
-    def create_trainer_service(self):
+    @event_handler(nebula_pb2.ConnectionMessage, nebula_pb2.ConnectionMessage.Action.LATE_CONNECT)
+    async def _connection_late_connect_callback(self, source, message):
+        logging.info(f"🔗  handle_connection_message | Trigger | Received late_connect message from {source}")   
+        if self.nm.accept_connection(source, joining=True):
+            self.nm.add_weight_modifier(source) 
+            ct_actions , df_actions = self.nm.get_actions()
+            
+            # connect to            
+            for addr in ct_actions.split():
+                cnt_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.CONNECTO_TO, addr)
+                await self.cm.send_message(source, cnt_msg)
+            
+            # disconnect from
+            for addr in df_actions.split():
+                df_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.DISCONNECT_FROM, addr)
+                await self.cm.send_message(source, df_msg)
+
+            await self.cm.connect(source, direct=True)
+            self.nm.update_neighbors(source)
+
+    @event_handler(nebula_pb2.ConnectionMessage, nebula_pb2.ConnectionMessage.Action.RESTRUCTURE)
+    async def _connection_disconnect_callback(self, source, message):
+        logging.info(f"🔗  handle_connection_message | Trigger | Received restructure message from {source}")
+        if self.nm.accept_connection(source, joining=False):
+            logging.info(f"🔗  handle_connection_message | Trigger | restructure connection accepted from {source}")
+            ct_actions , df_actions = self.nm.get_actions()
+                        
+            for addr in ct_actions.split():
+                cnt_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.CONNECTO_TO, addr)
+                await self.cm.send_message(source, cnt_msg)
+            
+            for addr in df_actions.split():
+                df_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.DISCONNECT_FROM, addr)
+                await self.cm.send_message(source, df_msg)      
+        else:
+            logging.info(f"🔗  handle_connection_message | Trigger | restructure connection denied from {source}")
+            await self.cm.disconnect(source, mutual_disconnection=False)
+            self.nm.update_neighbors(source, remove=True) 
+
+    @event_handler(nebula_pb2.DiscoverMessage, nebula_pb2.DiscoverMessage.Action.DISCOVER_JOIN)
+    async def _discover_discover_join_callback(self, source, message):
+        logging.info(f"🔍  handle_discover_message | Trigger | Received discover_join message from {source} ")
+        
+        self.nm.meet_node(source)
+        # if no neighbors means i'm new
+        if len(self.get_federation_nodes()) > 0:
+            model, rounds, round = self.cm.propagator.get_model_information(source, "stable") if self.get_round() > 0 else self.cm.propagator.get_model_information(source, "initialization")
+            epochs = self.config.participant["training_args"]["epochs"]
+            msg = self.cm.mm.generate_offer_message(
+                nebula_pb2.OfferMessage.Action.OFFER_MODEL, 
+                len(self.get_federation_nodes()), 
+                self.trainer.get_loss(),
+                model,
+                rounds,
+                round,
+                epochs
+            )
+            await self.cm.send_message(source, msg)
+
+    @event_handler(nebula_pb2.DiscoverMessage, nebula_pb2.DiscoverMessage.Action.DISCOVER_NODE)
+    async def _discover_discover_node_callback(self, source, message):
+        logging.info(f"🔍  handle_discover_message | Trigger | Received discover_node message from {source} ")
+        self.nm.meet_node(source)
+        msg = self.cm.mm.generate_offer_message(nebula_pb2.OfferMessage.Action.OFFER_METRIC, len(self.get_federation_nodes()), self.trainer.get_loss())
+        await self.cm.send_message(source, msg)
+      
+    @event_handler(nebula_pb2.OfferMessage, nebula_pb2.OfferMessage.Action.OFFER_MODEL)
+    async def _offer_offer_model_callback(self, source, message):
+        logging.info(f"🔍  handle_offer_message | Trigger | Received offer_model message from {source}")
+        if not self.nm.get_restructure_process_lock().locked():
+            decoded_model = self.trainer.deserialize_model(message.parameters)
+            self.nm.accept_model(source, decoded_model, message.rounds, message.round, message.epochs, message.n_neighbors, message.loss)
+            self.nm.add_candidate(source, message.n_neighbors, message.loss)
+            self.nm.meet_node(source)
+        
+    @event_handler(nebula_pb2.OfferMessage, nebula_pb2.OfferMessage.Action.OFFER_METRIC)
+    async def _offer_offer_metric_callback(self, source, message):
+        logging.info(f"🔍  handle_offer_message | Trigger | Received offer_metric message from {source}")
+        if not self.nm.get_restructure_process_lock().locked():
+            n_neighbors, loss, _, _, _, _ = message.arguments
+            self.nm.add_candidate(source, n_neighbors, loss)
+            self.nm.meet_node(source)
+
+    @event_handler(nebula_pb2.LinkMessage, nebula_pb2.LinkMessage.Action.CONNECTO_TO)
+    async def _link_connect_to_callback(self, source, message):
+        logging.info(f"🔗  handle_link_message | Trigger | Received connecto_to message from {source}")
+        addrs = message.arguments
+        for addr in addrs:
+            await self.cm.connect(addr, direct=True)
+            self.nm.update_neighbors(addr)
+            self.nm.meet_node(source)
+            
+    @event_handler(nebula_pb2.LinkMessage, nebula_pb2.LinkMessage.Action.DISCONNECT_FROM)
+    async def _link_disconnect_from_callback(self, source, message):
+        logging.info(f"🔗  handle_link_message | Trigger | Received disconnect_from message from {source}")
+        addrs = message.arguments
+        for addr in addrs:
+            await self.cm.disconnect(source, mutual_disconnection=False)
+            self.nm.update_neighbors(addr, remove=True)
+
+    def create_trainer_service(self, round=0):
         if self.trainer_service is None:
             self.trainer_service = threading.Thread(
                 target=self._start_learning,
+                args=(round,),
                 daemon=True,
                 name="trainer_service_thread-" + self.addr,
             )
@@ -335,14 +463,14 @@ class Engine:
         else:
             logging.info(f"💤  Waiting until receiving the start signal from the start node")
 
-    def _start_learning(self):
+    def _start_learning(self, round=0):
         self.learning_cycle_lock.acquire()
         try:
             if self.round is None:
                 self.total_rounds = self.config.participant["scenario_args"]["rounds"]
                 epochs = self.config.participant["training_args"]["epochs"]
                 self.get_round_lock().acquire()
-                self.round = 0
+                self.round = round
                 self.get_round_lock().release()
                 self.learning_cycle_lock.release()
                 print_msg_box(msg=f"Starting Federated Learning process...", indent=2, title="Start of the experiment")
@@ -507,6 +635,33 @@ class Engine:
         await self.cm.send_message_to_neighbors(message)
 
 
+    def _init_late_node(self):
+        """
+            Method to initialize a late connected node, creating its trainer and setting up the learning process
+
+            First step broadcasting discover message, after that we select candidates and connect to them.
+            The information to create the trainer is recieved from nodes that are already on federation and answared the discover message.
+                -model:     params
+                -rounds:    total rounds
+                -round:     current round of the learning process
+                -epochs:    epochs
+        """
+        logging.info("🌐  Initializing late creation node life from Engine")
+        model, rounds, round, epochs = self.nm.start_late_connection_process()
+           
+        self.config.participant["scenario_args"]["rounds"] = rounds
+        self.config.participant["training_args"]["epochs"] = epochs
+        
+        self.round = round
+        
+        #self._trainer = trainer(model, self.dataset, config=self.config, logger=nebulalogger)
+        self.trainer.set_model_parameters(model, initialize=True)
+        
+        self.set_initialization_status(True)
+        self.get_federation_ready_lock().release()
+        self._create_trainer_service(round=round)
+        self.cm.start_external_connection_service()
+        
 class MaliciousNode(Engine):
 
     def __init__(self, model, dataset, config=Config, trainer=Lightning, security=False, model_poisoning=False, poisoned_ratio=0, noise_type="gaussian"):

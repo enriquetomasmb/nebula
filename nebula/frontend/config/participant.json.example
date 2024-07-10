@@ -68,7 +68,12 @@
       "status": false,
       "round_start": 0,
       "scheme": "random"
-    }
+    },
+    "model_handler": "std",
+    "late_creation": false,
+    "sleeping_time": 0,
+    "weight_distance": 0.2,
+    "weight_het": 0.8
   },  
   "data_args": {
     "dataset": "MNIST",
@@ -82,7 +87,8 @@
   },
   "training_args": {
     "trainer": "lightning",
-    "epochs": 3
+    "epochs": 3,
+    "flexible_participation": false
   },
   "aggregator_args": {
     "algorithm": "FedAvg",

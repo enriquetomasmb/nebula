@@ -153,6 +153,8 @@ class NebulaModel(pl.LightningModule, ABC):
             torch.cuda.manual_seed_all(seed)
 
         self.global_number = {"Train": 0, "Validation": 0, "Test (Local)": 0, "Test (Global)": 0}
+        
+        self.current_loss = -1 # not calculated yet
 
     @abstractmethod
     def forward(self, x):
@@ -164,6 +166,9 @@ class NebulaModel(pl.LightningModule, ABC):
         """Optimizer configuration."""
         pass
 
+    def get_loss(self):
+        return self.current_loss    
+
     def step(self, batch, batch_idx, phase):
         """Training/validation/test step."""
         x, y = batch
@@ -171,6 +176,7 @@ class NebulaModel(pl.LightningModule, ABC):
         loss = self.criterion(y_pred, y)
         self.process_metrics(phase, y_pred, y, loss)
 
+        self.current_loss = loss
         return loss
 
     def training_step(self, batch, batch_idx):
