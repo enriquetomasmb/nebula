@@ -27,7 +27,7 @@ class NebulaTensorBoardLogger(TensorBoardLogger):
 
     def log_metrics(self, metrics, step=None):
         if step is None:
-            self.local_step = step
+            self.local_step += 1
             step = self.global_step + self.local_step
         # logging.debug(f"Logging metrics for global step {step} | local step {self.local_step} | global step {self.global_step}")
         if "epoch" in metrics:
