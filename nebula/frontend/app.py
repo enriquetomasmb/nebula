@@ -68,7 +68,6 @@ class Settings:
     templates_dir: str = "templates"
     
 settings = Settings()
-initialize_databases()
 
 logging.info(f"NEBULA_DEBUG: {settings.debug}")
 logging.info(f"NEBULA_ADVANCED_ANALYTICS: {settings.advanced_analytics}")
@@ -148,6 +147,7 @@ def set_default_user():
 
 @app.on_event("startup")
 async def startup_event():
+    await initialize_databases()
     set_default_user()
 
 nodes_registration = {}
