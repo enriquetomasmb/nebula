@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Type
 
 class CandidateSelector(ABC):
     
@@ -22,7 +23,7 @@ class CandidateSelector(ABC):
     def any_candidate(self):
         pass
     
-def factory_CandidateSelector(topology):
+def factory_CandidateSelector(topology) -> CandidateSelector:
     from nebula.core.neighbormanagement.candidateselection.fccandidateselector import FCCandidateSelector
     from nebula.core.neighbormanagement.candidateselection.hetcandidateselector import HETCandidateSelector
     from nebula.core.neighbormanagement.candidateselection.ringcandidateselector import RINGCandidateSelector

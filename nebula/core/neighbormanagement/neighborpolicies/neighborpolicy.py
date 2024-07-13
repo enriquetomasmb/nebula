@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Type
 
 class NeighborPolicy(ABC):
     
@@ -34,14 +35,14 @@ class NeighborPolicy(ABC):
     def update_neighbors(self, node, remove=False):
         pass
 
-def factory_NeighborPolicy(topology):
+def factory_NeighborPolicy(topology) -> NeighborPolicy:
     from nebula.core.neighbormanagement.neighborpolicies.idleneighborpolicy import IDLENeighborPolicy
     from nebula.core.neighbormanagement.neighborpolicies.fcneighborpolicy import FCNeighborPolicy
     from nebula.core.neighbormanagement.neighborpolicies.ringneighborpolicy import RINGNeighborPolicy
     from nebula.core.neighbormanagement.neighborpolicies.starneighborpolicy import STARNeighborPolicy
     
     options = {
-        'random': IDLEneighborPolicy, # default value
+        'random': IDLENeighborPolicy, # default value
         'fully': FCNeighborPolicy,
         'ring': RINGNeighborPolicy,
         'star': IDLENeighborPolicy

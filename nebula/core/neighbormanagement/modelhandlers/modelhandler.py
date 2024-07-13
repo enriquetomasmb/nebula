@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Type
 
 class ModelHandler(ABC):
     
@@ -18,7 +19,7 @@ class ModelHandler(ABC):
     def pre_process_model(self):
         pass
     
-def factory_ModelHandler(model_handler):
+def factory_ModelHandler(model_handler) -> ModelHandler:
     from nebula.core.neighbormanagement.modelhandlers.stdmodelhandler import STDModelHandler
     from nebula.core.neighbormanagement.modelhandlers.aggmodelhandler import AGGModelHandler
     

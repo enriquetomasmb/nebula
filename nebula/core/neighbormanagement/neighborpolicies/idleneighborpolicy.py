@@ -24,7 +24,7 @@ class IDLENeighborPolicy(NeighborPolicy):
         pass
     
     def get_nodes_known(self, neighbors_too=False):
-        return Set()
+        return set()
     
     def update_neighbors(self, node, remove=False):
         pass

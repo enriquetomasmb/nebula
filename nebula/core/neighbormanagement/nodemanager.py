@@ -139,7 +139,7 @@ class NodeManager():
     def accept_model(self, source, decoded_model, rounds, round, epochs, n_neighbors, loss): 
         if not self.accept_candidates_lock().locked():
             self.model_handler.accept_model(decoded_model)
-            self.model_handler.setConfig(config=(rounds, round, epochs))    
+            self.model_handler.set_config(config=(rounds, round, epochs))    
             self.candidate_selector.add_candidate((source, n_neighbors, loss))
 
     def add_candidate(self,source, n_neighbors, loss):
