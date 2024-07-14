@@ -1,6 +1,7 @@
 import asyncio
 import logging
 import os
+import time
 import docker
 from nebula.addons.functions import print_msg_box
 from nebula.addons.attacks.attacks import create_attack
@@ -29,6 +30,7 @@ import threading
 from nebula.config.config import Config
 from nebula.core.training.lightning import Lightning
 from nebula.core.utils.helper import cosine_metric
+from nebula.core.reputation import Reputation
 import sys
 import pdb
 
@@ -103,6 +105,15 @@ class Engine:
         self.poisoned_ratio = poisoned_ratio
         self.noise_type = noise_type
 
+        # Reputation
+        reputation_file = f'nebula/core/reputation/reputation.txt'
+
+        with open(reputation_file) as f:
+            self.reputation_file = f.read()
+
+        if self.reputation_file == 'True':
+            self.reputation_instance = Reputation()
+            self.reputation = {} # Reputation of the node
         if self.config.participant["tracking_args"]["local_tracking"] == "csv":
             nebulalogger = CSVLogger(f"{self.log_dir}", name="metrics", version=f"participant_{self.idx}")
         elif self.config.participant["tracking_args"]["local_tracking"] == "basic":
@@ -224,6 +235,9 @@ class Engine:
 
     def get_round_lock(self):
         return self.round_lock
+
+    def get_reputation(self):
+        return self.reputation
 
     @event_handler(nebula_pb2.DiscoveryMessage, nebula_pb2.DiscoveryMessage.Action.DISCOVER)
     async def _discovery_discover_callback(self, source, message):
@@ -438,6 +452,16 @@ class Engine:
             logging.info(f"[Role {self.role}] Starting learning cycle...")
             self.aggregator.update_federation_nodes(self.federation_nodes)
             await self._extended_learning_cycle()
+
+            if self.reputation_file == 'True':
+                neighbors = set(self.cm.get_all_addrs_current_connections(only_direct=True))
+                for nei in neighbors:
+                    self.reputation[nei] = self.reputation_instance.calculate_reputation(self.config.participant["scenario_args"]["name"], self.log_dir, self.idx, self.addr, nei, self.round)
+
+                if self.reputation is not None: 
+                    reputation_dict = {f"Reputation/{self.addr}": {k: float(v) for k, v in self.reputation.items()}}
+                    logging.info(f"Reputation dict: {reputation_dict}")
+                    self.trainer._logger.log_data(reputation_dict, step=self.round)
 
             self.get_round_lock().acquire()
             print_msg_box(msg=f"Round {self.round} of {self.total_rounds} finished.", indent=2, title="Round information")

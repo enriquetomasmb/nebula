@@ -143,9 +143,10 @@ class Propagator:
         if strategy_id == "initialization":
             return False
         
-        if len(self.aggregator.get_nodes_pending_models_to_aggregate()) >= len(self.aggregator._federation_nodes):
+        total_nodes = len(self.aggregator._federation_nodes) - len(self.aggregator.rejected_nodes)
+        if len(self.aggregator.get_nodes_pending_models_to_aggregate()) >= total_nodes:
+            logging.info(f"Aggregating models from {len(self.aggregator.get_nodes_pending_models_to_aggregate())} nodes")
             return False
-
         await asyncio.sleep(self.interval)
         return True
 

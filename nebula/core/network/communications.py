@@ -8,6 +8,7 @@ from datetime import datetime
 import requests
 import asyncio
 import subprocess
+import time
 
 from nebula.addons.mobility import Mobility
 from nebula.core.network.discoverer import Discoverer
@@ -28,6 +29,10 @@ from nebula.core.utils.helper import (
     jaccard_metric,
 )
 from typing import TYPE_CHECKING
+from nebula.core.reputation.Reputation import (
+    Reputation,
+    save_data,
+)
 
 if TYPE_CHECKING:
     from nebula.core.engine import Engine
@@ -73,6 +78,16 @@ class CommunicationsManager:
         self.network_engine = None
 
         self.stop_network_engine = asyncio.Event()
+
+        self.start_time_communication = {}
+        self.receive_data_contribution = {}
+        reputation_file = f'nebula/core/reputation/reputation.txt'
+
+        with open(reputation_file) as f:
+            self.reputation_file = f.read()
+
+        if self.reputation_file == 'True':
+            self.reputation_instance = Reputation()
 
     @property
     def engine(self):
@@ -147,6 +162,15 @@ class CommunicationsManager:
             logging.error(f"🔍  handle_discovery_message | Error while processing: {e}")
 
     async def handle_control_message(self, source, message):
+        current_round = self.engine.get_round()
+        if current_round is not None:
+            logging.info(f"🔧 handle_control_message | Received message from {source} with round {current_round}")
+            if source in self.start_time_communication:
+                end_time = time.time()
+                latency = end_time - self.start_time_communication[source]
+                logging.info(f"🔧 handle_control_message | Received message from neighbor {source} with message {message} in {latency} seconds")
+                save_data(self.config.participant['scenario_args']['name'], 'communication', source, self.addr, round=current_round, time=latency)
+
         logging.info(f"🔧  handle_control_message | Received [Action {message.action}] from {source} with log {message.log}")
         try:
             await self.engine.event_manager.trigger_event(source, message)
@@ -177,26 +201,40 @@ class CommunicationsManager:
                 # non-starting nodes receive the initialized model from the starting node
                 if not self.engine.get_federation_ready_lock().locked() or self.engine.get_initialization_status():
                     decoded_model = self.engine.trainer.deserialize_model(message.parameters)
-                    if self.config.participant["adaptive_args"]["model_similarity"]:
+                    if source != self.addr:
+                        contribution_key = (source, message.round)
+                        if contribution_key not in self.receive_data_contribution:
+                            self.receive_data_contribution[contribution_key] = len(message.parameters)
+                            logging.info(f"🤖 handle_model_message | Received model from {source} with round {message.round} | data contribution: {self.receive_data_contribution[contribution_key]}")
+                            save_data(self.config.participant['scenario_args']['name'], 'data_contribution', source, self.addr, message.round, data_contribution=self.receive_data_contribution[contribution_key])
+                    
+                    #if self.config.participant["adaptive_args"]["model_similarity"]:
+                    if current_round >= 0 and message.round >= 0:
                         logging.info(f"🤖  handle_model_message | Checking model similarity")
-                        cosine_value = cosine_metric(self.trainer.get_model_parameters(), decoded_model, similarity=True)
-                        euclidean_value = euclidean_metric(self.trainer.get_model_parameters(), decoded_model, similarity=True)
-                        minkowski_value = minkowski_metric(self.trainer.get_model_parameters(), decoded_model, p=2, similarity=True)
-                        manhattan_value = manhattan_metric(self.trainer.get_model_parameters(), decoded_model, similarity=True)
-                        pearson_correlation_value = pearson_correlation_metric(self.trainer.get_model_parameters(), decoded_model, similarity=True)
-                        jaccard_value = jaccard_metric(self.trainer.get_model_parameters(), decoded_model, similarity=True)
-                        with open(f"{self.log_dir}/participant_{self.idx}_similarity.csv", "a+") as f:
-                            if os.stat(f"{self.log_dir}/participant_{self.idx}_similarity.csv").st_size == 0:
-                                f.write("timestamp,source_ip,nodes,round,current_round,cosine,euclidean,minkowski,manhattan,pearson_correlation,jaccard\n")
+                        cosine_value = cosine_metric(self.engine.trainer.get_model_parameters(), decoded_model, similarity=True)
+                        euclidean_value = euclidean_metric(self.engine.trainer.get_model_parameters(), decoded_model, similarity=True)
+                        minkowski_value = minkowski_metric(self.engine.trainer.get_model_parameters(), decoded_model, p=2, similarity=True)
+                        manhattan_value = manhattan_metric(self.engine.trainer.get_model_parameters(), decoded_model, similarity=True)
+                        pearson_correlation_value = pearson_correlation_metric(self.engine.trainer.get_model_parameters(), decoded_model, similarity=True)
+                        jaccard_value = jaccard_metric(self.engine.trainer.get_model_parameters(), decoded_model, similarity=True)
+                        file = f'app/logs/{self.config.participant["scenario_args"]["name"]}/participant_{self.id}_similarity.csv'
+                        with open(file, "a+") as f:
+                            if os.stat(file).st_size == 0:
+                                f.write("timestamp,source_ip,round,current_round,cosine,euclidean,minkowski,manhattan,pearson_correlation,jaccard\n")
                             f.write(f"{datetime.now()}, {source}, {message.round}, {current_round}, {cosine_value}, {euclidean_value}, {minkowski_value}, {manhattan_value}, {pearson_correlation_value}, {jaccard_value}\n")
 
-                    await self.engine.aggregator.include_model_in_buffer(
-                        decoded_model,
-                        message.weight,
-                        source=source,
-                        round=message.round,
-                    )
-
+                        start_time_models_aggregated = time.time()
+                        models_added = await self.engine.aggregator.include_model_in_buffer(
+                            decoded_model,
+                            message.weight,
+                            source=source,
+                            round=message.round,
+                        )
+                        if models_added is not None:
+                            end_time_models_aggregated = time.time()
+                            latency = end_time_models_aggregated - start_time_models_aggregated
+                            logging.info(f"🤖  handle_model_message | Model aggregated in {latency} seconds")
+                            save_data(self.config.participant['scenario_args']['name'], 'aggregated_models', source, self.addr, message.round, time=latency)
                 else:
                     if message.round != -1:
                         # Be sure that the model message is from the initialization round (round = -1)
@@ -526,6 +564,8 @@ class CommunicationsManager:
             logging.info(f"Sending message to neighbors: {neighbors}")
 
         for neighbor in set(neighbors):
+            self.start_time_communication[neighbor] = time.time()
+            logging.info(f"Sending message with start_time {self.start_time_communication[neighbor]} to neighbor {neighbor}")
             await self.send_message(neighbor, message)
             await asyncio.sleep(interval)
 

@@ -3,6 +3,7 @@ from functools import partial
 import logging
 from nebula.core.utils.locker import Locker
 from nebula.core.pb import nebula_pb2
+from nebula.core.reputation.Reputation import save_data
 
 
 class AggregatorException(Exception):
@@ -62,6 +63,7 @@ class Aggregator(ABC):
         self._pending_models_to_aggregate = {}
         self._add_model_lock = Locker(name="add_model_lock")
         self._aggregation_done_lock = Locker(name="aggregation_done_lock")
+        self.rejected_nodes = set()
 
     def __str__(self):
         return self.__class__.__name__
@@ -93,6 +95,9 @@ class Aggregator(ABC):
     def reset(self):
         self._add_model_lock.acquire()
         self._federation_nodes.clear()
+        logging.info(f"🔄  reset | Before {self.rejected_nodes}")
+        self.rejected_nodes.clear()
+        logging.info(f"🔄  reset | After {self.rejected_nodes}")
         self._pending_models_to_aggregate.clear()
         try:
             self._aggregation_done_lock.release()
@@ -113,7 +118,14 @@ class Aggregator(ABC):
         self._aggregation_done_lock.release()
 
     def _add_pending_model(self, model, weight, source):
-        if len(self._federation_nodes) <= len(self.get_nodes_pending_models_to_aggregate()):
+        if weight == 0:
+            logging.info(f"🔄  _add_pending_model | Ignoring model with weight 0...")
+            self._add_model_lock.release()
+            return None
+        
+        total_nodes_aggregation = len(self._federation_nodes) - len(self.rejected_nodes)
+        logging.info(f"🔄  _add_pending_model | total_nodes_aggregation={total_nodes_aggregation} | len(self.get_nodes_pending_models_to_aggregate())={len(self.get_nodes_pending_models_to_aggregate())}")
+        if total_nodes_aggregation <= len(self.get_nodes_pending_models_to_aggregate()):
             logging.info(f"🔄  _add_pending_model | Ignoring model...")
             self._add_model_lock.release()
             return None
@@ -127,8 +139,15 @@ class Aggregator(ABC):
             logging.info(f"🔄  _add_pending_model | Node is not in the aggregation buffer --> Include model in the aggregation buffer.")
             self._pending_models_to_aggregate.update({source: (model, weight)})
 
-        logging.info(f"🔄  _add_pending_model | Model added in aggregation buffer ({str(len(self.get_nodes_pending_models_to_aggregate()))}/{str(len(self._federation_nodes))}) | Pending nodes: {self._federation_nodes - self.get_nodes_pending_models_to_aggregate()}")
-        if len(self.get_nodes_pending_models_to_aggregate()) >= len(self._federation_nodes):
+            if source != self._addr:
+                save_data(self.config.participant["scenario_args"]["name"], 'node_participation', source, self._addr, round=self.engine.get_round())
+
+        total_nodes_aggregation = len(self._federation_nodes) - len(self.rejected_nodes)
+        pending_nodes = self._federation_nodes - self.get_nodes_pending_models_to_aggregate() - self.rejected_nodes
+        models_added = f"{len(self.get_nodes_pending_models_to_aggregate())}/{total_nodes_aggregation}"
+        logging.info(f"🔄  _add_pending_model | Model added in aggregation buffer ({models_added}) | Pending nodes: {pending_nodes}")
+
+        if len(self.get_nodes_pending_models_to_aggregate()) >= total_nodes_aggregation:
             logging.info(f"🔄  _add_pending_model | All models were added in the aggregation buffer. Run aggregation...")
             self._aggregation_done_lock.release()
         self._add_model_lock.release()
@@ -137,6 +156,22 @@ class Aggregator(ABC):
     async def include_model_in_buffer(self, model, weight, source=None, round=None, local=False):
         self._add_model_lock.acquire()
         logging.info(f"🔄  include_model_in_buffer | source={source} | round={round} | weight={weight} |--| __models={self._pending_models_to_aggregate.keys()} | federation_nodes={self._federation_nodes} | pending_models_to_aggregate={self.get_nodes_pending_models_to_aggregate()}")
+
+        # Check the reputation of the source node
+        if self.engine.get_reputation() is not None:
+            if source in self.engine.reputation:
+                logging.info(f"🔄  include_model_in_buffer | Source node {source} has reputation {self.engine.reputation[source]}")
+                rep = self.engine.reputation[source]
+                if rep <= 0.35:
+                    logging.info(f"🔄  include_model_in_buffer | Source node {source} has reputation {rep} <= 0.35. Ignoring model...")
+                    weight = 0
+                    self.rejected_nodes.add(source)
+                elif 0.35 < rep <= 0.7:
+                    logging.info(f"🔄  include_model_in_buffer | Weight before {weight}")
+                    logging.info(f"🔄  include_model_in_buffer | Source node {source} has reputation 0.35 < {rep} <= 0.6. Weighting model...")
+                    weight = 0.7 * weight
+                    logging.info(f"🔄  include_model_in_buffer | Weight after {weight}")
+
         if model is None:
             logging.info(f"🔄  include_model_in_buffer | Ignoring model bad formed...")
             self._add_model_lock.release()
@@ -146,14 +181,15 @@ class Aggregator(ABC):
             self._handle_global_update(model, source)
             return
 
-        self._add_pending_model(model, weight, source)
+        result = self._add_pending_model(model, weight, source)
         
-        if len(self.get_nodes_pending_models_to_aggregate()) >= len(self._federation_nodes):
+        total_nodes_aggregation = len(self._federation_nodes) - len(self.rejected_nodes)
+        if len(self.get_nodes_pending_models_to_aggregate()) >= total_nodes_aggregation:
             logging.info(f"🔄  include_model_in_buffer | Broadcasting MODELS_INCLUDED for round {self.engine.get_round()}")
             message = self.cm.mm.generate_federation_message(nebula_pb2.FederationMessage.Action.FEDERATION_MODELS_INCLUDED, [self.engine.get_round()])
             await self.cm.send_message_to_neighbors(message)
             
-        return
+        return result
 
     def get_aggregation(self):
         if self._aggregation_done_lock.acquire(timeout=self.config.participant["aggregator_args"]["aggregation_timeout"]):
@@ -169,9 +205,10 @@ class Aggregator(ABC):
             return next(iter(self._pending_models_to_aggregate.values()))[0]
 
         unique_nodes_involved = set(node for key in self._pending_models_to_aggregate for node in key.split())
+        total_nodes_aggregation = len(self._federation_nodes) - len(self.rejected_nodes)
 
-        if len(unique_nodes_involved) != len(self._federation_nodes):
-            missing_nodes = self._federation_nodes - unique_nodes_involved
+        if len(unique_nodes_involved) != total_nodes_aggregation:
+            missing_nodes = self._federation_nodes - unique_nodes_involved - self.rejected_nodes
             logging.info(f"🔄  get_aggregation | Aggregation incomplete, missing models from: {missing_nodes}")
         else:
             logging.info(f"🔄  get_aggregation | All models accounted for, proceeding with aggregation.")
