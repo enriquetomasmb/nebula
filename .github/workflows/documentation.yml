@@ -1,0 +1,69 @@
+name: Update documentation
+on:
+  push:
+    branches:
+    - main
+    paths:
+    - docs/**
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'manual'
+        type: choice
+        options:
+        - manual
+        - info
+        - warning
+        - debug
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11' 
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # otherwise, you will failed to push refs to dest repo
+    - name: Install dependencies
+      run: |
+          pip install -r docs/requirements.txt
+    - name: List directories
+      run: |
+          ls -la
+    - name: Build Sphinx Documentation
+      run: |
+          cd docs
+          make html
+    - name: Add files
+      run: |
+          echo "nebula.enriquetomasmb.com" > docs/_build/CNAME
+    - name: List directories
+      run: |
+          ls -la docs/_build/
+    - uses: actions/checkout@v4
+      with:
+        ref: gh-pages
+        path: gh-pages
+    - name: List directories
+      run: |
+          ls -la gh-pages/
+    - name: Copy documentation to the gh-pages branch
+      run: |
+        cp -r docs/_build/* gh-pages/
+    - name: List directories
+      run: |
+          ls -la gh-pages/
+    - name: Commit and Push changes
+      run: |
+        cd gh-pages
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add .
+        git commit -m "Update documentation" -a || echo "No changes to commit"
+        git push origin gh-pages
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
