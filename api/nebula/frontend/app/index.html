@@ -1,0 +1,1412 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>nebula.frontend.app &#8212; NEBULA Documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../../../_static/documentation_options.js?v=f9c1cefe"></script>
+    <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/nebula/frontend/app/index';</script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../../_static/nebula-logo.jpg" class="logo__image only-light" alt="NEBULA Documentation - Home"/>
+    <script>document.write(`<img src="../../../../_static/nebula-logo.jpg" class="logo__image only-dark" alt="NEBULA Documentation - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../index.html">API Reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/enriquetomasmb/nebula" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../../../_sources/api/nebula/frontend/app/index.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>nebula.frontend.app</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#functions">Functions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#attributes">Attributes</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.Settings"><code class="docutils literal notranslate"><span class="pre">Settings</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.Settings.debug"><code class="docutils literal notranslate"><span class="pre">Settings.debug</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.Settings.advanced_analytics"><code class="docutils literal notranslate"><span class="pre">Settings.advanced_analytics</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.Settings.log_dir"><code class="docutils literal notranslate"><span class="pre">Settings.log_dir</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.Settings.config_dir"><code class="docutils literal notranslate"><span class="pre">Settings.config_dir</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.Settings.cert_dir"><code class="docutils literal notranslate"><span class="pre">Settings.cert_dir</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.Settings.root_host_path"><code class="docutils literal notranslate"><span class="pre">Settings.root_host_path</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.Settings.config_frontend_dir"><code class="docutils literal notranslate"><span class="pre">Settings.config_frontend_dir</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.Settings.statistics_port"><code class="docutils literal notranslate"><span class="pre">Settings.statistics_port</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.Settings.secret_key"><code class="docutils literal notranslate"><span class="pre">Settings.secret_key</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.Settings.PERMANENT_SESSION_LIFETIME"><code class="docutils literal notranslate"><span class="pre">Settings.PERMANENT_SESSION_LIFETIME</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.Settings.templates_dir"><code class="docutils literal notranslate"><span class="pre">Settings.templates_dir</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.settings"><code class="docutils literal notranslate"><span class="pre">settings</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.app"><code class="docutils literal notranslate"><span class="pre">app</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.ConnectionManager"><code class="docutils literal notranslate"><span class="pre">ConnectionManager</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.ConnectionManager.connect"><code class="docutils literal notranslate"><span class="pre">ConnectionManager.connect()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.ConnectionManager.disconnect"><code class="docutils literal notranslate"><span class="pre">ConnectionManager.disconnect()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.ConnectionManager.send_personal_message"><code class="docutils literal notranslate"><span class="pre">ConnectionManager.send_personal_message()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.ConnectionManager.broadcast"><code class="docutils literal notranslate"><span class="pre">ConnectionManager.broadcast()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.manager"><code class="docutils literal notranslate"><span class="pre">manager</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.websocket_endpoint"><code class="docutils literal notranslate"><span class="pre">websocket_endpoint()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.templates"><code class="docutils literal notranslate"><span class="pre">templates</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.datetimeformat"><code class="docutils literal notranslate"><span class="pre">datetimeformat()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.get_session"><code class="docutils literal notranslate"><span class="pre">get_session()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.set_default_user"><code class="docutils literal notranslate"><span class="pre">set_default_user()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.startup_event"><code class="docutils literal notranslate"><span class="pre">startup_event()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nodes_registration"><code class="docutils literal notranslate"><span class="pre">nodes_registration</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.scenarios_list_length"><code class="docutils literal notranslate"><span class="pre">scenarios_list_length</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.scenarios_finished"><code class="docutils literal notranslate"><span class="pre">scenarios_finished</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.signal_handler"><code class="docutils literal notranslate"><span class="pre">signal_handler()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.custom_http_exception_handler"><code class="docutils literal notranslate"><span class="pre">custom_http_exception_handler()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.index"><code class="docutils literal notranslate"><span class="pre">index()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_home"><code class="docutils literal notranslate"><span class="pre">nebula_home()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_dashboard_private"><code class="docutils literal notranslate"><span class="pre">nebula_dashboard_private()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_admin"><code class="docutils literal notranslate"><span class="pre">nebula_admin()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.save_note_for_scenario"><code class="docutils literal notranslate"><span class="pre">save_note_for_scenario()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.get_notes_for_scenario"><code class="docutils literal notranslate"><span class="pre">get_notes_for_scenario()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_login"><code class="docutils literal notranslate"><span class="pre">nebula_login()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_logout"><code class="docutils literal notranslate"><span class="pre">nebula_logout()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_delete_user"><code class="docutils literal notranslate"><span class="pre">nebula_delete_user()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_add_user"><code class="docutils literal notranslate"><span class="pre">nebula_add_user()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_update_user"><code class="docutils literal notranslate"><span class="pre">nebula_update_user()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_dashboard"><code class="docutils literal notranslate"><span class="pre">nebula_dashboard()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_dashboard_monitor"><code class="docutils literal notranslate"><span class="pre">nebula_dashboard_monitor()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.update_topology"><code class="docutils literal notranslate"><span class="pre">update_topology()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_update_node"><code class="docutils literal notranslate"><span class="pre">nebula_update_node()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_register_node"><code class="docutils literal notranslate"><span class="pre">nebula_register_node()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_wait_nodes"><code class="docutils literal notranslate"><span class="pre">nebula_wait_nodes()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_monitor_log"><code class="docutils literal notranslate"><span class="pre">nebula_monitor_log()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_monitor_log_x"><code class="docutils literal notranslate"><span class="pre">nebula_monitor_log_x()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_monitor_log_debug"><code class="docutils literal notranslate"><span class="pre">nebula_monitor_log_debug()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_monitor_log_error"><code class="docutils literal notranslate"><span class="pre">nebula_monitor_log_error()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_monitor_image"><code class="docutils literal notranslate"><span class="pre">nebula_monitor_image()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.stop_scenario"><code class="docutils literal notranslate"><span class="pre">stop_scenario()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.stop_all_scenarios"><code class="docutils literal notranslate"><span class="pre">stop_all_scenarios()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_stop_scenario"><code class="docutils literal notranslate"><span class="pre">nebula_stop_scenario()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.remove_scenario"><code class="docutils literal notranslate"><span class="pre">remove_scenario()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_remove_scenario"><code class="docutils literal notranslate"><span class="pre">nebula_remove_scenario()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.get_tracking_hash_scenario"><code class="docutils literal notranslate"><span class="pre">get_tracking_hash_scenario()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.zipdir"><code class="docutils literal notranslate"><span class="pre">zipdir()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_dashboard_download_logs_metrics"><code class="docutils literal notranslate"><span class="pre">nebula_dashboard_download_logs_metrics()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_dashboard_deployment"><code class="docutils literal notranslate"><span class="pre">nebula_dashboard_deployment()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.attack_node_assign"><code class="docutils literal notranslate"><span class="pre">attack_node_assign()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.mobility_assign"><code class="docutils literal notranslate"><span class="pre">mobility_assign()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.stop_all_scenarios_event"><code class="docutils literal notranslate"><span class="pre">stop_all_scenarios_event</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.finish_scenario_event"><code class="docutils literal notranslate"><span class="pre">finish_scenario_event</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nodes_finished"><code class="docutils literal notranslate"><span class="pre">nodes_finished</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.node_stopped"><code class="docutils literal notranslate"><span class="pre">node_stopped()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.run_scenario"><code class="docutils literal notranslate"><span class="pre">run_scenario()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.run_scenarios"><code class="docutils literal notranslate"><span class="pre">run_scenarios()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_dashboard_deployment_run"><code class="docutils literal notranslate"><span class="pre">nebula_dashboard_deployment_run()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.parser"><code class="docutils literal notranslate"><span class="pre">parser</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-nebula.frontend.app">
+<span id="nebula-frontend-app"></span><h1><a class="reference internal" href="#module-nebula.frontend.app" title="nebula.frontend.app"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nebula.frontend.app</span></code></a><a class="headerlink" href="#module-nebula.frontend.app" title="Link to this heading">#</a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">#</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.Settings" title="nebula.frontend.app.Settings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Settings</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.ConnectionManager" title="nebula.frontend.app.ConnectionManager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ConnectionManager</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.websocket_endpoint" title="nebula.frontend.app.websocket_endpoint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">websocket_endpoint</span></code></a>(websocket, client_id)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.datetimeformat" title="nebula.frontend.app.datetimeformat"><code class="xref py py-obj docutils literal notranslate"><span class="pre">datetimeformat</span></code></a>(value[, format])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.get_session" title="nebula.frontend.app.get_session"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_session</span></code></a>(request)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.set_default_user" title="nebula.frontend.app.set_default_user"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_default_user</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.startup_event" title="nebula.frontend.app.startup_event"><code class="xref py py-obj docutils literal notranslate"><span class="pre">startup_event</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.signal_handler" title="nebula.frontend.app.signal_handler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">signal_handler</span></code></a>(signal, frame)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.custom_http_exception_handler" title="nebula.frontend.app.custom_http_exception_handler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">custom_http_exception_handler</span></code></a>(request, exc)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.index" title="nebula.frontend.app.index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">index</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.nebula_home" title="nebula.frontend.app.nebula_home"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula_home</span></code></a>(request)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.nebula_dashboard_private" title="nebula.frontend.app.nebula_dashboard_private"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula_dashboard_private</span></code></a>(request, scenario_name[, session])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.nebula_admin" title="nebula.frontend.app.nebula_admin"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula_admin</span></code></a>(request[, session])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.save_note_for_scenario" title="nebula.frontend.app.save_note_for_scenario"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_note_for_scenario</span></code></a>(scenario_name, request[, session])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.get_notes_for_scenario" title="nebula.frontend.app.get_notes_for_scenario"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_notes_for_scenario</span></code></a>(scenario_name)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.nebula_login" title="nebula.frontend.app.nebula_login"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula_login</span></code></a>(request[, session, user, password])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.nebula_logout" title="nebula.frontend.app.nebula_logout"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula_logout</span></code></a>(request[, session])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.nebula_delete_user" title="nebula.frontend.app.nebula_delete_user"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula_delete_user</span></code></a>(user, request[, session])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.nebula_add_user" title="nebula.frontend.app.nebula_add_user"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula_add_user</span></code></a>(request[, session, user, password, role])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.nebula_update_user" title="nebula.frontend.app.nebula_update_user"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula_update_user</span></code></a>(request[, session, user, password, ...])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.nebula_dashboard" title="nebula.frontend.app.nebula_dashboard"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula_dashboard</span></code></a>(request[, session])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.nebula_dashboard_monitor" title="nebula.frontend.app.nebula_dashboard_monitor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula_dashboard_monitor</span></code></a>(scenario_name, request[, session])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.update_topology" title="nebula.frontend.app.update_topology"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_topology</span></code></a>(scenario_name, nodes_list, nodes_config)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.nebula_update_node" title="nebula.frontend.app.nebula_update_node"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula_update_node</span></code></a>(scenario_name, request[, session])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.nebula_register_node" title="nebula.frontend.app.nebula_register_node"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula_register_node</span></code></a>(scenario_name, request)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.nebula_wait_nodes" title="nebula.frontend.app.nebula_wait_nodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula_wait_nodes</span></code></a>(scenario_name)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.nebula_monitor_log" title="nebula.frontend.app.nebula_monitor_log"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula_monitor_log</span></code></a>(scenario_name, id)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.nebula_monitor_log_x" title="nebula.frontend.app.nebula_monitor_log_x"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula_monitor_log_x</span></code></a>(scenario_name, id, number)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.nebula_monitor_log_debug" title="nebula.frontend.app.nebula_monitor_log_debug"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula_monitor_log_debug</span></code></a>(scenario_name, id)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.nebula_monitor_log_error" title="nebula.frontend.app.nebula_monitor_log_error"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula_monitor_log_error</span></code></a>(scenario_name, id)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.nebula_monitor_image" title="nebula.frontend.app.nebula_monitor_image"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula_monitor_image</span></code></a>(scenario_name)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.stop_scenario" title="nebula.frontend.app.stop_scenario"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_scenario</span></code></a>(scenario_name)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.stop_all_scenarios" title="nebula.frontend.app.stop_all_scenarios"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_all_scenarios</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.nebula_stop_scenario" title="nebula.frontend.app.nebula_stop_scenario"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula_stop_scenario</span></code></a>(scenario_name, stop_all, request)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.remove_scenario" title="nebula.frontend.app.remove_scenario"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_scenario</span></code></a>([scenario_name])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.nebula_remove_scenario" title="nebula.frontend.app.nebula_remove_scenario"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula_remove_scenario</span></code></a>(scenario_name, request[, session])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.get_tracking_hash_scenario" title="nebula.frontend.app.get_tracking_hash_scenario"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_tracking_hash_scenario</span></code></a>(scenario_name)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.zipdir" title="nebula.frontend.app.zipdir"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zipdir</span></code></a>(path, ziph)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.nebula_dashboard_download_logs_metrics" title="nebula.frontend.app.nebula_dashboard_download_logs_metrics"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula_dashboard_download_logs_metrics</span></code></a>(scenario_name, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.nebula_dashboard_deployment" title="nebula.frontend.app.nebula_dashboard_deployment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula_dashboard_deployment</span></code></a>(request[, session])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.attack_node_assign" title="nebula.frontend.app.attack_node_assign"><code class="xref py py-obj docutils literal notranslate"><span class="pre">attack_node_assign</span></code></a>(nodes, federation, attack, ...)</p></td>
+<td><p>Identify which nodes will be attacked</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.mobility_assign" title="nebula.frontend.app.mobility_assign"><code class="xref py py-obj docutils literal notranslate"><span class="pre">mobility_assign</span></code></a>(nodes, mobile_participants_percent)</p></td>
+<td><p>Assign mobility to nodes</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.node_stopped" title="nebula.frontend.app.node_stopped"><code class="xref py py-obj docutils literal notranslate"><span class="pre">node_stopped</span></code></a>(scenario_name, request)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.run_scenario" title="nebula.frontend.app.run_scenario"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_scenario</span></code></a>(scenario_data, role)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.run_scenarios" title="nebula.frontend.app.run_scenarios"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_scenarios</span></code></a>(data, role)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.nebula_dashboard_deployment_run" title="nebula.frontend.app.nebula_dashboard_deployment_run"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula_dashboard_deployment_run</span></code></a>(request, background_tasks)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.settings" title="nebula.frontend.app.settings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">settings</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.app" title="nebula.frontend.app.app"><code class="xref py py-obj docutils literal notranslate"><span class="pre">app</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.manager" title="nebula.frontend.app.manager"><code class="xref py py-obj docutils literal notranslate"><span class="pre">manager</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.templates" title="nebula.frontend.app.templates"><code class="xref py py-obj docutils literal notranslate"><span class="pre">templates</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.nodes_registration" title="nebula.frontend.app.nodes_registration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nodes_registration</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.scenarios_list_length" title="nebula.frontend.app.scenarios_list_length"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scenarios_list_length</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.scenarios_finished" title="nebula.frontend.app.scenarios_finished"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scenarios_finished</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.stop_all_scenarios_event" title="nebula.frontend.app.stop_all_scenarios_event"><code class="xref py py-obj docutils literal notranslate"><span class="pre">stop_all_scenarios_event</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.finish_scenario_event" title="nebula.frontend.app.finish_scenario_event"><code class="xref py py-obj docutils literal notranslate"><span class="pre">finish_scenario_event</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.app.nodes_finished" title="nebula.frontend.app.nodes_finished"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nodes_finished</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.app.parser" title="nebula.frontend.app.parser"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parser</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="nebula.frontend.app.Settings">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">Settings</span></span><a class="headerlink" href="#nebula.frontend.app.Settings" title="Link to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.frontend.app.Settings.debug">
+<span class="sig-name descname"><span class="pre">debug</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#nebula.frontend.app.Settings.debug" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.frontend.app.Settings.advanced_analytics">
+<span class="sig-name descname"><span class="pre">advanced_analytics</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#nebula.frontend.app.Settings.advanced_analytics" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.frontend.app.Settings.log_dir">
+<span class="sig-name descname"><span class="pre">log_dir</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#nebula.frontend.app.Settings.log_dir" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.frontend.app.Settings.config_dir">
+<span class="sig-name descname"><span class="pre">config_dir</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#nebula.frontend.app.Settings.config_dir" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.frontend.app.Settings.cert_dir">
+<span class="sig-name descname"><span class="pre">cert_dir</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#nebula.frontend.app.Settings.cert_dir" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.frontend.app.Settings.root_host_path">
+<span class="sig-name descname"><span class="pre">root_host_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#nebula.frontend.app.Settings.root_host_path" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.frontend.app.Settings.config_frontend_dir">
+<span class="sig-name descname"><span class="pre">config_frontend_dir</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#nebula.frontend.app.Settings.config_frontend_dir" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.frontend.app.Settings.statistics_port">
+<span class="sig-name descname"><span class="pre">statistics_port</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nebula.frontend.app.Settings.statistics_port" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.frontend.app.Settings.secret_key">
+<span class="sig-name descname"><span class="pre">secret_key</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#nebula.frontend.app.Settings.secret_key" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.frontend.app.Settings.PERMANENT_SESSION_LIFETIME">
+<span class="sig-name descname"><span class="pre">PERMANENT_SESSION_LIFETIME</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">datetime.timedelta</span></em><a class="headerlink" href="#nebula.frontend.app.Settings.PERMANENT_SESSION_LIFETIME" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.frontend.app.Settings.templates_dir">
+<span class="sig-name descname"><span class="pre">templates_dir</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'templates'</span></em><a class="headerlink" href="#nebula.frontend.app.Settings.templates_dir" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nebula.frontend.app.settings">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">settings</span></span><a class="headerlink" href="#nebula.frontend.app.settings" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nebula.frontend.app.app">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">app</span></span><a class="headerlink" href="#nebula.frontend.app.app" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nebula.frontend.app.ConnectionManager">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">ConnectionManager</span></span><a class="headerlink" href="#nebula.frontend.app.ConnectionManager" title="Link to this definition">#</a></dt>
+<dd><dl class="py method">
+<dt class="sig sig-object py" id="nebula.frontend.app.ConnectionManager.connect">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">connect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">websocket</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.ConnectionManager.connect" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>websocket</strong> (<em>fastapi.WebSocket</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.frontend.app.ConnectionManager.disconnect">
+<span class="sig-name descname"><span class="pre">disconnect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">websocket</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.ConnectionManager.disconnect" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>websocket</strong> (<em>fastapi.WebSocket</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.frontend.app.ConnectionManager.send_personal_message">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">send_personal_message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">websocket</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.ConnectionManager.send_personal_message" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>message</strong> (<em>str</em>)</p></li>
+<li><p><strong>websocket</strong> (<em>fastapi.WebSocket</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.frontend.app.ConnectionManager.broadcast">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">broadcast</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.ConnectionManager.broadcast" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>message</strong> (<em>str</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nebula.frontend.app.manager">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">manager</span></span><a class="headerlink" href="#nebula.frontend.app.manager" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.websocket_endpoint">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">websocket_endpoint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">websocket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.websocket_endpoint" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>websocket</strong> (<em>fastapi.WebSocket</em>)</p></li>
+<li><p><strong>client_id</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nebula.frontend.app.templates">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">templates</span></span><a class="headerlink" href="#nebula.frontend.app.templates" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.datetimeformat">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">datetimeformat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'%B</span> <span class="pre">%d,</span> <span class="pre">%Y</span> <span class="pre">%H:%M'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.datetimeformat" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.get_session">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">get_session</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.get_session" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>fastapi.Request</em>)</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.set_default_user">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">set_default_user</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.set_default_user" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.startup_event">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">startup_event</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.startup_event" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nebula.frontend.app.nodes_registration">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nodes_registration</span></span><a class="headerlink" href="#nebula.frontend.app.nodes_registration" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nebula.frontend.app.scenarios_list_length">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">scenarios_list_length</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#nebula.frontend.app.scenarios_list_length" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nebula.frontend.app.scenarios_finished">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">scenarios_finished</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#nebula.frontend.app.scenarios_finished" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.signal_handler">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">signal_handler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">signal</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frame</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.signal_handler" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.custom_http_exception_handler">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">custom_http_exception_handler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exc</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.custom_http_exception_handler" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<em>fastapi.Request</em>)</p></li>
+<li><p><strong>exc</strong> (<em>starlette.exceptions.HTTPException</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.index">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.index" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.nebula_home">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nebula_home</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.nebula_home" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> (<em>fastapi.Request</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.nebula_dashboard_private">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nebula_dashboard_private</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Depends(get_session)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.nebula_dashboard_private" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<em>fastapi.Request</em>)</p></li>
+<li><p><strong>scenario_name</strong> (<em>str</em>)</p></li>
+<li><p><strong>session</strong> (<em>Dict</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.nebula_admin">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nebula_admin</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Depends(get_session)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.nebula_admin" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<em>fastapi.Request</em>)</p></li>
+<li><p><strong>session</strong> (<em>Dict</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.save_note_for_scenario">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">save_note_for_scenario</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Depends(get_session)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.save_note_for_scenario" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scenario_name</strong> (<em>str</em>)</p></li>
+<li><p><strong>request</strong> (<em>fastapi.Request</em>)</p></li>
+<li><p><strong>session</strong> (<em>Dict</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.get_notes_for_scenario">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">get_notes_for_scenario</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.get_notes_for_scenario" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>scenario_name</strong> (<em>str</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.nebula_login">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nebula_login</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Depends(get_session)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Form(...)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Form(...)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.nebula_login" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<em>fastapi.Request</em>)</p></li>
+<li><p><strong>session</strong> (<em>Dict</em>)</p></li>
+<li><p><strong>user</strong> (<em>str</em>)</p></li>
+<li><p><strong>password</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.nebula_logout">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nebula_logout</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Depends(get_session)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.nebula_logout" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<em>fastapi.Request</em>)</p></li>
+<li><p><strong>session</strong> (<em>Dict</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.nebula_delete_user">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nebula_delete_user</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Depends(get_session)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.nebula_delete_user" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>user</strong> (<em>str</em>)</p></li>
+<li><p><strong>request</strong> (<em>fastapi.Request</em>)</p></li>
+<li><p><strong>session</strong> (<em>Dict</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.nebula_add_user">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nebula_add_user</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Depends(get_session)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Form(...)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Form(...)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">role</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Form(...)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.nebula_add_user" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<em>fastapi.Request</em>)</p></li>
+<li><p><strong>session</strong> (<em>Dict</em>)</p></li>
+<li><p><strong>user</strong> (<em>str</em>)</p></li>
+<li><p><strong>password</strong> (<em>str</em>)</p></li>
+<li><p><strong>role</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.nebula_update_user">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nebula_update_user</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Depends(get_session)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">user</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Form(...)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Form(...)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">role</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Form(...)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.nebula_update_user" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<em>fastapi.Request</em>)</p></li>
+<li><p><strong>session</strong> (<em>Dict</em>)</p></li>
+<li><p><strong>user</strong> (<em>str</em>)</p></li>
+<li><p><strong>password</strong> (<em>str</em>)</p></li>
+<li><p><strong>role</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.nebula_dashboard">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nebula_dashboard</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Depends(get_session)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.nebula_dashboard" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<em>fastapi.Request</em>)</p></li>
+<li><p><strong>session</strong> (<em>Dict</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.nebula_dashboard_monitor">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nebula_dashboard_monitor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Depends(get_session)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.nebula_dashboard_monitor" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scenario_name</strong> (<em>str</em>)</p></li>
+<li><p><strong>request</strong> (<em>fastapi.Request</em>)</p></li>
+<li><p><strong>session</strong> (<em>Dict</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.update_topology">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">update_topology</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes_list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nodes_config</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.update_topology" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.nebula_update_node">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nebula_update_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Depends(get_session)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.nebula_update_node" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scenario_name</strong> (<em>str</em>)</p></li>
+<li><p><strong>request</strong> (<em>fastapi.Request</em>)</p></li>
+<li><p><strong>session</strong> (<em>Dict</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.nebula_register_node">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nebula_register_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.nebula_register_node" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scenario_name</strong> (<em>str</em>)</p></li>
+<li><p><strong>request</strong> (<em>fastapi.Request</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.nebula_wait_nodes">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nebula_wait_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.nebula_wait_nodes" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>scenario_name</strong> (<em>str</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.nebula_monitor_log">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nebula_monitor_log</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.nebula_monitor_log" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scenario_name</strong> (<em>str</em>)</p></li>
+<li><p><strong>id</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.nebula_monitor_log_x">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nebula_monitor_log_x</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.nebula_monitor_log_x" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scenario_name</strong> (<em>str</em>)</p></li>
+<li><p><strong>id</strong> (<em>str</em>)</p></li>
+<li><p><strong>number</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.nebula_monitor_log_debug">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nebula_monitor_log_debug</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.nebula_monitor_log_debug" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scenario_name</strong> (<em>str</em>)</p></li>
+<li><p><strong>id</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.nebula_monitor_log_error">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nebula_monitor_log_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.nebula_monitor_log_error" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scenario_name</strong> (<em>str</em>)</p></li>
+<li><p><strong>id</strong> (<em>str</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.nebula_monitor_image">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nebula_monitor_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.nebula_monitor_image" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>scenario_name</strong> (<em>str</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.stop_scenario">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">stop_scenario</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.stop_scenario" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.stop_all_scenarios">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">stop_all_scenarios</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.stop_all_scenarios" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.nebula_stop_scenario">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nebula_stop_scenario</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop_all</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Depends(get_session)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.nebula_stop_scenario" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scenario_name</strong> (<em>str</em>)</p></li>
+<li><p><strong>stop_all</strong> (<em>bool</em>)</p></li>
+<li><p><strong>request</strong> (<em>fastapi.Request</em>)</p></li>
+<li><p><strong>session</strong> (<em>Dict</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.remove_scenario">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">remove_scenario</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.remove_scenario" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.nebula_remove_scenario">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nebula_remove_scenario</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Depends(get_session)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.nebula_remove_scenario" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scenario_name</strong> (<em>str</em>)</p></li>
+<li><p><strong>request</strong> (<em>fastapi.Request</em>)</p></li>
+<li><p><strong>session</strong> (<em>Dict</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.get_tracking_hash_scenario">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">get_tracking_hash_scenario</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.get_tracking_hash_scenario" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.zipdir">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">zipdir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ziph</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.zipdir" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.nebula_dashboard_download_logs_metrics">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nebula_dashboard_download_logs_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Depends(get_session)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.nebula_dashboard_download_logs_metrics" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scenario_name</strong> (<em>str</em>)</p></li>
+<li><p><strong>request</strong> (<em>fastapi.Request</em>)</p></li>
+<li><p><strong>session</strong> (<em>Dict</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.nebula_dashboard_deployment">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nebula_dashboard_deployment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Depends(get_session)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.nebula_dashboard_deployment" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<em>fastapi.Request</em>)</p></li>
+<li><p><strong>session</strong> (<em>Dict</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.attack_node_assign">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">attack_node_assign</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">federation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attack</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poisoned_node_percent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poisoned_sample_percent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poisoned_noise_percent</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.attack_node_assign" title="Link to this definition">#</a></dt>
+<dd><p>Identify which nodes will be attacked</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.mobility_assign">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">mobility_assign</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nodes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mobile_participants_percent</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.mobility_assign" title="Link to this definition">#</a></dt>
+<dd><p>Assign mobility to nodes</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nebula.frontend.app.stop_all_scenarios_event">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">stop_all_scenarios_event</span></span><a class="headerlink" href="#nebula.frontend.app.stop_all_scenarios_event" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nebula.frontend.app.finish_scenario_event">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">finish_scenario_event</span></span><a class="headerlink" href="#nebula.frontend.app.finish_scenario_event" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nebula.frontend.app.nodes_finished">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nodes_finished</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nebula.frontend.app.nodes_finished" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.node_stopped">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">node_stopped</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.node_stopped" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scenario_name</strong> (<em>str</em>)</p></li>
+<li><p><strong>request</strong> (<em>fastapi.Request</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.run_scenario">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">run_scenario</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">role</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.run_scenario" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.run_scenarios">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">run_scenarios</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">role</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.run_scenarios" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.app.nebula_dashboard_deployment_run">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">nebula_dashboard_deployment_run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">background_tasks</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Depends(get_session)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.app.nebula_dashboard_deployment_run" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>request</strong> (<em>fastapi.Request</em>)</p></li>
+<li><p><strong>background_tasks</strong> (<em>fastapi.BackgroundTasks</em>)</p></li>
+<li><p><strong>session</strong> (<em>Dict</em>)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nebula.frontend.app.parser">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.app.</span></span><span class="sig-name descname"><span class="pre">parser</span></span><a class="headerlink" href="#nebula.frontend.app.parser" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#functions">Functions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#attributes">Attributes</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.Settings"><code class="docutils literal notranslate"><span class="pre">Settings</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.Settings.debug"><code class="docutils literal notranslate"><span class="pre">Settings.debug</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.Settings.advanced_analytics"><code class="docutils literal notranslate"><span class="pre">Settings.advanced_analytics</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.Settings.log_dir"><code class="docutils literal notranslate"><span class="pre">Settings.log_dir</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.Settings.config_dir"><code class="docutils literal notranslate"><span class="pre">Settings.config_dir</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.Settings.cert_dir"><code class="docutils literal notranslate"><span class="pre">Settings.cert_dir</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.Settings.root_host_path"><code class="docutils literal notranslate"><span class="pre">Settings.root_host_path</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.Settings.config_frontend_dir"><code class="docutils literal notranslate"><span class="pre">Settings.config_frontend_dir</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.Settings.statistics_port"><code class="docutils literal notranslate"><span class="pre">Settings.statistics_port</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.Settings.secret_key"><code class="docutils literal notranslate"><span class="pre">Settings.secret_key</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.Settings.PERMANENT_SESSION_LIFETIME"><code class="docutils literal notranslate"><span class="pre">Settings.PERMANENT_SESSION_LIFETIME</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.Settings.templates_dir"><code class="docutils literal notranslate"><span class="pre">Settings.templates_dir</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.settings"><code class="docutils literal notranslate"><span class="pre">settings</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.app"><code class="docutils literal notranslate"><span class="pre">app</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.ConnectionManager"><code class="docutils literal notranslate"><span class="pre">ConnectionManager</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.ConnectionManager.connect"><code class="docutils literal notranslate"><span class="pre">ConnectionManager.connect()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.ConnectionManager.disconnect"><code class="docutils literal notranslate"><span class="pre">ConnectionManager.disconnect()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.ConnectionManager.send_personal_message"><code class="docutils literal notranslate"><span class="pre">ConnectionManager.send_personal_message()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.ConnectionManager.broadcast"><code class="docutils literal notranslate"><span class="pre">ConnectionManager.broadcast()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.manager"><code class="docutils literal notranslate"><span class="pre">manager</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.websocket_endpoint"><code class="docutils literal notranslate"><span class="pre">websocket_endpoint()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.templates"><code class="docutils literal notranslate"><span class="pre">templates</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.datetimeformat"><code class="docutils literal notranslate"><span class="pre">datetimeformat()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.get_session"><code class="docutils literal notranslate"><span class="pre">get_session()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.set_default_user"><code class="docutils literal notranslate"><span class="pre">set_default_user()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.startup_event"><code class="docutils literal notranslate"><span class="pre">startup_event()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nodes_registration"><code class="docutils literal notranslate"><span class="pre">nodes_registration</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.scenarios_list_length"><code class="docutils literal notranslate"><span class="pre">scenarios_list_length</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.scenarios_finished"><code class="docutils literal notranslate"><span class="pre">scenarios_finished</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.signal_handler"><code class="docutils literal notranslate"><span class="pre">signal_handler()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.custom_http_exception_handler"><code class="docutils literal notranslate"><span class="pre">custom_http_exception_handler()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.index"><code class="docutils literal notranslate"><span class="pre">index()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_home"><code class="docutils literal notranslate"><span class="pre">nebula_home()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_dashboard_private"><code class="docutils literal notranslate"><span class="pre">nebula_dashboard_private()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_admin"><code class="docutils literal notranslate"><span class="pre">nebula_admin()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.save_note_for_scenario"><code class="docutils literal notranslate"><span class="pre">save_note_for_scenario()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.get_notes_for_scenario"><code class="docutils literal notranslate"><span class="pre">get_notes_for_scenario()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_login"><code class="docutils literal notranslate"><span class="pre">nebula_login()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_logout"><code class="docutils literal notranslate"><span class="pre">nebula_logout()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_delete_user"><code class="docutils literal notranslate"><span class="pre">nebula_delete_user()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_add_user"><code class="docutils literal notranslate"><span class="pre">nebula_add_user()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_update_user"><code class="docutils literal notranslate"><span class="pre">nebula_update_user()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_dashboard"><code class="docutils literal notranslate"><span class="pre">nebula_dashboard()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_dashboard_monitor"><code class="docutils literal notranslate"><span class="pre">nebula_dashboard_monitor()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.update_topology"><code class="docutils literal notranslate"><span class="pre">update_topology()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_update_node"><code class="docutils literal notranslate"><span class="pre">nebula_update_node()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_register_node"><code class="docutils literal notranslate"><span class="pre">nebula_register_node()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_wait_nodes"><code class="docutils literal notranslate"><span class="pre">nebula_wait_nodes()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_monitor_log"><code class="docutils literal notranslate"><span class="pre">nebula_monitor_log()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_monitor_log_x"><code class="docutils literal notranslate"><span class="pre">nebula_monitor_log_x()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_monitor_log_debug"><code class="docutils literal notranslate"><span class="pre">nebula_monitor_log_debug()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_monitor_log_error"><code class="docutils literal notranslate"><span class="pre">nebula_monitor_log_error()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_monitor_image"><code class="docutils literal notranslate"><span class="pre">nebula_monitor_image()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.stop_scenario"><code class="docutils literal notranslate"><span class="pre">stop_scenario()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.stop_all_scenarios"><code class="docutils literal notranslate"><span class="pre">stop_all_scenarios()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_stop_scenario"><code class="docutils literal notranslate"><span class="pre">nebula_stop_scenario()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.remove_scenario"><code class="docutils literal notranslate"><span class="pre">remove_scenario()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_remove_scenario"><code class="docutils literal notranslate"><span class="pre">nebula_remove_scenario()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.get_tracking_hash_scenario"><code class="docutils literal notranslate"><span class="pre">get_tracking_hash_scenario()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.zipdir"><code class="docutils literal notranslate"><span class="pre">zipdir()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_dashboard_download_logs_metrics"><code class="docutils literal notranslate"><span class="pre">nebula_dashboard_download_logs_metrics()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_dashboard_deployment"><code class="docutils literal notranslate"><span class="pre">nebula_dashboard_deployment()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.attack_node_assign"><code class="docutils literal notranslate"><span class="pre">attack_node_assign()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.mobility_assign"><code class="docutils literal notranslate"><span class="pre">mobility_assign()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.stop_all_scenarios_event"><code class="docutils literal notranslate"><span class="pre">stop_all_scenarios_event</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.finish_scenario_event"><code class="docutils literal notranslate"><span class="pre">finish_scenario_event</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nodes_finished"><code class="docutils literal notranslate"><span class="pre">nodes_finished</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.node_stopped"><code class="docutils literal notranslate"><span class="pre">node_stopped()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.run_scenario"><code class="docutils literal notranslate"><span class="pre">run_scenario()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.run_scenarios"><code class="docutils literal notranslate"><span class="pre">run_scenarios()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.nebula_dashboard_deployment_run"><code class="docutils literal notranslate"><span class="pre">nebula_dashboard_deployment_run()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.app.parser"><code class="docutils literal notranslate"><span class="pre">parser</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Enrique Tomás Martínez Beltrán
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Enrique Tomás Martínez Beltrán.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

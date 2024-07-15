@@ -1,0 +1,670 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>nebula.core.models.cifar10.dualagg &#8212; NEBULA Documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../../../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../../../../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../../../../../../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../../../../../../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../../../../../_static/documentation_options.js?v=f9c1cefe"></script>
+    <script src="../../../../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../../../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/nebula/core/models/cifar10/dualagg/index';</script>
+    <link rel="index" title="Index" href="../../../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../../../../_static/nebula-logo.jpg" class="logo__image only-light" alt="NEBULA Documentation - Home"/>
+    <script>document.write(`<img src="../../../../../../_static/nebula-logo.jpg" class="logo__image only-dark" alt="NEBULA Documentation - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../../../../installation.html">Installation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../index.html">API Reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/enriquetomasmb/nebula" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../../../../../_sources/api/nebula/core/models/cifar10/dualagg/index.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>nebula.core.models.cifar10.dualagg</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.ContrastiveLoss"><code class="docutils literal notranslate"><span class="pre">ContrastiveLoss</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.ContrastiveLoss.forward"><code class="docutils literal notranslate"><span class="pre">ContrastiveLoss.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel"><code class="docutils literal notranslate"><span class="pre">DualAggModel</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.process_metrics"><code class="docutils literal notranslate"><span class="pre">DualAggModel.process_metrics()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.log_metrics_by_epoch"><code class="docutils literal notranslate"><span class="pre">DualAggModel.log_metrics_by_epoch()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.forward"><code class="docutils literal notranslate"><span class="pre">DualAggModel.forward()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.configure_optimizers"><code class="docutils literal notranslate"><span class="pre">DualAggModel.configure_optimizers()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.step"><code class="docutils literal notranslate"><span class="pre">DualAggModel.step()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.training_step"><code class="docutils literal notranslate"><span class="pre">DualAggModel.training_step()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.on_train_epoch_end"><code class="docutils literal notranslate"><span class="pre">DualAggModel.on_train_epoch_end()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.validation_step"><code class="docutils literal notranslate"><span class="pre">DualAggModel.validation_step()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.on_validation_epoch_end"><code class="docutils literal notranslate"><span class="pre">DualAggModel.on_validation_epoch_end()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.test_step"><code class="docutils literal notranslate"><span class="pre">DualAggModel.test_step()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.on_test_epoch_end"><code class="docutils literal notranslate"><span class="pre">DualAggModel.on_test_epoch_end()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.save_historical_model"><code class="docutils literal notranslate"><span class="pre">DualAggModel.save_historical_model()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.global_load_state_dict"><code class="docutils literal notranslate"><span class="pre">DualAggModel.global_load_state_dict()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.historical_load_state_dict"><code class="docutils literal notranslate"><span class="pre">DualAggModel.historical_load_state_dict()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.adapt_state_dict_for_model"><code class="docutils literal notranslate"><span class="pre">DualAggModel.adapt_state_dict_for_model()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.get_global_model_parameters"><code class="docutils literal notranslate"><span class="pre">DualAggModel.get_global_model_parameters()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.print_summary"><code class="docutils literal notranslate"><span class="pre">DualAggModel.print_summary()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-nebula.core.models.cifar10.dualagg">
+<span id="nebula-core-models-cifar10-dualagg"></span><h1><a class="reference internal" href="#module-nebula.core.models.cifar10.dualagg" title="nebula.core.models.cifar10.dualagg"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nebula.core.models.cifar10.dualagg</span></code></a><a class="headerlink" href="#module-nebula.core.models.cifar10.dualagg" title="Link to this heading">#</a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">#</a></h2>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.core.models.cifar10.dualagg.ContrastiveLoss" title="nebula.core.models.cifar10.dualagg.ContrastiveLoss"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ContrastiveLoss</span></code></a></p></td>
+<td><p>Contrastive loss function.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.core.models.cifar10.dualagg.DualAggModel" title="nebula.core.models.cifar10.dualagg.DualAggModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DualAggModel</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py class">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.ContrastiveLoss">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.core.models.cifar10.dualagg.</span></span><span class="sig-name descname"><span class="pre">ContrastiveLoss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.ContrastiveLoss" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.nn.Module</span></code></p>
+<p>Contrastive loss function.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.ContrastiveLoss.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">historical_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.ContrastiveLoss.forward" title="Link to this definition">#</a></dt>
+<dd><p>Calculates the contrastive loss between the local output, global output, and historical output.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>local_out</strong> (<em>torch.Tensor</em>) – The local output tensor of shape (batch_size, embedding_size).</p></li>
+<li><p><strong>global_out</strong> (<em>torch.Tensor</em>) – The global output tensor of shape (batch_size, embedding_size).</p></li>
+<li><p><strong>historical_out</strong> (<em>torch.Tensor</em>) – The historical output tensor of shape (batch_size, embedding_size).</p></li>
+<li><p><strong>labels</strong> (<em>torch.Tensor</em>) – The ground truth labels tensor of shape (batch_size,).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The contrastive loss value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If the input tensors have different shapes.</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>The contrastive loss is calculated as the difference between the mean cosine similarity of the local output</dt><dd><p>with the historical output and the mean cosine similarity of the local output with the global output,
+multiplied by a scaling factor mu.</p>
+</dd>
+</dl>
+</li>
+<li><p>The cosine similarity values represent the similarity between the corresponding vectors in the input tensors.</p></li>
+</ul>
+<p>Higher values indicate greater similarity, while lower values indicate less similarity.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.core.models.cifar10.dualagg.</span></span><span class="sig-name descname"><span class="pre">DualAggModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confusion_matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">lightning.LightningModule</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.process_metrics">
+<span class="sig-name descname"><span class="pre">process_metrics</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pred</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loss</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'local'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.process_metrics" title="Link to this definition">#</a></dt>
+<dd><p>Calculate and log metrics for the given phase.
+:param phase: One of ‘Train’, ‘Validation’, or ‘Test’
+:type phase: str
+:param y_pred: Model predictions
+:type y_pred: torch.Tensor
+:param y: Ground truth labels
+:type y: torch.Tensor
+:param loss: Loss value
+:type loss: torch.Tensor, optional</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.log_metrics_by_epoch">
+<span class="sig-name descname"><span class="pre">log_metrics_by_epoch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_cm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_cm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'local'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.log_metrics_by_epoch" title="Link to this definition">#</a></dt>
+<dd><p>Log all metrics at the end of an epoch for the given phase.
+:param phase: One of ‘Train’, ‘Validation’, or ‘Test’
+:type phase: str
+:param : param phase:
+:param : param plot_cm:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'local'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.forward" title="Link to this definition">#</a></dt>
+<dd><p>Forward pass of the model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.configure_optimizers">
+<span class="sig-name descname"><span class="pre">configure_optimizers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.configure_optimizers" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.step">
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.step" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.training_step">
+<span class="sig-name descname"><span class="pre">training_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_id</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.training_step" title="Link to this definition">#</a></dt>
+<dd><p>Training step for the model.
+:param batch:
+:param batch_id:</p>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.on_train_epoch_end">
+<span class="sig-name descname"><span class="pre">on_train_epoch_end</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.on_train_epoch_end" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.validation_step">
+<span class="sig-name descname"><span class="pre">validation_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.validation_step" title="Link to this definition">#</a></dt>
+<dd><p>Validation step for the model.
+:param batch:
+:param batch_idx:</p>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.on_validation_epoch_end">
+<span class="sig-name descname"><span class="pre">on_validation_epoch_end</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.on_validation_epoch_end" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.test_step">
+<span class="sig-name descname"><span class="pre">test_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.test_step" title="Link to this definition">#</a></dt>
+<dd><p>Test step for the model.
+:param batch:
+:param batch_idx:</p>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.on_test_epoch_end">
+<span class="sig-name descname"><span class="pre">on_test_epoch_end</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.on_test_epoch_end" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.save_historical_model">
+<span class="sig-name descname"><span class="pre">save_historical_model</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.save_historical_model" title="Link to this definition">#</a></dt>
+<dd><p>Save the current local model as the historical model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.global_load_state_dict">
+<span class="sig-name descname"><span class="pre">global_load_state_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.global_load_state_dict" title="Link to this definition">#</a></dt>
+<dd><p>Load the given state dictionary into the global model.
+:param state_dict: The state dictionary to load into the global model.
+:type state_dict: dict</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.historical_load_state_dict">
+<span class="sig-name descname"><span class="pre">historical_load_state_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_dict</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.historical_load_state_dict" title="Link to this definition">#</a></dt>
+<dd><p>Load the given state dictionary into the historical model.
+:param state_dict: The state dictionary to load into the historical model.
+:type state_dict: dict</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.adapt_state_dict_for_model">
+<span class="sig-name descname"><span class="pre">adapt_state_dict_for_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">state_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_prefix</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.adapt_state_dict_for_model" title="Link to this definition">#</a></dt>
+<dd><p>Adapt the keys in the provided state_dict to match the structure expected by the model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.get_global_model_parameters">
+<span class="sig-name descname"><span class="pre">get_global_model_parameters</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.get_global_model_parameters" title="Link to this definition">#</a></dt>
+<dd><p>Get the parameters of the global model.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.print_summary">
+<span class="sig-name descname"><span class="pre">print_summary</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.print_summary" title="Link to this definition">#</a></dt>
+<dd><p>Print a summary of local, historical and global models to check if they are the same.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.ContrastiveLoss"><code class="docutils literal notranslate"><span class="pre">ContrastiveLoss</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.ContrastiveLoss.forward"><code class="docutils literal notranslate"><span class="pre">ContrastiveLoss.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel"><code class="docutils literal notranslate"><span class="pre">DualAggModel</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.process_metrics"><code class="docutils literal notranslate"><span class="pre">DualAggModel.process_metrics()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.log_metrics_by_epoch"><code class="docutils literal notranslate"><span class="pre">DualAggModel.log_metrics_by_epoch()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.forward"><code class="docutils literal notranslate"><span class="pre">DualAggModel.forward()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.configure_optimizers"><code class="docutils literal notranslate"><span class="pre">DualAggModel.configure_optimizers()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.step"><code class="docutils literal notranslate"><span class="pre">DualAggModel.step()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.training_step"><code class="docutils literal notranslate"><span class="pre">DualAggModel.training_step()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.on_train_epoch_end"><code class="docutils literal notranslate"><span class="pre">DualAggModel.on_train_epoch_end()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.validation_step"><code class="docutils literal notranslate"><span class="pre">DualAggModel.validation_step()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.on_validation_epoch_end"><code class="docutils literal notranslate"><span class="pre">DualAggModel.on_validation_epoch_end()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.test_step"><code class="docutils literal notranslate"><span class="pre">DualAggModel.test_step()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.on_test_epoch_end"><code class="docutils literal notranslate"><span class="pre">DualAggModel.on_test_epoch_end()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.save_historical_model"><code class="docutils literal notranslate"><span class="pre">DualAggModel.save_historical_model()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.global_load_state_dict"><code class="docutils literal notranslate"><span class="pre">DualAggModel.global_load_state_dict()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.historical_load_state_dict"><code class="docutils literal notranslate"><span class="pre">DualAggModel.historical_load_state_dict()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.adapt_state_dict_for_model"><code class="docutils literal notranslate"><span class="pre">DualAggModel.adapt_state_dict_for_model()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.get_global_model_parameters"><code class="docutils literal notranslate"><span class="pre">DualAggModel.get_global_model_parameters()</span></code></a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.print_summary"><code class="docutils literal notranslate"><span class="pre">DualAggModel.print_summary()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Enrique Tomás Martínez Beltrán
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Enrique Tomás Martínez Beltrán.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

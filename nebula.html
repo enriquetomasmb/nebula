@@ -1,0 +1,685 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="./" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>nebula package &#8212; NEBULA Documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="_static/documentation_options.js?v=f9c1cefe"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'nebula';</script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="_static/nebula-logo.jpg" class="logo__image only-light" alt="NEBULA Documentation - Home"/>
+    <script>document.write(`<img src="_static/nebula-logo.jpg" class="logo__image only-dark" alt="NEBULA Documentation - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="api/index.html">API Reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/enriquetomasmb/nebula" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="_sources/nebula.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>nebula package</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#subpackages">Subpackages</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula-controller-module">nebula.controller module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula-node-module">nebula.node module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula-scenarios-module">nebula.scenarios module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-nebula">Module contents</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="nebula-package">
+<h1>nebula package<a class="headerlink" href="#nebula-package" title="Link to this heading">#</a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading">#</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="nebula.addons.html">nebula.addons package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="nebula.addons.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nebula.addons.attacks.html">nebula.addons.attacks package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="nebula.addons.attacks.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.addons.attacks.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.addons.attacks.html#nebula-addons-attacks-attacks-module">nebula.addons.attacks.attacks module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.addons.attacks.html#module-nebula.addons.attacks">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="nebula.addons.blockchain.html">nebula.addons.blockchain package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="nebula.addons.blockchain.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.addons.blockchain.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.addons.blockchain.html#nebula-addons-blockchain-blockchain-deployer-module">nebula.addons.blockchain.blockchain_deployer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.addons.blockchain.html#module-nebula.addons.blockchain">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="nebula.addons.trustworthiness.html">nebula.addons.trustworthiness package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="nebula.addons.trustworthiness.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.addons.trustworthiness.html#nebula-addons-trustworthiness-calculation-module">nebula.addons.trustworthiness.calculation module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.addons.trustworthiness.html#nebula-addons-trustworthiness-factsheet-module">nebula.addons.trustworthiness.factsheet module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.addons.trustworthiness.html#nebula-addons-trustworthiness-metric-module">nebula.addons.trustworthiness.metric module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.addons.trustworthiness.html#nebula-addons-trustworthiness-pillar-module">nebula.addons.trustworthiness.pillar module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.addons.trustworthiness.html#nebula-addons-trustworthiness-utils-module">nebula.addons.trustworthiness.utils module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.addons.trustworthiness.html#module-nebula.addons.trustworthiness">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="nebula.addons.waf.html">nebula.addons.waf package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="nebula.addons.waf.html#module-nebula.addons.waf">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="nebula.addons.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nebula.addons.html#module-nebula.addons.env">nebula.addons.env module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nebula.addons.html#nebula.addons.env.check_environment"><code class="docutils literal notranslate"><span class="pre">check_environment()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="nebula.addons.html#nebula.addons.env.check_version"><code class="docutils literal notranslate"><span class="pre">check_version()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="nebula.addons.html#module-nebula.addons.functions">nebula.addons.functions module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nebula.addons.html#nebula.addons.functions.print_msg_box"><code class="docutils literal notranslate"><span class="pre">print_msg_box()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="nebula.addons.html#module-nebula.addons.mobility">nebula.addons.mobility module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nebula.addons.html#nebula.addons.mobility.Mobility"><code class="docutils literal notranslate"><span class="pre">Mobility</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="nebula.addons.html#nebula.addons.mobility.Mobility.change_connections"><code class="docutils literal notranslate"><span class="pre">Mobility.change_connections()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.addons.html#nebula.addons.mobility.Mobility.change_connections_based_on_distance"><code class="docutils literal notranslate"><span class="pre">Mobility.change_connections_based_on_distance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.addons.html#nebula.addons.mobility.Mobility.change_geo_location"><code class="docutils literal notranslate"><span class="pre">Mobility.change_geo_location()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.addons.html#nebula.addons.mobility.Mobility.change_geo_location_nearest_neighbor_strategy"><code class="docutils literal notranslate"><span class="pre">Mobility.change_geo_location_nearest_neighbor_strategy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.addons.html#nebula.addons.mobility.Mobility.change_geo_location_random_strategy"><code class="docutils literal notranslate"><span class="pre">Mobility.change_geo_location_random_strategy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.addons.html#nebula.addons.mobility.Mobility.round"><code class="docutils literal notranslate"><span class="pre">Mobility.round</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.addons.html#nebula.addons.mobility.Mobility.run"><code class="docutils literal notranslate"><span class="pre">Mobility.run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.addons.html#nebula.addons.mobility.Mobility.set_geo_location"><code class="docutils literal notranslate"><span class="pre">Mobility.set_geo_location()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="nebula.addons.html#nebula-addons-reporter-module">nebula.addons.reporter module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nebula.addons.html#nebula-addons-topologymanager-module">nebula.addons.topologymanager module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nebula.addons.html#module-nebula.addons">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="nebula.config.html">nebula.config package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="nebula.config.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nebula.config.html#module-nebula.config.config">nebula.config.config module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nebula.config.html#nebula.config.config.Config"><code class="docutils literal notranslate"><span class="pre">Config</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.config.Config.add_neighbor_from_config"><code class="docutils literal notranslate"><span class="pre">Config.add_neighbor_from_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.config.Config.add_participant_config"><code class="docutils literal notranslate"><span class="pre">Config.add_participant_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.config.Config.add_participants_config"><code class="docutils literal notranslate"><span class="pre">Config.add_participants_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.config.Config.get_participant_config"><code class="docutils literal notranslate"><span class="pre">Config.get_participant_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.config.Config.get_topology_config"><code class="docutils literal notranslate"><span class="pre">Config.get_topology_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.config.Config.participant"><code class="docutils literal notranslate"><span class="pre">Config.participant</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.config.Config.participants"><code class="docutils literal notranslate"><span class="pre">Config.participants</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.config.Config.participants_path"><code class="docutils literal notranslate"><span class="pre">Config.participants_path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.config.Config.reload_config_file"><code class="docutils literal notranslate"><span class="pre">Config.reload_config_file()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.config.Config.remove_neighbor_from_config"><code class="docutils literal notranslate"><span class="pre">Config.remove_neighbor_from_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.config.Config.set_participant_config"><code class="docutils literal notranslate"><span class="pre">Config.set_participant_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.config.Config.set_participants_config"><code class="docutils literal notranslate"><span class="pre">Config.set_participants_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.config.Config.set_topology_config"><code class="docutils literal notranslate"><span class="pre">Config.set_topology_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.config.Config.to_json"><code class="docutils literal notranslate"><span class="pre">Config.to_json()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.config.Config.topology"><code class="docutils literal notranslate"><span class="pre">Config.topology</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.config.Config.update_neighbors_from_config"><code class="docutils literal notranslate"><span class="pre">Config.update_neighbors_from_config()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="nebula.config.html#module-nebula.config.mender">nebula.config.mender module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nebula.config.html#nebula.config.mender.Mender"><code class="docutils literal notranslate"><span class="pre">Mender</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.mender.Mender.deploy_artifact_device"><code class="docutils literal notranslate"><span class="pre">Mender.deploy_artifact_device()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.mender.Mender.deploy_artifact_list"><code class="docutils literal notranslate"><span class="pre">Mender.deploy_artifact_list()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.mender.Mender.generate_artifact"><code class="docutils literal notranslate"><span class="pre">Mender.generate_artifact()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.mender.Mender.get_artifacts"><code class="docutils literal notranslate"><span class="pre">Mender.get_artifacts()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.mender.Mender.get_connected_device"><code class="docutils literal notranslate"><span class="pre">Mender.get_connected_device()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.mender.Mender.get_devices"><code class="docutils literal notranslate"><span class="pre">Mender.get_devices()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.mender.Mender.get_devices_by_group"><code class="docutils literal notranslate"><span class="pre">Mender.get_devices_by_group()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.mender.Mender.get_info_deployment"><code class="docutils literal notranslate"><span class="pre">Mender.get_info_deployment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.mender.Mender.get_info_device"><code class="docutils literal notranslate"><span class="pre">Mender.get_info_device()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.mender.Mender.get_my_info"><code class="docutils literal notranslate"><span class="pre">Mender.get_my_info()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.mender.Mender.get_token"><code class="docutils literal notranslate"><span class="pre">Mender.get_token()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.mender.Mender.renew_token"><code class="docutils literal notranslate"><span class="pre">Mender.renew_token()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.config.html#nebula.config.mender.Mender.upload_artifact"><code class="docutils literal notranslate"><span class="pre">Mender.upload_artifact()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="nebula.config.html#module-nebula.config">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="nebula.core.html">nebula.core package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="nebula.core.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nebula.core.aggregation.html">nebula.core.aggregation package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.aggregation.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.aggregation.html#nebula-core-aggregation-aggregator-module">nebula.core.aggregation.aggregator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.aggregation.html#nebula-core-aggregation-blockchainreputation-module">nebula.core.aggregation.blockchainReputation module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.aggregation.html#nebula-core-aggregation-dualhistagg-module">nebula.core.aggregation.dualhistagg module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.aggregation.html#nebula-core-aggregation-fedavg-module">nebula.core.aggregation.fedavg module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.aggregation.html#nebula-core-aggregation-fedavgsvm-module">nebula.core.aggregation.fedavgSVM module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.aggregation.html#nebula-core-aggregation-krum-module">nebula.core.aggregation.krum module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.aggregation.html#nebula-core-aggregation-median-module">nebula.core.aggregation.median module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.aggregation.html#nebula-core-aggregation-trimmedmean-module">nebula.core.aggregation.trimmedmean module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.aggregation.html#module-nebula.core.aggregation">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="nebula.core.datasets.html">nebula.core.datasets package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.datasets.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.datasets.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.datasets.html#nebula-core-datasets-changeablesubset-module">nebula.core.datasets.changeablesubset module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.datasets.html#nebula-core-datasets-datamodule-module">nebula.core.datasets.datamodule module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.datasets.html#nebula-core-datasets-nebuladataset-module">nebula.core.datasets.nebuladataset module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.datasets.html#module-nebula.core.datasets">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="nebula.core.models.html">nebula.core.models package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.models.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.models.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.models.html#nebula-core-models-nebulamodel-module">nebula.core.models.nebulamodel module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.models.html#module-nebula.core.models">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="nebula.core.network.html">nebula.core.network package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.network.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.network.html#nebula-core-network-communications-module">nebula.core.network.communications module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.network.html#nebula-core-network-connection-module">nebula.core.network.connection module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.network.html#nebula-core-network-discoverer-module">nebula.core.network.discoverer module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.network.html#module-nebula.core.network.forwarder">nebula.core.network.forwarder module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.network.html#nebula-core-network-health-module">nebula.core.network.health module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.network.html#nebula-core-network-messages-module">nebula.core.network.messages module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.network.html#module-nebula.core.network.propagator">nebula.core.network.propagator module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.network.html#module-nebula.core.network">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="nebula.core.pb.html">nebula.core.pb package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.pb.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.pb.html#nebula-core-pb-nebula-pb2-module">nebula.core.pb.nebula_pb2 module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.pb.html#module-nebula.core.pb">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="nebula.core.training.html">nebula.core.training package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.training.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.training.html#nebula-core-training-lightning-module">nebula.core.training.lightning module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.training.html#nebula-core-training-scikit-module">nebula.core.training.scikit module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.training.html#nebula-core-training-siamese-module">nebula.core.training.siamese module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.training.html#module-nebula.core.training">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="nebula.core.utils.html">nebula.core.utils package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.utils.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.utils.html#nebula-core-utils-certificate-module">nebula.core.utils.certificate module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.utils.html#nebula-core-utils-deterministic-module">nebula.core.utils.deterministic module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.utils.html#nebula-core-utils-helper-module">nebula.core.utils.helper module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.utils.html#module-nebula.core.utils.locker">nebula.core.utils.locker module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.utils.html#nebula-core-utils-nebulalogger-module">nebula.core.utils.nebulalogger module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.utils.html#nebula-core-utils-nebulalogger-tensorboard-module">nebula.core.utils.nebulalogger_tensorboard module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.utils.html#module-nebula.core.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="nebula.core.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nebula.core.html#nebula-core-engine-module">nebula.core.engine module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nebula.core.html#module-nebula.core.eventmanager">nebula.core.eventmanager module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nebula.core.html#nebula.core.eventmanager.EventManager"><code class="docutils literal notranslate"><span class="pre">EventManager</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.html#nebula.core.eventmanager.EventManager.get_event_callbacks"><code class="docutils literal notranslate"><span class="pre">EventManager.get_event_callbacks()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.html#nebula.core.eventmanager.EventManager.get_event_callbacks_names"><code class="docutils literal notranslate"><span class="pre">EventManager.get_event_callbacks_names()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.html#nebula.core.eventmanager.EventManager.register_event"><code class="docutils literal notranslate"><span class="pre">EventManager.register_event()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.html#nebula.core.eventmanager.EventManager.trigger_event"><code class="docutils literal notranslate"><span class="pre">EventManager.trigger_event()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.html#nebula.core.eventmanager.EventManager.unregister_event"><code class="docutils literal notranslate"><span class="pre">EventManager.unregister_event()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="nebula.core.html#nebula.core.eventmanager.event_handler"><code class="docutils literal notranslate"><span class="pre">event_handler()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="nebula.core.html#module-nebula.core.role">nebula.core.role module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nebula.core.html#nebula.core.role.Role"><code class="docutils literal notranslate"><span class="pre">Role</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.html#nebula.core.role.Role.AGGREGATOR"><code class="docutils literal notranslate"><span class="pre">Role.AGGREGATOR</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.html#nebula.core.role.Role.IDLE"><code class="docutils literal notranslate"><span class="pre">Role.IDLE</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.html#nebula.core.role.Role.PROXY"><code class="docutils literal notranslate"><span class="pre">Role.PROXY</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.html#nebula.core.role.Role.SERVER"><code class="docutils literal notranslate"><span class="pre">Role.SERVER</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="nebula.core.html#nebula.core.role.Role.TRAINER"><code class="docutils literal notranslate"><span class="pre">Role.TRAINER</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="nebula.core.html#module-nebula.core">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="nebula.frontend.html">nebula.frontend package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="nebula.frontend.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="nebula.frontend.config.html">nebula.frontend.config package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="nebula.frontend.config.html#module-nebula.frontend.config">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="nebula.frontend.databases.html">nebula.frontend.databases package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="nebula.frontend.databases.html#module-nebula.frontend.databases">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="nebula.frontend.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nebula.frontend.html#nebula-frontend-app-module">nebula.frontend.app module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nebula.frontend.html#nebula-frontend-database-module">nebula.frontend.database module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nebula.frontend.html#module-nebula.frontend">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="nebula.tests.html">nebula.tests package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="nebula.tests.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nebula.tests.html#nebula-tests-main-module">nebula.tests.main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="nebula.tests.html#module-nebula.tests">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">#</a></h2>
+</section>
+<section id="nebula-controller-module">
+<h2>nebula.controller module<a class="headerlink" href="#nebula-controller-module" title="Link to this heading">#</a></h2>
+</section>
+<section id="nebula-node-module">
+<h2>nebula.node module<a class="headerlink" href="#nebula-node-module" title="Link to this heading">#</a></h2>
+</section>
+<section id="nebula-scenarios-module">
+<h2>nebula.scenarios module<a class="headerlink" href="#nebula-scenarios-module" title="Link to this heading">#</a></h2>
+</section>
+<section id="module-nebula">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-nebula" title="Link to this heading">#</a></h2>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#subpackages">Subpackages</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#submodules">Submodules</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula-controller-module">nebula.controller module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula-node-module">nebula.node module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula-scenarios-module">nebula.scenarios module</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-nebula">Module contents</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Enrique Tomás Martínez Beltrán
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Enrique Tomás Martínez Beltrán.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

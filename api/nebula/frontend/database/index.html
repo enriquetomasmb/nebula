@@ -1,0 +1,795 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>nebula.frontend.database &#8212; NEBULA Documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/styles/sphinx-book-theme.css?v=384b581d" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+    <script src="../../../../_static/documentation_options.js?v=f9c1cefe"></script>
+    <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/scripts/sphinx-book-theme.js?v=efea14e4"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/nebula/frontend/database/index';</script>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search..."
+         aria-label="Search..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../../_static/nebula-logo.jpg" class="logo__image only-light" alt="NEBULA Documentation - Home"/>
+    <script>document.write(`<img src="../../../../_static/nebula-logo.jpg" class="logo__image only-dark" alt="NEBULA Documentation - Home"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item">
+
+ <script>
+ document.write(`
+   <button class="btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script></div>
+        <div class="sidebar-primary-item"><nav class="bd-links bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="../../../index.html">API Reference</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="simple">
+</ul>
+</details></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+<a href="https://github.com/enriquetomasmb/nebula" target="_blank"
+   class="btn btn-sm btn-source-repository-button"
+   title="Source repository"
+   data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+
+</a>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Download this page">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../../../_sources/api/nebula/frontend/database/index.rst" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="Download source file"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.rst</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="Print to PDF"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="Fullscreen mode"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script>
+
+
+<script>
+document.write(`
+  <button class="btn btn-sm pst-navbar-icon search-button search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass fa-lg"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>nebula.frontend.database</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> Contents </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#functions">Functions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#attributes">Attributes</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.user_db_file_location"><code class="docutils literal notranslate"><span class="pre">user_db_file_location</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.node_db_file_location"><code class="docutils literal notranslate"><span class="pre">node_db_file_location</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.scenario_db_file_location"><code class="docutils literal notranslate"><span class="pre">scenario_db_file_location</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.notes_db_file_location"><code class="docutils literal notranslate"><span class="pre">notes_db_file_location</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.PRAGMA_SETTINGS"><code class="docutils literal notranslate"><span class="pre">PRAGMA_SETTINGS</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.setup_database"><code class="docutils literal notranslate"><span class="pre">setup_database()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.initialize_databases"><code class="docutils literal notranslate"><span class="pre">initialize_databases()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.list_users"><code class="docutils literal notranslate"><span class="pre">list_users()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.get_user_info"><code class="docutils literal notranslate"><span class="pre">get_user_info()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.verify"><code class="docutils literal notranslate"><span class="pre">verify()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.delete_user_from_db"><code class="docutils literal notranslate"><span class="pre">delete_user_from_db()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.add_user"><code class="docutils literal notranslate"><span class="pre">add_user()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.update_user"><code class="docutils literal notranslate"><span class="pre">update_user()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.list_nodes"><code class="docutils literal notranslate"><span class="pre">list_nodes()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.list_nodes_by_scenario_name"><code class="docutils literal notranslate"><span class="pre">list_nodes_by_scenario_name()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.update_node_record"><code class="docutils literal notranslate"><span class="pre">update_node_record()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.remove_all_nodes"><code class="docutils literal notranslate"><span class="pre">remove_all_nodes()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.remove_nodes_by_scenario_name"><code class="docutils literal notranslate"><span class="pre">remove_nodes_by_scenario_name()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.get_run_hashes_scenario"><code class="docutils literal notranslate"><span class="pre">get_run_hashes_scenario()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.get_all_scenarios"><code class="docutils literal notranslate"><span class="pre">get_all_scenarios()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.get_all_scenarios_and_check_completed"><code class="docutils literal notranslate"><span class="pre">get_all_scenarios_and_check_completed()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.scenario_update_record"><code class="docutils literal notranslate"><span class="pre">scenario_update_record()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.scenario_set_all_status_to_finished"><code class="docutils literal notranslate"><span class="pre">scenario_set_all_status_to_finished()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.scenario_set_status_to_finished"><code class="docutils literal notranslate"><span class="pre">scenario_set_status_to_finished()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.scenario_set_status_to_completed"><code class="docutils literal notranslate"><span class="pre">scenario_set_status_to_completed()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.get_running_scenario"><code class="docutils literal notranslate"><span class="pre">get_running_scenario()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.get_completed_scenario"><code class="docutils literal notranslate"><span class="pre">get_completed_scenario()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.get_scenario_by_name"><code class="docutils literal notranslate"><span class="pre">get_scenario_by_name()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.remove_scenario_by_name"><code class="docutils literal notranslate"><span class="pre">remove_scenario_by_name()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.check_scenario_federation_completed"><code class="docutils literal notranslate"><span class="pre">check_scenario_federation_completed()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.check_scenario_with_role"><code class="docutils literal notranslate"><span class="pre">check_scenario_with_role()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.save_notes"><code class="docutils literal notranslate"><span class="pre">save_notes()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.get_notes"><code class="docutils literal notranslate"><span class="pre">get_notes()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.remove_note"><code class="docutils literal notranslate"><span class="pre">remove_note()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <section id="module-nebula.frontend.database">
+<span id="nebula-frontend-database"></span><h1><a class="reference internal" href="#module-nebula.frontend.database" title="nebula.frontend.database"><code class="xref py py-mod docutils literal notranslate"><span class="pre">nebula.frontend.database</span></code></a><a class="headerlink" href="#module-nebula.frontend.database" title="Link to this heading">#</a></h1>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">#</a></h2>
+<section id="functions">
+<h3>Functions<a class="headerlink" href="#functions" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.database.setup_database" title="nebula.frontend.database.setup_database"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setup_database</span></code></a>(db_file_location)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.database.initialize_databases" title="nebula.frontend.database.initialize_databases"><code class="xref py py-obj docutils literal notranslate"><span class="pre">initialize_databases</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.database.list_users" title="nebula.frontend.database.list_users"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_users</span></code></a>([all_info])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.database.get_user_info" title="nebula.frontend.database.get_user_info"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_user_info</span></code></a>(user)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.database.verify" title="nebula.frontend.database.verify"><code class="xref py py-obj docutils literal notranslate"><span class="pre">verify</span></code></a>(user, password)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.database.delete_user_from_db" title="nebula.frontend.database.delete_user_from_db"><code class="xref py py-obj docutils literal notranslate"><span class="pre">delete_user_from_db</span></code></a>(user)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.database.add_user" title="nebula.frontend.database.add_user"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_user</span></code></a>(user, password, role)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.database.update_user" title="nebula.frontend.database.update_user"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_user</span></code></a>(user, password, role)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.database.list_nodes" title="nebula.frontend.database.list_nodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_nodes</span></code></a>([scenario_name, sort_by])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.database.list_nodes_by_scenario_name" title="nebula.frontend.database.list_nodes_by_scenario_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list_nodes_by_scenario_name</span></code></a>(scenario_name)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.database.update_node_record" title="nebula.frontend.database.update_node_record"><code class="xref py py-obj docutils literal notranslate"><span class="pre">update_node_record</span></code></a>(node_uid, idx, ip, port, role, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.database.remove_all_nodes" title="nebula.frontend.database.remove_all_nodes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_all_nodes</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.database.remove_nodes_by_scenario_name" title="nebula.frontend.database.remove_nodes_by_scenario_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_nodes_by_scenario_name</span></code></a>(scenario_name)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.database.get_run_hashes_scenario" title="nebula.frontend.database.get_run_hashes_scenario"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_run_hashes_scenario</span></code></a>(scenario_name)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.database.get_all_scenarios" title="nebula.frontend.database.get_all_scenarios"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_all_scenarios</span></code></a>([sort_by])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.database.get_all_scenarios_and_check_completed" title="nebula.frontend.database.get_all_scenarios_and_check_completed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_all_scenarios_and_check_completed</span></code></a>([sort_by])</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.database.scenario_update_record" title="nebula.frontend.database.scenario_update_record"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scenario_update_record</span></code></a>(scenario_name, start_time, ...)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.database.scenario_set_all_status_to_finished" title="nebula.frontend.database.scenario_set_all_status_to_finished"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scenario_set_all_status_to_finished</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.database.scenario_set_status_to_finished" title="nebula.frontend.database.scenario_set_status_to_finished"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scenario_set_status_to_finished</span></code></a>(scenario_name)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.database.scenario_set_status_to_completed" title="nebula.frontend.database.scenario_set_status_to_completed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scenario_set_status_to_completed</span></code></a>(scenario_name)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.database.get_running_scenario" title="nebula.frontend.database.get_running_scenario"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_running_scenario</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.database.get_completed_scenario" title="nebula.frontend.database.get_completed_scenario"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_completed_scenario</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.database.get_scenario_by_name" title="nebula.frontend.database.get_scenario_by_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_scenario_by_name</span></code></a>(scenario_name)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.database.remove_scenario_by_name" title="nebula.frontend.database.remove_scenario_by_name"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_scenario_by_name</span></code></a>(scenario_name)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.database.check_scenario_federation_completed" title="nebula.frontend.database.check_scenario_federation_completed"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_scenario_federation_completed</span></code></a>(scenario_name)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.database.check_scenario_with_role" title="nebula.frontend.database.check_scenario_with_role"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_scenario_with_role</span></code></a>(role, scenario_name)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.database.save_notes" title="nebula.frontend.database.save_notes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">save_notes</span></code></a>(scenario, notes)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.database.get_notes" title="nebula.frontend.database.get_notes"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_notes</span></code></a>(scenario)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.database.remove_note" title="nebula.frontend.database.remove_note"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_note</span></code></a>(scenario)</p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="attributes">
+<h3>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">#</a></h3>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.database.user_db_file_location" title="nebula.frontend.database.user_db_file_location"><code class="xref py py-obj docutils literal notranslate"><span class="pre">user_db_file_location</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.database.node_db_file_location" title="nebula.frontend.database.node_db_file_location"><code class="xref py py-obj docutils literal notranslate"><span class="pre">node_db_file_location</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.database.scenario_db_file_location" title="nebula.frontend.database.scenario_db_file_location"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scenario_db_file_location</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.frontend.database.notes_db_file_location" title="nebula.frontend.database.notes_db_file_location"><code class="xref py py-obj docutils literal notranslate"><span class="pre">notes_db_file_location</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.frontend.database.PRAGMA_SETTINGS" title="nebula.frontend.database.PRAGMA_SETTINGS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PRAGMA_SETTINGS</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py data">
+<dt class="sig sig-object py" id="nebula.frontend.database.user_db_file_location">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">user_db_file_location</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'databases/users.db'</span></em><a class="headerlink" href="#nebula.frontend.database.user_db_file_location" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nebula.frontend.database.node_db_file_location">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">node_db_file_location</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'databases/nodes.db'</span></em><a class="headerlink" href="#nebula.frontend.database.node_db_file_location" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nebula.frontend.database.scenario_db_file_location">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">scenario_db_file_location</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'databases/scenarios.db'</span></em><a class="headerlink" href="#nebula.frontend.database.scenario_db_file_location" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nebula.frontend.database.notes_db_file_location">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">notes_db_file_location</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'databases/notes.db'</span></em><a class="headerlink" href="#nebula.frontend.database.notes_db_file_location" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nebula.frontend.database.PRAGMA_SETTINGS">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">PRAGMA_SETTINGS</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['PRAGMA</span> <span class="pre">journal_mode=WAL;',</span> <span class="pre">'PRAGMA</span> <span class="pre">synchronous=NORMAL;',</span> <span class="pre">'PRAGMA</span> <span class="pre">journal_size_limit=1048576;',...</span></em><a class="headerlink" href="#nebula.frontend.database.PRAGMA_SETTINGS" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.setup_database">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">setup_database</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_file_location</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.setup_database" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.initialize_databases">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">initialize_databases</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.initialize_databases" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.list_users">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">list_users</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">all_info</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.list_users" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.get_user_info">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">get_user_info</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.get_user_info" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.verify">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">verify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.verify" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.delete_user_from_db">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">delete_user_from_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.delete_user_from_db" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.add_user">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">add_user</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">role</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.add_user" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.update_user">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">update_user</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">role</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.update_user" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.list_nodes">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">list_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'idx'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.list_nodes" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.list_nodes_by_scenario_name">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">list_nodes_by_scenario_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.list_nodes_by_scenario_name" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.update_node_record">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">update_node_record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_uid</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ip</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">role</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighbors</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">federation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">federation_round</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scenario</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_hash</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.update_node_record" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.remove_all_nodes">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">remove_all_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.remove_all_nodes" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.remove_nodes_by_scenario_name">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">remove_nodes_by_scenario_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.remove_nodes_by_scenario_name" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.get_run_hashes_scenario">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">get_run_hashes_scenario</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.get_run_hashes_scenario" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.get_all_scenarios">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">get_all_scenarios</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sort_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'start_time'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.get_all_scenarios" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.get_all_scenarios_and_check_completed">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">get_all_scenarios_and_check_completed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sort_by</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'start_time'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.get_all_scenarios_and_check_completed" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.scenario_update_record">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">scenario_update_record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_time</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network_subnet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">role</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.scenario_update_record" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.scenario_set_all_status_to_finished">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">scenario_set_all_status_to_finished</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.scenario_set_all_status_to_finished" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.scenario_set_status_to_finished">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">scenario_set_status_to_finished</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.scenario_set_status_to_finished" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.scenario_set_status_to_completed">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">scenario_set_status_to_completed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.scenario_set_status_to_completed" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.get_running_scenario">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">get_running_scenario</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.get_running_scenario" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.get_completed_scenario">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">get_completed_scenario</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.get_completed_scenario" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.get_scenario_by_name">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">get_scenario_by_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.get_scenario_by_name" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.remove_scenario_by_name">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">remove_scenario_by_name</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.remove_scenario_by_name" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.check_scenario_federation_completed">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">check_scenario_federation_completed</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.check_scenario_federation_completed" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.check_scenario_with_role">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">check_scenario_with_role</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">role</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.check_scenario_with_role" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.save_notes">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">save_notes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.save_notes" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.get_notes">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">get_notes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.get_notes" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="nebula.frontend.database.remove_note">
+<span class="sig-prename descclassname"><span class="pre">nebula.frontend.database.</span></span><span class="sig-name descname"><span class="pre">remove_note</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.frontend.database.remove_note" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> Contents
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#functions">Functions</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#attributes">Attributes</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.user_db_file_location"><code class="docutils literal notranslate"><span class="pre">user_db_file_location</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.node_db_file_location"><code class="docutils literal notranslate"><span class="pre">node_db_file_location</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.scenario_db_file_location"><code class="docutils literal notranslate"><span class="pre">scenario_db_file_location</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.notes_db_file_location"><code class="docutils literal notranslate"><span class="pre">notes_db_file_location</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.PRAGMA_SETTINGS"><code class="docutils literal notranslate"><span class="pre">PRAGMA_SETTINGS</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.setup_database"><code class="docutils literal notranslate"><span class="pre">setup_database()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.initialize_databases"><code class="docutils literal notranslate"><span class="pre">initialize_databases()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.list_users"><code class="docutils literal notranslate"><span class="pre">list_users()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.get_user_info"><code class="docutils literal notranslate"><span class="pre">get_user_info()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.verify"><code class="docutils literal notranslate"><span class="pre">verify()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.delete_user_from_db"><code class="docutils literal notranslate"><span class="pre">delete_user_from_db()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.add_user"><code class="docutils literal notranslate"><span class="pre">add_user()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.update_user"><code class="docutils literal notranslate"><span class="pre">update_user()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.list_nodes"><code class="docutils literal notranslate"><span class="pre">list_nodes()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.list_nodes_by_scenario_name"><code class="docutils literal notranslate"><span class="pre">list_nodes_by_scenario_name()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.update_node_record"><code class="docutils literal notranslate"><span class="pre">update_node_record()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.remove_all_nodes"><code class="docutils literal notranslate"><span class="pre">remove_all_nodes()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.remove_nodes_by_scenario_name"><code class="docutils literal notranslate"><span class="pre">remove_nodes_by_scenario_name()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.get_run_hashes_scenario"><code class="docutils literal notranslate"><span class="pre">get_run_hashes_scenario()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.get_all_scenarios"><code class="docutils literal notranslate"><span class="pre">get_all_scenarios()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.get_all_scenarios_and_check_completed"><code class="docutils literal notranslate"><span class="pre">get_all_scenarios_and_check_completed()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.scenario_update_record"><code class="docutils literal notranslate"><span class="pre">scenario_update_record()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.scenario_set_all_status_to_finished"><code class="docutils literal notranslate"><span class="pre">scenario_set_all_status_to_finished()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.scenario_set_status_to_finished"><code class="docutils literal notranslate"><span class="pre">scenario_set_status_to_finished()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.scenario_set_status_to_completed"><code class="docutils literal notranslate"><span class="pre">scenario_set_status_to_completed()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.get_running_scenario"><code class="docutils literal notranslate"><span class="pre">get_running_scenario()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.get_completed_scenario"><code class="docutils literal notranslate"><span class="pre">get_completed_scenario()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.get_scenario_by_name"><code class="docutils literal notranslate"><span class="pre">get_scenario_by_name()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.remove_scenario_by_name"><code class="docutils literal notranslate"><span class="pre">remove_scenario_by_name()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.check_scenario_federation_completed"><code class="docutils literal notranslate"><span class="pre">check_scenario_federation_completed()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.check_scenario_with_role"><code class="docutils literal notranslate"><span class="pre">check_scenario_with_role()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.save_notes"><code class="docutils literal notranslate"><span class="pre">save_notes()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.get_notes"><code class="docutils literal notranslate"><span class="pre">get_notes()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.frontend.database.remove_note"><code class="docutils literal notranslate"><span class="pre">remove_note()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+By Enrique Tomás Martínez Beltrán
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+
+  <p class="copyright">
+    
+      © Copyright 2024, Enrique Tomás Martínez Beltrán.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
