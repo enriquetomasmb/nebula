@@ -41,7 +41,6 @@ jobs:
     - name: Add files
       run: |
           echo "nebula.enriquetomasmb.com" > docs/_build/CNAME
-          touch docs/_build/.nojekyll
     - name: List directories
       run: |
           ls -la docs/_build/
@@ -55,6 +54,7 @@ jobs:
     - name: Copy documentation to the gh-pages branch
       run: |
         cp -r docs/_build/* gh-pages/
+        touch gh-pages/.nojekyll
     - name: List directories
       run: |
           ls -la gh-pages/
