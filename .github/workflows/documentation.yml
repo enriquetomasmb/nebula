@@ -41,6 +41,7 @@ jobs:
     - name: Add files
       run: |
           echo "nebula.enriquetomasmb.com" > docs/_build/CNAME
+          touch docs/_build/.nojekyll
     - name: List directories
       run: |
           ls -la docs/_build/
