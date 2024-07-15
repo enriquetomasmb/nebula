@@ -1,14 +1,29 @@
-:py:mod:`nebula.frontend.app`
-=============================
+nebula.frontend.app
+===================
 
 .. py:module:: nebula.frontend.app
 
 
-Module Contents
----------------
+Attributes
+----------
+
+.. autoapisummary::
+
+   nebula.frontend.app.settings
+   nebula.frontend.app.app
+   nebula.frontend.app.manager
+   nebula.frontend.app.templates
+   nebula.frontend.app.nodes_registration
+   nebula.frontend.app.scenarios_list_length
+   nebula.frontend.app.scenarios_finished
+   nebula.frontend.app.stop_all_scenarios_event
+   nebula.frontend.app.finish_scenario_event
+   nebula.frontend.app.nodes_finished
+   nebula.frontend.app.parser
+
 
 Classes
-~~~~~~~
+-------
 
 .. autoapisummary::
 
@@ -16,9 +31,8 @@ Classes
    nebula.frontend.app.ConnectionManager
 
 
-
 Functions
-~~~~~~~~~
+---------
 
 .. autoapisummary::
 
@@ -68,98 +82,66 @@ Functions
    nebula.frontend.app.nebula_dashboard_deployment_run
 
 
-
-Attributes
-~~~~~~~~~~
-
-.. autoapisummary::
-
-   nebula.frontend.app.settings
-   nebula.frontend.app.app
-   nebula.frontend.app.manager
-   nebula.frontend.app.templates
-   nebula.frontend.app.nodes_registration
-   nebula.frontend.app.scenarios_list_length
-   nebula.frontend.app.scenarios_finished
-   nebula.frontend.app.stop_all_scenarios_event
-   nebula.frontend.app.finish_scenario_event
-   nebula.frontend.app.nodes_finished
-   nebula.frontend.app.parser
-
+Module Contents
+---------------
 
 .. py:class:: Settings
 
-
    .. py:attribute:: debug
-      :type: bool
+      :type:  bool
 
-      
 
    .. py:attribute:: advanced_analytics
-      :type: bool
+      :type:  bool
 
-      
 
    .. py:attribute:: log_dir
-      :type: str
+      :type:  str
 
-      
 
    .. py:attribute:: config_dir
-      :type: str
+      :type:  str
 
-      
 
    .. py:attribute:: cert_dir
-      :type: str
+      :type:  str
 
-      
 
    .. py:attribute:: root_host_path
-      :type: str
+      :type:  str
 
-      
 
    .. py:attribute:: config_frontend_dir
-      :type: str
+      :type:  str
 
-      
 
    .. py:attribute:: statistics_port
-      :type: int
+      :type:  int
 
-      
 
    .. py:attribute:: secret_key
-      :type: str
+      :type:  str
 
-      
 
    .. py:attribute:: PERMANENT_SESSION_LIFETIME
-      :type: datetime.timedelta
+      :type:  datetime.timedelta
 
-      
 
    .. py:attribute:: templates_dir
-      :type: str
+      :type:  str
       :value: 'templates'
 
-      
 
 
 .. py:data:: settings
 
-   
-
 .. py:data:: app
-
-   
 
 .. py:class:: ConnectionManager
 
-
    .. py:method:: connect(websocket)
       :async:
+
 
 
    .. py:method:: disconnect(websocket)
@@ -169,6 +151,7 @@ Attributes
       :async:
 
 
+
    .. py:method:: broadcast(message)
       :async:
 
@@ -176,24 +159,17 @@ Attributes
 
 .. py:data:: manager
 
-   
-
 .. py:function:: websocket_endpoint(websocket, client_id)
    :async:
 
 
 .. py:data:: templates
 
-   
-
 .. py:function:: datetimeformat(value, format='%B %d, %Y %H:%M')
-
 
 .. py:function:: get_session(request)
 
-
 .. py:function:: set_default_user()
-
 
 .. py:function:: startup_event()
    :async:
@@ -201,20 +177,15 @@ Attributes
 
 .. py:data:: nodes_registration
 
-   
-
 .. py:data:: scenarios_list_length
    :value: 0
 
-   
 
 .. py:data:: scenarios_finished
    :value: 0
 
-   
 
 .. py:function:: signal_handler(signal, frame)
-
 
 .. py:function:: custom_http_exception_handler(request, exc)
    :async:
@@ -274,7 +245,6 @@ Attributes
 
 .. py:function:: update_topology(scenario_name, nodes_list, nodes_config)
 
-
 .. py:function:: nebula_update_node(scenario_name, request, session = Depends(get_session))
    :async:
 
@@ -309,9 +279,7 @@ Attributes
 
 .. py:function:: stop_scenario(scenario_name)
 
-
 .. py:function:: stop_all_scenarios()
-
 
 .. py:function:: nebula_stop_scenario(scenario_name, stop_all, request, session = Depends(get_session))
    :async:
@@ -319,16 +287,13 @@ Attributes
 
 .. py:function:: remove_scenario(scenario_name=None)
 
-
 .. py:function:: nebula_remove_scenario(scenario_name, request, session = Depends(get_session))
    :async:
 
 
 .. py:function:: get_tracking_hash_scenario(scenario_name)
 
-
 .. py:function:: zipdir(path, ziph)
-
 
 .. py:function:: nebula_dashboard_download_logs_metrics(scenario_name, request, session = Depends(get_session))
    :async:
@@ -350,16 +315,11 @@ Attributes
 
 .. py:data:: stop_all_scenarios_event
 
-   
-
 .. py:data:: finish_scenario_event
-
-   
 
 .. py:data:: nodes_finished
    :value: []
 
-   
 
 .. py:function:: node_stopped(scenario_name, request)
    :async:
@@ -367,15 +327,11 @@ Attributes
 
 .. py:function:: run_scenario(scenario_data, role)
 
-
 .. py:function:: run_scenarios(data, role)
-
 
 .. py:function:: nebula_dashboard_deployment_run(request, background_tasks, session = Depends(get_session))
    :async:
 
 
 .. py:data:: parser
-
-   
 

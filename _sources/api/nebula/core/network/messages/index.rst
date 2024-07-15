@@ -1,24 +1,21 @@
-:py:mod:`nebula.core.network.messages`
-======================================
+nebula.core.network.messages
+============================
 
 .. py:module:: nebula.core.network.messages
 
 
-Module Contents
----------------
-
 Classes
-~~~~~~~
+-------
 
 .. autoapisummary::
 
    nebula.core.network.messages.MessagesManager
 
 
-
+Module Contents
+---------------
 
 .. py:class:: MessagesManager(addr, config, cm)
-
 
    .. py:method:: generate_discovery_message(action, latitude=0.0, longitude=0.0)
 
@@ -36,6 +33,5 @@ Classes
 
 
    .. py:method:: generate_reputation_message(reputation)
-
 
 

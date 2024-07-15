@@ -1,36 +1,31 @@
-:py:mod:`nebula.addons.trustworthiness.pillar`
-==============================================
+nebula.addons.trustworthiness.pillar
+====================================
 
 .. py:module:: nebula.addons.trustworthiness.pillar
 
 
-Module Contents
----------------
-
-Classes
-~~~~~~~
-
-.. autoapisummary::
-
-   nebula.addons.trustworthiness.pillar.TrustPillar
-
-
-
-
 Attributes
-~~~~~~~~~~
+----------
 
 .. autoapisummary::
 
    nebula.addons.trustworthiness.pillar.logger
 
 
+Classes
+-------
+
+.. autoapisummary::
+
+   nebula.addons.trustworthiness.pillar.TrustPillar
+
+
+Module Contents
+---------------
+
 .. py:data:: logger
 
-   
-
 .. py:class:: TrustPillar(name, metrics, input_docs, use_weights=False)
-
 
    Class to represent a trust pillar.
 
@@ -43,12 +38,14 @@ Attributes
    :param use_weights: True to turn on the weights in the metric config file.
    :type use_weights: bool
 
+
    .. py:method:: evaluate()
 
       Evaluate the trust score for the pillar.
 
       :returns: Score of [0, 1].
       :rtype: float
+
 
 
    .. py:method:: get_notion_score(name, metrics)
@@ -62,6 +59,7 @@ Attributes
 
       :returns: Score of [0, 1].
       :rtype: float
+
 
 
    .. py:method:: get_metric_score(result, name, metric)

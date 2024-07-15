@@ -1,24 +1,11 @@
-:py:mod:`nebula.addons.trustworthiness.factsheet`
-=================================================
+nebula.addons.trustworthiness.factsheet
+=======================================
 
 .. py:module:: nebula.addons.trustworthiness.factsheet
 
 
-Module Contents
----------------
-
-Classes
-~~~~~~~
-
-.. autoapisummary::
-
-   nebula.addons.trustworthiness.factsheet.Factsheet
-
-
-
-
 Attributes
-~~~~~~~~~~
+----------
 
 .. autoapisummary::
 
@@ -26,16 +13,22 @@ Attributes
    nebula.addons.trustworthiness.factsheet.logger
 
 
-.. py:data:: dirname
+Classes
+-------
 
-   
+.. autoapisummary::
+
+   nebula.addons.trustworthiness.factsheet.Factsheet
+
+
+Module Contents
+---------------
+
+.. py:data:: dirname
 
 .. py:data:: logger
 
-   
-
 .. py:class:: Factsheet
-
 
    .. py:method:: populate_factsheet_pre_train(data, scenario_name)
 
@@ -45,6 +38,7 @@ Attributes
       :type data: dict
       :param scenario_name: The name of the scenario.
       :type scenario_name: string
+
 
 
    .. py:method:: populate_factsheet_post_train(scenario)

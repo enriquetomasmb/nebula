@@ -1,24 +1,21 @@
-:py:mod:`nebula.core.training.scikit`
-=====================================
+nebula.core.training.scikit
+===========================
 
 .. py:module:: nebula.core.training.scikit
 
 
-Module Contents
----------------
-
 Classes
-~~~~~~~
+-------
 
 .. autoapisummary::
 
    nebula.core.training.scikit.Scikit
 
 
-
+Module Contents
+---------------
 
 .. py:class:: Scikit(model, data, config=None, logger=None)
-
 
    .. py:method:: set_model(model)
 
@@ -57,6 +54,5 @@ Classes
 
 
    .. py:method:: finalize_round()
-
 
 

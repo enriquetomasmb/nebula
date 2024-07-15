@@ -1,14 +1,11 @@
-:py:mod:`nebula.core.network.propagator`
-========================================
+nebula.core.network.propagator
+==============================
 
 .. py:module:: nebula.core.network.propagator
 
 
-Module Contents
----------------
-
 Classes
-~~~~~~~
+-------
 
 .. autoapisummary::
 
@@ -18,18 +15,21 @@ Classes
    nebula.core.network.propagator.Propagator
 
 
-
+Module Contents
+---------------
 
 .. py:class:: PropagationStrategy
 
-
    Bases: :py:obj:`abc.ABC`
+
 
    Helper class that provides a standard way to create an ABC using
    inheritance.
 
+
    .. py:method:: is_node_eligible(node)
       :abstractmethod:
+
 
 
    .. py:method:: prepare_model_payload(node)
@@ -39,11 +39,12 @@ Classes
 
 .. py:class:: InitialModelPropagation(aggregator, trainer, engine)
 
-
    Bases: :py:obj:`PropagationStrategy`
+
 
    Helper class that provides a standard way to create an ABC using
    inheritance.
+
 
    .. py:method:: get_round()
 
@@ -52,16 +53,16 @@ Classes
 
 
    .. py:method:: prepare_model_payload(node)
-
 
 
 .. py:class:: StableModelPropagation(aggregator, trainer, engine)
 
-
    Bases: :py:obj:`PropagationStrategy`
+
 
    Helper class that provides a standard way to create an ABC using
    inheritance.
+
 
    .. py:method:: get_round()
 
@@ -72,9 +73,7 @@ Classes
    .. py:method:: prepare_model_payload(node)
 
 
-
 .. py:class:: Propagator(cm)
-
 
    .. py:method:: start()
 
@@ -90,6 +89,7 @@ Classes
 
    .. py:method:: propagate(strategy_id)
       :async:
+
 
 
    .. py:method:: propagate_continuously(strategy_id)

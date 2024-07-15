@@ -1,21 +1,21 @@
-:py:mod:`nebula.core.models.cifar10`
-====================================
+nebula.core.models.cifar10
+==========================
 
 .. py:module:: nebula.core.models.cifar10
 
 
 Submodules
 ----------
+
 .. toctree::
-   :titlesonly:
    :maxdepth: 1
 
-   cnn/index.rst
-   cnnV2/index.rst
-   cnnV3/index.rst
-   dualagg/index.rst
-   fastermobilenet/index.rst
-   resnet/index.rst
-   simplemobilenet/index.rst
+   /api/nebula/core/models/cifar10/cnn/index
+   /api/nebula/core/models/cifar10/cnnV2/index
+   /api/nebula/core/models/cifar10/cnnV3/index
+   /api/nebula/core/models/cifar10/dualagg/index
+   /api/nebula/core/models/cifar10/fastermobilenet/index
+   /api/nebula/core/models/cifar10/resnet/index
+   /api/nebula/core/models/cifar10/simplemobilenet/index
 
 

@@ -1,30 +1,30 @@
-:py:mod:`nebula`
-================
+nebula
+======
 
 .. py:module:: nebula
 
 
 Subpackages
 -----------
-.. toctree::
-   :titlesonly:
-   :maxdepth: 3
 
-   addons/index.rst
-   config/index.rst
-   core/index.rst
-   frontend/index.rst
-   tests/index.rst
+.. toctree::
+   :maxdepth: 1
+
+   /api/nebula/addons/index
+   /api/nebula/config/index
+   /api/nebula/core/index
+   /api/nebula/frontend/index
+   /api/nebula/tests/index
 
 
 Submodules
 ----------
+
 .. toctree::
-   :titlesonly:
    :maxdepth: 1
 
-   controller/index.rst
-   node/index.rst
-   scenarios/index.rst
+   /api/nebula/controller/index
+   /api/nebula/node/index
+   /api/nebula/scenarios/index
 
 

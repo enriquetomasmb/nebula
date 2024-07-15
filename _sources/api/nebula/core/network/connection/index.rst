@@ -1,28 +1,24 @@
-:py:mod:`nebula.core.network.connection`
-========================================
+nebula.core.network.connection
+==============================
 
 .. py:module:: nebula.core.network.connection
 
 
-Module Contents
----------------
-
 Classes
-~~~~~~~
+-------
 
 .. autoapisummary::
 
    nebula.core.network.connection.Connection
 
 
-
+Module Contents
+---------------
 
 .. py:class:: Connection(cm, reader, writer, id, host, port, direct=True, active=True, compression='zlib', config=None)
 
-
    .. py:attribute:: DEFAULT_FEDERATED_ROUND
 
-      
 
    .. py:method:: get_addr()
 
@@ -70,24 +66,30 @@ Classes
       :async:
 
 
+
    .. py:method:: stop()
       :async:
+
 
 
    .. py:method:: compress(data, compression)
       :async:
 
 
+
    .. py:method:: decompress(compressed)
       :async:
+
 
 
    .. py:method:: send(data, pb=True, encoding_type='utf-8', compression='none')
       :async:
 
 
+
    .. py:method:: retrieve_message(message)
       :async:
+
 
 
    .. py:method:: handle_incoming_message()

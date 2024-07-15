@@ -1,17 +1,17 @@
-:py:mod:`nebula.core.training`
-==============================
+nebula.core.training
+====================
 
 .. py:module:: nebula.core.training
 
 
 Submodules
 ----------
+
 .. toctree::
-   :titlesonly:
    :maxdepth: 1
 
-   lightning/index.rst
-   scikit/index.rst
-   siamese/index.rst
+   /api/nebula/core/training/lightning/index
+   /api/nebula/core/training/scikit/index
+   /api/nebula/core/training/siamese/index
 
 

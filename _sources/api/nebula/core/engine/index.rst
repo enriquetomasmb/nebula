@@ -1,14 +1,11 @@
-:py:mod:`nebula.core.engine`
-============================
+nebula.core.engine
+==================
 
 .. py:module:: nebula.core.engine
 
 
-Module Contents
----------------
-
 Classes
-~~~~~~~
+-------
 
 .. autoapisummary::
 
@@ -20,9 +17,8 @@ Classes
    nebula.core.engine.IdleNode
 
 
-
 Functions
-~~~~~~~~~
+---------
 
 .. autoapisummary::
 
@@ -31,18 +27,16 @@ Functions
    nebula.core.engine.print_banner
 
 
+Module Contents
+---------------
 
 .. py:function:: handle_exception(exc_type, exc_value, exc_traceback)
 
-
 .. py:function:: signal_handler(sig, frame)
-
 
 .. py:function:: print_banner()
 
-
 .. py:class:: Engine(model, dataset, config=Config, trainer=Lightning, security=False, model_poisoning=False, poisoned_ratio=0, noise_type='gaussian')
-
 
    .. py:property:: cm
 
@@ -56,10 +50,10 @@ Functions
    .. py:property:: aggregator
 
 
-   .. py:property:: trainer
-
-
    .. py:method:: get_aggregator_type()
+
+
+   .. py:property:: trainer
 
 
    .. py:method:: get_addr()
@@ -96,8 +90,10 @@ Functions
       :async:
 
 
+
    .. py:method:: deploy_federation()
       :async:
+
 
 
    .. py:method:: reputation_calculation(aggregated_models_weights)
@@ -110,30 +106,25 @@ Functions
 
 .. py:class:: MaliciousNode(model, dataset, config=Config, trainer=Lightning, security=False, model_poisoning=False, poisoned_ratio=0, noise_type='gaussian')
 
-
    Bases: :py:obj:`Engine`
 
 
 .. py:class:: AggregatorNode(model, dataset, config=Config, trainer=Lightning, security=False, model_poisoning=False, poisoned_ratio=0, noise_type='gaussian')
-
 
    Bases: :py:obj:`Engine`
 
 
 .. py:class:: ServerNode(model, dataset, config=Config, trainer=Lightning, security=False, model_poisoning=False, poisoned_ratio=0, noise_type='gaussian')
 
-
    Bases: :py:obj:`Engine`
 
 
 .. py:class:: TrainerNode(model, dataset, config=Config, trainer=Lightning, security=False, model_poisoning=False, poisoned_ratio=0, noise_type='gaussian')
 
-
    Bases: :py:obj:`Engine`
 
 
 .. py:class:: IdleNode(model, dataset, config=Config, trainer=Lightning, security=False, model_poisoning=False, poisoned_ratio=0, noise_type='gaussian')
-
 
    Bases: :py:obj:`Engine`
 

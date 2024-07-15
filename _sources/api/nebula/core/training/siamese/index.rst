@@ -1,24 +1,21 @@
-:py:mod:`nebula.core.training.siamese`
-======================================
+nebula.core.training.siamese
+============================
 
 .. py:module:: nebula.core.training.siamese
 
 
-Module Contents
----------------
-
 Classes
-~~~~~~~
+-------
 
 .. autoapisummary::
 
    nebula.core.training.siamese.Siamese
 
 
-
+Module Contents
+---------------
 
 .. py:class:: Siamese(model, data, config=None, logger=None)
-
 
    .. py:property:: logger
 
@@ -50,6 +47,7 @@ Classes
       :rtype: str
 
 
+
    .. py:method:: set_epochs(epochs)
 
 
@@ -72,6 +70,5 @@ Classes
 
 
    .. py:method:: finalize_round()
-
 
 

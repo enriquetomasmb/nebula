@@ -1,33 +1,11 @@
-:py:mod:`nebula.controller`
-===========================
+nebula.controller
+=================
 
 .. py:module:: nebula.controller
 
 
-Module Contents
----------------
-
-Classes
-~~~~~~~
-
-.. autoapisummary::
-
-   nebula.controller.TermEscapeCodeFormatter
-   nebula.controller.Controller
-
-
-
-Functions
-~~~~~~~~~
-
-.. autoapisummary::
-
-   nebula.controller.signal_handler
-
-
-
 Attributes
-~~~~~~~~~~
+----------
 
 .. autoapisummary::
 
@@ -35,10 +13,30 @@ Attributes
    nebula.controller.console_handler
 
 
+Classes
+-------
+
+.. autoapisummary::
+
+   nebula.controller.TermEscapeCodeFormatter
+   nebula.controller.Controller
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   nebula.controller.signal_handler
+
+
+Module Contents
+---------------
+
 .. py:class:: TermEscapeCodeFormatter(fmt=None, datefmt=None, style='%', validate=True)
 
-
    Bases: :py:obj:`logging.Formatter`
+
 
    Formatter instances are used to convert a LogRecord to text.
 
@@ -80,6 +78,7 @@ Attributes
    %(message)s         The result of record.getMessage(), computed just as
                        the record is emitted
 
+
    .. py:method:: format(record)
 
       Format the specified record as text.
@@ -98,17 +97,12 @@ Attributes
 .. py:data:: log_console_format
    :value: '[%(levelname)s] - %(asctime)s - Controller - %(message)s'
 
-   
 
 .. py:data:: console_handler
 
-   
-
 .. py:function:: signal_handler(sig, frame)
 
-
 .. py:class:: Controller(args)
-
 
    .. py:method:: start()
 
@@ -126,12 +120,15 @@ Attributes
       :staticmethod:
 
 
+
    .. py:method:: stop_network()
       :staticmethod:
 
 
+
    .. py:method:: stop_waf()
       :staticmethod:
+
 
 
    .. py:method:: stop()

@@ -1,15 +1,15 @@
-:py:mod:`nebula.core.datasets.sentiment140`
-===========================================
+nebula.core.datasets.sentiment140
+=================================
 
 .. py:module:: nebula.core.datasets.sentiment140
 
 
 Submodules
 ----------
+
 .. toctree::
-   :titlesonly:
    :maxdepth: 1
 
-   sentiment140/index.rst
+   /api/nebula/core/datasets/sentiment140/sentiment140/index
 
 

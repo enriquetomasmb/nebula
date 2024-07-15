@@ -1,32 +1,11 @@
-:py:mod:`nebula.core.models.cifar10.resnet`
-===========================================
+nebula.core.models.cifar10.resnet
+=================================
 
 .. py:module:: nebula.core.models.cifar10.resnet
 
 
-Module Contents
----------------
-
-Classes
-~~~~~~~
-
-.. autoapisummary::
-
-   nebula.core.models.cifar10.resnet.CIFAR10ModelResNet
-
-
-
-Functions
-~~~~~~~~~
-
-.. autoapisummary::
-
-   nebula.core.models.cifar10.resnet.conv_block
-
-
-
 Attributes
-~~~~~~~~~~
+----------
 
 .. autoapisummary::
 
@@ -35,26 +14,39 @@ Attributes
    nebula.core.models.cifar10.resnet.classifiers
 
 
+Classes
+-------
+
+.. autoapisummary::
+
+   nebula.core.models.cifar10.resnet.CIFAR10ModelResNet
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   nebula.core.models.cifar10.resnet.conv_block
+
+
+Module Contents
+---------------
+
 .. py:data:: IMAGE_SIZE
    :value: 32
 
-   
 
 .. py:data:: BATCH_SIZE
 
-   
-
 .. py:data:: classifiers
-
-   
 
 .. py:function:: conv_block(input_channels, num_classes, pool=False)
 
-
 .. py:class:: CIFAR10ModelResNet(input_channels=3, num_classes=10, learning_rate=0.001, metrics=None, confusion_matrix=None, seed=None, implementation='scratch', classifier='resnet9')
 
-
    Bases: :py:obj:`lightning.LightningModule`
+
 
    .. py:method:: process_metrics(phase, y_pred, y, loss=None)
 
@@ -87,6 +79,5 @@ Attributes
 
 
    .. py:method:: on_test_epoch_end()
-
 
 

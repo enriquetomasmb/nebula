@@ -1,15 +1,15 @@
-:py:mod:`nebula.tests`
-======================
+nebula.tests
+============
 
 .. py:module:: nebula.tests
 
 
 Submodules
 ----------
+
 .. toctree::
-   :titlesonly:
    :maxdepth: 1
 
-   main/index.rst
+   /api/nebula/tests/main/index
 
 

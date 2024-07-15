@@ -1,16 +1,16 @@
-:py:mod:`nebula.core.models.emnist`
-===================================
+nebula.core.models.emnist
+=========================
 
 .. py:module:: nebula.core.models.emnist
 
 
 Submodules
 ----------
+
 .. toctree::
-   :titlesonly:
    :maxdepth: 1
 
-   cnn/index.rst
-   mlp/index.rst
+   /api/nebula/core/models/emnist/cnn/index
+   /api/nebula/core/models/emnist/mlp/index
 
 

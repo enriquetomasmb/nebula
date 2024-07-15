@@ -1,20 +1,20 @@
-:py:mod:`nebula.core.utils`
-===========================
+nebula.core.utils
+=================
 
 .. py:module:: nebula.core.utils
 
 
 Submodules
 ----------
+
 .. toctree::
-   :titlesonly:
    :maxdepth: 1
 
-   certificate/index.rst
-   deterministic/index.rst
-   helper/index.rst
-   locker/index.rst
-   nebulalogger/index.rst
-   nebulalogger_tensorboard/index.rst
+   /api/nebula/core/utils/certificate/index
+   /api/nebula/core/utils/deterministic/index
+   /api/nebula/core/utils/helper/index
+   /api/nebula/core/utils/locker/index
+   /api/nebula/core/utils/nebulalogger/index
+   /api/nebula/core/utils/nebulalogger_tensorboard/index
 
 

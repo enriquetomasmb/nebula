@@ -1,21 +1,19 @@
-:py:mod:`nebula.addons.attacks.poisoning.labelflipping`
-=======================================================
+nebula.addons.attacks.poisoning.labelflipping
+=============================================
 
 .. py:module:: nebula.addons.attacks.poisoning.labelflipping
 
 
-Module Contents
----------------
-
-
 Functions
-~~~~~~~~~
+---------
 
 .. autoapisummary::
 
    nebula.addons.attacks.poisoning.labelflipping.labelFlipping
 
 
+Module Contents
+---------------
 
 .. py:function:: labelFlipping(dataset, indices, poisoned_persent=0, targeted=False, target_label=4, target_changed_label=7)
 

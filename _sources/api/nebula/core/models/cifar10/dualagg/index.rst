@@ -1,14 +1,11 @@
-:py:mod:`nebula.core.models.cifar10.dualagg`
-============================================
+nebula.core.models.cifar10.dualagg
+==================================
 
 .. py:module:: nebula.core.models.cifar10.dualagg
 
 
-Module Contents
----------------
-
 Classes
-~~~~~~~
+-------
 
 .. autoapisummary::
 
@@ -16,14 +13,16 @@ Classes
    nebula.core.models.cifar10.dualagg.DualAggModel
 
 
-
+Module Contents
+---------------
 
 .. py:class:: ContrastiveLoss(mu=0.5)
 
-
    Bases: :py:obj:`torch.nn.Module`
 
+
    Contrastive loss function.
+
 
    .. py:method:: forward(local_out, global_out, historical_out, labels)
 
@@ -55,8 +54,8 @@ Classes
 
 .. py:class:: DualAggModel(input_channels=3, num_classes=10, learning_rate=0.001, mu=0.5, metrics=None, confusion_matrix=None, seed=None)
 
-
    Bases: :py:obj:`lightning.LightningModule`
+
 
    .. py:method:: process_metrics(phase, y_pred, y, loss=None, mode='local')
 
@@ -71,6 +70,7 @@ Classes
       :type loss: torch.Tensor, optional
 
 
+
    .. py:method:: log_metrics_by_epoch(phase, print_cm=False, plot_cm=False, mode='local')
 
       Log all metrics at the end of an epoch for the given phase.
@@ -80,9 +80,11 @@ Classes
       :param : param plot_cm:
 
 
+
    .. py:method:: forward(x, mode='local')
 
       Forward pass of the model.
+
 
 
    .. py:method:: configure_optimizers()
@@ -100,6 +102,7 @@ Classes
       Returns:
 
 
+
    .. py:method:: on_train_epoch_end()
 
 
@@ -110,6 +113,7 @@ Classes
       :param batch_idx:
 
       Returns:
+
 
 
    .. py:method:: on_validation_epoch_end()
@@ -124,12 +128,14 @@ Classes
       Returns:
 
 
+
    .. py:method:: on_test_epoch_end()
 
 
    .. py:method:: save_historical_model()
 
       Save the current local model as the historical model.
+
 
 
    .. py:method:: global_load_state_dict(state_dict)
@@ -139,6 +145,7 @@ Classes
       :type state_dict: dict
 
 
+
    .. py:method:: historical_load_state_dict(state_dict)
 
       Load the given state dictionary into the historical model.
@@ -146,14 +153,17 @@ Classes
       :type state_dict: dict
 
 
+
    .. py:method:: adapt_state_dict_for_model(state_dict, model_prefix)
 
       Adapt the keys in the provided state_dict to match the structure expected by the model.
 
 
+
    .. py:method:: get_global_model_parameters()
 
       Get the parameters of the global model.
+
 
 
    .. py:method:: print_summary()

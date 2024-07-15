@@ -1,23 +1,27 @@
-:py:mod:`nebula.core.aggregation.aggregator`
-============================================
+nebula.core.aggregation.aggregator
+==================================
 
 .. py:module:: nebula.core.aggregation.aggregator
 
 
-Module Contents
----------------
+Exceptions
+----------
+
+.. autoapisummary::
+
+   nebula.core.aggregation.aggregator.AggregatorException
+
 
 Classes
-~~~~~~~
+-------
 
 .. autoapisummary::
 
    nebula.core.aggregation.aggregator.Aggregator
 
 
-
 Functions
-~~~~~~~~~
+---------
 
 .. autoapisummary::
 
@@ -26,34 +30,36 @@ Functions
    nebula.core.aggregation.aggregator.create_malicious_aggregator
 
 
+Module Contents
+---------------
 
 .. py:exception:: AggregatorException
 
-
    Bases: :py:obj:`Exception`
+
 
    Common base class for all non-exit exceptions.
 
 
 .. py:function:: create_aggregator(config, engine)
 
-
 .. py:function:: create_target_aggregator(config, engine)
-
 
 .. py:class:: Aggregator(config=None, engine=None)
 
-
    Bases: :py:obj:`abc.ABC`
+
 
    Helper class that provides a standard way to create an ABC using
    inheritance.
+
 
    .. py:property:: cm
 
 
    .. py:method:: run_aggregation(models)
       :abstractmethod:
+
 
 
    .. py:method:: update_federation_nodes(federation_nodes)
@@ -72,13 +78,12 @@ Functions
       :async:
 
 
+
    .. py:method:: get_aggregation()
 
 
    .. py:method:: print_model_size(model)
 
 
-
 .. py:function:: create_malicious_aggregator(aggregator, attack)
-
 

@@ -1,5 +1,5 @@
-:py:mod:`nebula.addons.blockchain.chaincode`
-============================================
+nebula.addons.blockchain.chaincode
+==================================
 
 .. py:module:: nebula.addons.blockchain.chaincode
 

@@ -1,15 +1,19 @@
-:py:mod:`nebula.tests.main`
-===========================
+nebula.tests.main
+=================
 
 .. py:module:: nebula.tests.main
 
 
-Module Contents
----------------
+Attributes
+----------
+
+.. autoapisummary::
+
+   nebula.tests.main.TIMEOUT
 
 
 Functions
-~~~~~~~~~
+---------
 
 .. autoapisummary::
 
@@ -22,38 +26,24 @@ Functions
    nebula.tests.main.run_scenario
 
 
-
-Attributes
-~~~~~~~~~~
-
-.. autoapisummary::
-
-   nebula.tests.main.TIMEOUT
-
+Module Contents
+---------------
 
 .. py:data:: TIMEOUT
    :value: 3600
 
-   
 
 .. py:function:: signal_handler(signal, frame)
 
-
 .. py:function:: create_docker_network()
-
 
 .. py:function:: menu()
 
-
 .. py:function:: check_error_logs(test_name, scenario_name)
-
 
 .. py:function:: load_test(test_path)
 
-
 .. py:function:: run_test(test_path)
 
-
 .. py:function:: run_scenario(scenario)
-
 

@@ -1,35 +1,31 @@
-:py:mod:`nebula.node`
-=====================
+nebula.node
+===========
 
 .. py:module:: nebula.node
 
 
-Module Contents
----------------
-
-
-Functions
-~~~~~~~~~
-
-.. autoapisummary::
-
-   nebula.node.main
-
-
-
 Attributes
-~~~~~~~~~~
+----------
 
 .. autoapisummary::
 
    nebula.node.loop
 
 
+Functions
+---------
+
+.. autoapisummary::
+
+   nebula.node.main
+
+
+Module Contents
+---------------
+
 .. py:function:: main()
    :async:
 
 
 .. py:data:: loop
-
-   
 

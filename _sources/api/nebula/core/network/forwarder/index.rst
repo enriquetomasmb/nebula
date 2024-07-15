@@ -1,32 +1,31 @@
-:py:mod:`nebula.core.network.forwarder`
-=======================================
+nebula.core.network.forwarder
+=============================
 
 .. py:module:: nebula.core.network.forwarder
 
 
-Module Contents
----------------
-
 Classes
-~~~~~~~
+-------
 
 .. autoapisummary::
 
    nebula.core.network.forwarder.Forwarder
 
 
-
+Module Contents
+---------------
 
 .. py:class:: Forwarder(config, cm)
 
-
    Bases: :py:obj:`threading.Thread`
+
 
    A class that represents a thread of control.
 
    This class can be safely subclassed in a limited fashion. There are two ways
    to specify the activity: by passing a callable object to the constructor, or
    by overriding the run() method in a subclass.
+
 
 
    .. py:method:: run()
@@ -40,15 +39,17 @@ Classes
 
 
 
+
    .. py:method:: run_forwarder()
       :async:
+
 
 
    .. py:method:: process_pending_messages(messages_left)
       :async:
 
 
-   .. py:method:: forward(msg, addr_from)
 
+   .. py:method:: forward(msg, addr_from)
 
 

@@ -1,17 +1,17 @@
-:py:mod:`nebula.core.models.syscall`
-====================================
+nebula.core.models.syscall
+==========================
 
 .. py:module:: nebula.core.models.syscall
 
 
 Submodules
 ----------
+
 .. toctree::
-   :titlesonly:
    :maxdepth: 1
 
-   autoencoder/index.rst
-   mlp/index.rst
-   svm/index.rst
+   /api/nebula/core/models/syscall/autoencoder/index
+   /api/nebula/core/models/syscall/mlp/index
+   /api/nebula/core/models/syscall/svm/index
 
 

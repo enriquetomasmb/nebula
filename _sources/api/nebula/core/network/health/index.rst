@@ -1,32 +1,31 @@
-:py:mod:`nebula.core.network.health`
-====================================
+nebula.core.network.health
+==========================
 
 .. py:module:: nebula.core.network.health
 
 
-Module Contents
----------------
-
 Classes
-~~~~~~~
+-------
 
 .. autoapisummary::
 
    nebula.core.network.health.Health
 
 
-
+Module Contents
+---------------
 
 .. py:class:: Health(addr, config, cm)
 
-
    Bases: :py:obj:`threading.Thread`
+
 
    A class that represents a thread of control.
 
    This class can be safely subclassed in a limited fashion. There are two ways
    to specify the activity: by passing a callable object to the constructor, or
    by overriding the run() method in a subclass.
+
 
 
    .. py:method:: run()
@@ -40,12 +39,15 @@ Classes
 
 
 
+
    .. py:method:: run_send_alive()
       :async:
 
 
+
    .. py:method:: run_check_alive()
       :async:
+
 
 
    .. py:method:: alive(source)

@@ -1,24 +1,21 @@
-:py:mod:`nebula.addons.topologymanager`
-=======================================
+nebula.addons.topologymanager
+=============================
 
 .. py:module:: nebula.addons.topologymanager
 
 
-Module Contents
----------------
-
 Classes
-~~~~~~~
+-------
 
 .. autoapisummary::
 
    nebula.addons.topologymanager.TopologyManager
 
 
-
+Module Contents
+---------------
 
 .. py:class:: TopologyManager(scenario_name=None, n_nodes=5, b_symmetric=True, undirected_neighbor_num=5, topology=None)
-
 
    .. py:method:: draw_graph(plot=False, path=None)
 
@@ -48,6 +45,7 @@ Classes
       :staticmethod:
 
 
+
    .. py:method:: add_nodes(nodes)
 
 
@@ -58,6 +56,5 @@ Classes
 
 
    .. py:method:: get_neighbors_string(node_idx)
-
 
 

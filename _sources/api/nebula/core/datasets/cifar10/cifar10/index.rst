@@ -1,35 +1,35 @@
-:py:mod:`nebula.core.datasets.cifar10.cifar10`
-==============================================
+nebula.core.datasets.cifar10.cifar10
+====================================
 
 .. py:module:: nebula.core.datasets.cifar10.cifar10
 
 
-Module Contents
----------------
-
 Classes
-~~~~~~~
+-------
 
 .. autoapisummary::
 
    nebula.core.datasets.cifar10.cifar10.CIFAR10Dataset
 
 
-
+Module Contents
+---------------
 
 .. py:class:: CIFAR10Dataset(num_classes=10, partition_id=0, partitions_number=1, batch_size=32, num_workers=4, iid=True, partition='dirichlet', partition_parameter=0.5, seed=42, config=None)
 
-
    Bases: :py:obj:`nebula.core.datasets.nebuladataset.NebulaDataset`
+
 
    Abstract class for a partitioned dataset.
 
    Classes inheriting from this class need to implement specific methods
    for loading and partitioning the dataset.
 
+
    .. py:method:: initialize_dataset()
 
       Initialize the dataset. This should load or create the dataset.
+
 
 
    .. py:method:: load_cifar10_dataset(train=True)
@@ -38,6 +38,7 @@ Classes
    .. py:method:: generate_non_iid_map(dataset, partition='dirichlet', partition_parameter=0.5)
 
       Create a non-iid map of the dataset.
+
 
 
    .. py:method:: generate_iid_map(dataset, partition='balancediid', partition_parameter=2)

@@ -1,14 +1,11 @@
-:py:mod:`nebula.core.aggregation.blockchainReputation`
-======================================================
+nebula.core.aggregation.blockchainReputation
+============================================
 
 .. py:module:: nebula.core.aggregation.blockchainReputation
 
 
-Module Contents
----------------
-
 Classes
-~~~~~~~
+-------
 
 .. autoapisummary::
 
@@ -16,9 +13,8 @@ Classes
    nebula.core.aggregation.blockchainReputation.BlockchainHandler
 
 
-
 Functions
-~~~~~~~~~
+---------
 
 .. autoapisummary::
 
@@ -27,25 +23,25 @@ Functions
    nebula.core.aggregation.blockchainReputation.print_with_frame
 
 
+Module Contents
+---------------
 
 .. py:function:: cossim_euclidean(model1, model2, similarity)
 
-
 .. py:class:: BlockchainReputation(similarity_metric = 'CossimEuclid', config=None, **kwargs)
 
-
    Bases: :py:obj:`nebula.core.aggregation.aggregator.Aggregator`
+
 
    # BAT-SandrinHunkeler (BlockchainReputation)
    Weighted FedAvg by using relative reputation of each model's trainer
    Returns: aggregated model
 
+
    .. py:attribute:: ALGORITHM_MAP
 
-      
 
    .. py:method:: run_aggregation(model_buffer)
-
 
 
 .. py:function:: print_table(title, values, headers)
@@ -70,23 +66,28 @@ Functions
 
 .. py:class:: BlockchainHandler(home_address)
 
-
    Handles interaction with Oracle and Non-Validator Node of Blockchain Network
+
 
    .. py:property:: oracle_url
       :type: str
+
       :classmethod:
+
 
 
    .. py:property:: rest_header
       :type: Mapping[str, str]
+
       :classmethod:
+
 
 
    .. py:method:: verify_balance()
 
       Calls blockchain directly for requesting current balance
       Returns: None
+
 
 
 
@@ -97,10 +98,12 @@ Functions
 
 
 
+
    .. py:method:: report_reputation_oracle(records)
 
       Reports reputations used for aggregation
       Returns: None
+
 
 
 
@@ -113,6 +116,7 @@ Functions
 
 
 
+
    .. py:method:: get_reputations(ip_addresses)
 
       Requests globally aggregated opinions values from reputation system for computing aggregation weights
@@ -122,11 +126,13 @@ Functions
 
 
 
+
    .. py:method:: verify_registration()
 
       Verifies the successful registration of the node itself,
       executes registration again if reputation system returns false
       Returns: None
+
 
 
 

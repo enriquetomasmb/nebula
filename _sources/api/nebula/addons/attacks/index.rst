@@ -1,24 +1,24 @@
-:py:mod:`nebula.addons.attacks`
-===============================
+nebula.addons.attacks
+=====================
 
 .. py:module:: nebula.addons.attacks
 
 
 Subpackages
 -----------
-.. toctree::
-   :titlesonly:
-   :maxdepth: 3
 
-   poisoning/index.rst
+.. toctree::
+   :maxdepth: 1
+
+   /api/nebula/addons/attacks/poisoning/index
 
 
 Submodules
 ----------
+
 .. toctree::
-   :titlesonly:
    :maxdepth: 1
 
-   attacks/index.rst
+   /api/nebula/addons/attacks/attacks/index
 
 

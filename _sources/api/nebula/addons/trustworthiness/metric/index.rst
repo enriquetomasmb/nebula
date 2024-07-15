@@ -1,24 +1,11 @@
-:py:mod:`nebula.addons.trustworthiness.metric`
-==============================================
+nebula.addons.trustworthiness.metric
+====================================
 
 .. py:module:: nebula.addons.trustworthiness.metric
 
 
-Module Contents
----------------
-
-Classes
-~~~~~~~
-
-.. autoapisummary::
-
-   nebula.addons.trustworthiness.metric.TrustMetricManager
-
-
-
-
 Attributes
-~~~~~~~~~~
+----------
 
 .. autoapisummary::
 
@@ -26,18 +13,25 @@ Attributes
    nebula.addons.trustworthiness.metric.logger
 
 
-.. py:data:: dirname
+Classes
+-------
 
-   
+.. autoapisummary::
+
+   nebula.addons.trustworthiness.metric.TrustMetricManager
+
+
+Module Contents
+---------------
+
+.. py:data:: dirname
 
 .. py:data:: logger
 
-   
-
 .. py:class:: TrustMetricManager
 
-
    Manager class to help store the output directory and handle calls from the FL framework.
+
 
    .. py:method:: evaluate(scenario, weights, use_weights=False)
 

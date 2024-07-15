@@ -1,16 +1,16 @@
-:py:mod:`nebula.config`
-=======================
+nebula.config
+=============
 
 .. py:module:: nebula.config
 
 
 Submodules
 ----------
+
 .. toctree::
-   :titlesonly:
    :maxdepth: 1
 
-   config/index.rst
-   mender/index.rst
+   /api/nebula/config/config/index
+   /api/nebula/config/mender/index
 
 

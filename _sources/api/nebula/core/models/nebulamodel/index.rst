@@ -1,30 +1,29 @@
-:py:mod:`nebula.core.models.nebulamodel`
-========================================
+nebula.core.models.nebulamodel
+==============================
 
 .. py:module:: nebula.core.models.nebulamodel
 
 
-Module Contents
----------------
-
 Classes
-~~~~~~~
+-------
 
 .. autoapisummary::
 
    nebula.core.models.nebulamodel.NebulaModel
 
 
-
+Module Contents
+---------------
 
 .. py:class:: NebulaModel(input_channels=1, num_classes=10, learning_rate=0.001, metrics=None, confusion_matrix=None, seed=None)
 
-
    Bases: :py:obj:`lightning.LightningModule`, :py:obj:`abc.ABC`
+
 
    Abstract class for the NEBULA model.
 
    This class is an abstract class that defines the interface for the NEBULA model.
+
 
    .. py:method:: process_metrics(phase, y_pred, y, loss=None)
 
@@ -40,6 +39,7 @@ Classes
       :type loss: torch.Tensor, optional
 
 
+
    .. py:method:: log_metrics_end(phase)
 
       Log metrics for the given phase.
@@ -49,6 +49,7 @@ Classes
       :type print_cm: bool
       :param plot_cm: Plot confusion matrix
       :type plot_cm: bool
+
 
 
    .. py:method:: generate_confusion_matrix(phase, print_cm=False, plot_cm=False)
@@ -61,21 +62,27 @@ Classes
       :param : param plot:
 
 
+
    .. py:method:: forward(x)
       :abstractmethod:
 
+
       Forward pass of the model.
+
 
 
    .. py:method:: configure_optimizers()
       :abstractmethod:
 
+
       Optimizer configuration.
+
 
 
    .. py:method:: step(batch, batch_idx, phase)
 
       Training/validation/test step.
+
 
 
    .. py:method:: training_step(batch, batch_idx)
@@ -85,6 +92,7 @@ Classes
       :param batch_id:
 
       Returns:
+
 
 
    .. py:method:: on_train_end()
@@ -102,6 +110,7 @@ Classes
       Returns:
 
 
+
    .. py:method:: on_validation_end()
 
 
@@ -117,10 +126,10 @@ Classes
       Returns:
 
 
+
    .. py:method:: on_test_end()
 
 
    .. py:method:: on_test_epoch_end()
-
 
 

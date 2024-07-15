@@ -1,42 +1,37 @@
-:py:mod:`nebula.config.config`
-==============================
+nebula.config.config
+====================
 
 .. py:module:: nebula.config.config
 
 
-Module Contents
----------------
-
 Classes
-~~~~~~~
+-------
 
 .. autoapisummary::
 
    nebula.config.config.Config
 
 
-
+Module Contents
+---------------
 
 .. py:class:: Config(entity, topology_config_file=None, participant_config_file=None)
 
-
    .. py:attribute:: topology
 
-      
 
    .. py:attribute:: participant
 
-      
 
    .. py:attribute:: participants
       :value: []
 
-      
+
 
    .. py:attribute:: participants_path
       :value: []
 
-      
+
 
    .. py:method:: get_topology_config()
 
@@ -72,6 +67,5 @@ Classes
 
 
    .. py:method:: reload_config_file()
-
 
 

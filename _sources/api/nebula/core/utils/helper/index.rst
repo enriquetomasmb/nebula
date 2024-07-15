@@ -1,15 +1,11 @@
-:py:mod:`nebula.core.utils.helper`
-==================================
+nebula.core.utils.helper
+========================
 
 .. py:module:: nebula.core.utils.helper
 
 
-Module Contents
----------------
-
-
 Functions
-~~~~~~~~~
+---------
 
 .. autoapisummary::
 
@@ -23,28 +19,22 @@ Functions
    nebula.core.utils.helper.normalise_layers
 
 
+Module Contents
+---------------
 
 .. py:function:: cosine_metric2(model1, model2, similarity = False)
 
-
 .. py:function:: cosine_metric(model1, model2, similarity = False)
-
 
 .. py:function:: euclidean_metric(model1, model2, standardized = False, similarity = False)
 
-
 .. py:function:: minkowski_metric(model1, model2, p, similarity = False)
-
 
 .. py:function:: manhattan_metric(model1, model2, similarity = False)
 
-
 .. py:function:: pearson_correlation_metric(model1, model2, similarity = False)
-
 
 .. py:function:: jaccard_metric(model1, model2, similarity = False)
 
-
 .. py:function:: normalise_layers(untrusted_params, trusted_params)
-
 

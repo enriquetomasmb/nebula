@@ -1,15 +1,15 @@
-:py:mod:`nebula.core.datasets.wadi`
-===================================
+nebula.core.datasets.wadi
+=========================
 
 .. py:module:: nebula.core.datasets.wadi
 
 
 Submodules
 ----------
+
 .. toctree::
-   :titlesonly:
    :maxdepth: 1
 
-   wadi/index.rst
+   /api/nebula/core/datasets/wadi/wadi/index
 
 

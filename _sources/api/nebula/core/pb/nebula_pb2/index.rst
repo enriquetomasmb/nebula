@@ -1,5 +1,5 @@
-:py:mod:`nebula.core.pb.nebula_pb2`
-===================================
+nebula.core.pb.nebula_pb2
+=========================
 
 .. py:module:: nebula.core.pb.nebula_pb2
 
@@ -9,10 +9,16 @@
 
 
 
+Attributes
+----------
+
+.. autoapisummary::
+
+   nebula.core.pb.nebula_pb2.DESCRIPTOR
+
+
 Module Contents
 ---------------
 
 .. py:data:: DESCRIPTOR
-
-   
 

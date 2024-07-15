@@ -1,24 +1,21 @@
-:py:mod:`nebula.config.mender`
-==============================
+nebula.config.mender
+====================
 
 .. py:module:: nebula.config.mender
 
 
-Module Contents
----------------
-
 Classes
-~~~~~~~
+-------
 
 .. autoapisummary::
 
    nebula.config.mender.Mender
 
 
-
+Module Contents
+---------------
 
 .. py:class:: Mender
-
 
    .. py:method:: get_token()
 
@@ -28,6 +25,7 @@ Classes
 
    .. py:method:: generate_artifact(type_artifact, artifact_name, device_type, file_path)
       :staticmethod:
+
 
 
    .. py:method:: get_artifacts()
@@ -58,6 +56,5 @@ Classes
 
 
    .. py:method:: get_connected_device(device_id)
-
 
 

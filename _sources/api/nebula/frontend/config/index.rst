@@ -1,5 +1,5 @@
-:py:mod:`nebula.frontend.config`
-================================
+nebula.frontend.config
+======================
 
 .. py:module:: nebula.frontend.config
 

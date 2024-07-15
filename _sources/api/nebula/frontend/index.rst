@@ -1,26 +1,26 @@
-:py:mod:`nebula.frontend`
-=========================
+nebula.frontend
+===============
 
 .. py:module:: nebula.frontend
 
 
 Subpackages
 -----------
-.. toctree::
-   :titlesonly:
-   :maxdepth: 3
 
-   config/index.rst
-   databases/index.rst
+.. toctree::
+   :maxdepth: 1
+
+   /api/nebula/frontend/config/index
+   /api/nebula/frontend/databases/index
 
 
 Submodules
 ----------
+
 .. toctree::
-   :titlesonly:
    :maxdepth: 1
 
-   app/index.rst
-   database/index.rst
+   /api/nebula/frontend/app/index
+   /api/nebula/frontend/database/index
 
 

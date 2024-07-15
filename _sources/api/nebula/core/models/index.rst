@@ -1,33 +1,33 @@
-:py:mod:`nebula.core.models`
-============================
+nebula.core.models
+==================
 
 .. py:module:: nebula.core.models
 
 
 Subpackages
 -----------
-.. toctree::
-   :titlesonly:
-   :maxdepth: 3
 
-   cifar10/index.rst
-   cifar100/index.rst
-   emnist/index.rst
-   fashionmnist/index.rst
-   kitsun/index.rst
-   militarysar/index.rst
-   mnist/index.rst
-   sentiment140/index.rst
-   syscall/index.rst
-   wadi/index.rst
+.. toctree::
+   :maxdepth: 1
+
+   /api/nebula/core/models/cifar10/index
+   /api/nebula/core/models/cifar100/index
+   /api/nebula/core/models/emnist/index
+   /api/nebula/core/models/fashionmnist/index
+   /api/nebula/core/models/kitsun/index
+   /api/nebula/core/models/militarysar/index
+   /api/nebula/core/models/mnist/index
+   /api/nebula/core/models/sentiment140/index
+   /api/nebula/core/models/syscall/index
+   /api/nebula/core/models/wadi/index
 
 
 Submodules
 ----------
+
 .. toctree::
-   :titlesonly:
    :maxdepth: 1
 
-   nebulamodel/index.rst
+   /api/nebula/core/models/nebulamodel/index
 
 

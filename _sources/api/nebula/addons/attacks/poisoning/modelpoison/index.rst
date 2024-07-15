@@ -1,21 +1,19 @@
-:py:mod:`nebula.addons.attacks.poisoning.modelpoison`
-=====================================================
+nebula.addons.attacks.poisoning.modelpoison
+===========================================
 
 .. py:module:: nebula.addons.attacks.poisoning.modelpoison
 
 
-Module Contents
----------------
-
-
 Functions
-~~~~~~~~~
+---------
 
 .. autoapisummary::
 
    nebula.addons.attacks.poisoning.modelpoison.modelpoison
 
 
+Module Contents
+---------------
 
 .. py:function:: modelpoison(model, poisoned_ratio, noise_type='gaussian')
 

@@ -1,15 +1,21 @@
-:py:mod:`nebula.addons.trustworthiness.utils`
-=============================================
+nebula.addons.trustworthiness.utils
+===================================
 
 .. py:module:: nebula.addons.trustworthiness.utils
 
 
-Module Contents
----------------
+Attributes
+----------
+
+.. autoapisummary::
+
+   nebula.addons.trustworthiness.utils.hashids
+   nebula.addons.trustworthiness.utils.logger
+   nebula.addons.trustworthiness.utils.dirname
 
 
 Functions
-~~~~~~~~~
+---------
 
 .. autoapisummary::
 
@@ -23,28 +29,14 @@ Functions
    nebula.addons.trustworthiness.utils.save_results_csv
 
 
-
-Attributes
-~~~~~~~~~~
-
-.. autoapisummary::
-
-   nebula.addons.trustworthiness.utils.hashids
-   nebula.addons.trustworthiness.utils.logger
-   nebula.addons.trustworthiness.utils.dirname
-
+Module Contents
+---------------
 
 .. py:data:: hashids
 
-   
-
 .. py:data:: logger
 
-   
-
 .. py:data:: dirname
-
-   
 
 .. py:function:: count_class_samples(scenario_name, dataloaders_files)
 
@@ -138,5 +130,4 @@ Attributes
 
 
 .. py:function:: save_results_csv(scenario_name, id, bytes_sent, bytes_recv, accuracy, loss, finish)
-
 

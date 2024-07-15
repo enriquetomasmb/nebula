@@ -1,21 +1,21 @@
-:py:mod:`nebula.core.network`
-=============================
+nebula.core.network
+===================
 
 .. py:module:: nebula.core.network
 
 
 Submodules
 ----------
+
 .. toctree::
-   :titlesonly:
    :maxdepth: 1
 
-   communications/index.rst
-   connection/index.rst
-   discoverer/index.rst
-   forwarder/index.rst
-   health/index.rst
-   messages/index.rst
-   propagator/index.rst
+   /api/nebula/core/network/communications/index
+   /api/nebula/core/network/connection/index
+   /api/nebula/core/network/discoverer/index
+   /api/nebula/core/network/forwarder/index
+   /api/nebula/core/network/health/index
+   /api/nebula/core/network/messages/index
+   /api/nebula/core/network/propagator/index
 
 

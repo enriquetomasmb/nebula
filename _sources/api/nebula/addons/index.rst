@@ -1,31 +1,31 @@
-:py:mod:`nebula.addons`
-=======================
+nebula.addons
+=============
 
 .. py:module:: nebula.addons
 
 
 Subpackages
 -----------
-.. toctree::
-   :titlesonly:
-   :maxdepth: 3
 
-   attacks/index.rst
-   blockchain/index.rst
-   trustworthiness/index.rst
-   waf/index.rst
+.. toctree::
+   :maxdepth: 1
+
+   /api/nebula/addons/attacks/index
+   /api/nebula/addons/blockchain/index
+   /api/nebula/addons/trustworthiness/index
+   /api/nebula/addons/waf/index
 
 
 Submodules
 ----------
+
 .. toctree::
-   :titlesonly:
    :maxdepth: 1
 
-   env/index.rst
-   functions/index.rst
-   mobility/index.rst
-   reporter/index.rst
-   topologymanager/index.rst
+   /api/nebula/addons/env/index
+   /api/nebula/addons/functions/index
+   /api/nebula/addons/mobility/index
+   /api/nebula/addons/reporter/index
+   /api/nebula/addons/topologymanager/index
 
 

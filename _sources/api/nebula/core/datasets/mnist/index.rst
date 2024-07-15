@@ -1,15 +1,15 @@
-:py:mod:`nebula.core.datasets.mnist`
-====================================
+nebula.core.datasets.mnist
+==========================
 
 .. py:module:: nebula.core.datasets.mnist
 
 
 Submodules
 ----------
+
 .. toctree::
-   :titlesonly:
    :maxdepth: 1
 
-   mnist/index.rst
+   /api/nebula/core/datasets/mnist/mnist/index
 
 

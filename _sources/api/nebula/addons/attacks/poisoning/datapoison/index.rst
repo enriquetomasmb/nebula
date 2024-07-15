@@ -1,15 +1,11 @@
-:py:mod:`nebula.addons.attacks.poisoning.datapoison`
-====================================================
+nebula.addons.attacks.poisoning.datapoison
+==========================================
 
 .. py:module:: nebula.addons.attacks.poisoning.datapoison
 
 
-Module Contents
----------------
-
-
 Functions
-~~~~~~~~~
+---------
 
 .. autoapisummary::
 
@@ -18,6 +14,8 @@ Functions
    nebula.addons.attacks.poisoning.datapoison.poison_to_nlp_rawdata
 
 
+Module Contents
+---------------
 
 .. py:function:: datapoison(dataset, indices, poisoned_persent, poisoned_ratio, targeted=False, target_label=3, noise_type='salt')
 

@@ -1,48 +1,53 @@
-:py:mod:`nebula.core.datasets.nebuladataset`
-============================================
+nebula.core.datasets.nebuladataset
+==================================
 
 .. py:module:: nebula.core.datasets.nebuladataset
 
 
-Module Contents
----------------
-
 Classes
-~~~~~~~
+-------
 
 .. autoapisummary::
 
    nebula.core.datasets.nebuladataset.NebulaDataset
 
 
-
+Module Contents
+---------------
 
 .. py:class:: NebulaDataset(num_classes=10, partition_id=0, partitions_number=1, batch_size=32, num_workers=4, iid=True, partition='dirichlet', partition_parameter=0.5, seed=42, config=None)
 
-
    Bases: :py:obj:`torch.utils.data.Dataset`, :py:obj:`abc.ABC`
+
 
    Abstract class for a partitioned dataset.
 
    Classes inheriting from this class need to implement specific methods
    for loading and partitioning the dataset.
 
+
    .. py:method:: initialize_dataset()
       :abstractmethod:
 
+
       Initialize the dataset. This should load or create the dataset.
+
 
 
    .. py:method:: generate_non_iid_map(dataset, partition='dirichlet')
       :abstractmethod:
 
+
       Create a non-iid map of the dataset.
+
 
 
    .. py:method:: generate_iid_map(dataset)
       :abstractmethod:
 
+
       Create an iid map of the dataset.
+
 
 
    .. py:method:: plot_data_distribution(dataset, partitions_map)
@@ -53,6 +58,7 @@ Classes
 
       :param dataset: The dataset to plot (torch.utils.data.Dataset).
       :param partitions_map: The map of the dataset partitions.
+
 
 
    .. py:method:: visualize_tsne(dataset)
@@ -92,6 +98,7 @@ Classes
           # a Dirichlet distribution with alpha = 0.5.
 
 
+
    .. py:method:: homo_partition(dataset)
 
       Homogeneously partition the dataset into multiple subsets.
@@ -121,6 +128,7 @@ Classes
           # This creates federated data subsets with homogeneous distribution.
 
 
+
    .. py:method:: balanced_iid_partition(dataset)
 
       Partition the dataset into balanced and IID (Independent and Identically Distributed)
@@ -148,6 +156,7 @@ Classes
       Example usage:
           federated_data = balanced_iid_partition(my_dataset)
           # This creates federated data subsets with equal class distributions.
+
 
 
    .. py:method:: unbalanced_iid_partition(dataset, imbalance_factor=2)
@@ -185,6 +194,7 @@ Classes
           # an imbalance factor of 2.
 
 
+
    .. py:method:: percentage_partition(dataset, percentage=20)
 
       Partition a dataset into multiple subsets with a specified level of non-IID-ness.
@@ -219,6 +229,7 @@ Classes
           federated_data = percentage_partition(my_dataset, percentage=20)
           # This creates federated data subsets with varying class distributions based on
           # a percentage of 20.
+
 
 
    .. py:method:: plot_all_data_distribution(dataset, partitions_map)

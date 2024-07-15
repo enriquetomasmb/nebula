@@ -1,26 +1,26 @@
-:py:mod:`nebula.addons.blockchain`
-==================================
+nebula.addons.blockchain
+========================
 
 .. py:module:: nebula.addons.blockchain
 
 
 Subpackages
 -----------
-.. toctree::
-   :titlesonly:
-   :maxdepth: 3
 
-   chaincode/index.rst
-   geth/index.rst
-   oracle/index.rst
+.. toctree::
+   :maxdepth: 1
+
+   /api/nebula/addons/blockchain/chaincode/index
+   /api/nebula/addons/blockchain/geth/index
+   /api/nebula/addons/blockchain/oracle/index
 
 
 Submodules
 ----------
+
 .. toctree::
-   :titlesonly:
    :maxdepth: 1
 
-   blockchain_deployer/index.rst
+   /api/nebula/addons/blockchain/blockchain_deployer/index
 
 

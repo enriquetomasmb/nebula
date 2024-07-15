@@ -1,32 +1,31 @@
-:py:mod:`nebula.addons.mobility`
-================================
+nebula.addons.mobility
+======================
 
 .. py:module:: nebula.addons.mobility
 
 
-Module Contents
----------------
-
 Classes
-~~~~~~~
+-------
 
 .. autoapisummary::
 
    nebula.addons.mobility.Mobility
 
 
-
+Module Contents
+---------------
 
 .. py:class:: Mobility(config, cm)
 
-
    Bases: :py:obj:`threading.Thread`
+
 
    A class that represents a thread of control.
 
    This class can be safely subclassed in a limited fashion. There are two ways
    to specify the activity: by passing a callable object to the constructor, or
    by overriding the run() method in a subclass.
+
 
 
    .. py:property:: round
@@ -40,6 +39,7 @@ Classes
       invokes the callable object passed to the object's constructor as the
       target argument, if any, with sequential and keyword arguments taken
       from the args and kwargs arguments, respectively.
+
 
 
 

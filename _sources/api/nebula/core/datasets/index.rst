@@ -1,36 +1,36 @@
-:py:mod:`nebula.core.datasets`
-==============================
+nebula.core.datasets
+====================
 
 .. py:module:: nebula.core.datasets
 
 
 Subpackages
 -----------
-.. toctree::
-   :titlesonly:
-   :maxdepth: 3
 
-   cifar10/index.rst
-   cifar100/index.rst
-   emnist/index.rst
-   fashionmnist/index.rst
-   kitsun/index.rst
-   militarysar/index.rst
-   mnist/index.rst
-   mnistML/index.rst
-   sentiment140/index.rst
-   syscall/index.rst
-   wadi/index.rst
+.. toctree::
+   :maxdepth: 1
+
+   /api/nebula/core/datasets/cifar10/index
+   /api/nebula/core/datasets/cifar100/index
+   /api/nebula/core/datasets/emnist/index
+   /api/nebula/core/datasets/fashionmnist/index
+   /api/nebula/core/datasets/kitsun/index
+   /api/nebula/core/datasets/militarysar/index
+   /api/nebula/core/datasets/mnist/index
+   /api/nebula/core/datasets/mnistML/index
+   /api/nebula/core/datasets/sentiment140/index
+   /api/nebula/core/datasets/syscall/index
+   /api/nebula/core/datasets/wadi/index
 
 
 Submodules
 ----------
+
 .. toctree::
-   :titlesonly:
    :maxdepth: 1
 
-   changeablesubset/index.rst
-   datamodule/index.rst
-   nebuladataset/index.rst
+   /api/nebula/core/datasets/changeablesubset/index
+   /api/nebula/core/datasets/datamodule/index
+   /api/nebula/core/datasets/nebuladataset/index
 
 

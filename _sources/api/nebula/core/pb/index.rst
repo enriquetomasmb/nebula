@@ -1,15 +1,15 @@
-:py:mod:`nebula.core.pb`
-========================
+nebula.core.pb
+==============
 
 .. py:module:: nebula.core.pb
 
 
 Submodules
 ----------
+
 .. toctree::
-   :titlesonly:
    :maxdepth: 1
 
-   nebula_pb2/index.rst
+   /api/nebula/core/pb/nebula_pb2/index
 
 

@@ -1,16 +1,16 @@
-:py:mod:`nebula.core.models.fashionmnist`
-=========================================
+nebula.core.models.fashionmnist
+===============================
 
 .. py:module:: nebula.core.models.fashionmnist
 
 
 Submodules
 ----------
+
 .. toctree::
-   :titlesonly:
    :maxdepth: 1
 
-   cnn/index.rst
-   mlp/index.rst
+   /api/nebula/core/models/fashionmnist/cnn/index
+   /api/nebula/core/models/fashionmnist/mlp/index
 
 

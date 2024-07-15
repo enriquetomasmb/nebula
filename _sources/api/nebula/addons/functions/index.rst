@@ -1,21 +1,19 @@
-:py:mod:`nebula.addons.functions`
-=================================
+nebula.addons.functions
+=======================
 
 .. py:module:: nebula.addons.functions
 
 
-Module Contents
----------------
-
-
 Functions
-~~~~~~~~~
+---------
 
 .. autoapisummary::
 
    nebula.addons.functions.print_msg_box
 
 
+Module Contents
+---------------
 
 .. py:function:: print_msg_box(msg, indent=1, width=None, title=None)
 

@@ -1,37 +1,34 @@
-:py:mod:`nebula.core.training.lightning`
-========================================
+nebula.core.training.lightning
+==============================
 
 .. py:module:: nebula.core.training.lightning
 
 
-Module Contents
----------------
-
 Classes
-~~~~~~~
+-------
 
 .. autoapisummary::
 
    nebula.core.training.lightning.Lightning
 
 
-
+Module Contents
+---------------
 
 .. py:class:: Lightning(model, data, config=None, logger=None)
-
-
-   .. py:property:: logger
-
 
    .. py:attribute:: DEFAULT_MODEL_WEIGHT
       :value: 1
 
-      
+
 
    .. py:attribute:: BYPASS_MODEL_WEIGHT
       :value: 0
 
-      
+
+
+   .. py:property:: logger
+
 
    .. py:method:: get_round()
 
@@ -52,6 +49,7 @@ Classes
 
       :returns: SHA256 hash of model parameters
       :rtype: str
+
 
 
    .. py:method:: set_epochs(epochs)
@@ -85,6 +83,5 @@ Classes
 
 
    .. py:method:: on_learning_cycle_end()
-
 
 

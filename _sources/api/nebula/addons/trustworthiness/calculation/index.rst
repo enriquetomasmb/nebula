@@ -1,15 +1,23 @@
-:py:mod:`nebula.addons.trustworthiness.calculation`
-===================================================
+nebula.addons.trustworthiness.calculation
+=========================================
 
 .. py:module:: nebula.addons.trustworthiness.calculation
 
 
-Module Contents
----------------
+Attributes
+----------
+
+.. autoapisummary::
+
+   nebula.addons.trustworthiness.calculation.dirname
+   nebula.addons.trustworthiness.calculation.logger
+   nebula.addons.trustworthiness.calculation.R_L1
+   nebula.addons.trustworthiness.calculation.R_L2
+   nebula.addons.trustworthiness.calculation.R_LI
 
 
 Functions
-~~~~~~~~~
+---------
 
 .. autoapisummary::
 
@@ -32,41 +40,24 @@ Functions
    nebula.addons.trustworthiness.calculation.stop_emissions_tracking_and_save
 
 
-
-Attributes
-~~~~~~~~~~
-
-.. autoapisummary::
-
-   nebula.addons.trustworthiness.calculation.dirname
-   nebula.addons.trustworthiness.calculation.logger
-   nebula.addons.trustworthiness.calculation.R_L1
-   nebula.addons.trustworthiness.calculation.R_L2
-   nebula.addons.trustworthiness.calculation.R_LI
-
+Module Contents
+---------------
 
 .. py:data:: dirname
 
-   
-
 .. py:data:: logger
-
-   
 
 .. py:data:: R_L1
    :value: 40
 
-   
 
 .. py:data:: R_L2
    :value: 2
 
-   
 
 .. py:data:: R_LI
    :value: 0.1
 
-   
 
 .. py:function:: get_mapped_score(score_key, score_map)
 

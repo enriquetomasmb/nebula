@@ -1,15 +1,15 @@
-:py:mod:`nebula.core.models.militarysar`
-========================================
+nebula.core.models.militarysar
+==============================
 
 .. py:module:: nebula.core.models.militarysar
 
 
 Submodules
 ----------
+
 .. toctree::
-   :titlesonly:
    :maxdepth: 1
 
-   cnn/index.rst
+   /api/nebula/core/models/militarysar/cnn/index
 
 
