@@ -46,12 +46,16 @@ from nebula.core.models.cifar10.knoledgeDistillation.StudentCNN import StudentCI
 from nebula.core.models.cifar10.knoledgeDistillation.StudentResnet import StudentCIFAR10ModelResNet8
 from nebula.core.models.cifar10.prototypeKnoledgeDistillation.ProtoStudentCNN import ProtoStudentCIFAR10ModelCNN
 from nebula.core.models.cifar10.prototypeKnoledgeDistillation.ProtoStudentResnet8 import ProtoStudentCIFAR10ModelResnet8
-from nebula.core.models.fashionmnist.knoledgdeDistillation.StudentCNN import StudentFashionMNISTModelCNN
+from nebula.core.models.fashionmnist.knoledgeDistillation.StudentCNN import StudentFashionMNISTModelCNN
 from nebula.core.models.fashionmnist.prototypeKnoledgeDistillation.ProtoStudentCNN import \
     ProtoStudentFashionMNISTModelCNN
 from nebula.core.models.fashionmnist.prototypes.ProtoCNN import ProtoFashionMNISTModelCNN
 from nebula.core.training.knoledgeDistillation.kdlightning import KDLightning
 from nebula.core.training.prototypeKnoledgeDistillation.protokdquantizationlightning import ProtoKDQuantizationLightning
+from nebula.core.models.mnist.knoledgeDistillation.StudentCNN import StudentMNISTModelCNN
+from nebula.core.models.mnist.prototypeKnoledgeDistillation.ProtoStudentCNN import ProtoStudentMNISTModelCNN
+from nebula.core.models.mnist.prototypes.ProtoCNN import ProtoMNISTModelCNN
+
 
 
 # os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
@@ -122,8 +126,48 @@ async def main():
             model = MNISTModelMLP()
         elif model_name == "CNN":
             model = MNISTModelCNN()
+        elif model_name == "CNN Quant KD":
+            model = StudentMNISTModelCNN()
+            learner = KDLightning
+        elif model_name == "CNN Quant KD Decreasing":
+            model = StudentMNISTModelCNN(decreasing_beta=True)
+            learner = KDLightning
+        elif model_name == "CNN Quant KD send logic":
+            model = StudentMNISTModelCNN(send_logic="mixed_2rounds")
+            learner = KDLightning
+        elif model_name == "CNN Quant KD Decreasing send logic":
+            model = StudentMNISTModelCNN(decreasing_beta=True, send_logic="mixed_2rounds")
+            learner = KDLightning
+        elif model_name == "CNN Quant MD":
+            model = StudentMNISTModelCNN(mutual_distilation="MD")
+            learner = KDLightning
+        elif model_name == "CNN Quant MD Decreasing":
+            model = StudentMNISTModelCNN(mutual_distilation="MD", decreasing_beta=True)
+            learner = KDLightning
+        elif model_name == "CNN Quant MD send logic":
+            model = StudentMNISTModelCNN(mutual_distilation="MD", send_logic="mixed_2rounds")
+            learner = KDLightning
+        elif model_name == "CNN Quant MD Decreasing send logic":
+            model = StudentMNISTModelCNN(mutual_distilation="MD", decreasing_beta=True,
+                                                send_logic="mixed_2rounds")
+            learner = KDLightning
+        elif model_name == "CNN Proto":
+            model = ProtoMNISTModelCNN()
+            learner = ProtoLightning
+        elif model_name == "CNN Proto Quant KD":
+            model = ProtoStudentMNISTModelCNN()
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "CNN Proto Quant KD send logic":
+            model = ProtoStudentMNISTModelCNN(send_logic="mixed_2rounds")
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "CNN Proto Quant MD":
+            model = ProtoStudentMNISTModelCNN(mutual_distilation=True)
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "CNN Proto Quant MD send logic":
+            model = ProtoStudentMNISTModelCNN(mutual_distilation=True, send_logic="mixed_2rounds")
+            learner = ProtoKDQuantizationLightning
         else:
-            raise ValueError(f"Model {model} not supported for dataset {dataset_str}")
+            raise ValueError(f"Model {model} not supported")
     elif dataset_str == "FashionMNIST":
         dataset = FashionMNISTDataset(num_classes=10, partition_id=idx, partitions_number=n_nodes, iid=iid, partition=partition_selection, partition_parameter=partition_parameter, seed=42, config=config)
         if model_name == "MLP":
