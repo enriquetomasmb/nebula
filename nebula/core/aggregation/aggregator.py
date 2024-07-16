@@ -16,6 +16,8 @@ def create_aggregator(config, engine):
     from nebula.core.aggregation.median import Median
     from nebula.core.aggregation.trimmedmean import TrimmedMean
     from nebula.core.aggregation.blockchainReputation import BlockchainReputation
+    from nebula.core.aggregation.protoavg import ProtoAvg
+    from nebula.core.aggregation.protofedavg import ProtoFedAvg
 
     ALGORITHM_MAP = {
         "FedAvg": FedAvg,
@@ -23,6 +25,8 @@ def create_aggregator(config, engine):
         "Median": Median,
         "TrimmedMean": TrimmedMean,
         "BlockchainReputation": BlockchainReputation,
+        "ProtoAvg": ProtoAvg,
+        "ProtoFedAvg": ProtoFedAvg,
     }
     algorithm = config.participant["aggregator_args"]["algorithm"]
     aggregator = ALGORITHM_MAP.get(algorithm)
