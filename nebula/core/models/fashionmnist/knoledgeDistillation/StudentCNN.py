@@ -2,7 +2,7 @@
 import torch
 
 from nebula.core.knoledgeDistillation.KD import DistillKL
-from nebula.core.models.fashionmnist.knoledgdeDistillation.TeacherCNN  import MDTeacherFashionMNISTModelCNN, \
+from nebula.core.models.fashionmnist.knoledgeDistillation.TeacherCNN  import MDTeacherFashionMNISTModelCNN, \
     TeacherFashionMNISTModelCNN
 
 from nebula.core.models.knoledgeDistillationBaseNebulaModel.studentfedstellarmodelV2 import StudentFedstellarModelV2
