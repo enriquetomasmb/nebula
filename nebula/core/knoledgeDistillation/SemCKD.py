@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from fedstellar.learning.knoledgeDistillation.normalize import Normalize
+from nebula.core.knoledgeDistillation.normalize import Normalize
 
 class SemCKDLoss(nn.Module):
     """Cross-Layer Distillation with Semantic Calibration, AAAI2021"""
@@ -30,11 +30,11 @@ class AAEmbed(nn.Module):
         super(AAEmbed, self).__init__()
         self.num_mid_channel = 2 * num_target_channels
 
-        def conv1x1(in_channels, out_channels, stride=1):
-            return nn.Conv2d(in_channels, out_channels, kernel_size=1, padding=0, stride=stride, bias=False)
+        def conv1x1(input_channels, num_classes, stride=1):
+            return nn.Conv2d(input_channels, num_classes, kernel_size=1, padding=0, stride=stride, bias=False)
 
-        def conv3x3(in_channels, out_channels, stride=1):
-            return nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1, stride=stride, bias=False)
+        def conv3x3(input_channels, num_classes, stride=1):
+            return nn.Conv2d(input_channels, num_classes, kernel_size=3, padding=1, stride=stride, bias=False)
 
         self.regressor = nn.Sequential(
             conv1x1(num_input_channels, self.num_mid_channel),
