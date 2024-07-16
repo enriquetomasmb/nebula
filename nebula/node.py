@@ -29,27 +29,29 @@ from nebula.core.models.fashionmnist.mlp import FashionMNISTModelMLP
 from nebula.core.models.fashionmnist.cnn import FashionMNISTModelCNN
 from nebula.core.models.syscall.mlp import SyscallModelMLP
 from nebula.core.models.syscall.autoencoder import SyscallModelAutoencoder
+from nebula.core.models.cifar10.resnet import CIFAR10ModelResNet
+from nebula.core.models.cifar10.fastermobilenet import FasterMobileNet
+from nebula.core.models.cifar10.simplemobilenet import SimpleMobileNetV1
+from nebula.core.models.cifar10.cnn import CIFAR10ModelCNN
+from nebula.core.models.cifar10.cnnV2 import CIFAR10ModelCNN_V2
+from nebula.core.models.cifar10.cnnV3 import CIFAR10ModelCNN_V3
 from nebula.core.models.militarysar.cnn import MilitarySARModelCNN
 from nebula.core.models.syscall.svm import SyscallModelSGDOneClassSVM
 from nebula.core.engine import MaliciousNode, AggregatorNode, TrainerNode, ServerNode, IdleNode
 from nebula.core.role import Role
-from nebula.core.optimizations.communications.prototypes.models.cifar10.ProtoCNN import ProtoCIFAR10ModelCNN
-from nebula.core.optimizations.communications.prototypes.models.cifar10.ProtoResnet import ProtoCIFAR10ModelResNet8
-from nebula.core.optimizations.communications.prototypes.training.protolightning import ProtoLightning
-from nebula.core.optimizations.communications.KD.models.cifar10.StudentCNN import StudentCIFAR10ModelCNN
-from nebula.core.optimizations.communications.KD.models.cifar10.StudentResnet import StudentCIFAR10ModelResNet8
-from nebula.core.optimizations.communications.KD_prototypes.models.cifar10.ProtoStudentCNN import ProtoStudentCIFAR10ModelCNN
-from nebula.core.optimizations.communications.KD_prototypes.models.cifar10.ProtoStudentResnet8 import ProtoStudentCIFAR10ModelResnet8
-from nebula.core.optimizations.communications.KD.models.fashionmnist.StudentCNN import StudentFashionMNISTModelCNN
-from nebula.core.optimizations.communications.KD_prototypes.models.fashionmnist.ProtoStudentCNN import \
+from nebula.core.models.cifar10.prototypes.ProtoCNN import ProtoCIFAR10ModelCNN
+from nebula.core.models.cifar10.prototypes.ProtoResnet import ProtoCIFAR10ModelResNet8
+from nebula.core.training.prototypes.protolightning import ProtoLightning
+from nebula.core.models.cifar10.knoledgeDistillation.StudentCNN import StudentCIFAR10ModelCNN
+from nebula.core.models.cifar10.knoledgeDistillation.StudentResnet import StudentCIFAR10ModelResNet8
+from nebula.core.models.cifar10.prototypeKnoledgeDistillation.ProtoStudentCNN import ProtoStudentCIFAR10ModelCNN
+from nebula.core.models.cifar10.prototypeKnoledgeDistillation.ProtoStudentResnet8 import ProtoStudentCIFAR10ModelResnet8
+from nebula.core.models.fashionmnist.knoledgdeDistillation.StudentCNN import StudentFashionMNISTModelCNN
+from nebula.core.models.fashionmnist.prototypeKnoledgeDistillation.ProtoStudentCNN import \
     ProtoStudentFashionMNISTModelCNN
-from nebula.core.optimizations.communications.prototypes.models.fashionmnist.ProtoCNN import ProtoFashionMNISTModelCNN
-from nebula.core.optimizations.communications.KD.training.kdlightning import KDLightning
-from nebula.core.optimizations.communications.KD_prototypes.training.protokdquantizationlightning import ProtoKDQuantizationLightning
-from nebula.core.optimizations.communications.KD.models.mnist.StudentCNN import StudentMNISTModelCNN
-from nebula.core.optimizations.communications.KD_prototypes.models.mnist.ProtoStudentCNN import ProtoStudentMNISTModelCNN
-from nebula.core.optimizations.communications.prototypes.models.mnist.ProtoCNN import ProtoMNISTModelCNN
-
+from nebula.core.models.fashionmnist.prototypes.ProtoCNN import ProtoFashionMNISTModelCNN
+from nebula.core.training.knoledgeDistillation.kdlightning import KDLightning
+from nebula.core.training.prototypeKnoledgeDistillation.protokdquantizationlightning import ProtoKDQuantizationLightning
 
 
 # os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
@@ -120,48 +122,8 @@ async def main():
             model = MNISTModelMLP()
         elif model_name == "CNN":
             model = MNISTModelCNN()
-        elif model_name == "CNN Quant KD":
-            model = StudentMNISTModelCNN()
-            learner = KDLightning
-        elif model_name == "CNN Quant KD Decreasing":
-            model = StudentMNISTModelCNN(decreasing_beta=True)
-            learner = KDLightning
-        elif model_name == "CNN Quant KD send logic":
-            model = StudentMNISTModelCNN(send_logic="mixed_2rounds")
-            learner = KDLightning
-        elif model_name == "CNN Quant KD Decreasing send logic":
-            model = StudentMNISTModelCNN(decreasing_beta=True, send_logic="mixed_2rounds")
-            learner = KDLightning
-        elif model_name == "CNN Quant MD":
-            model = StudentMNISTModelCNN(mutual_distilation="MD")
-            learner = KDLightning
-        elif model_name == "CNN Quant MD Decreasing":
-            model = StudentMNISTModelCNN(mutual_distilation="MD", decreasing_beta=True)
-            learner = KDLightning
-        elif model_name == "CNN Quant MD send logic":
-            model = StudentMNISTModelCNN(mutual_distilation="MD", send_logic="mixed_2rounds")
-            learner = KDLightning
-        elif model_name == "CNN Quant MD Decreasing send logic":
-            model = StudentMNISTModelCNN(mutual_distilation="MD", decreasing_beta=True,
-                                                send_logic="mixed_2rounds")
-            learner = KDLightning
-        elif model_name == "CNN Proto":
-            model = ProtoMNISTModelCNN()
-            learner = ProtoLightning
-        elif model_name == "CNN Proto Quant KD":
-            model = ProtoStudentMNISTModelCNN()
-            learner = ProtoKDQuantizationLightning
-        elif model_name == "CNN Proto Quant KD send logic":
-            model = ProtoStudentMNISTModelCNN(send_logic="mixed_2rounds")
-            learner = ProtoKDQuantizationLightning
-        elif model_name == "CNN Proto Quant MD":
-            model = ProtoStudentMNISTModelCNN(mutual_distilation=True)
-            learner = ProtoKDQuantizationLightning
-        elif model_name == "CNN Proto Quant MD send logic":
-            model = ProtoStudentMNISTModelCNN(mutual_distilation=True, send_logic="mixed_2rounds")
-            learner = ProtoKDQuantizationLightning
         else:
-            raise ValueError(f"Model {model} not supported")
+            raise ValueError(f"Model {model} not supported for dataset {dataset_str}")
     elif dataset_str == "FashionMNIST":
         dataset = FashionMNISTDataset(num_classes=10, partition_id=idx, partitions_number=n_nodes, iid=iid, partition=partition_selection, partition_parameter=partition_parameter, seed=42, config=config)
         if model_name == "MLP":
