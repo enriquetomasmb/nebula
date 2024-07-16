@@ -1,5 +1,3 @@
-import copy
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -105,8 +103,13 @@ class ProtoFashionMNISTModelCNN(NebulaModel):
         return distances.argmin(dim=1)
 
     def configure_optimizers(self):
-        """ """
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        """ Configure the optimizer for training. """
+        optimizer = torch.optim.Adam(
+            self.parameters(),
+            lr=self.learning_rate,
+            betas=(self.config["beta1"], self.config["beta2"]),
+            amsgrad=self.config["amsgrad"],
+        )
         return optimizer
 
     def step(self, batch, batch_idx, phase):
