@@ -183,6 +183,7 @@ class Engine:
         # Thread for the trainer service, it is created when the learning starts
         self.trainer_service = None
         
+        self._node_manager = None
         if self.config.participant["mobility_args"]["mobility"]:
             topology = self.config.participant["mobility_args"]["mobility_type"]
             model_handler = self.config.participant["mobility_args"]["model_handler"]
@@ -273,13 +274,15 @@ class Engine:
         if source not in self.cm.get_addrs_current_connections(myself=True):
             logging.info(f"🔗  handle_connection_message | Trigger | Connecting to {source}")
             await self.cm.connect(source, direct=True)
-            self.nm.update_neighbors(source)
+            if self.nm is not None:
+                self.nm.update_neighbors(source)
 
     @event_handler(nebula_pb2.ConnectionMessage, nebula_pb2.ConnectionMessage.Action.DISCONNECT)
     async def _connection_disconnect_callback(self, source, message):
         logging.info(f"🔗  handle_connection_message | Trigger | Received disconnection message from {source}")
         await self.cm.disconnect(source, mutual_disconnection=False)
-        self.nm.update_neighbors(source, remove=True)
+        if self.nm is not None:
+            self.nm.update_neighbors(source, remove=True)
 
     @event_handler(nebula_pb2.FederationMessage, nebula_pb2.FederationMessage.Action.FEDERATION_START)
     async def _start_federation_callback(self, source, message):
@@ -634,7 +637,9 @@ class Engine:
         message = self.cm.mm.generate_federation_message(nebula_pb2.FederationMessage.Action.REPUTATION, malicious_nodes)
         await self.cm.send_message_to_neighbors(message)
 
-
+    def get_weight_modifier(self, addr):
+        return self.nm.get_weight_modifier(addr) if self.nm is not None else 1
+                             
     def _init_late_node(self):
         """
             Method to initialize a late connected node, creating its trainer and setting up the learning process
@@ -659,7 +664,7 @@ class Engine:
         
         self.set_initialization_status(True)
         self.get_federation_ready_lock().release()
-        self._create_trainer_service(round=round)
+        self.create_trainer_service(round=round)
         self.cm.start_external_connection_service()
         
 class MaliciousNode(Engine):

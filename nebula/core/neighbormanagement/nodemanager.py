@@ -8,6 +8,7 @@ from nebula.core.utils.locker import Locker
 from nebula.core.neighbormanagement.candidateselection.candidateselector import factory_CandidateSelector
 from nebula.core.neighbormanagement.modelhandlers.modelhandler import factory_ModelHandler
 from nebula.core.neighbormanagement.neighborpolicies.neighborpolicy import factory_NeighborPolicy
+from nebula.core.neighbormanagement.timergenerator import TimerGenerator
 from nebula.core.pb import nebula_pb2
 from nebula.core.network.communications import CommunicationsManager
 
@@ -37,6 +38,9 @@ class NodeManager():
         self.recieve_offer_timer = 5
         self._restructure_process_lock = Locker(name="restructure_process_lock")
         self.restructure = False
+        self.max_time_to_wait = 6
+        self._timer_generator = TimerGenerator(self.engine.cm.get_addrs_current_connections(only_direct=True, myself=False), self.max_time_to_wait, 80)
+        
         self.set_confings()
 
     @property
@@ -54,6 +58,10 @@ class NodeManager():
     @property
     def model_handler(self):
         return self._model_handler
+    
+    @property
+    def timer_generator(self):
+        return self._timer_generator
     
     def get_restructure_process_lock(self):
         return self._restructure_process_lock
@@ -78,6 +86,15 @@ class NodeManager():
         self.neighbor_policy.set_config([self.engine.cm.get_addrs_current_connections(only_direct=True, myself=False), self.engine.cm.get_addrs_current_connections(only_direct=False, myself=False), self.engine.addr])
         #self.model_handler.set_config([self.engine.get_round(), self.engine.config.participant["training_args"]["epochs"]])
         self.candidate_selector.set_config([self.engine.get_loss(), self.config.participant["molibity_args"]["weight_distance"], self.config.participant["molibity_args"]["weight_het"]])
+    
+    def get_timer(self):
+        return self.timer_generator.get_timer(self.engine.get_round())
+    
+    def adjust_timer(self):
+        self.timer_generator.adjust_timer()
+        
+    def get_stop_condition(self):
+        return self.timer_generator.get_stop_condition()    
               
     def add_weight_modifier(self, addr):
         self.weight_modifier_lock().acquire()
@@ -124,6 +141,9 @@ class NodeManager():
     
     def update_neighbors(self, node, remove=False):
         self.neighbor_policy.update_neighbors(node, remove)
+        self.timer_generator.update_node(node, remove)
+        if remove:
+            self.remove_weight_modifier(node)
         if not remove:
             self.neighbor_policy.meet_node(node)
     

@@ -210,9 +210,10 @@ class CommunicationsManager:
                                 f.write("timestamp,source_ip,nodes,round,current_round,cosine,euclidean,minkowski,manhattan,pearson_correlation,jaccard\n")
                             f.write(f"{datetime.now()}, {source}, {message.round}, {current_round}, {cosine_value}, {euclidean_value}, {minkowski_value}, {manhattan_value}, {pearson_correlation_value}, {jaccard_value}\n")
 
+                    model_weight = message.weight * self.engine.get_weight_modifier(source)
                     await self.engine.aggregator.include_model_in_buffer(
                         decoded_model,
-                        message.weight,
+                        model_weight,
                         source=source,
                         round=message.round,
                     )
