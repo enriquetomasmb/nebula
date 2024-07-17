@@ -1965,15 +1965,6 @@
 
                 document.getElementById("yes-button").addEventListener("click", function () {
 
-                    //Timeout for scenario deployment
-                    var timeout;
-
-                    if (document.getElementById("aggregationSelect").value == "BlockchainReputation"){
-                        timeout = 20000;
-                    } else {
-                        timeout = 10000;
-                    }
-
                     var data = scenarioStorage.scenariosList;
 
                     // Hide the modal
