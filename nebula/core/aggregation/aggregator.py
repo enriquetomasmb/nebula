@@ -47,9 +47,6 @@ class Aggregator(ABC):
 
     def set_waiting_global_update(self):
         self._waiting_global_update = True
-
-    def stop_waiting_for_updates(self):
-        self._aggregation_done_lock.release()
     
     def reset(self):
         self._add_model_lock.acquire()
@@ -116,6 +113,9 @@ class Aggregator(ABC):
             
         return
 
+    def set_timer(self, time_value):
+        self.config.participant["aggregator_args"]["aggregation_timeout"] = time_value
+
     def get_aggregation(self):
         if self._aggregation_done_lock.acquire(timeout=self.config.participant["aggregator_args"]["aggregation_timeout"]):
             try:
@@ -124,6 +124,8 @@ class Aggregator(ABC):
                 pass
         else:
             logging.error(f"🔄  get_aggregation | Timeout reached for aggregation")
+
+        self.engine.stop_waiting_for_updates()
 
         if self._waiting_global_update and len(self._pending_models_to_aggregate) == 1:
             logging.info(f"🔄  get_aggregation | Received an global model. Overwriting my model with the aggregated model.")

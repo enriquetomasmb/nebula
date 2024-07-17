@@ -28,7 +28,7 @@ class TimerGenerator():
         self.last_update_receive_time = 0
         self.start_moment = 0
         self.update_lock = Locker(name="update_lock")
-        self.all_updates_received = asyncio.Condition()
+        #self.all_updates_received = asyncio.Condition()
         
     def get_stop_condition(self):
         return self.all_updates_received     
@@ -42,8 +42,10 @@ class TimerGenerator():
     def update_node(self, node, remove=False):
         if remove:
             self.nodes_historic.pop(node, None)
+            self.max_updates_number -= 1
         else:
-            self.nodes_historic.update({node: deque(maxlen=self.max_historic_size)})        
+            self.nodes_historic.update({node: deque(maxlen=self.max_historic_size)})
+            self.max_updates_number += 1        
 
     async def receive_update(self, node_id, node_response_time):
         """
@@ -62,8 +64,8 @@ class TimerGenerator():
             self.nodes_historic[node_id].append(t_n)                        # add time
             if self.n_updates_receive == self.max_updates_number:           # it means all updates are being receive
                 self.last_update_receive_time = t_n 
-                async with self.all_updates_received:               
-                    self.all_updates_received.notify_all() 
+                #async with self.all_updates_received:               
+                #    self.all_updates_received.notify_all() 
 
     def adjust_timer(self):
         """

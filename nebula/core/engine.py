@@ -654,29 +654,22 @@ class Engine:
         return self.nm.get_weight_modifier(addr) if self.nm is not None else 1
     
     async def receive_update_from_node(self, node, nose_response_time):
-        self.nm.receive_update_from_node(node, nose_response_time)
+        if self.nm is not None:
+            self.nm.receive_update_from_node(node, nose_response_time)
                
     def still_waiting_for_updates(self):
-        return not self._waiting_updates_lock.locked()           
+        return not self._waiting_updates_lock.locked()
+    
+    def stop_waiting_for_updates(self):
+        self._waiting_updates_lock.acquire()
+        if self.nm is not None:
+            self.nm.adjust_timer()           
               
     async def _set_updates_timer(self):
         if self.nm is not None:
-            task = asyncio.create_task(self._wait_stop_condition())
-    
-    async def _wait_stop_condition(self):
-        """
-            Set up the timer to wait for updates and check condition, after one of them is interrupted
-            the aggregation process will end up
-        """
-        time_to_wait = self.nm.get_timer()
-        logging.info(f"💤  Waiting for all updates received or timeout = {time_to_wait} in round {self.round}.")
-        try:
-            await asyncio.wait_for(self.nm.get_stop_condition().wait(), timeout=time_to_wait)
-        except asyncio.TimeoutError:
-            pass
+            time_to_wait = self.nm.get_timer()
+            self.aggregator.set_timer(time_to_wait)
         
-        self._waiting_updates_lock.acquire()
-        self.aggregator.stop_waiting_for_updates()
                              
     def _init_late_node(self):
         """
