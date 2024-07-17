@@ -18,9 +18,52 @@ from nebula.addons.topologymanager import TopologyManager
 from nebula.config.config import Config
 from nebula.core.utils.certificate import generate_ca_certificate, generate_certificate
 
+
 # Definition of a scenario
 class Scenario:
-    def __init__(self, scenario_title, scenario_description, simulation, federation, topology, nodes, nodes_graph, n_nodes, matrix, dataset, iid, partition_selection, partition_parameter, model, agg_algorithm, rounds, logginglevel, accelerator, network_subnet, network_gateway, epochs, attacks, poisoned_node_percent, poisoned_sample_percent, poisoned_noise_percent, with_reputation, is_dynamic_topology, is_dynamic_aggregation, target_aggregation, random_geo, latitude, longitude, mobility, mobility_type, radius_federation, scheme_mobility, round_frequency, mobile_participants_percent, additional_participants, schema_additional_participants):
+    def __init__(
+        self,
+        scenario_title,
+        scenario_description,
+        simulation,
+        federation,
+        topology,
+        nodes,
+        nodes_graph,
+        n_nodes,
+        matrix,
+        dataset,
+        iid,
+        partition_selection,
+        partition_parameter,
+        model,
+        agg_algorithm,
+        rounds,
+        logginglevel,
+        accelerator,
+        network_subnet,
+        network_gateway,
+        epochs,
+        attacks,
+        poisoned_node_percent,
+        poisoned_sample_percent,
+        poisoned_noise_percent,
+        with_reputation,
+        is_dynamic_topology,
+        is_dynamic_aggregation,
+        target_aggregation,
+        random_geo,
+        latitude,
+        longitude,
+        mobility,
+        mobility_type,
+        radius_federation,
+        scheme_mobility,
+        round_frequency,
+        mobile_participants_percent,
+        additional_participants,
+        schema_additional_participants,
+    ):
         self.scenario_title = scenario_title
         self.scenario_description = scenario_description
         self.simulation = simulation
@@ -61,15 +104,15 @@ class Scenario:
         self.mobile_participants_percent = mobile_participants_percent
         self.additional_participants = additional_participants
         self.schema_additional_participants = schema_additional_participants
-        
+
     def attack_node_assign(
-    self,
-    nodes,
-    federation,
-    attack,
-    poisoned_node_percent,
-    poisoned_sample_percent,
-    poisoned_noise_percent,
+        self,
+        nodes,
+        federation,
+        attack,
+        poisoned_node_percent,
+        poisoned_sample_percent,
+        poisoned_noise_percent,
     ):
         """Identify which nodes will be attacked"""
         import random
@@ -106,19 +149,19 @@ class Scenario:
             nodes[node]["poisoned_sample_percent"] = attack_sample_percent
             nodes[node]["poisoned_ratio"] = poisoned_ratio
         return nodes
-    
+
     def mobility_assign(self, nodes, mobile_participants_percent):
         """Assign mobility to nodes"""
         import random
-    
+
         # Number of mobile nodes, round down
         num_mobile = math.floor(mobile_participants_percent / 100 * len(nodes))
         if num_mobile > len(nodes):
             num_mobile = len(nodes)
-    
+
         # Get the index of mobile nodes
         mobile_nodes = random.sample(list(nodes.keys()), num_mobile)
-    
+
         # Assign the role of each node
         for node in nodes:
             node_mob = False
@@ -126,17 +169,18 @@ class Scenario:
                 node_mob = True
             nodes[node]["mobility"] = node_mob
         return nodes
-    
+
     @classmethod
     def from_dict(cls, data):
         return cls(**data)
-        
-# Class to manage the actual scenario
+
+
+# Class to manage the current scenario
 class ScenarioManagement:
     def __init__(self, scenario, controller):
-        # Actual scenario 
+        # Current scenario
         self.scenario = Scenario.from_dict(scenario)
-        
+
         # Scenario management settings
         self.start_date_scenario = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         self.scenario_name = f'nebula_{self.scenario.federation}_{datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}'
@@ -144,38 +188,38 @@ class ScenarioManagement:
         self.config_dir = os.path.join(os.environ.get("NEBULA_CONFIG_DIR"), self.scenario_name)
         self.log_dir = os.environ.get("NEBULA_LOGS_DIR")
         self.cert_dir = os.environ.get("NEBULA_CERTS_DIR")
-        self.advanced_analytics = os.environ.get("NEBULA_ADVANCED_ANALYTICS", "False") == 'True'
+        self.advanced_analytics = os.environ.get("NEBULA_ADVANCED_ANALYTICS", "False") == "True"
         self.config = Config(entity="scenarioManagement")
         self.controller = controller
         self.topologymanager = None
         self.env_path = None
         self.use_blockchain = self.scenario.agg_algorithm == "BlockchainReputation"
-        
+
         # Create Scenario management dirs
         os.makedirs(self.config_dir, exist_ok=True)
         os.makedirs(os.path.join(self.log_dir, self.scenario_name), exist_ok=True)
         os.makedirs(self.cert_dir, exist_ok=True)
-        
+
         # Save the scenario configuration
         scenario_file = os.path.join(self.config_dir, "scenario.json")
         with open(scenario_file, "w") as f:
             json.dump(scenario, f, sort_keys=False, indent=2)
-            
+
         # Save management settings
         settings = {
             "scenario_name": self.scenario_name,
-            "root_path" : self.root_path,
-            "config_dir" : self.config_dir,
-            "log_dir" : self.log_dir,
-            "cert_dir" : self.cert_dir,
-            "env" : None,
-            "use_blockchain" : self.use_blockchain,
+            "root_path": self.root_path,
+            "config_dir": self.config_dir,
+            "log_dir": self.log_dir,
+            "cert_dir": self.cert_dir,
+            "env": None,
+            "use_blockchain": self.use_blockchain,
         }
-        
+
         settings_file = os.path.join(self.config_dir, "settings.json")
         with open(settings_file, "w") as f:
             json.dump(settings, f, sort_keys=False, indent=2)
-            
+
         self.scenario.nodes = self.scenario.attack_node_assign(
             self.scenario.nodes,
             self.scenario.federation,
@@ -184,25 +228,25 @@ class ScenarioManagement:
             int(self.scenario.poisoned_sample_percent),
             int(self.scenario.poisoned_noise_percent),
         )
-        
-        if(self.scenario.mobility):
+
+        if self.scenario.mobility:
             mobile_participants_percent = int(self.scenario.mobile_participants_percent)
             self.scenario.nodes = self.scenario.mobility_assign(self.scenario.nodes, mobile_participants_percent)
         else:
             self.scenario.nodes = self.scenario.mobility_assign(self.scenario.nodes, 0)
-        
+
         # Save node settings
         for node in self.scenario.nodes:
             node_config = self.scenario.nodes[node]
             participant_file = os.path.join(self.config_dir, f'participant_{node_config["id"]}.json')
             os.makedirs(os.path.dirname(participant_file), exist_ok=True)
             shutil.copy(
-                os.path.join(os.path.dirname(__file__), './frontend/config/participant.json.example'),
+                os.path.join(os.path.dirname(__file__), "./frontend/config/participant.json.example"),
                 participant_file,
             )
             with open(participant_file) as f:
                 participant_config = json.load(f)
-                
+
             participant_config["network_args"]["ip"] = node_config["ip"]
             participant_config["network_args"]["port"] = int(node_config["port"])
             participant_config["device_args"]["idx"] = node_config["id"]
@@ -235,10 +279,10 @@ class ScenarioManagement:
             participant_config["mobility_args"]["radius_federation"] = self.scenario.radius_federation
             participant_config["mobility_args"]["scheme_mobility"] = self.scenario.scheme_mobility
             participant_config["mobility_args"]["round_frequency"] = self.scenario.round_frequency
-        
+
             with open(participant_file, "w") as f:
                 json.dump(participant_config, f, sort_keys=False, indent=2)
-    
+
     @staticmethod
     def stop_blockchain():
         if sys.platform == "win32":
@@ -288,13 +332,13 @@ class ScenarioManagement:
 
             except Exception as e:
                 raise Exception("Error while killing docker containers: {}".format(e))
-            
+
     @staticmethod
     def stop_nodes():
         logging.info("Closing NEBULA nodes... Please wait")
         ScenarioManagement.stop_participants()
         ScenarioManagement.stop_blockchain()
-        
+
     def load_configurations_and_start_nodes(self, additional_participants=None, schema_additional_participants=None):
         logging.info("Generating the scenario {} at {}".format(self.scenario_name, self.start_date_scenario))
 
@@ -394,7 +438,7 @@ class ScenarioManagement:
             self.start_nodes_docker()
         else:
             logging.info("Simulation mode is disabled, waiting for nodes to start...")
-            
+
     def create_topology(self, matrix=None):
         import numpy as np
 
@@ -458,7 +502,7 @@ class ScenarioManagement:
 
         topologymanager.add_nodes(nodes_ip_port)
         return topologymanager
-    
+
     def start_blockchain(self):
         BlockchainDeployer(config_dir=f"{self.config_dir}/blockchain", input_dir="/nebula/nebula/addons/blockchain")
         try:
@@ -467,7 +511,7 @@ class ScenarioManagement:
         except subprocess.CalledProcessError as e:
             logging.error("Docker Compose failed to start Blockchain, please check if Docker Compose is installed (https://docs.docker.com/compose/install/) and Docker Engine is running.")
             raise e
-        
+
     def start_nodes_docker(self):
         import subprocess
 
@@ -490,7 +534,6 @@ class ScenarioManagement:
         except Exception as e:
             print(f"Unexpected error: {e}")
 
-        
         logging.info("Starting nodes using Docker Compose...")
         logging.info("env path: {}".format(self.env_path))
 
@@ -611,11 +654,13 @@ class ScenarioManagement:
                     "proxy:" if self.scenario.simulation and self.use_blockchain else "",
                 )
         docker_compose_file = docker_compose_template.format(services)
-        docker_compose_file += network_template.format(self.scenario.network_subnet, self.scenario.network_gateway, "proxy:" if self.scenario.simulation and self.use_blockchain else "", "name: chainnet" if self.scenario.simulation and self.use_blockchain else "", "external: true" if self.scenario.simulation and self.use_blockchain else "")
+        docker_compose_file += network_template.format(
+            self.scenario.network_subnet, self.scenario.network_gateway, "proxy:" if self.scenario.simulation and self.use_blockchain else "", "name: chainnet" if self.scenario.simulation and self.use_blockchain else "", "external: true" if self.scenario.simulation and self.use_blockchain else ""
+        )
         # Write the Docker Compose file in config directory
         with open(f"{self.config_dir}/docker-compose.yml", "w") as f:
             f.write(docker_compose_file)
-        
+
         # Start the Docker Compose file, catch error if any
         try:
             subprocess.check_call(
@@ -634,40 +679,25 @@ class ScenarioManagement:
 
         container_ids = None
 
-        #Obtain container IDs
+        # Obtain container IDs
         try:
             # Obtain docker ids
-            result = subprocess.run(
-                [
-                    "docker",
-                    "compose",
-                    "-f",
-                    f"{self.config_dir}/docker-compose.yml",
-                    "ps",
-                    "-q"
-                ],
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                text=True
-            )
+            result = subprocess.run(["docker", "compose", "-f", f"{self.config_dir}/docker-compose.yml", "ps", "-q"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
             if result.returncode != 0:
                 raise Exception(f"Error obtaining docker IDs: {result.stderr}")
 
-            container_ids = result.stdout.strip().split('\n')
+            container_ids = result.stdout.strip().split("\n")
 
         except subprocess.CalledProcessError as e:
-            raise Exception(
-                "Docker Compose failed to start, please check if Docker Compose is installed "
-                "(https://docs.docker.com/compose/install/) and Docker Engine is running."
-            )
+            raise Exception("Docker Compose failed to start, please check if Docker Compose is installed " "(https://docs.docker.com/compose/install/) and Docker Engine is running.")
 
         if not container_ids or len(container_ids) != len(self.config.participants):
             raise Exception("The number of container IDs does not match the number of participants.")
 
         # Change log and config directory in dockers to /nebula/app, and change controller endpoint
         for idx, node in enumerate(self.config.participants):
-            #Assign docker ID to node
+            # Assign docker ID to node
             node["device_args"]["docker_id"] = container_ids[idx]
             # Print the configuration of the node
             node["tracking_args"]["log_dir"] = "/nebula/app/logs"
@@ -680,7 +710,7 @@ class ScenarioManagement:
             # Write the config file in config directory
             with open(f"{self.config_dir}/participant_{node['device_args']['idx']}.json", "w") as f:
                 json.dump(node, f, indent=4)
-                
+
     @classmethod
     def remove_files_by_scenario(cls, scenario_name):
         try:
@@ -710,29 +740,28 @@ class ScenarioManagement:
             logging.error("Unknown error while removing files")
             logging.error(e)
             raise e
-    
+
     def scenario_finished(self, timeout_seconds):
         client = docker.from_env()
         all_containers = client.containers.list(all=True)
         containers = [container for container in all_containers if self.scenario_name.lower() in container.name.lower()]
-        
+
         start_time = datetime.now()
         while True:
             all_containers_finished = True
             for container in containers:
                 container.reload()
-                if container.status != 'exited':
+                if container.status != "exited":
                     all_containers_finished = False
                     break
             if all_containers_finished:
                 return True
-    
+
             current_time = datetime.now()
             elapsed_time = current_time - start_time
             if elapsed_time.total_seconds() >= timeout_seconds:
                 for container in containers:
-                        container.stop()
+                    container.stop()
                 return False
-            
+
             time.sleep(5)
-    

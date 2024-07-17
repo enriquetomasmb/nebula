@@ -1976,30 +1976,35 @@
 
                     var data = scenarioStorage.scenariosList;
 
-                    var xhr = new XMLHttpRequest();
-                    xhr.open("POST", "/nebula/dashboard/deployment/run", true);
-                    xhr.setRequestHeader('Content-Type', 'application/json');
-                    xhr.send(JSON.stringify(data));
                     // Hide the modal
                     $('#confirm-modal').modal('hide');
                     document.querySelector(".overlay").style.display = "block";
                     document.getElementById("spinner").style.display = "block";
-                    // Get response code
-                    xhr.addEventListener("load", function () {
-                        if (xhr.status === 200) {
-                            // Redirect to /dashboard
-                            setTimeout(function () {
-                                window.location.href = "/nebula/dashboard";
-                            }, timeout);
+
+                    fetch("/nebula/dashboard/deployment/run", {
+                        method: "POST",
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(response => {
+                        if (response.redirected) {
+                            window.location.href = response.url;
                         } else {
                             document.querySelector(".overlay").style.display = "none";
                             document.getElementById("spinner").style.display = "none";
                             // If the user is a demo, show a modal with a message
                             $('#confirm-modal').on('hidden.bs.modal', function () {
-                                $('#info-modal-body').html('You are not allowed to run a scenario. You have a limited functionality or a scenario is already running')
+                                $('#info-modal-body').html('You are not allowed to run a scenario. You have a limited functionality or a scenario is already running');
                                 $('#info-modal').modal('show');
                             });
                         }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.querySelector(".overlay").style.display = "none";
+                        document.getElementById("spinner").style.display = "none";
                     });
 
                 });

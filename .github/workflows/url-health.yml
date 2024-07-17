@@ -1,0 +1,28 @@
+name: URL Health Check
+
+on:
+  schedule:
+    - cron: '0 * * * *' # Execute the action every hour
+  workflow_dispatch: # Allows you to run the workflow manually
+
+jobs:
+  health-check:
+    runs-on: ubuntu-latest
+
+    container:
+      image: alpine:latest
+
+    steps:
+      - name: Install curl
+        run: apk add --no-cache curl
+
+      - name: URL Health Check
+        uses: Jtalk/url-health-check-action@v4
+        with:
+          url: 'https://federatedlearning.inf.um.es'
+          max-attempts: 3
+          retry-delay: 3s
+          follow-redirect: true
+          retry-all: false
+          cookie: 'token=url-health'
+          basic-auth: # optional
