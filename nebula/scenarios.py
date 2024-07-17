@@ -285,11 +285,20 @@ class ScenarioManagement:
 
     @staticmethod
     def stop_blockchain():
-        try:
-            subprocess.Popen("docker ps -a --filter 'label=com.docker.compose.project=blockchain' --format '{{.ID}}' | xargs -n 1 docker rm --force --volumes  >/dev/null 2>&1", shell=True)
-        except subprocess.CalledProcessError:
-            logging.error("Docker Compose failed to stop blockchain or blockchain already exited.")
-
+        if sys.platform == "win32":
+            try:
+                # Comando adaptado para PowerShell en Windows
+                command = "docker ps -a --filter 'label=com.docker.compose.project=blockchain' --format '{{.ID}}' | ForEach-Object { docker rm --force --volumes $_ } | Out-Null"
+                os.system(f'powershell.exe -Command "{command}"')
+            except Exception as e:
+                logging.error("Error while killing docker containers: {}".format(e))
+        else:
+            try:
+                process = subprocess.Popen("docker ps -a --filter 'label=com.docker.compose.project=blockchain' --format '{{.ID}}' | xargs -n 1 docker rm --force --volumes  >/dev/null 2>&1", shell=True)
+                process.wait()
+            except subprocess.CalledProcessError:
+                logging.error("Docker Compose failed to stop blockchain or blockchain already exited.")
+            
     @staticmethod
     def stop_participants():
         if sys.platform == "win32":
@@ -495,7 +504,7 @@ class ScenarioManagement:
         return topologymanager
 
     def start_blockchain(self):
-        BlockchainDeployer(config_dir=f"{self.config_dir}/blockchain", input_dir="/nebula/nebula/blockchain")
+        BlockchainDeployer(config_dir=f"{self.config_dir}/blockchain", input_dir="/nebula/nebula/addons/blockchain")
         try:
             logging.info("Blockchain is being deployed")
             subprocess.check_call(["docker", "compose", "-f", f"{self.config_dir}/blockchain/blockchain-docker-compose.yml", "up", "--remove-orphans", "--force-recreate", "-d", "--build"])
