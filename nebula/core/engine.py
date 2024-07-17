@@ -8,6 +8,7 @@ from nebula.addons.reporter import Reporter
 from nebula.core.aggregation.aggregator import create_aggregator, create_malicious_aggregator, create_target_aggregator
 from nebula.core.eventmanager import EventManager, event_handler
 from nebula.core.network.communications import CommunicationsManager
+from nebula.core.neighbormanagement.nodemanager import NodeManager
 from nebula.core.pb import nebula_pb2
 from nebula.core.utils.locker import Locker
 from lightning.pytorch.loggers import CSVLogger
@@ -187,6 +188,7 @@ class Engine:
         # Thread for the trainer service, it is created when the learning starts
         self.trainer_service = None
         
+        self._waiting_updates_lock = Locker(name="waiting_updates_lock")
         self._node_manager = None
         if self.config.participant["mobility_args"]["mobility"]:
             topology = self.config.participant["mobility_args"]["mobility_type"]
@@ -548,6 +550,7 @@ class Engine:
 
     async def _waiting_model_updates(self):
         logging.info(f"💤  Waiting convergence in round {self.round}.")
+        self._set_updates_timer()
         params = self.aggregator.get_aggregation()
         if params is not None:
             logging.info(f"_waiting_model_updates | Aggregation done for round {self.round}, including parameters in local model.")
@@ -571,6 +574,7 @@ class Engine:
             self.aggregator.reset()
             self.trainer.on_round_end()
             self.round = self.round + 1
+            self._waiting_updates_lock.release()
             self.config.participant["federation_args"]["round"] = self.round  # Set current round in config (send to the controller)
             self.get_round_lock().release()
 
@@ -647,6 +651,31 @@ class Engine:
 
     def get_weight_modifier(self, addr):
         return self.nm.get_weight_modifier(addr) if self.nm is not None else 1
+    
+    async def receive_update_from_node(self, node, nose_response_time):
+        self.nm.receive_update_from_node(node, nose_response_time)
+               
+    def still_waiting_for_updates(self):
+        return not self._waiting_updates_lock.locked()           
+              
+    async def _set_updates_timer(self):
+        if self.nm is not None:
+            task = asyncio.create_task(self._wait_stop_condition())
+    
+    async def _wait_stop_condition(self):
+        """
+            Set up the timer to wait for updates and check condition, after one of them is interrupted
+            the aggregation process will end up
+        """
+        time_to_wait = self.nm.get_timer()
+        logging.info(f"💤  Waiting for all updates received or timeout = {time_to_wait} in round {self.round}.")
+        try:
+            await asyncio.wait_for(self.nm.get_stop_condition().wait(), timeout=time_to_wait)
+        except asyncio.TimeoutError:
+            pass
+        
+        self._waiting_updates_lock.acquire()
+        self.aggregator.stop_waiting_for_updates()
                              
     def _init_late_node(self):
         """

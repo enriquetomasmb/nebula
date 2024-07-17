@@ -35,7 +35,8 @@ class TimerGenerator():
         
     def get_timer(self, round):
         self.round = round
-        self.start_moment = time.time()
+        sm = time.time()
+        self.start_moment = round(sm, 2)
         return self.waiting_time
 
     def update_node(self, node, remove=False):
@@ -53,12 +54,13 @@ class TimerGenerator():
             node_id : node addr
             node_response_time : the time when the update was received
         """
-        t_n = node_response_time - self.start_moment
+        nrt = round(node_response_time,2)
+        t_n = nrt - self.start_moment if nrt - self.start_moment >= 0 else 0
         async with self.update_lock:
             self.n_updates_receive +=1
             self.updates_receive_from_nodes.add(node_id)                    # this node has send update
             self.nodes_historic[node_id].append(t_n)                        # add time
-            if self.n_updates_receive == self.max_updates_number:           # it means all updates are receive
+            if self.n_updates_receive == self.max_updates_number:           # it means all updates are being receive
                 self.last_update_receive_time = t_n 
                 async with self.all_updates_received:               
                     self.all_updates_received.notify_all() 

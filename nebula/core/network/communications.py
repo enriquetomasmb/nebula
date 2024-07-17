@@ -8,6 +8,7 @@ from datetime import datetime
 import requests
 import asyncio
 import subprocess
+import time
 
 from nebula.addons.mobility import Mobility
 from nebula.core.network.discoverer import Discoverer
@@ -211,14 +212,17 @@ class CommunicationsManager:
                             if os.stat(f"{self.log_dir}/participant_{self.idx}_similarity.csv").st_size == 0:
                                 f.write("timestamp,source_ip,nodes,round,current_round,cosine,euclidean,minkowski,manhattan,pearson_correlation,jaccard\n")
                             f.write(f"{datetime.now()}, {source}, {message.round}, {current_round}, {cosine_value}, {euclidean_value}, {minkowski_value}, {manhattan_value}, {pearson_correlation_value}, {jaccard_value}\n")
-
-                    model_weight = message.weight * self.engine.get_weight_modifier(source)
-                    await self.engine.aggregator.include_model_in_buffer(
-                        decoded_model,
-                        model_weight,
-                        source=source,
-                        round=message.round,
-                    )
+                    
+                    if self.engine.still_waiting_for_updates():
+                        model_weight = message.weight * self.engine.get_weight_modifier(source)
+                        rt = time.time()
+                        self.engine.receive_update_from_node(source, rt)
+                        await self.engine.aggregator.include_model_in_buffer(
+                            decoded_model,
+                            model_weight,
+                            source=source,
+                            round=message.round,
+                        )
 
                 else:
                     if message.round != -1:

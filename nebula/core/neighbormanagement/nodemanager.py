@@ -94,7 +94,10 @@ class NodeManager():
         self.timer_generator.adjust_timer()
         
     def get_stop_condition(self):
-        return self.timer_generator.get_stop_condition()    
+        return self.timer_generator.get_stop_condition()
+    
+    async def receive_update_from_node(self, node_id, node_response_time):
+        await self.timer_generator.receive_update(node_id, node_response_time)   
               
     def add_weight_modifier(self, addr):
         self.weight_modifier_lock().acquire()

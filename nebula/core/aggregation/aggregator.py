@@ -1,55 +1,13 @@
 from abc import ABC, abstractmethod
 from functools import partial
 import logging
+from typing import Type
 from nebula.core.utils.locker import Locker
 from nebula.core.pb import nebula_pb2
 
 
 class AggregatorException(Exception):
     pass
-
-
-def create_aggregator(config, engine):
-    from nebula.core.aggregation.fedavg import FedAvg
-    from nebula.core.aggregation.krum import Krum
-    from nebula.core.aggregation.median import Median
-    from nebula.core.aggregation.trimmedmean import TrimmedMean
-    from nebula.core.aggregation.blockchainReputation import BlockchainReputation
-
-    ALGORITHM_MAP = {
-        "FedAvg": FedAvg,
-        "Krum": Krum,
-        "Median": Median,
-        "TrimmedMean": TrimmedMean,
-        "BlockchainReputation": BlockchainReputation,
-    }
-    algorithm = config.participant["aggregator_args"]["algorithm"]
-    aggregator = ALGORITHM_MAP.get(algorithm)
-    if aggregator:
-        return aggregator(config=config, engine=engine)
-    else:
-        raise AggregatorException(f"Aggregation algorithm {algorithm} not found.")
-
-
-def create_target_aggregator(config, engine):
-    from nebula.core.aggregation.fedavg import FedAvg
-    from nebula.core.aggregation.krum import Krum
-    from nebula.core.aggregation.median import Median
-    from nebula.core.aggregation.trimmedmean import TrimmedMean
-
-    ALGORITHM_MAP = {
-        "FedAvg": FedAvg,
-        "Krum": Krum,
-        "Median": Median,
-        "TrimmedMean": TrimmedMean,
-    }
-    algorithm = config.participant["defense_args"]["target_aggregation"]
-    aggregator = ALGORITHM_MAP.get(algorithm)
-    if aggregator:
-        return aggregator(config=config, engine=engine)
-    else:
-        raise AggregatorException(f"Aggregation algorithm {algorithm} not found.")
-
 
 class Aggregator(ABC):
     def __init__(self, config=None, engine=None):
@@ -90,6 +48,9 @@ class Aggregator(ABC):
     def set_waiting_global_update(self):
         self._waiting_global_update = True
 
+    def stop_waiting_for_updates(self):
+        self._aggregation_done_lock.release()
+    
     def reset(self):
         self._add_model_lock.acquire()
         self._federation_nodes.clear()
@@ -208,3 +169,44 @@ def create_malicious_aggregator(aggregator, attack):
 
     aggregator.run_aggregation = partial(malicious_aggregate, aggregator)
     return aggregator
+
+def create_aggregator(config, engine) -> Aggregator:
+    from nebula.core.aggregation.fedavg import FedAvg
+    from nebula.core.aggregation.krum import Krum
+    from nebula.core.aggregation.median import Median
+    from nebula.core.aggregation.trimmedmean import TrimmedMean
+    from nebula.core.aggregation.blockchainReputation import BlockchainReputation
+
+    ALGORITHM_MAP = {
+        "FedAvg": FedAvg,
+        "Krum": Krum,
+        "Median": Median,
+        "TrimmedMean": TrimmedMean,
+        "BlockchainReputation": BlockchainReputation,
+    }
+    algorithm = config.participant["aggregator_args"]["algorithm"]
+    aggregator = ALGORITHM_MAP.get(algorithm)
+    if aggregator:
+        return aggregator(config=config, engine=engine)
+    else:
+        raise AggregatorException(f"Aggregation algorithm {algorithm} not found.")
+
+
+def create_target_aggregator(config, engine) -> Aggregator:
+    from nebula.core.aggregation.fedavg import FedAvg
+    from nebula.core.aggregation.krum import Krum
+    from nebula.core.aggregation.median import Median
+    from nebula.core.aggregation.trimmedmean import TrimmedMean
+
+    ALGORITHM_MAP = {
+        "FedAvg": FedAvg,
+        "Krum": Krum,
+        "Median": Median,
+        "TrimmedMean": TrimmedMean,
+    }
+    algorithm = config.participant["defense_args"]["target_aggregation"]
+    aggregator = ALGORITHM_MAP.get(algorithm)
+    if aggregator:
+        return aggregator(config=config, engine=engine)
+    else:
+        raise AggregatorException(f"Aggregation algorithm {algorithm} not found.")
