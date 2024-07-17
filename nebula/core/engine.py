@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import os
-
 import docker
 from nebula.addons.functions import print_msg_box
 from nebula.addons.attacks.attacks import create_attack
@@ -10,10 +9,11 @@ from nebula.core.aggregation.aggregator import create_aggregator, create_malicio
 from nebula.core.eventmanager import EventManager, event_handler
 from nebula.core.network.communications import CommunicationsManager
 from nebula.core.pb import nebula_pb2
+from nebula.core.utils.locker import Locker
+from lightning.pytorch.loggers import CSVLogger
 from nebula.core.utils.nebulalogger_tensorboard import NebulaTensorBoardLogger
 from nebula.core.utils.nebulalogger import NebulaLogger
 from nebula.core.utils.locker import Locker
-from nebula.core.neighbormanagement.nodemanager import NodeManager
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -23,14 +23,9 @@ logging.getLogger("aim").setLevel(logging.ERROR)
 logging.getLogger("plotly").setLevel(logging.ERROR)
 
 import threading
-
-from lightning.pytorch.loggers import CSVLogger
-
 from nebula.config.config import Config
 from nebula.core.training.lightning import Lightning
-
 from nebula.core.utils.helper import cosine_metric
-
 import sys
 import pdb
 
@@ -110,9 +105,18 @@ class Engine:
         elif self.config.participant["tracking_args"]["local_tracking"] == "basic":
             nebulalogger = NebulaTensorBoardLogger(self.config.participant["scenario_args"]["start_time"], f"{self.log_dir}", name="metrics", version=f"participant_{self.idx}", log_graph=True)
         elif self.config.participant["tracking_args"]["local_tracking"] == "advanced":
-            nebulalogger = NebulaLogger(config=self.config, engine=self, scenario_start_time=self.config.participant["scenario_args"]["start_time"], repo=f"{self.config.participant['tracking_args']['log_dir']}",
-                                                experiment=self.experiment_name, run_name=f"participant_{self.idx}",
-                                                train_metric_prefix='train_', test_metric_prefix='test_', val_metric_prefix='val_', log_system_params=False)
+            nebulalogger = NebulaLogger(
+                config=self.config,
+                engine=self,
+                scenario_start_time=self.config.participant["scenario_args"]["start_time"],
+                repo=f"{self.config.participant['tracking_args']['log_dir']}",
+                experiment=self.experiment_name,
+                run_name=f"participant_{self.idx}",
+                train_metric_prefix="train_",
+                test_metric_prefix="test_",
+                val_metric_prefix="val_",
+                log_system_params=False,
+            )
             # nebulalogger_aim = NebulaLogger(config=self.config, engine=self, scenario_start_time=self.config.participant["scenario_args"]["start_time"], repo=f"aim://nebula-frontend:8085",
             #                                     experiment=self.experiment_name, run_name=f"participant_{self.idx}",
             #                                     train_metric_prefix='train_', test_metric_prefix='test_', val_metric_prefix='val_', log_system_params=False)
@@ -436,8 +440,9 @@ class Engine:
         logging.info(f"💤  Cold start time: {self.config.participant['misc_args']['grace_time_connection']} seconds before connecting to the network")
         await asyncio.sleep(self.config.participant["misc_args"]["grace_time_connection"])
         await self.cm.start()
-        await self.cm.register()
-        await self.cm.wait_for_controller()
+        if self.config.participant["scenario_args"]["controller"] == "nebula-frontend":
+            await self.cm.register()
+            await self.cm.wait_for_controller()
         initial_neighbors = self.config.participant["network_args"]["neighbors"].split()
         for i in initial_neighbors:
             addr = f"{i.split(':')[0]}:{i.split(':')[1]}"
@@ -578,8 +583,11 @@ class Engine:
         self.total_rounds = None
         self.get_federation_ready_lock().acquire()
         print_msg_box(msg=f"Federated Learning process has been completed.", indent=2, title="End of the experiment")
-        # Report 
-        self.reporter.report_scenario_finished()
+        # Enable loggin info
+        logging.getLogger().disabled = True
+        # Report
+        if self.config.participant["scenario_args"]["controller"] == "nebula-frontend":
+            self.reporter.report_scenario_finished()
         # Kill itself
         try:
             self.client.containers.get(self.docker_id).stop()

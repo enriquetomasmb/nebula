@@ -36,14 +36,14 @@ class NebulaModel(pl.LightningModule, ABC):
         if phase == "Train":
             # self.log(name=f"{phase}/Loss", value=loss, add_dataloader_idx=False)
             self.logger.log_data({f"{phase}/Loss": loss.item()}, step=self.global_step)
-            self.train_metrics(y_pred_classes, y)
+            self.train_metrics.update(y_pred_classes, y)
         elif phase == "Validation":
-            self.val_metrics(y_pred_classes, y)
+            self.val_metrics.update(y_pred_classes, y)
         elif phase == "Test (Local)":
-            self.test_metrics(y_pred_classes, y)
+            self.test_metrics.update(y_pred_classes, y)
             self.cm.update(y_pred_classes, y) if self.cm is not None else None
         elif phase == "Test (Global)":
-            self.test_metrics_global(y_pred_classes, y)
+            self.test_metrics_global.update(y_pred_classes, y)
             self.cm_global.update(y_pred_classes, y) if self.cm_global is not None else None
         else:
             raise NotImplementedError
@@ -71,12 +71,10 @@ class NebulaModel(pl.LightningModule, ABC):
 
         self.logger.log_data(output, step=self.global_number[phase])
 
-        # Print test metrics in the log file
-        if phase == "Test (Local)" or phase == "Test (Global)":
-            metrics_str = ""
-            for key, value in output.items():
-                metrics_str += f"{key}: {value:.4f}\n"
-            print_msg_box(metrics_str, indent=2, title=f"{phase} Metrics | Step: {self.global_number[phase]}")
+        metrics_str = ""
+        for key, value in output.items():
+            metrics_str += f"{key}: {value:.4f}\n"
+        print_msg_box(metrics_str, indent=2, title=f"{phase} Metrics | Step: {self.global_number[phase]}")
 
     def generate_confusion_matrix(self, phase, print_cm=False, plot_cm=False):
         """
@@ -191,12 +189,11 @@ class NebulaModel(pl.LightningModule, ABC):
         return self.step(batch, batch_idx=batch_idx, phase="Train")
 
     def on_train_end(self):
-        self.log_metrics_end("Train")
-        self.train_metrics.reset()
         self.global_number["Train"] += 1
 
     def on_train_epoch_end(self):
-        pass
+        self.log_metrics_end("Train")
+        self.train_metrics.reset()
 
     def validation_step(self, batch, batch_idx):
         """
@@ -210,12 +207,11 @@ class NebulaModel(pl.LightningModule, ABC):
         return self.step(batch, batch_idx=batch_idx, phase="Validation")
 
     def on_validation_end(self):
-        self.log_metrics_end("Validation")
-        self.val_metrics.reset()
         self.global_number["Validation"] += 1
 
     def on_validation_epoch_end(self):
-        pass
+        self.log_metrics_end("Validation")
+        self.val_metrics.reset()
 
     def test_step(self, batch, batch_idx, dataloader_idx=None):
         """
@@ -232,14 +228,13 @@ class NebulaModel(pl.LightningModule, ABC):
             return self.step(batch, batch_idx=batch_idx, phase="Test (Global)")
 
     def on_test_end(self):
+        self.global_number["Test (Local)"] += 1
+        self.global_number["Test (Global)"] += 1
+
+    def on_test_epoch_end(self):
         self.log_metrics_end("Test (Local)")
         self.log_metrics_end("Test (Global)")
         self.generate_confusion_matrix("Test (Local)", print_cm=True, plot_cm=True)
         self.generate_confusion_matrix("Test (Global)", print_cm=True, plot_cm=True)
         self.test_metrics.reset()
         self.test_metrics_global.reset()
-        self.global_number["Test (Local)"] += 1
-        self.global_number["Test (Global)"] += 1
-
-    def on_test_epoch_end(self):
-        pass

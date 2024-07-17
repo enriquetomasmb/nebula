@@ -40,6 +40,6 @@ RUN python3.11 -m pip install --upgrade pip
 RUN apt-get update && apt-get install -y build-essential gcc g++ clang git make cmake
 
 WORKDIR /nebula
-COPY requirements.txt .
+COPY nebula/requirements.txt .
 # Install the required packages
 RUN python3.11 -m pip install --ignore-installed -r requirements.txt
