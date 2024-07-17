@@ -34,6 +34,75 @@ async def initialize_databases():
     await setup_database(node_db_file_location)
     await setup_database(scenario_db_file_location)
     await setup_database(notes_db_file_location)
+    
+    async with aiosqlite.connect(user_db_file_location) as conn:
+        _c = await conn.cursor()
+        await _c.execute(
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                user TEXT PRIMARY KEY,
+                password TEXT NOT NULL,
+                role TEXT NOT NULL
+            );
+            """
+        )
+        await conn.commit()
+        
+    async with aiosqlite.connect(node_db_file_location) as conn:
+        _c = await conn.cursor()
+        await _c.execute(
+            """
+            CREATE TABLE IF NOT EXISTS nodes (
+                uid TEXT PRIMARY KEY,
+                idx TEXT NOT NULL,
+                ip TEXT NOT NULL,
+                port TEXT NOT NULL,
+                role TEXT NOT NULL,
+                neighbors TEXT NOT NULL,
+                latitude TEXT NOT NULL,
+                longitude TEXT NOT NULL,
+                timestamp TEXT NOT NULL,
+                federation TEXT NOT NULL,
+                round TEXT NOT NULL,
+                scenario TEXT NOT NULL,
+                hash TEXT NOT NULL
+            );
+            """
+        )
+        await conn.commit()
+        
+    async with aiosqlite.connect(scenario_db_file_location) as conn:
+        _c = await conn.cursor()
+        await _c.execute(
+            """
+            CREATE TABLE IF NOT EXISTS scenarios (
+                name TEXT PRIMARY KEY,
+                start_time TEXT NOT NULL,
+                end_time TEXT NOT NULL,
+                title TEXT NOT NULL,
+                description TEXT NOT NULL,
+                status TEXT NOT NULL,
+                network_subnet TEXT NOT NULL,
+                model TEXT NOT NULL,
+                dataset TEXT NOT NULL,
+                rounds TEXT NOT NULL,
+                role TEXT NOT NULL
+            );
+            """
+        )
+        await conn.commit()
+        
+    async with aiosqlite.connect(notes_db_file_location) as conn:
+        _c = await conn.cursor()
+        await _c.execute(
+            """
+            CREATE TABLE IF NOT EXISTS notes (
+                scenario TEXT PRIMARY KEY,
+                scenario_notes TEXT NOT NULL
+            );
+            """
+        )
+        await conn.commit()
 
 def list_users(all_info=False):
     with sqlite3.connect(user_db_file_location) as conn:
