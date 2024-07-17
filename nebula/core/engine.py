@@ -574,7 +574,8 @@ class Engine:
             self.aggregator.reset()
             self.trainer.on_round_end()
             self.round = self.round + 1
-            self._waiting_updates_lock.release()
+            if self._waiting_updates_lock.locked():
+                self._waiting_updates_lock.release()
             self.config.participant["federation_args"]["round"] = self.round  # Set current round in config (send to the controller)
             self.get_round_lock().release()
 
