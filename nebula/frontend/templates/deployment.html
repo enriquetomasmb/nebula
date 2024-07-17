@@ -1965,6 +1965,15 @@
 
                 document.getElementById("yes-button").addEventListener("click", function () {
 
+                    //Timeout for scenario deployment
+                    var timeout;
+
+                    if (document.getElementById("aggregationSelect").value == "BlockchainReputation"){
+                        timeout = 20000;
+                    } else {
+                        timeout = 10000;
+                    }
+
                     var data = scenarioStorage.scenariosList;
 
                     var xhr = new XMLHttpRequest();
@@ -1981,7 +1990,7 @@
                             // Redirect to /dashboard
                             setTimeout(function () {
                                 window.location.href = "/nebula/dashboard";
-                            }, 20000);
+                            }, timeout);
                         } else {
                             document.querySelector(".overlay").style.display = "none";
                             document.getElementById("spinner").style.display = "none";
