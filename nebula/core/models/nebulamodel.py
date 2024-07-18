@@ -232,3 +232,39 @@ class NebulaModel(pl.LightningModule, ABC):
         self.generate_confusion_matrix("Test (Global)", print_cm=True, plot_cm=True)
         self.test_metrics.reset()
         self.test_metrics_global.reset()
+
+
+class NebulaModelStandalone(NebulaModel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    # Log metrics per epoch
+    def on_train_end(self):
+        pass
+
+    def on_train_epoch_end(self):
+        self.log_metrics_end("Train")
+        self.train_metrics.reset()
+        # NebulaModel registers training rounds
+        # NebulaModelStandalone register the global number of epochs instead of rounds
+        self.global_number["Train"] += 1
+        
+    def on_validation_end(self):
+        pass
+
+    def on_validation_epoch_end(self):
+        self.log_metrics_end("Validation")
+        self.global_number["Validation"] += 1
+        self.val_metrics.reset()
+        
+    def on_test_end(self):
+        self.global_number["Test (Local)"] += 1
+        self.global_number["Test (Global)"] += 1
+
+    def on_test_epoch_end(self):
+        self.log_metrics_end("Test (Local)")
+        self.log_metrics_end("Test (Global)")
+        self.generate_confusion_matrix("Test (Local)", print_cm=True, plot_cm=True)
+        self.generate_confusion_matrix("Test (Global)", print_cm=True, plot_cm=True)
+        self.test_metrics.reset()
+        self.test_metrics_global.reset()
