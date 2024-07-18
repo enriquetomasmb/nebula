@@ -29,32 +29,26 @@ from nebula.core.models.fashionmnist.mlp import FashionMNISTModelMLP
 from nebula.core.models.fashionmnist.cnn import FashionMNISTModelCNN
 from nebula.core.models.syscall.mlp import SyscallModelMLP
 from nebula.core.models.syscall.autoencoder import SyscallModelAutoencoder
-from nebula.core.models.cifar10.resnet import CIFAR10ModelResNet
-from nebula.core.models.cifar10.fastermobilenet import FasterMobileNet
-from nebula.core.models.cifar10.simplemobilenet import SimpleMobileNetV1
-from nebula.core.models.cifar10.cnn import CIFAR10ModelCNN
-from nebula.core.models.cifar10.cnnV2 import CIFAR10ModelCNN_V2
-from nebula.core.models.cifar10.cnnV3 import CIFAR10ModelCNN_V3
 from nebula.core.models.militarysar.cnn import MilitarySARModelCNN
 from nebula.core.models.syscall.svm import SyscallModelSGDOneClassSVM
 from nebula.core.engine import MaliciousNode, AggregatorNode, TrainerNode, ServerNode, IdleNode
 from nebula.core.role import Role
-from nebula.core.models.cifar10.prototypes.ProtoCNN import ProtoCIFAR10ModelCNN
-from nebula.core.models.cifar10.prototypes.ProtoResnet import ProtoCIFAR10ModelResNet8
-from nebula.core.training.prototypes.protolightning import ProtoLightning
-from nebula.core.models.cifar10.knoledgeDistillation.StudentCNN import StudentCIFAR10ModelCNN
-from nebula.core.models.cifar10.knoledgeDistillation.StudentResnet import StudentCIFAR10ModelResNet8
-from nebula.core.models.cifar10.prototypeKnoledgeDistillation.ProtoStudentCNN import ProtoStudentCIFAR10ModelCNN
-from nebula.core.models.cifar10.prototypeKnoledgeDistillation.ProtoStudentResnet8 import ProtoStudentCIFAR10ModelResnet8
-from nebula.core.models.fashionmnist.knoledgeDistillation.StudentCNN import StudentFashionMNISTModelCNN
-from nebula.core.models.fashionmnist.prototypeKnoledgeDistillation.ProtoStudentCNN import \
+from nebula.core.optimizations.communications.prototypes.models.cifar10.ProtoCNN import ProtoCIFAR10ModelCNN
+from nebula.core.optimizations.communications.prototypes.models.cifar10.ProtoResnet import ProtoCIFAR10ModelResNet8
+from nebula.core.optimizations.communications.prototypes.training.protolightning import ProtoLightning
+from nebula.core.optimizations.communications.KD.models.cifar10.StudentCNN import StudentCIFAR10ModelCNN
+from nebula.core.optimizations.communications.KD.models.cifar10.StudentResnet import StudentCIFAR10ModelResNet8
+from nebula.core.optimizations.communications.KD_prototypes.models.cifar10.ProtoStudentCNN import ProtoStudentCIFAR10ModelCNN
+from nebula.core.optimizations.communications.KD_prototypes.models.cifar10.ProtoStudentResnet8 import ProtoStudentCIFAR10ModelResnet8
+from nebula.core.optimizations.communications.KD.models.fashionmnist.StudentCNN import StudentFashionMNISTModelCNN
+from nebula.core.optimizations.communications.KD_prototypes.models.fashionmnist.ProtoStudentCNN import \
     ProtoStudentFashionMNISTModelCNN
-from nebula.core.models.fashionmnist.prototypes.ProtoCNN import ProtoFashionMNISTModelCNN
-from nebula.core.training.knoledgeDistillation.kdlightning import KDLightning
-from nebula.core.training.prototypeKnoledgeDistillation.protokdquantizationlightning import ProtoKDQuantizationLightning
-from nebula.core.models.mnist.knoledgeDistillation.StudentCNN import StudentMNISTModelCNN
-from nebula.core.models.mnist.prototypeKnoledgeDistillation.ProtoStudentCNN import ProtoStudentMNISTModelCNN
-from nebula.core.models.mnist.prototypes.ProtoCNN import ProtoMNISTModelCNN
+from nebula.core.optimizations.communications.prototypes.models.fashionmnist.ProtoCNN import ProtoFashionMNISTModelCNN
+from nebula.core.optimizations.communications.KD.training.kdlightning import KDLightning
+from nebula.core.optimizations.communications.KD_prototypes.training.protokdquantizationlightning import ProtoKDQuantizationLightning
+from nebula.core.optimizations.communications.KD.models.mnist.StudentCNN import StudentMNISTModelCNN
+from nebula.core.optimizations.communications.KD_prototypes.models.mnist.ProtoStudentCNN import ProtoStudentMNISTModelCNN
+from nebula.core.optimizations.communications.prototypes.models.mnist.ProtoCNN import ProtoMNISTModelCNN
 
 
 
