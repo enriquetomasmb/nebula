@@ -189,14 +189,23 @@ class Connection:
                 logging.error(f"❗️  Unknown data type to send: {type(data)}")
                 return
 
+            data_to_send = None
             if compression != "none":
                 encoded_data = await self.compress(encoded_data, compression)
-                if encoded_data is not None:
-                    self.writer.write(data_prefix + encoded_data + self.COMPRESSION_CHAR + self.EOT_CHAR)
+                if encoded_data is None:
+                    return
+                data_to_send = data_prefix + encoded_data + self.COMPRESSION_CHAR + self.EOT_CHAR
             else:
-                self.writer.write(data_prefix + encoded_data + self.EOT_CHAR)
+                data_to_send = data_prefix + encoded_data + self.EOT_CHAR
 
-            await self.writer.drain()
+            chunk_size = 4096
+            total_size = len(data_to_send)
+            chunks = [data_to_send[i : i + chunk_size] for i in range(0, total_size, chunk_size)]
+            
+            for chunk in chunks:
+                self.writer.write(chunk)
+                await self.writer.drain()
+            
             logging.debug(f"Size of data (after compression -- if applied): {format(sys.getsizeof(encoded_data)/1024/1024, '.10f')} MB")
         except Exception as e:
             logging.error(f"❗️  Error sending data to node: {e}")
@@ -236,10 +245,12 @@ class Connection:
                     if not chunk:
                         break
                     buffer += chunk
+                    logging.debug(f"Size of buffer: {format(sys.getsizeof(buffer)/1024/1024, '.10f')} MB")
                     eot_pos = buffer.find(self.EOT_CHAR)
-                    while eot_pos > 0:
+                    while eot_pos >= 0:
                         message = buffer[:eot_pos]
                         buffer = buffer[eot_pos + len(self.EOT_CHAR) :]
+                        logging.debug(f"Size of message: {format(sys.getsizeof(message)/1024/1024, '.10f')} MB")
                         await self.retrieve_message(message)
                         eot_pos = buffer.find(self.EOT_CHAR)
                 except asyncio.IncompleteReadError:

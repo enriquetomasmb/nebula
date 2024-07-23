@@ -48,7 +48,7 @@ class CommunicationsManager:
         self.wait_endpoint = f'http://{self.config.participant["scenario_args"]["controller"]}/nebula/dashboard/{self.config.participant["scenario_args"]["name"]}/node/wait'
 
         self._connections = {}
-        self.connections_lock = Locker(name="connections_lock")
+        self.connections_lock = Locker(name="connections_lock", async_lock=True)
         self.connections_manager_lock = Locker(name="connections_manager_lock", async_lock=True)
         self.connection_attempt_lock_incoming = Locker(name="connection_attempt_lock_incoming", async_lock=True)
         self.connection_attempt_lock_outgoing = Locker(name="connection_attempt_lock_outgoing", async_lock=True)
@@ -59,10 +59,10 @@ class CommunicationsManager:
 
         self._mm = MessagesManager(addr=self.addr, config=self.config, cm=self)
         self.received_messages_hashes = collections.deque(maxlen=self.config.participant["message_args"]["max_local_messages"])
-        self.receive_messages_lock = Locker(name="receive_messages_lock")
+        self.receive_messages_lock = Locker(name="receive_messages_lock", async_lock=True)
 
         self._discoverer = Discoverer(addr=self.addr, config=self.config, cm=self)
-        self._health = Health(addr=self.addr, config=self.config, cm=self)
+        # self._health = Health(addr=self.addr, config=self.config, cm=self)
         self._forwarder = Forwarder(config=self.config, cm=self)
         self._propagator = Propagator(cm=self)
         self._mobility = Mobility(config=self.config, cm=self)
@@ -114,22 +114,22 @@ class CommunicationsManager:
             if source == self.addr:
                 return
             if message_wrapper.HasField("discovery_message"):
-                if self.include_received_message_hash(hashlib.md5(data).hexdigest()):
-                    self.forwarder.forward(data, addr_from=addr_from)
+                if await self.include_received_message_hash(hashlib.md5(data).hexdigest()):
+                    await self.forwarder.forward(data, addr_from=addr_from)
                     await self.handle_discovery_message(source, message_wrapper.discovery_message)
             elif message_wrapper.HasField("control_message"):
                 await self.handle_control_message(source, message_wrapper.control_message)
             elif message_wrapper.HasField("federation_message"):
-                if self.include_received_message_hash(hashlib.md5(data).hexdigest()):
-                    self.forwarder.forward(data, addr_from=addr_from)
+                if await self.include_received_message_hash(hashlib.md5(data).hexdigest()):
+                    await self.forwarder.forward(data, addr_from=addr_from)
                     await self.handle_federation_message(source, message_wrapper.federation_message)
             elif message_wrapper.HasField("model_message"):
-                if self.include_received_message_hash(hashlib.md5(data).hexdigest()):
+                if await self.include_received_message_hash(hashlib.md5(data).hexdigest()):
                     # TODO: Improve the technique. Now only forward model messages if the node is a proxy
                     # Need to update the expected model messages receiving during the round
                     # Round -1 is the initialization round --> all nodes should receive the model
                     if self.config.participant["device_args"]["proxy"] or message_wrapper.model_message.round == -1:
-                        self.forwarder.forward(data, addr_from=addr_from)
+                        await self.forwarder.forward(data, addr_from=addr_from)
                     await self.handle_model_message(source, message_wrapper.model_message)
             elif message_wrapper.HasField("connection_message"):
                 await self.handle_connection_message(source, message_wrapper.connection_message)
@@ -163,11 +163,18 @@ class CommunicationsManager:
     async def handle_model_message(self, source, message):
         logging.info(f"🤖  handle_model_message | Received model from {source} with round {message.round}")
         if self.get_round() is not None:
-            self.engine.get_round_lock().acquire()
+            await self.engine.get_round_lock().acquire_async()
             current_round = self.get_round()
-            self.engine.get_round_lock().release()
+            await self.engine.get_round_lock().release_async()
             if message.round != current_round and message.round != -1:
                 logging.info(f"❗️  handle_model_message | Received a model from a different round | Model round: {message.round} | Current round: {current_round}")
+                logging.info(f"❗️  handle_model_message | Ignoring model from {source}, but including in the future model buffer")
+                await self.engine.aggregator.include_future_model_in_buffer(
+                    message.parameters,
+                    message.weight,
+                    source=source,
+                    round=message.round,
+                )
                 return
             if not self.engine.get_federation_ready_lock().locked() and len(self.engine.get_federation_nodes()) == 0:
                 logging.info(f"🤖  handle_model_message | There are no defined federation nodes")
@@ -207,9 +214,9 @@ class CommunicationsManager:
                         self.engine.trainer.set_model_parameters(model, initialize=True)
                         logging.info(f"🤖  handle_model_message | Model Parameters Initialized")
                         self.engine.set_initialization_status(True)
-                        self.engine.get_federation_ready_lock().release()  # Enable learning cycle once the initialization is done
+                        await self.engine.get_federation_ready_lock().release_async()  # Enable learning cycle once the initialization is done
                         try:
-                            self.engine.get_federation_ready_lock().release()  # Release the lock acquired at the beginning of the engine
+                            await self.engine.get_federation_ready_lock().release_async()  # Release the lock acquired at the beginning of the engine
                         except RuntimeError:
                             pass
                     except RuntimeError:
@@ -385,11 +392,11 @@ class CommunicationsManager:
     async def deploy_additional_services(self):
         logging.info(f"🌐  Deploying additional services...")
         self._generate_network_conditions()
-        self._forwarder.start()
-        self._discoverer.start()
-        self._health.start()
+        await self._forwarder.start()
+        await self._discoverer.start()
+        # await self._health.start()
         self._propagator.start()
-        self._mobility.start()
+        await self._mobility.start()
 
     def _generate_network_conditions(self):
         # TODO: Implement selection of network conditions from frontend
@@ -502,9 +509,9 @@ class CommunicationsManager:
             logging.error(f"❗️  Network simulation error: {e}")
             return
 
-    def include_received_message_hash(self, hash_message):
+    async def include_received_message_hash(self, hash_message):
         try:
-            self.receive_messages_lock.acquire()
+            await self.receive_messages_lock.acquire_async()
             if hash_message in self.received_messages_hashes:
                 # logging.info(f"❗️  handle_incoming_message | Ignoring message already received.")
                 return False
@@ -516,45 +523,58 @@ class CommunicationsManager:
             logging.error(f"❗️  handle_incoming_message | Error including message hash: {e}")
             return False
         finally:
-            self.receive_messages_lock.release()
+            await self.receive_messages_lock.release_async()
 
     async def send_message_to_neighbors(self, message, neighbors=None, interval=0):
         if neighbors is None:
-            neighbors = set(self.get_all_addrs_current_connections(only_direct=True))
+            current_connections = await self.get_all_addrs_current_connections(only_direct=True)
+            neighbors = set(current_connections)
             logging.info(f"Sending message to ALL neighbors: {neighbors}")
         else:
             logging.info(f"Sending message to neighbors: {neighbors}")
-
-        for neighbor in set(neighbors):
-            await self.send_message(neighbor, message)
-            await asyncio.sleep(interval)
+            
+        messages = [(neighbor, message) for neighbor in neighbors]
+        logging.info(f"Sending {len(messages)} messages")
+        asyncio.create_task(self.send_messages(messages, interval))
 
     async def send_message(self, dest_addr, message):
         try:
-            self.get_connections_lock().acquire()
+            # await self.get_connections_lock().acquire_async()
             conn = self.connections[dest_addr]
-            corutine = conn.send(data=message)
-            asyncio.run_coroutine_threadsafe(corutine, conn.loop)
+            await conn.send(data=message)
         except Exception as e:
             logging.error(f"❗️  Cannot send message {message} to {dest_addr}. Error: {str(e)}")
             await self.disconnect(dest_addr, mutual_disconnection=False)
-        finally:
-            self.get_connections_lock().release()
+        # finally:
+        #     await self.get_connections_lock().release_async()
+        
+    async def send_messages(self, messages, interval=0):
+        tasks = [self.send_message(dest_addr, message) for dest_addr, message in messages]
+        await asyncio.gather(*tasks)
+        if interval > 0:
+            await asyncio.sleep(interval)
 
     async def send_model(self, dest_addr, round, serialized_model, weight=1):
         try:
-            self.get_connections_lock().acquire()
-            conn = self.connections[dest_addr]
+            # await self.get_connections_lock().acquire_async()
+            conn = self.connections.get(dest_addr)
+            if conn is None:
+                logging.info(f"❗️  Connection with {dest_addr} not found")
+                return
             logging.info(f"Sending model to {dest_addr} with round {round}: weight={weight} | size={sys.getsizeof(serialized_model) / (1024 ** 2) if serialized_model is not None else 0} MB")
             message = self.mm.generate_model_message(round, serialized_model, weight)
-            corutine = conn.send(data=message)
-            asyncio.run_coroutine_threadsafe(corutine, conn.loop)
+            await conn.send(data=message)
+            logging.info(f"Model sent to {dest_addr}")
         except Exception as e:
             logging.error(f"❗️  Cannot send model to {dest_addr}: {str(e)}")
             await self.disconnect(dest_addr, mutual_disconnection=False)
-        finally:
-            self.get_connections_lock().release()
-
+        # finally:
+        #     await self.get_connections_lock().release_async()
+        
+    async def send_models(self, models, round):
+        tasks = [self.send_model(dest_addr, round, serialized_model, weight) for dest_addr, serialized_model, weight in models]
+        await asyncio.gather(*tasks)
+    
     async def establish_connection(self, addr, direct=True, reconnect=False):
         logging.info(f"🔗  [outgoing] Establishing connection with {addr} (direct: {direct})")
 
@@ -667,9 +687,9 @@ class CommunicationsManager:
         asyncio.create_task(process_establish_connection(addr, direct, reconnect))
 
     async def connect(self, addr, direct=True):
-        self.get_connections_lock().acquire()
+        await self.get_connections_lock().acquire_async()
         duplicated = addr in self.connections.keys()
-        self.get_connections_lock().release()
+        await self.get_connections_lock().release_async()
         if duplicated:
             if direct:  # Upcoming direct connection
                 if not self.connections[addr].get_direct():
@@ -713,8 +733,7 @@ class CommunicationsManager:
             return
         try:
             if mutual_disconnection:
-                coroutine = self.connections[dest_addr].send(data=self.mm.generate_connection_message(nebula_pb2.ConnectionMessage.Action.DISCONNECT))
-                asyncio.run_coroutine_threadsafe(coroutine, self.connections[dest_addr].loop)
+                await self.connections[dest_addr].send(data=self.mm.generate_connection_message(nebula_pb2.ConnectionMessage.Action.DISCONNECT))
                 await asyncio.sleep(1)
                 self.connections[dest_addr].stop()
         except Exception as e:
@@ -722,13 +741,14 @@ class CommunicationsManager:
         if dest_addr in self.connections:
             logging.info(f"Removing {dest_addr} from connections")
             del self.connections[dest_addr]
-        current_connections = set(self.get_all_addrs_current_connections(only_direct=True))
+        current_connections = await self.get_all_addrs_current_connections(only_direct=True)
+        current_connections = set(current_connections)
         logging.info(f"Current connections: {current_connections}")
         self.config.update_neighbors_from_config(current_connections, dest_addr)
 
-    def get_all_addrs_current_connections(self, only_direct=False, only_undirected=False):
+    async def get_all_addrs_current_connections(self, only_direct=False, only_undirected=False):
         try:
-            self.get_connections_lock().acquire()
+            await self.get_connections_lock().acquire_async()
             if only_direct:
                 return {addr for addr, conn in self.connections.items() if conn.get_direct()}
             elif only_undirected:
@@ -736,17 +756,18 @@ class CommunicationsManager:
             else:
                 return set(self.connections.keys())
         finally:
-            self.get_connections_lock().release()
+            await self.get_connections_lock().release_async()
 
-    def get_addrs_current_connections(self, only_direct=False, only_undirected=False, myself=False):
-        current_connections = set(self.get_all_addrs_current_connections(only_direct=only_direct, only_undirected=only_undirected))
+    async def get_addrs_current_connections(self, only_direct=False, only_undirected=False, myself=False):
+        current_connections = await self.get_all_addrs_current_connections(only_direct=only_direct, only_undirected=only_undirected)
+        current_connections = set(current_connections)
         if myself:
             current_connections.add(self.addr)
         return current_connections
 
-    def get_connection_by_addr(self, addr):
+    async def get_connection_by_addr(self, addr):
         try:
-            self.get_connections_lock().acquire()
+            await self.get_connections_lock().acquire_async()
             for key, conn in self.connections.items():
                 if addr in key:
                     return conn
@@ -755,25 +776,25 @@ class CommunicationsManager:
             logging.error(f"Error getting connection by address: {e}")
             return None
         finally:
-            self.get_connections_lock().release()
+            await self.get_connections_lock().release_async()
 
-    def get_direct_connections(self):
+    async def get_direct_connections(self):
         try:
-            self.get_connections_lock().acquire()
+            await self.get_connections_lock().acquire_async()
             return {conn for _, conn in self.connections.items() if conn.get_direct()}
         finally:
-            self.get_connections_lock().release()
+            await self.get_connections_lock().release_async()
 
-    def get_undirect_connections(self):
+    async def get_undirect_connections(self):
         try:
-            self.get_connections_lock().acquire()
+            await self.get_connections_lock().acquire_async()
             return {conn for _, conn in self.connections.items() if not conn.get_direct()}
         finally:
-            self.get_connections_lock().release()
+            await self.get_connections_lock().release_async()
 
-    def get_nearest_connections(self, top: int = 1):
+    async def get_nearest_connections(self, top: int = 1):
         try:
-            self.get_connections_lock().acquire()
+            await self.get_connections_lock().acquire_async()
             sorted_connections = sorted(
                 self.connections.values(),
                 key=lambda conn: (conn.get_neighbor_distance() if conn.get_neighbor_distance() is not None else float("inf")),
@@ -783,7 +804,7 @@ class CommunicationsManager:
             else:
                 return sorted_connections[:top]
         finally:
-            self.get_connections_lock().release()
+            await self.get_connections_lock().release_async()
 
     def get_ready_connections(self):
         return {addr for addr, conn in self.connections.items() if conn.get_ready()}

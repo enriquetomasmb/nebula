@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import asyncio
 from functools import partial
 import logging
 from nebula.core.utils.locker import Locker
@@ -60,8 +61,9 @@ class Aggregator(ABC):
         self._federation_nodes = set()
         self._waiting_global_update = False
         self._pending_models_to_aggregate = {}
-        self._add_model_lock = Locker(name="add_model_lock")
-        self._aggregation_done_lock = Locker(name="aggregation_done_lock")
+        self._future_models_to_aggregate = {}
+        self._add_model_lock = Locker(name="add_model_lock", async_lock=True)
+        self._aggregation_done_lock = Locker(name="aggregation_done_lock", async_lock=True)
 
     def __str__(self):
         return self.__class__.__name__
@@ -79,48 +81,48 @@ class Aggregator(ABC):
             logging.error("Trying to aggregate models when there are no models")
             return None
 
-    def update_federation_nodes(self, federation_nodes):
+    async def update_federation_nodes(self, federation_nodes):
         if not self._aggregation_done_lock.locked():
             self._federation_nodes = federation_nodes
             self._pending_models_to_aggregate.clear()
-            self._aggregation_done_lock.acquire(timeout=self.config.participant["aggregator_args"]["aggregation_timeout"])
+            await self._aggregation_done_lock.acquire_async(timeout=self.config.participant["aggregator_args"]["aggregation_timeout"])
         else:
             raise Exception("It is not possible to set nodes to aggregate when the aggregation is running.")
 
     def set_waiting_global_update(self):
         self._waiting_global_update = True
 
-    def reset(self):
-        self._add_model_lock.acquire()
+    async def reset(self):
+        await self._add_model_lock.acquire_async()
         self._federation_nodes.clear()
         self._pending_models_to_aggregate.clear()
         try:
-            self._aggregation_done_lock.release()
+            await self._aggregation_done_lock.release_async()
         except:
             pass
-        self._add_model_lock.release()
+        await self._add_model_lock.release_async()
 
     def get_nodes_pending_models_to_aggregate(self):
         return {node for key in self._pending_models_to_aggregate.keys() for node in key.split()}
 
-    def _handle_global_update(self, model, source):
+    async def _handle_global_update(self, model, source):
         logging.info(f"🔄  _handle_global_update | source={source}")
         logging.info(f"🔄  _handle_global_update | Received a model from {source}. Overwriting __models with the aggregated model.")
         self._pending_models_to_aggregate.clear()
         self._pending_models_to_aggregate = {source: (model, 1)}
         self._waiting_global_update = False
-        self._add_model_lock.release()
-        self._aggregation_done_lock.release()
+        await self._add_model_lock.release_async()
+        await self._aggregation_done_lock.release_async()
 
-    def _add_pending_model(self, model, weight, source):
+    async def _add_pending_model(self, model, weight, source):
         if len(self._federation_nodes) <= len(self.get_nodes_pending_models_to_aggregate()):
             logging.info(f"🔄  _add_pending_model | Ignoring model...")
-            self._add_model_lock.release()
+            await self._add_model_lock.release_async()
             return None
 
         if source not in self._federation_nodes:
             logging.info(f"🔄  _add_pending_model | Can't add a model from ({source}), which is not in the federation.")
-            self._add_model_lock.release()
+            await self._add_model_lock.release_async()
             return None
 
         elif source not in self.get_nodes_pending_models_to_aggregate():
@@ -130,23 +132,30 @@ class Aggregator(ABC):
         logging.info(f"🔄  _add_pending_model | Model added in aggregation buffer ({str(len(self.get_nodes_pending_models_to_aggregate()))}/{str(len(self._federation_nodes))}) | Pending nodes: {self._federation_nodes - self.get_nodes_pending_models_to_aggregate()}")
         if len(self.get_nodes_pending_models_to_aggregate()) >= len(self._federation_nodes):
             logging.info(f"🔄  _add_pending_model | All models were added in the aggregation buffer. Run aggregation...")
-            self._aggregation_done_lock.release()
-        self._add_model_lock.release()
+            self._aggregation_done_lock.release_async()
+        await self._add_model_lock.release_async()
         return self.get_nodes_pending_models_to_aggregate()
 
     async def include_model_in_buffer(self, model, weight, source=None, round=None, local=False):
-        self._add_model_lock.acquire()
+        await self._add_model_lock.acquire_async()
         logging.info(f"🔄  include_model_in_buffer | source={source} | round={round} | weight={weight} |--| __models={self._pending_models_to_aggregate.keys()} | federation_nodes={self._federation_nodes} | pending_models_to_aggregate={self.get_nodes_pending_models_to_aggregate()}")
         if model is None:
             logging.info(f"🔄  include_model_in_buffer | Ignoring model bad formed...")
-            self._add_model_lock.release()
+            await self._add_model_lock.release_async()
             return
 
         if self._waiting_global_update and not local:
-            self._handle_global_update(model, source)
+            await self._handle_global_update(model, source)
             return
 
-        self._add_pending_model(model, weight, source)
+        await self._add_pending_model(model, weight, source)
+        
+        # Check if _future_models_to_aggregate has models in the current round to include in the aggregation buffer
+        if round is not None and round in self._future_models_to_aggregate:
+            logging.info(f"🔄  include_model_in_buffer | Including future models in the aggregation buffer for round {round}")
+            for future_model in self._future_models_to_aggregate[round]:
+                await self._add_pending_model(future_model[0], future_model[1], future_model[2])
+            del self._future_models_to_aggregate[round]
         
         if len(self.get_nodes_pending_models_to_aggregate()) >= len(self._federation_nodes):
             logging.info(f"🔄  include_model_in_buffer | Broadcasting MODELS_INCLUDED for round {self.engine.get_round()}")
@@ -155,14 +164,14 @@ class Aggregator(ABC):
             
         return
 
-    def get_aggregation(self):
-        if self._aggregation_done_lock.acquire(timeout=self.config.participant["aggregator_args"]["aggregation_timeout"]):
-            try:
-                self._aggregation_done_lock.release()
-            except:
-                pass
-        else:
+    async def get_aggregation(self):
+        try:
+            timeout = self.config.participant["aggregator_args"]["aggregation_timeout"]
+            await self._aggregation_done_lock.acquire_async(timeout=timeout)
+        except asyncio.TimeoutError:
             logging.error(f"🔄  get_aggregation | Timeout reached for aggregation")
+        finally:
+            await self._aggregation_done_lock.release_async()
 
         if self._waiting_global_update and len(self._pending_models_to_aggregate) == 1:
             logging.info(f"🔄  get_aggregation | Received an global model. Overwriting my model with the aggregated model.")
@@ -177,6 +186,14 @@ class Aggregator(ABC):
             logging.info(f"🔄  get_aggregation | All models accounted for, proceeding with aggregation.")
 
         return self.run_aggregation(self._pending_models_to_aggregate)
+    
+    async def include_future_model_in_buffer(self, model, weight, source=None, round=None):
+        await self._add_model_lock.acquire_async()
+        logging.info(f"🔄  [FUTURE] include_future_model_in_buffer | source={source} | round={round} | weight={weight}")
+        if round not in self._future_models_to_aggregate:
+            self._future_models_to_aggregate[round] = []
+        self._future_models_to_aggregate[round].append((model, weight, source))
+        await self._add_model_lock.release_async()
 
     def print_model_size(self, model):
         total_params = 0
