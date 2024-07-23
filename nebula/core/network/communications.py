@@ -812,6 +812,9 @@ class CommunicationsManager:
 
     def get_ready_connections(self):
         return {addr for addr, conn in self.connections.items() if conn.get_ready()}
+    
+    def check_finished_experiment(self):
+        return all(conn.get_federated_round() == self.config.participant["scenario_args"]["rounds"] - 1 for conn in self.connections.values())
 
     def __str__(self):
         return f"Connections: {[str(conn) for conn in self.connections.values()]}"

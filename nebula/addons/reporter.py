@@ -52,8 +52,12 @@ class Reporter:
                         logging.error(f"Error received from controller: {response.status} (probably there is overhead in the controller, trying again in the next round)")
                         text = await response.text()
                         logging.debug(text)
+                    else:
+                        logging.info(f"Participant {self.config.participant['device_args']['idx']} reported scenario finished")
+                        return True
         except aiohttp.ClientError as e:
             logging.error(f"Error connecting to the controller at {url}: {e}")
+        return False
 
     async def __report_data_queue(self):
         while not self.data_queue.empty():

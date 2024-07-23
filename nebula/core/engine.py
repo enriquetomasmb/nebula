@@ -447,20 +447,27 @@ class Engine:
         logging.info(f"[Testing] Finishing final testing...")
         self.round = None
         self.total_rounds = None
-        await self.get_federation_ready_lock().acquire_async()
         print_msg_box(msg=f"Federated Learning process has been completed.", indent=2, title="End of the experiment")
         # Enable loggin info
         logging.getLogger().disabled = True
         # Report
         if self.config.participant["scenario_args"]["controller"] == "nebula-frontend":
-            await self.reporter.report_scenario_finished()
+            result = await self.reporter.report_scenario_finished()
+            if result:
+                pass
+            else:
+                logging.error(f"Error reporting scenario finished")
+        
+        # Check if all my connections reached the total rounds
+        while not self.cm.check_finished_experiment():
+            await asyncio.sleep(1)
+        
         # Kill itself
         try:
             self.client.containers.get(self.docker_id).stop()
-            print(f"Docker container with ID {self.docker_id} stopped successfully.")
         except Exception as e:
             print(f"Error stopping Docker container with ID {self.docker_id}: {e}")
-
+    
     async def _extended_learning_cycle(self):
         """
         This method is called in each round of the learning cycle. It is used to extend the learning cycle with additional
