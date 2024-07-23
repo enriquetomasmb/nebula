@@ -56,7 +56,7 @@ from typing import Any, Dict
 
 
 class Settings:
-    debug: bool = os.environ.get("NEBULA_DEBUG", "False") == "True"
+    production: bool = os.environ.get("NEBULA_PRODUCTION", "False") == "True"
     advanced_analytics: bool = os.environ.get("NEBULA_ADVANCED_ANALYTICS", "False") == "True"
     log_dir: str = os.environ.get("NEBULA_LOGS_DIR")
     config_dir: str = os.environ.get("NEBULA_CONFIG_DIR")
@@ -71,7 +71,7 @@ class Settings:
 
 settings = Settings()
 
-logging.info(f"NEBULA_DEBUG: {settings.debug}")
+logging.info(f"NEBULA_PRODUCTION: {settings.production}")
 logging.info(f"NEBULA_ADVANCED_ANALYTICS: {settings.advanced_analytics}")
 
 app = FastAPI()
@@ -131,9 +131,13 @@ templates = Jinja2Templates(directory=settings.templates_dir)
 def datetimeformat(value, format="%B %d, %Y %H:%M"):
     return datetime.datetime.strptime(value, "%Y-%m-%d %H:%M:%S").strftime(format)
 
+def add_global_context(request: Request):
+    return {
+        "is_production": settings.production,
+    }
 
 templates.env.filters["datetimeformat"] = datetimeformat
-
+templates.env.globals.update(add_global_context=add_global_context)
 
 def get_session(request: Request) -> Dict:
     return request.session

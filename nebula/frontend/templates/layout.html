@@ -10,7 +10,9 @@
         content="A cutting-edge platform designed to facilitate the training of federated models within both centralized and decentralized architectures">
     <meta name="keywords"
         content="decentralized, federated, learning, machine learning, platform, deep learning, collaborative training, communication mechanisms, cybersecurity">
-
+    {% if add_global_context(request)['is_production'] %}
+    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+    {% endif %}
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://federatedlearning.inf.um.es">

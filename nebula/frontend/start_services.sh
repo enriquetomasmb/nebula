@@ -16,18 +16,12 @@ cd $NEBULA_FRONTEND_DIR
 
 # Start Gunicorn
 NEBULA_SOCK=nebula.sock
-echo "DEV: $NEBULA_DEV"
-if [ "$NEBULA_DEV" = "True" ]; then
-    echo "Starting Gunicorn in development mode..."
-    NEBULA_SOCK=nebula.sock
-fi
 
 NEBULA_FRONTEND_STATIC_DIR=/nebula/nebula/frontend/static
 NEBULA_FRONTEND_TEMPLATES_DIR=/nebula/nebula/frontend/templates
-DEBUG=$NEBULA_DEBUG
-echo "DEBUG: $DEBUG"
-if [ "$DEBUG" = "True" ]; then
-    echo "Starting Gunicorn in debug mode..."
+echo "NEBULA_PRODUCTION: $NEBULA_PRODUCTION"
+if [ "$NEBULA_PRODUCTION" = "False" ]; then
+    echo "Starting Gunicorn in dev mode..."
     uvicorn app:app --uds /tmp/$NEBULA_SOCK --reload --reload-dir $NEBULA_FRONTEND_DIR --reload-exclude '*.db' --reload-exclude '*.db-journal' --log-level debug --proxy-headers --forwarded-allow-ips "*" &
 else
     echo "Starting Gunicorn in production mode..."
