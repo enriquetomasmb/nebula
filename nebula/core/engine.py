@@ -355,7 +355,7 @@ class Engine:
                 await self.get_federation_ready_lock().acquire_async()
                 if self.config.participant["device_args"]["start"]:
                     logging.info(f"Propagate initial model updates.")
-                    await self.cm.propagator.propagate_continuously("initialization")
+                    await self.cm.propagator.propagate("initialization")
                     await self.get_federation_ready_lock().release_async()
 
                 self.trainer.set_epochs(epochs)
@@ -559,7 +559,7 @@ class AggregatorNode(Engine):
 
         await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.get_model_weight(), source=self.addr, round=self.round)
 
-        await self.cm.propagator.propagate_continuously("stable")
+        await self.cm.propagator.propagate("stable")
         await self._waiting_model_updates()
 
 
@@ -576,7 +576,7 @@ class ServerNode(Engine):
         # In the first round, the server node doest take into account the initial model parameters for the aggregation
         await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.BYPASS_MODEL_WEIGHT, source=self.addr, round=self.round)
         await self._waiting_model_updates()
-        await self.cm.propagator.propagate_continuously("stable")
+        await self.cm.propagator.propagate("stable")
 
 
 class TrainerNode(Engine):
@@ -598,7 +598,7 @@ class TrainerNode(Engine):
 
         await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.get_model_weight(), source=self.addr, round=self.round, local=True)
 
-        await self.cm.propagator.propagate_continuously("stable")
+        await self.cm.propagator.propagate("stable")
         await self._waiting_model_updates()
 
 

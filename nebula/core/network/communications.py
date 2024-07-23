@@ -543,14 +543,11 @@ class CommunicationsManager:
 
     async def send_message(self, dest_addr, message):
         try:
-            # await self.get_connections_lock().acquire_async()
             conn = self.connections[dest_addr]
             await conn.send(data=message)
         except Exception as e:
             logging.error(f"❗️  Cannot send message {message} to {dest_addr}. Error: {str(e)}")
             await self.disconnect(dest_addr, mutual_disconnection=False)
-        # finally:
-        #     await self.get_connections_lock().release_async()
 
     async def send_messages(self, messages, interval=0):
         tasks = [self.send_message(dest_addr, message) for dest_addr, message in messages]
@@ -560,7 +557,6 @@ class CommunicationsManager:
 
     async def send_model(self, dest_addr, round, serialized_model, weight=1):
         try:
-            # await self.get_connections_lock().acquire_async()
             conn = self.connections.get(dest_addr)
             if conn is None:
                 logging.info(f"❗️  Connection with {dest_addr} not found")
@@ -572,8 +568,6 @@ class CommunicationsManager:
         except Exception as e:
             logging.error(f"❗️  Cannot send model to {dest_addr}: {str(e)}")
             await self.disconnect(dest_addr, mutual_disconnection=False)
-        # finally:
-        #     await self.get_connections_lock().release_async()
 
     async def send_models(self, models, round):
         tasks = [self.send_model(dest_addr, round, serialized_model, weight) for dest_addr, serialized_model, weight in models]
