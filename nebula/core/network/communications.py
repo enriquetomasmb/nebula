@@ -171,7 +171,7 @@ class CommunicationsManager:
                 logging.info(f"❗️  handle_model_message | Received a model from a different round | Model round: {message.round} | Current round: {current_round}")
                 if message.round > current_round:
                     logging.info(f"🤖  handle_model_message | Saving model from {source} for future round")
-                    await self.engine.aggregator.include_future_model_in_buffer(
+                    await self.engine.aggregator.include_next_model_in_buffer(
                         message.parameters,
                         message.weight,
                         source=source,

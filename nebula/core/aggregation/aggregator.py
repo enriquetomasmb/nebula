@@ -130,6 +130,19 @@ class Aggregator(ABC):
             self._pending_models_to_aggregate.update({source: (model, weight)})
 
         logging.info(f"🔄  _add_pending_model | Model added in aggregation buffer ({str(len(self.get_nodes_pending_models_to_aggregate()))}/{str(len(self._federation_nodes))}) | Pending nodes: {self._federation_nodes - self.get_nodes_pending_models_to_aggregate()}")
+
+        # Check if _future_models_to_aggregate has models in the current round to include in the aggregation buffer
+        if self.engine.get_round() in self._future_models_to_aggregate:
+            logging.info(f"🔄  _add_pending_model | Including next models in the aggregation buffer for round {self.engine.get_round()}")
+            for future_model in self._future_models_to_aggregate[self.engine.get_round()]:
+                if future_model is None:
+                    continue
+                future_model, future_weight, future_source = future_model
+                if future_source in self._federation_nodes and future_source not in self.get_nodes_pending_models_to_aggregate():
+                    self._pending_models_to_aggregate.update({future_source: (future_model, future_weight)})
+                    logging.info(f"🔄  _add_pending_model | Next model added in aggregation buffer ({str(len(self.get_nodes_pending_models_to_aggregate()))}/{str(len(self._federation_nodes))}) | Pending nodes: {self._federation_nodes - self.get_nodes_pending_models_to_aggregate()}")
+            del self._future_models_to_aggregate[self.engine.get_round()]
+
         if len(self.get_nodes_pending_models_to_aggregate()) >= len(self._federation_nodes):
             logging.info(f"🔄  _add_pending_model | All models were added in the aggregation buffer. Run aggregation...")
             await self._aggregation_done_lock.release_async()
@@ -149,19 +162,12 @@ class Aggregator(ABC):
             return
 
         await self._add_pending_model(model, weight, source)
-        
-        # Check if _future_models_to_aggregate has models in the current round to include in the aggregation buffer
-        if round is not None and round in self._future_models_to_aggregate:
-            logging.info(f"🔄  include_model_in_buffer | Including future models in the aggregation buffer for round {round}")
-            for future_model in self._future_models_to_aggregate[round]:
-                await self._add_pending_model(future_model[0], future_model[1], future_model[2])
-            del self._future_models_to_aggregate[round]
-        
+
         if len(self.get_nodes_pending_models_to_aggregate()) >= len(self._federation_nodes):
             logging.info(f"🔄  include_model_in_buffer | Broadcasting MODELS_INCLUDED for round {self.engine.get_round()}")
             message = self.cm.mm.generate_federation_message(nebula_pb2.FederationMessage.Action.FEDERATION_MODELS_INCLUDED, [self.engine.get_round()])
             await self.cm.send_message_to_neighbors(message)
-            
+
         return
 
     async def get_aggregation(self):
@@ -186,12 +192,13 @@ class Aggregator(ABC):
             logging.info(f"🔄  get_aggregation | All models accounted for, proceeding with aggregation.")
 
         return self.run_aggregation(self._pending_models_to_aggregate)
-    
-    async def include_future_model_in_buffer(self, model, weight, source=None, round=None):
-        logging.info(f"🔄  [FUTURE] include_future_model_in_buffer | source={source} | round={round} | weight={weight}")
+
+    async def include_next_model_in_buffer(self, model, weight, source=None, round=None):
+        logging.info(f"🔄  include_next_model_in_buffer | source={source} | round={round} | weight={weight}")
         if round not in self._future_models_to_aggregate:
             self._future_models_to_aggregate[round] = []
-        self._future_models_to_aggregate[round].append((model, weight, source))
+        decoded_model = self.engine.trainer.deserialize_model(model)
+        self._future_models_to_aggregate[round].append((decoded_model, weight, source))
 
     def print_model_size(self, model):
         total_params = 0
