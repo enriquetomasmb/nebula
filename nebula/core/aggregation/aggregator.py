@@ -132,7 +132,7 @@ class Aggregator(ABC):
         logging.info(f"🔄  _add_pending_model | Model added in aggregation buffer ({str(len(self.get_nodes_pending_models_to_aggregate()))}/{str(len(self._federation_nodes))}) | Pending nodes: {self._federation_nodes - self.get_nodes_pending_models_to_aggregate()}")
         if len(self.get_nodes_pending_models_to_aggregate()) >= len(self._federation_nodes):
             logging.info(f"🔄  _add_pending_model | All models were added in the aggregation buffer. Run aggregation...")
-            self._aggregation_done_lock.release_async()
+            await self._aggregation_done_lock.release_async()
         await self._add_model_lock.release_async()
         return self.get_nodes_pending_models_to_aggregate()
 
@@ -188,12 +188,10 @@ class Aggregator(ABC):
         return self.run_aggregation(self._pending_models_to_aggregate)
     
     async def include_future_model_in_buffer(self, model, weight, source=None, round=None):
-        await self._add_model_lock.acquire_async()
         logging.info(f"🔄  [FUTURE] include_future_model_in_buffer | source={source} | round={round} | weight={weight}")
         if round not in self._future_models_to_aggregate:
             self._future_models_to_aggregate[round] = []
         self._future_models_to_aggregate[round].append((model, weight, source))
-        await self._add_model_lock.release_async()
 
     def print_model_size(self, model):
         total_params = 0

@@ -356,8 +356,6 @@ class Engine:
                 if self.config.participant["device_args"]["start"]:
                     logging.info(f"Propagate initial model updates.")
                     await self.cm.propagator.propagate_continuously("initialization")
-                    logging.info(f"💤 Grace time to propagate the initial model updates.") 
-                    await asyncio.sleep(10)
                     await self.get_federation_ready_lock().release_async()
 
                 self.trainer.set_epochs(epochs)

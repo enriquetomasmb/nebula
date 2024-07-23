@@ -166,15 +166,19 @@ class CommunicationsManager:
             await self.engine.get_round_lock().acquire_async()
             current_round = self.get_round()
             await self.engine.get_round_lock().release_async()
+
             if message.round != current_round and message.round != -1:
                 logging.info(f"❗️  handle_model_message | Received a model from a different round | Model round: {message.round} | Current round: {current_round}")
-                logging.info(f"❗️  handle_model_message | Ignoring model from {source}, but including in the future model buffer")
-                await self.engine.aggregator.include_future_model_in_buffer(
-                    message.parameters,
-                    message.weight,
-                    source=source,
-                    round=message.round,
-                )
+                if message.round > current_round:
+                    logging.info(f"🤖  handle_model_message | Saving model from {source} for future round")
+                    await self.engine.aggregator.include_future_model_in_buffer(
+                        message.parameters,
+                        message.weight,
+                        source=source,
+                        round=message.round,
+                    )
+                else:
+                    logging.info(f"❗️  handle_model_message | Ignoring model from {source} from a previous round")
                 return
             if not self.engine.get_federation_ready_lock().locked() and len(self.engine.get_federation_nodes()) == 0:
                 logging.info(f"🤖  handle_model_message | There are no defined federation nodes")
@@ -532,7 +536,7 @@ class CommunicationsManager:
             logging.info(f"Sending message to ALL neighbors: {neighbors}")
         else:
             logging.info(f"Sending message to neighbors: {neighbors}")
-            
+
         messages = [(neighbor, message) for neighbor in neighbors]
         logging.info(f"Sending {len(messages)} messages")
         asyncio.create_task(self.send_messages(messages, interval))
@@ -547,7 +551,7 @@ class CommunicationsManager:
             await self.disconnect(dest_addr, mutual_disconnection=False)
         # finally:
         #     await self.get_connections_lock().release_async()
-        
+
     async def send_messages(self, messages, interval=0):
         tasks = [self.send_message(dest_addr, message) for dest_addr, message in messages]
         await asyncio.gather(*tasks)
@@ -570,11 +574,11 @@ class CommunicationsManager:
             await self.disconnect(dest_addr, mutual_disconnection=False)
         # finally:
         #     await self.get_connections_lock().release_async()
-        
+
     async def send_models(self, models, round):
         tasks = [self.send_model(dest_addr, round, serialized_model, weight) for dest_addr, serialized_model, weight in models]
         await asyncio.gather(*tasks)
-    
+
     async def establish_connection(self, addr, direct=True, reconnect=False):
         logging.info(f"🔗  [outgoing] Establishing connection with {addr} (direct: {direct})")
 

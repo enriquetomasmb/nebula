@@ -189,7 +189,6 @@ class Connection:
                 logging.error(f"❗️  Unknown data type to send: {type(data)}")
                 return
 
-            data_to_send = None
             if compression != "none":
                 encoded_data = await self.compress(encoded_data, compression)
                 if encoded_data is None:
@@ -198,14 +197,14 @@ class Connection:
             else:
                 data_to_send = data_prefix + encoded_data + self.EOT_CHAR
 
-            chunk_size = 4096
+            chunk_size = 1024 * 1024 * 1024
             total_size = len(data_to_send)
-            chunks = [data_to_send[i : i + chunk_size] for i in range(0, total_size, chunk_size)]
-            
-            for chunk in chunks:
+
+            for i in range(0, total_size, chunk_size):
+                chunk = data_to_send[i : i + chunk_size]
                 self.writer.write(chunk)
                 await self.writer.drain()
-            
+
             logging.debug(f"Size of data (after compression -- if applied): {format(sys.getsizeof(encoded_data)/1024/1024, '.10f')} MB")
         except Exception as e:
             logging.error(f"❗️  Error sending data to node: {e}")
@@ -220,7 +219,7 @@ class Connection:
                 if message is None:
                     return None
             if data_type_prefix == self.DATA_TYPE_PREFIXES["pb"]:
-                logging.debug(f"Received message (pb): {message}")
+                logging.debug(f"Received a successful message (protobuf)")
                 asyncio.create_task(self.cm.handle_incoming_message(message, self.addr), name=f"Connection {self.addr} message handler")
             elif data_type_prefix == self.DATA_TYPE_PREFIXES["string"]:
                 logging.debug(f"Received message (string): {message.decode('utf-8')}")
@@ -238,21 +237,30 @@ class Connection:
 
     async def handle_incoming_message(self):
         try:
-            buffer = b""
+            buffer = bytearray()
+            chunk_size = 1024 * 1024 * 1024
+            max_buffer_size = 2 * 1024 * 1024 * 1024 # 2 GB
             while True:
                 try:
-                    chunk = await self.reader.read(4096)
+                    chunk = await self.reader.read(chunk_size)
                     if not chunk:
                         break
-                    buffer += chunk
+                    buffer.extend(chunk)
                     logging.debug(f"Size of buffer: {format(sys.getsizeof(buffer)/1024/1024, '.10f')} MB")
-                    eot_pos = buffer.find(self.EOT_CHAR)
-                    while eot_pos >= 0:
+
+                    if len(buffer) > max_buffer_size:
+                        logging.warning(f"❗️  Buffer size exceeded maximum size: {max_buffer_size}")
+
+                    while True:
+                        eot_pos = buffer.find(self.EOT_CHAR)
+                        if eot_pos < 0:
+                            break
                         message = buffer[:eot_pos]
                         buffer = buffer[eot_pos + len(self.EOT_CHAR) :]
-                        logging.debug(f"Size of message: {format(sys.getsizeof(message)/1024/1024, '.10f')} MB")
-                        await self.retrieve_message(message)
-                        eot_pos = buffer.find(self.EOT_CHAR)
+                        logging.debug(f"Size of message: {len(message)/1024/1024:.10f} MB")
+                        asyncio.create_task(self.retrieve_message(bytes(message)))
+                        logging.debug(f"Size of buffer (after message retrieval): {format(sys.getsizeof(buffer)/1024/1024, '.10f')} MB")
+
                 except asyncio.IncompleteReadError:
                     logging.error(f"❗️  Incomplete read error")
                     break
