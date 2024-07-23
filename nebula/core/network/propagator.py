@@ -109,6 +109,7 @@ class Propagator:
         self.status_history.clear()
 
     async def propagate(self, strategy_id: str):
+        self.reset_status_history()
         if strategy_id not in self.strategies:
             logging.info(f"Strategy {strategy_id} not found.")
             return False
@@ -119,7 +120,8 @@ class Propagator:
         strategy = self.strategies[strategy_id]
         logging.info(f"Starting model propagation with strategy: {strategy_id}")
 
-        eligible_neighbors = [neighbor_addr for neighbor_addr in self.cm.get_addrs_current_connections(only_direct=True) if strategy.is_node_eligible(neighbor_addr)]
+        current_connections = await self.cm.get_addrs_current_connections(only_direct=True)
+        eligible_neighbors = [neighbor_addr for neighbor_addr in current_connections if strategy.is_node_eligible(neighbor_addr)]
         logging.info(f"Eligible neighbors for model propagation: {eligible_neighbors}")
         if not eligible_neighbors:
             logging.info("Propagation complete: No eligible neighbors.")
@@ -130,29 +132,24 @@ class Propagator:
             logging.info("Exiting propagation due to repeated statuses.")
             return False
 
+        models = []
+
         for neighbor_addr in eligible_neighbors:
             serialized_model, weight = strategy.prepare_model_payload(neighbor_addr)
             if serialized_model:
                 serialized_model = serialized_model if isinstance(serialized_model, bytes) else self.trainer.serialize_model(serialized_model)
-                if strategy_id == "initialization":
-                    await self.cm.send_model(neighbor_addr, -1, serialized_model, weight)
-                else:
-                    await self.cm.send_model(neighbor_addr, self.get_round(), serialized_model, weight)
-            await asyncio.sleep(self.model_interval)
-            
+                models.append((neighbor_addr, serialized_model, weight))
+
+        logging.info(f"Models ready to propagate: num models {len(models)}")
+
         if strategy_id == "initialization":
+            asyncio.create_task(self.cm.send_models(models, -1))
             return False
-        
+        else:
+            asyncio.create_task(self.cm.send_models(models, self.get_round()))
+
         if len(self.aggregator.get_nodes_pending_models_to_aggregate()) >= len(self.aggregator._federation_nodes):
             return False
 
         await asyncio.sleep(self.interval)
         return True
-
-    async def propagate_continuously(self, strategy_id: str):
-        self.reset_status_history()
-        while True:
-            propagated = await self.propagate(strategy_id)
-            if not propagated:
-                logging.info("Exiting continuous propagation...")
-                return

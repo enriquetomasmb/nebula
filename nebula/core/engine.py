@@ -25,7 +25,6 @@ logging.getLogger("matplotlib").setLevel(logging.ERROR)
 logging.getLogger("aim").setLevel(logging.ERROR)
 logging.getLogger("plotly").setLevel(logging.ERROR)
 
-import threading
 from nebula.config.config import Config
 from nebula.core.training.lightning import Lightning
 from nebula.core.utils.helper import cosine_metric
@@ -149,10 +148,9 @@ class Engine:
         msg += f"\nTarget aggregation: {self.target_aggregation.__class__.__name__}" if self.is_dynamic_aggregation else ""
         print_msg_box(msg=msg, indent=2, title="Defense information")
 
-        self.learning_cycle_lock = Locker(name="learning_cycle_lock")
-        self.federation_ready_lock = Locker(name="federation_ready_lock")
-        self.federation_ready_lock.acquire()
-        self.round_lock = Locker(name="round_lock")
+        self.learning_cycle_lock = Locker(name="learning_cycle_lock", async_lock=True)
+        self.federation_ready_lock = Locker(name="federation_ready_lock", async_lock=True)
+        self.round_lock = Locker(name="round_lock", async_lock=True)
 
         self.config.reload_config_file()
 
@@ -173,10 +171,7 @@ class Engine:
 
         # Register additional callbacks
         self._event_manager.register_event((nebula_pb2.FederationMessage, nebula_pb2.FederationMessage.Action.REPUTATION), self._reputation_callback)
-        # ...
-
-        # Thread for the trainer service, it is created when the learning starts
-        self.trainer_service = None
+        # ... add more callbacks here
 
     @property
     def cm(self):
@@ -228,10 +223,11 @@ class Engine:
     @event_handler(nebula_pb2.DiscoveryMessage, nebula_pb2.DiscoveryMessage.Action.DISCOVER)
     async def _discovery_discover_callback(self, source, message):
         logging.info(f"🔍  handle_discovery_message | Trigger | Received discovery message from {source} (network propagation)")
-        if source not in self.cm.get_addrs_current_connections(myself=True):
+        current_connections = await self.cm.get_addrs_current_connections(myself=True)
+        if source not in current_connections:
             logging.info(f"🔍  handle_discovery_message | Trigger | Connecting to {source} indirectly")
             await self.cm.connect(source, direct=False)
-        with self.cm.get_connections_lock():
+        async with self.cm.get_connections_lock():
             if source in self.cm.connections:
                 # Update the latitude and longitude of the node (if already connected)
                 if message.latitude is not None and -90 <= message.latitude <= 90 and message.longitude is not None and -180 <= message.longitude <= 180:
@@ -242,7 +238,8 @@ class Engine:
     @event_handler(nebula_pb2.ControlMessage, nebula_pb2.ControlMessage.Action.ALIVE)
     async def _control_alive_callback(self, source, message):
         logging.info(f"🔧  handle_control_message | Trigger | Received alive message from {source}")
-        if source in self.cm.get_addrs_current_connections(myself=True):
+        current_connections = await self.cm.get_addrs_current_connections(myself=True)
+        if source in current_connections:
             try:
                 await self.cm.health.alive(source)
             except Exception as e:
@@ -253,7 +250,8 @@ class Engine:
     @event_handler(nebula_pb2.ConnectionMessage, nebula_pb2.ConnectionMessage.Action.CONNECT)
     async def _connection_connect_callback(self, source, message):
         logging.info(f"🔗  handle_connection_message | Trigger | Received connection message from {source}")
-        if source not in self.cm.get_addrs_current_connections(myself=True):
+        current_connections = await self.cm.get_addrs_current_connections(myself=True)
+        if source not in current_connections:
             logging.info(f"🔗  handle_connection_message | Trigger | Connecting to {source}")
             await self.cm.connect(source, direct=True)
 
@@ -265,7 +263,7 @@ class Engine:
     @event_handler(nebula_pb2.FederationMessage, nebula_pb2.FederationMessage.Action.FEDERATION_START)
     async def _start_federation_callback(self, source, message):
         logging.info(f"📝  handle_federation_message | Trigger | Received start federation message from {source}")
-        self.create_trainer_service()
+        await self.create_trainer_module()
 
     @event_handler(nebula_pb2.FederationMessage, nebula_pb2.FederationMessage.Action.REPUTATION)
     async def _reputation_callback(self, source, message):
@@ -273,15 +271,15 @@ class Engine:
         if self.with_reputation:
             if len(malicious_nodes) > 0 and not self._is_malicious:
                 if self.is_dynamic_topology:
-                    self._disrupt_connection_using_reputation(malicious_nodes)
+                    await self._disrupt_connection_using_reputation(malicious_nodes)
                 if self.is_dynamic_aggregation and self.aggregator != self.target_aggregation:
                     await self._dynamic_aggregator(self.aggregator.get_nodes_pending_models_to_aggregate(), malicious_nodes)
 
     @event_handler(nebula_pb2.FederationMessage, nebula_pb2.FederationMessage.Action.FEDERATION_MODELS_INCLUDED)
-    def _federation_models_included_callback(self, source, message):
+    async def _federation_models_included_callback(self, source, message):
         logging.info(f"📝  handle_federation_message | Trigger | Received aggregation finished message from {source}")
         try:
-            self.cm.get_connections_lock().acquire()
+            await self.cm.get_connections_lock().acquire_async()
             if self.round is not None and source in self.cm.connections:
                 try:
                     if message is not None and len(message.arguments) > 0:
@@ -293,20 +291,11 @@ class Engine:
         except Exception as e:
             logging.error(f"Error updating round in connection: {e}")
         finally:
-            self.cm.get_connections_lock().release()
+            await self.cm.get_connections_lock().release_async()
 
-    def create_trainer_service(self):
-        if self.trainer_service is None:
-            self.trainer_service = threading.Thread(
-                target=self._start_learning,
-                daemon=True,
-                name="trainer_service_thread-" + self.addr,
-            )
-            self.trainer_service.start()
-            logging.info(f"Started trainer service thread...")
-
-    def get_trainer_service(self):
-        return self.trainer_service
+    async def create_trainer_module(self):
+        asyncio.create_task(self._start_learning())
+        logging.info(f"Started trainer module...")
 
     async def start_communications(self):
         logging.info(f"Neighbors: {self.config.participant['network_args']['neighbors']}")
@@ -323,12 +312,14 @@ class Engine:
             await asyncio.sleep(1)
         while not self.cm.verify_connections(initial_neighbors):
             await asyncio.sleep(1)
-        logging.info(f"Connections verified: {self.cm.get_addrs_current_connections()}")
-        self._reporter.start()
+        current_connections = await self.cm.get_addrs_current_connections()
+        logging.info(f"Connections verified: {current_connections}")
+        await self._reporter.start()
         await self.cm.deploy_additional_services()
         await asyncio.sleep(self.config.participant["misc_args"]["grace_time_connection"] // 2)
 
     async def deploy_federation(self):
+        await self.federation_ready_lock.acquire_async()
         if self.config.participant["device_args"]["start"]:
             logging.info(f"💤  Waiting for {self.config.participant['misc_args']['grace_time_start_federation']} seconds to start the federation")
             await asyncio.sleep(self.config.participant["misc_args"]["grace_time_start_federation"])
@@ -336,60 +327,60 @@ class Engine:
                 logging.info(f"Sending FEDERATION_START to neighbors...")
                 message = self.cm.mm.generate_federation_message(nebula_pb2.FederationMessage.Action.FEDERATION_START)
                 await self.cm.send_message_to_neighbors(message)
-                self.get_federation_ready_lock().release()
-                self.create_trainer_service()
+                await self.get_federation_ready_lock().release_async()
+                await self.create_trainer_module()
             else:
                 logging.info(f"Federation already started")
 
         else:
             logging.info(f"💤  Waiting until receiving the start signal from the start node")
 
-    def _start_learning(self):
-        self.learning_cycle_lock.acquire()
+    async def _start_learning(self):
+        await self.learning_cycle_lock.acquire_async()
         try:
             if self.round is None:
                 self.total_rounds = self.config.participant["scenario_args"]["rounds"]
                 epochs = self.config.participant["training_args"]["epochs"]
-                self.get_round_lock().acquire()
+                await self.get_round_lock().acquire_async()
                 self.round = 0
-                self.get_round_lock().release()
-                self.learning_cycle_lock.release()
+                await self.get_round_lock().release_async()
+                await self.learning_cycle_lock.release_async()
                 print_msg_box(msg=f"Starting Federated Learning process...", indent=2, title="Start of the experiment")
-                logging.info(f"Initial DIRECT connections: {self.cm.get_addrs_current_connections(only_direct=True)} | Initial UNDIRECT participants: {self.cm.get_addrs_current_connections(only_undirected=True)}")
+                direct_connections = await self.cm.get_addrs_current_connections(only_direct=True)
+                undirected_connections = await self.cm.get_addrs_current_connections(only_undirected=True)
+                logging.info(f"Initial DIRECT connections: {direct_connections} | Initial UNDIRECT participants: {undirected_connections}")
                 logging.info(f"💤  Waiting initialization of the federation...")
                 # Lock to wait for the federation to be ready (only affects the first round, when the learning starts)
                 # Only applies to non-start nodes --> start node does not wait for the federation to be ready
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-
-                self.get_federation_ready_lock().acquire()
+                await self.get_federation_ready_lock().acquire_async()
                 if self.config.participant["device_args"]["start"]:
                     logging.info(f"Propagate initial model updates.")
-                    loop.run_until_complete(self.cm.propagator.propagate_continuously("initialization"))
-                    self.get_federation_ready_lock().release()
+                    await self.cm.propagator.propagate("initialization")
+                    await self.get_federation_ready_lock().release_async()
 
                 self.trainer.set_epochs(epochs)
                 self.trainer.create_trainer()
 
-                loop.run_until_complete(self._learning_cycle())
+                await self._learning_cycle()
             else:
-                self.learning_cycle_lock.release()
+                await self.learning_cycle_lock.release_async()
         finally:
-            loop.close()
+            if self.learning_cycle_lock.locked_async():
+                await self.learning_cycle_lock.release_async()
 
-    def _disrupt_connection_using_reputation(self, malicious_nodes):
+    async def _disrupt_connection_using_reputation(self, malicious_nodes):
         malicious_nodes = list(set(malicious_nodes) & set(self.get_current_connections()))
         logging.info(f"Disrupting connection with malicious nodes at round {self.round}")
         logging.info(f"Removing {malicious_nodes} from {self.get_current_connections()}")
         logging.info(f"Current connections before aggregation at round {self.round}: {self.get_current_connections()}")
         for malicious_node in malicious_nodes:
             if (self.get_name() != malicious_node) and (malicious_node not in self._secure_neighbors):
-                self.cm.disconnect(malicious_node)
+                await self.cm.disconnect(malicious_node)
         logging.info(f"Current connections after aggregation at round {self.round}: {self.get_current_connections()}")
 
-        self._connect_with_benign(malicious_nodes)
+        await self._connect_with_benign(malicious_nodes)
 
-    def _connect_with_benign(self, malicious_nodes):
+    async def _connect_with_benign(self, malicious_nodes):
         lower_threshold = 1
         higher_threshold = len(self.federation_nodes) - 1
         if higher_threshold < lower_threshold:
@@ -400,7 +391,7 @@ class Engine:
         if len(self.get_current_connections()) <= lower_threshold:
             for node in benign_nodes:
                 if len(self.get_current_connections()) <= higher_threshold and self.get_name() != node:
-                    connected = self.cm.connect(node)
+                    connected = await self.cm.connect(node)
                     if connected:
                         logging.info(f"Connect new connection with at round {self.round}: {connected}")
 
@@ -409,7 +400,7 @@ class Engine:
         if self.aggregator != self.target_aggregation:
             logging.info(f"Current aggregator is: {self.aggregator}")
             self.aggregator = self.target_aggregation
-            self.aggregator.update_federation_nodes(self.federation_nodes)
+            await self.aggregator.update_federation_nodes(self.federation_nodes)
 
             for subnodes in aggregated_models_weights.keys():
                 sublist = subnodes.split()
@@ -421,7 +412,7 @@ class Engine:
 
     async def _waiting_model_updates(self):
         logging.info(f"💤  Waiting convergence in round {self.round}.")
-        params = self.aggregator.get_aggregation()
+        params = await self.aggregator.get_aggregation()
         if params is not None:
             logging.info(f"_waiting_model_updates | Aggregation done for round {self.round}, including parameters in local model.")
             self.trainer.set_model_parameters(params)
@@ -432,20 +423,22 @@ class Engine:
         while self.round is not None and self.round < self.total_rounds:
             print_msg_box(msg=f"Round {self.round} of {self.total_rounds} started.", indent=2, title="Round information")
             self.trainer.on_round_start()
-            self.federation_nodes = self.cm.get_addrs_current_connections(only_direct=True, myself=True)
+            self.federation_nodes = await self.cm.get_addrs_current_connections(only_direct=True, myself=True)
             logging.info(f"Federation nodes: {self.federation_nodes}")
-            logging.info(f"Direct connections: {self.cm.get_addrs_current_connections(only_direct=True)} | Undirected connections: {self.cm.get_addrs_current_connections(only_undirected=True)}")
+            direct_connections = await self.cm.get_addrs_current_connections(only_direct=True)
+            undirected_connections = await self.cm.get_addrs_current_connections(only_undirected=True)
+            logging.info(f"Direct connections: {direct_connections} | Undirected connections: {undirected_connections}")
             logging.info(f"[Role {self.role}] Starting learning cycle...")
-            self.aggregator.update_federation_nodes(self.federation_nodes)
+            await self.aggregator.update_federation_nodes(self.federation_nodes)
             await self._extended_learning_cycle()
 
-            self.get_round_lock().acquire()
+            await self.get_round_lock().acquire_async()
             print_msg_box(msg=f"Round {self.round} of {self.total_rounds} finished.", indent=2, title="Round information")
             self.aggregator.reset()
             self.trainer.on_round_end()
             self.round = self.round + 1
             self.config.participant["federation_args"]["round"] = self.round  # Set current round in config (send to the controller)
-            self.get_round_lock().release()
+            await self.get_round_lock().release_async()
 
         # End of the learning cycle
         self.trainer.on_learning_cycle_end()
@@ -454,20 +447,27 @@ class Engine:
         logging.info(f"[Testing] Finishing final testing...")
         self.round = None
         self.total_rounds = None
-        self.get_federation_ready_lock().acquire()
         print_msg_box(msg=f"Federated Learning process has been completed.", indent=2, title="End of the experiment")
         # Enable loggin info
         logging.getLogger().disabled = True
         # Report
         if self.config.participant["scenario_args"]["controller"] == "nebula-frontend":
-            self.reporter.report_scenario_finished()
+            result = await self.reporter.report_scenario_finished()
+            if result:
+                pass
+            else:
+                logging.error(f"Error reporting scenario finished")
+        
+        # Check if all my connections reached the total rounds
+        while not self.cm.check_finished_experiment():
+            await asyncio.sleep(1)
+        
         # Kill itself
         try:
             self.client.containers.get(self.docker_id).stop()
-            print(f"Docker container with ID {self.docker_id} stopped successfully.")
         except Exception as e:
             print(f"Error stopping Docker container with ID {self.docker_id}: {e}")
-
+    
     async def _extended_learning_cycle(self):
         """
         This method is called in each round of the learning cycle. It is used to extend the learning cycle with additional
@@ -559,7 +559,7 @@ class AggregatorNode(Engine):
 
         await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.get_model_weight(), source=self.addr, round=self.round)
 
-        await self.cm.propagator.propagate_continuously("stable")
+        await self.cm.propagator.propagate("stable")
         await self._waiting_model_updates()
 
 
@@ -576,7 +576,7 @@ class ServerNode(Engine):
         # In the first round, the server node doest take into account the initial model parameters for the aggregation
         await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.BYPASS_MODEL_WEIGHT, source=self.addr, round=self.round)
         await self._waiting_model_updates()
-        await self.cm.propagator.propagate_continuously("stable")
+        await self.cm.propagator.propagate("stable")
 
 
 class TrainerNode(Engine):
@@ -598,7 +598,7 @@ class TrainerNode(Engine):
 
         await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.get_model_weight(), source=self.addr, round=self.round, local=True)
 
-        await self.cm.propagator.propagate_continuously("stable")
+        await self.cm.propagator.propagate("stable")
         await self._waiting_model_updates()
 
 

@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import threading
 import time
 from nebula.addons.functions import print_msg_box
 from typing import TYPE_CHECKING
@@ -11,10 +10,9 @@ if TYPE_CHECKING:
     from nebula.core.network.communications import CommunicationsManager
 
 
-class Health(threading.Thread):
+class Health:
     def __init__(self, addr, config, cm: "CommunicationsManager"):
-        threading.Thread.__init__(self, daemon=True, name="health_thread-" + config.participant["device_args"]["name"])
-        print_msg_box(msg=f"Starting health thread...", indent=2, title="Health thread")
+        print_msg_box(msg=f"Starting health module...", indent=2, title="Health module")
         self.addr = addr
         self.config = config
         self.cm = cm
@@ -22,17 +20,14 @@ class Health(threading.Thread):
         self.alive_interval = self.config.participant["health_args"]["send_alive_interval"]
         self.check_alive_interval = self.config.participant["health_args"]["check_alive_interval"]
         self.timeout = self.config.participant["health_args"]["alive_timeout"]
-
-    def run(self):
-        loop = asyncio.new_event_loop()
-        # loop.set_debug(True)
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(asyncio.gather(self.run_send_alive(), self.run_check_alive()))
-        loop.close()
+    
+    async def start(self):
+        asyncio.create_task(self.run_send_alive())
+        asyncio.create_task(self.run_check_alive())
 
     async def run_send_alive(self):
         await asyncio.sleep(self.config.participant["health_args"]["grace_time_health"])
-        # Set all connections to active at the beginning of the health thread
+        # Set all connections to active at the beginning of the health module
         for conn in self.cm.connections.values():
             conn.set_active(True)
         while True:
@@ -43,8 +38,7 @@ class Health(threading.Thread):
                     if conn.get_direct():
                         try:
                             logging.info(f"🕒  Sending alive message to {conn.get_addr()}...")
-                            corutine = conn.send(data=message)
-                            asyncio.run_coroutine_threadsafe(corutine, loop=conn.loop)
+                            await conn.send(data=message)
                         except Exception as e:
                             logging.error(f"❗️  Cannot send alive message to {conn.get_addr()}. Error: {str(e)}")
                     await asyncio.sleep(self.alive_interval)
