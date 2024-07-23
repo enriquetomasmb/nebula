@@ -215,7 +215,7 @@ class CIFAR10ModelResNet(pl.LightningModule):
         optimizer = torch.optim.Adam(self.parameters(), lr=1e-2, weight_decay=1e-4)
         return optimizer
 
-    def step(self, batch, phase):
+    def step(self, batch, batch_idx, phase):
         images, labels = batch
         images = images.to(self.device)
         labels = labels.to(self.device)
@@ -226,19 +226,19 @@ class CIFAR10ModelResNet(pl.LightningModule):
         return loss
 
     def training_step(self, batch, batch_id):
-        return self.step(batch, "Train")
+        return self.step(batch, batch_id, "Train")
 
     def on_train_epoch_end(self):
         self.log_metrics_by_epoch("Train", print_cm=True, plot_cm=True)
 
     def validation_step(self, batch, batch_idx):
-        return self.step(batch, "Validation")
+        return self.step(batch, batch_idx, "Validation")
 
     def on_validation_epoch_end(self):
         self.log_metrics_by_epoch("Validation", print_cm=True, plot_cm=True)
 
     def test_step(self, batch, batch_idx):
-        return self.step(batch, "Test")
+        return self.step(batch, batch_idx, "Test")
 
     def on_test_epoch_end(self):
         self.log_metrics_by_epoch("Test", print_cm=True, plot_cm=True)
