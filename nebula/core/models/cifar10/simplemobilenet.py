@@ -2,8 +2,10 @@ import lightning as pl
 from torch import nn
 import torch
 
+from nebula.core.models.nebulamodel import NebulaModel
 
-class SimpleMobileNetV1(pl.LightningModule):
+
+class SimpleMobileNetV1(NebulaModel):
     def process_metrics(self, phase, y_pred, y, loss=None):
         if loss is not None:
             self.log(f"{phase}/Loss", loss, prog_bar=True, logger=True)
