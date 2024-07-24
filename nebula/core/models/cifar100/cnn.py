@@ -2,7 +2,7 @@ import torch
 from nebula.core.models.nebulamodel import NebulaModel
 
 
-class CNN(NebulaModel):
+class CIFAR100ModelCNN(NebulaModel):
     def __init__(
         self,
         input_channels=3,
