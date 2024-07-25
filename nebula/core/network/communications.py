@@ -538,7 +538,6 @@ class CommunicationsManager:
             logging.info(f"Sending message to neighbors: {neighbors}")
 
         messages = [(neighbor, message) for neighbor in neighbors]
-        logging.info(f"Sending {len(messages)} messages")
         asyncio.create_task(self.send_messages(messages, interval))
 
     async def send_message(self, dest_addr, message):
@@ -564,7 +563,7 @@ class CommunicationsManager:
             logging.info(f"Sending model to {dest_addr} with round {round}: weight={weight} | size={sys.getsizeof(serialized_model) / (1024 ** 2) if serialized_model is not None else 0} MB")
             message = self.mm.generate_model_message(round, serialized_model, weight)
             await conn.send(data=message)
-            logging.info(f"Model sent to {dest_addr}")
+            logging.info(f"Model sent to {dest_addr} with round {round}")
         except Exception as e:
             logging.error(f"❗️  Cannot send model to {dest_addr}: {str(e)}")
             await self.disconnect(dest_addr, mutual_disconnection=False)
