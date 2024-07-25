@@ -560,7 +560,7 @@ class ScenarioManagement:
                     - /bin/bash
                     - -c
                     - |
-                        ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python3.11 /nebula/nebula/node.py {}
+                        ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python3.11 -m memray run -o {} /nebula/nebula/node.py {}
                 networks:
                     nebula-net-scenario:
                         ipv4_address: {}
@@ -588,7 +588,7 @@ class ScenarioManagement:
                     - /bin/bash
                     - -c
                     - |
-                        ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python3.11 /nebula/nebula/node.py {}
+                        ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python3.11 -m memray run -o {} /nebula/nebula/node.py {}
                 deploy:
                     resources:
                         reservations:
@@ -630,6 +630,7 @@ class ScenarioManagement:
         for node in self.config.participants:
             idx = node["device_args"]["idx"]
             path = f"/nebula/app/config/{self.scenario_name}/participant_{idx}.json"
+            mem_log = f"/nebula/app/logs/{self.scenario_name}/mem_participant_{idx}.bin"
             logging.info("Starting node {} with configuration {}".format(idx, path))
             logging.info("Node {} is listening on ip {}".format(idx, node["network_args"]["ip"]))
             # Add one service for each participant
@@ -639,6 +640,7 @@ class ScenarioManagement:
                     idx,
                     self.root_path,
                     self.scenario.network_gateway,
+                    mem_log,
                     path,
                     node["network_args"]["ip"],
                     "proxy:" if self.scenario.simulation and self.use_blockchain else "",
