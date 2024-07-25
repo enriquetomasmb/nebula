@@ -48,7 +48,7 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
             else:
                 proto[label] = proto_info['sum'].to('cpu')
 
-        logging.info(f"[ProtoFashionMNISTModelCNN.get_protos] Protos: {proto}")
+        #logging.info(f"[ProtoFashionMNISTModelCNN.get_protos] Protos: {proto}")
         return proto
 
     def set_protos(self, protos):

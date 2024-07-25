@@ -137,7 +137,7 @@ class Lightning:
         except:
             raise Exception("Error setting parameters")
 
-    def get_model_parameters(self, bytes=False):
+    def get_model_parameters(self, bytes=False, initialize=False):
         if bytes:
             return self.serialize_model(self.model.state_dict())
         else:

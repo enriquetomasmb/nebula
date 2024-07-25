@@ -20,40 +20,46 @@ class ProtoQuantizationLightning(Lightning):
     def __init__(self, model, data, config=None, logger=None):
         super().__init__(model, data, config, logger)
 
-    def serialize_model(self, model):
+    def set_model_parameters(self, params, initialize=False):
+        if initialize:
+            # logging.info(f"Initializing model with parameters: {params.keys()}")
+            self.model.load_state_dict(params)
+            return
 
+        # Convert parameters back to float32
+        logging.info("[Learner] Decoding parameters...")
+        for key, value in params.items():
+            if key != 'protos':
+                params[key] = value.float()
+        # Imprimimos la key de los parametros para debug
+        # logging.info("[Learner] Keys of parameters: {}".format(params.keys()))
+
+        try:
+            self.model.load_state_dict(params)
+        except:
+            raise Exception("Error setting parameters")
+
+    def get_model_parameters(self, bytes=False, initialize=False):
+        if initialize:
+            # logging.info("[Learner] Getting parameters to initialize model...")
+            # model = self.model.state_dict()
+            # logging.info("Keys: {}".format(list(model.keys())))
+            if bytes:
+                return self.serialize_model(self.model.state_dict())
+            else:
+                return self.model.state_dict()
+
+        model = self.model.state_dict()
         # Convert parameters to float16 before saving to reduce data size
         logging.info("[Learner] Encoding parameters...")
         # print keys for debug
-        logging.info("[Learner] Keys of parameters: {}".format(model.keys()))
+        # logging.info("[Learner] Keys of parameters: {}".format(model.keys()))
         # quantize parameters to half precision, only if the key is not 'protos'
         for key, value in model.items():
             if key != 'protos':
                 model[key] = value.half()
-        # From https://pytorch.org/docs/stable/notes/serialization.html
-        try:
-            buffer = io.BytesIO()
-            with gzip.GzipFile(fileobj=buffer, mode="wb") as f:
-                torch.save(model, f)
-            return buffer.getvalue()
-        except:
-            raise Exception("Error serializing model")
 
-    def deserialize_model(self, data):
-        # From https://pytorch.org/docs/stable/notes/serialization.html
-        try:
-            buffer = io.BytesIO(data)
-
-            with gzip.GzipFile(fileobj=buffer, mode="rb") as f:
-                params_dict = torch.load(f, map_location="cpu")
-                # Convert parameters back to float32
-                logging.info("[Learner] Decoding parameters...")
-                for key, value in params_dict.items():
-                    if key != 'protos':
-                        params_dict[key] = value.float()
-                # Imprimimos la key de los parametros para debug
-                logging.info("[Learner] Keys of parameters: {}".format(params_dict.keys()))
-            return OrderedDict(params_dict)
-
-        except:
-            raise Exception("Error decoding parameters")
+        if bytes:
+            return self.serialize_model(model)
+        else:
+            return model

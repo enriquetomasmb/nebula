@@ -22,13 +22,7 @@ class QuantizationLightning(Lightning):
 
     def serialize_model(self, model):
 
-        # Convert parameters to float16 before saving to reduce data size
-        logging.info("[Learner] Encoding parameters...")
-        # print keys for debug
-        logging.info("[Learner] Keys of parameters: {}".format(model.keys()))
-        # quantize parameters to half precision
-        if hasattr(self.model, "teacher_model") and self.model.teacher_model is not None:
-            model = {k: v.half() for k, v in model.items()}
+
         # From https://pytorch.org/docs/stable/notes/serialization.html
         try:
             buffer = io.BytesIO()
@@ -38,19 +32,42 @@ class QuantizationLightning(Lightning):
         except:
             raise Exception("Error serializing model")
 
-    def deserialize_model(self, data):
-        # From https://pytorch.org/docs/stable/notes/serialization.html
+    def set_model_parameters(self, params, initialize=False):
+        if initialize:
+            self.model.load_state_dict(params)
+            return
+
+        # Convert parameters back to float32
+        logging.info("[Learner] Decoding parameters...")
+        params_dict = {k: v.float() for k, v in params.items()}
+        # Imprimimos la key de los parametros para debug
+        logging.info("[Learner] Keys of parameters: {}".format(params_dict.keys()))
+
+        if hasattr(self.model, 'set_protos'):
+            self.model.set_protos(params)
+            return
         try:
-            buffer = io.BytesIO(data)
-
-            with gzip.GzipFile(fileobj=buffer, mode="rb") as f:
-                params_dict = torch.load(f, map_location="cpu")
-                # Convert parameters back to float32
-                logging.info("[Learner] Decoding parameters...")
-                params_dict = {k: v.float() for k, v in params_dict.items()}
-                # Imprimimos la key de los parametros para debug
-                logging.info("[Learner] Keys of parameters: {}".format(params_dict.keys()))
-            return OrderedDict(params_dict)
-
+            self.model.load_state_dict(params)
         except:
-            raise Exception("Error decoding parameters")
+            raise Exception("Error setting parameters")
+
+    def get_model_parameters(self, bytes=False, initialize=False):
+        if initialize:
+            if bytes:
+                return self.serialize_model(self.model.state_dict())
+            else:
+                return self.model.state_dict()
+
+        model = self.model.state_dict()
+        # Convert parameters to float16 before saving to reduce data size
+        logging.info("[Learner] Encoding parameters...")
+        # print keys for debug
+        logging.info("[Learner] Keys of parameters: {}".format(model.keys()))
+        # quantize parameters to half precision
+        if hasattr(self.model, "teacher_model") and self.model.teacher_model is not None:
+            model = {k: v.half() for k, v in model.items()}
+
+        if bytes:
+            return self.serialize_model(model)
+        else:
+            return model
