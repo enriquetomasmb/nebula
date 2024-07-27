@@ -24,7 +24,7 @@ class Lightning:
         self.data = data
         self.config = config
         self._logger = logger
-        self._trainer = None
+        self.__trainer = None
         self.epochs = 1
         logging.getLogger("lightning.pytorch").setLevel(logging.ERROR)
         self.round = 0
@@ -48,7 +48,7 @@ class Lightning:
         if self.config.participant["device_args"]["accelerator"] == "gpu" and num_gpus > 0:
             gpu_index = self.config.participant["device_args"]["idx"] % num_gpus
             logging.info("Creating trainer with accelerator GPU ({})".format(gpu_index))
-            self._trainer = Trainer(
+            self.__trainer = Trainer(
                 callbacks=[RichModelSummary(max_depth=1), LearningRateMonitor(logging_interval="epoch")],
                 max_epochs=self.epochs,
                 accelerator=self.config.participant["device_args"]["accelerator"],
@@ -60,7 +60,7 @@ class Lightning:
             )
         else:
             logging.info("Creating trainer with accelerator CPU")
-            self._trainer = Trainer(
+            self.__trainer = Trainer(
                 callbacks=[RichModelSummary(max_depth=1), LearningRateMonitor(logging_interval="epoch")],
                 max_epochs=self.epochs,
                 accelerator=self.config.participant["device_args"]["accelerator"],
@@ -70,7 +70,7 @@ class Lightning:
                 enable_model_summary=False,
                 # deterministic=True
             )
-        logging.info(f"Trainer strategy: {self._trainer.strategy}")
+        logging.info(f"Trainer strategy: {self.__trainer.strategy}")
 
     def validate_neighbour_model(self, neighbour_model_param):
         avg_loss = 0
@@ -137,7 +137,7 @@ class Lightning:
         except:
             raise Exception("Error setting parameters")
 
-    def get_model_parameters(self, bytes=False, initialize=False):
+    def get_model_parameters(self, bytes=False):
         if bytes:
             return self.serialize_model(self.model.state_dict())
         else:
@@ -146,7 +146,8 @@ class Lightning:
     def train(self):
         try:
             self.create_trainer()
-            self._trainer.fit(self.model, self.data)
+            self.__trainer.fit(self.model, self.data)
+            self.__trainer = None
         except Exception as e:
             logging.error(f"Error training model: {e}")
             logging.error(traceback.format_exc())
@@ -154,7 +155,8 @@ class Lightning:
     def test(self):
         try:
             self.create_trainer()
-            self._trainer.test(self.model, self.data, verbose=True)
+            self.__trainer.test(self.model, self.data, verbose=True)
+            self.__trainer = None
         except Exception as e:
             logging.error(f"Error testing model: {e}")
             logging.error(traceback.format_exc())
