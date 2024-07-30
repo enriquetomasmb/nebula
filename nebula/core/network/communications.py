@@ -170,7 +170,7 @@ class CommunicationsManager:
             if message.round != current_round and message.round != -1:
                 logging.info(f"❗️  handle_model_message | Received a model from a different round | Model round: {message.round} | Current round: {current_round}")
                 if message.round > current_round:
-                    logging.info(f"🤖  handle_model_message | Saving model from {source} for future round")
+                    logging.info(f"🤖  handle_model_message | Saving model from {source} for future round {message.round}")
                     await self.engine.aggregator.include_next_model_in_buffer(
                         message.parameters,
                         message.weight,
@@ -211,6 +211,13 @@ class CommunicationsManager:
                 else:
                     if message.round != -1:
                         # Be sure that the model message is from the initialization round (round = -1)
+                        logging.info(f"🤖  handle_model_message | Saving model from {source} for future round {message.round}")
+                        await self.engine.aggregator.include_next_model_in_buffer(
+                            message.parameters,
+                            message.weight,
+                            source=source,
+                            round=message.round,
+                        )
                         return
                     logging.info(f"🤖  handle_model_message | Initializing model (executed by {source})")
                     try:
