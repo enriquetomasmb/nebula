@@ -2558,6 +2558,18 @@
                     withResourceConstraintsButton.addEventListener("click", function () {
                         document.getElementById("resource-constraints").style.display = "block";
                     });
+                    // check the radio button for resource constraints if applicable and show the configuration fields
+                    if (participant.resourceConstricted) {
+                        document.getElementById("with-resource-constraints-btn").checked = true;
+                        document.getElementById("resource-constraints").style.display = "block";
+                    }
+                    // set the correct values for the config fields:
+                    if (participant.resourceConstraintCPU !== 0) {
+                        document.getElementById("resource-constraint-cpu").value = participant.resourceConstraintCPU;
+                    }
+                    if (participant.resourceConstraintLatency !== 0) {
+                        document.getElementById("resource-constraint-latency").value = participant.resourceConstraintLatency;
+                    }
                     // set the correct ids for the config fields
                     document.getElementById("resource-constraint-cpu").setAttribute("id", "resource-constraint-cpu-" + i.toString());
                     document.getElementById("resource-constraint-latency").setAttribute("id", "resource-constraint-latency-" + i.toString());
@@ -2607,8 +2619,8 @@
                     participant.port = document.getElementById("participant-" + i + "-port").value;
                     if (document.getElementById("with-resource-constraints-btn").checked) {
                         participant.resourceConstricted = true;
-                        participant.resourceConstraintCPU = document.getElementById("resource-constraint-cpu-" + i).value;
-                        participant.resourceConstraintLatency = document.getElementById("resource-constraint-latency-" + i).value;
+                        participant.resourceConstraintCPU = Number(document.getElementById("resource-constraint-cpu-" + i).value);
+                        participant.resourceConstraintLatency = Number(document.getElementById("resource-constraint-latency-" + i).value);
                         }
                     Graph.graphData(Graph.graphData());
                 });
