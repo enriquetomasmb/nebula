@@ -1,5 +1,6 @@
 import asyncio
 import base64
+import gc
 import logging
 import time
 from geopy import distance
@@ -197,7 +198,7 @@ class Connection:
             else:
                 data_to_send = data_prefix + encoded_data + self.EOT_CHAR
 
-            chunk_size = 1024 * 1024 * 1024
+            chunk_size = 100 * 1024 * 1024 # 100 MB
             total_size = len(data_to_send)
 
             for i in range(0, total_size, chunk_size):
@@ -234,12 +235,15 @@ class Connection:
         except Exception as e:
             logging.error(f"❗️  Error retrieving message: {e}")
             return None
+        finally:
+            del message
+            gc.collect()
 
     async def handle_incoming_message(self):
         try:
             buffer = bytearray()
-            chunk_size = 1024 * 1024 * 1024
-            max_buffer_size = 2 * 1024 * 1024 * 1024 # 2 GB
+            chunk_size = 100 * 1024 * 1024 # 100 MB
+            max_buffer_size = 1024 * 1024 * 1024 # 1 GB
             while True:
                 try:
                     chunk = await self.reader.read(chunk_size)

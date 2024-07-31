@@ -7,7 +7,7 @@ matplotlib==3.9.1
 networkx==3.3
 psutil==6.0.0
 pycryptodome==3.20.0
-cryptography==42.0.8
+cryptography==43.0.0
 nvidia-ml-py==12.555.43
 adversarial-robustness-toolbox==1.18.1
 shap==0.46.0

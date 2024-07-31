@@ -314,9 +314,6 @@ class Engine:
         logging.info(f"💤  Cold start time: {self.config.participant['misc_args']['grace_time_connection']} seconds before connecting to the network")
         await asyncio.sleep(self.config.participant["misc_args"]["grace_time_connection"])
         await self.cm.start()
-        if self.config.participant["scenario_args"]["controller"] == "nebula-frontend":
-            await self.cm.register()
-            await self.cm.wait_for_controller()
         initial_neighbors = self.config.participant["network_args"]["neighbors"].split()
         for i in initial_neighbors:
             addr = f"{i.split(':')[0]}:{i.split(':')[1]}"

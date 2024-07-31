@@ -603,7 +603,7 @@ class ScenarioManagement:
                     - /bin/bash
                     - -c
                     - |
-                        ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python3.11 /nebula/nebula/node.py {}
+                        {} && ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python3.11 /nebula/nebula/node.py {}
                 networks:
                     nebula-net-scenario:
                         ipv4_address: {}
@@ -631,7 +631,7 @@ class ScenarioManagement:
                     - /bin/bash
                     - -c
                     - |
-                        ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python3.11 /nebula/nebula/node.py {}
+                        {} && ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python3.11 /nebula/nebula/node.py {}
                 deploy:
                     resources:
                         reservations:
@@ -681,6 +681,7 @@ class ScenarioManagement:
                 services += participant_gpu_template.format(
                     idx,
                     self.root_path,
+                    "sleep 10" if node["device_args"]["start"] else "sleep 0",
                     self.scenario.network_gateway,
                     path,
                     node["network_args"]["ip"],
@@ -691,6 +692,7 @@ class ScenarioManagement:
                 services += participant_template.format(
                     idx,
                     self.root_path,
+                    "sleep 10" if node["device_args"]["start"] else "sleep 0",
                     self.scenario.network_gateway,
                     path,
                     node["network_args"]["ip"],
@@ -703,6 +705,19 @@ class ScenarioManagement:
         # Write the Docker Compose file in config directory
         with open(f"{self.config_dir}/docker-compose.yml", "w") as f:
             f.write(docker_compose_file)
+            
+        # Include additional config to the participants
+        for idx, node in enumerate(self.config.participants):
+            node["tracking_args"]["log_dir"] = "/nebula/app/logs"
+            node["tracking_args"]["config_dir"] = f"/nebula/app/config/{self.scenario_name}"
+            node["scenario_args"]["controller"] = self.controller
+            node["security_args"]["certfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_cert.pem"
+            node["security_args"]["keyfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_key.pem"
+            node["security_args"]["cafile"] = f"/nebula/app/certs/ca_cert.pem"
+            
+             # Write the config file in config directory
+            with open(f"{self.config_dir}/participant_{node['device_args']['idx']}.json", "w") as f:
+                json.dump(node, f, indent=4)
 
         # Start the Docker Compose file, catch error if any
         try:
@@ -721,34 +736,26 @@ class ScenarioManagement:
             raise Exception("Docker Compose failed to start, please check if Docker Compose is installed (https://docs.docker.com/compose/install/) and Docker Engine is running.")
 
         container_ids = None
+        logging.info("Waiting for nodes to start...")
+        # Loop until all containers are running (equivalent to the number of participants)
+        while container_ids is None or len(container_ids) != len(self.config.participants):
+            time.sleep(3)
+            try:
+                # Obtain docker ids
+                result = subprocess.run(["docker", "compose", "-f", f"{self.config_dir}/docker-compose.yml", "ps", "-q"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
 
-        # Obtain container IDs
-        try:
-            # Obtain docker ids
-            result = subprocess.run(["docker", "compose", "-f", f"{self.config_dir}/docker-compose.yml", "ps", "-q"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                if result.returncode != 0:
+                    raise Exception(f"Error obtaining docker IDs: {result.stderr}")
 
-            if result.returncode != 0:
-                raise Exception(f"Error obtaining docker IDs: {result.stderr}")
+                container_ids = result.stdout.strip().split("\n")
 
-            container_ids = result.stdout.strip().split("\n")
-
-        except subprocess.CalledProcessError as e:
-            raise Exception("Docker Compose failed to start, please check if Docker Compose is installed " "(https://docs.docker.com/compose/install/) and Docker Engine is running.")
-
-        if not container_ids or len(container_ids) != len(self.config.participants):
-            raise Exception("The number of container IDs does not match the number of participants.")
+            except subprocess.CalledProcessError as e:
+                raise Exception("Docker Compose failed to start, please check if Docker Compose is installed " "(https://docs.docker.com/compose/install/) and Docker Engine is running.")
 
         # Change log and config directory in dockers to /nebula/app, and change controller endpoint
         for idx, node in enumerate(self.config.participants):
             # Assign docker ID to node
             node["device_args"]["docker_id"] = container_ids[idx]
-            # Print the configuration of the node
-            node["tracking_args"]["log_dir"] = "/nebula/app/logs"
-            node["tracking_args"]["config_dir"] = f"/nebula/app/config/{self.scenario_name}"
-            node["scenario_args"]["controller"] = self.controller
-            node["security_args"]["certfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_cert.pem"
-            node["security_args"]["keyfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_key.pem"
-            node["security_args"]["cafile"] = f"/nebula/app/certs/ca_cert.pem"
 
             # Write the config file in config directory
             with open(f"{self.config_dir}/participant_{node['device_args']['idx']}.json", "w") as f:
