@@ -153,7 +153,8 @@ class Lightning:
     def test(self):
         try:
             self.create_trainer()
-            self.__trainer.test(self.model, self.data, verbose=True)
+            results = self.__trainer.test(self.model, self.data, verbose=True)
+            return results
         except Exception as e:
             logging.error(f"Error testing model: {e}")
             logging.error(traceback.format_exc())

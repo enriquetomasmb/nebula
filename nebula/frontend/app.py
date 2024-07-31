@@ -714,6 +714,7 @@ def remove_scenario(scenario_name=None):
     remove_scenario_by_name(scenario_name)
     remove_note(scenario_name)
     ScenarioManagement.remove_files_by_scenario(scenario_name)
+    ScenarioManagement.remove_trustworthiness_files(scenario_name)
 
 
 @app.get("/nebula/dashboard/{scenario_name}/remove")
@@ -1054,6 +1055,7 @@ async def run_scenario(scenario_data, role):
     scenario_update_record(
         scenario_name=scenarioManagement.scenario_name,
         start_time=scenarioManagement.start_date_scenario,
+        completed_time = "",
         end_time="",
         status="running",
         title=scenario_data["scenario_title"],
@@ -1100,6 +1102,42 @@ async def run_scenarios(data, role):
             stop_all_scenarios_event.clear()
             stop_scenario(scenario_name)
             return
+        
+        #Trust#
+        from nebula.addons.trustworthiness.factsheet import Factsheet
+        from nebula.addons.trustworthiness.metric import TrustMetricManager
+        
+        if scenario_data['with_trustworthiness']:
+            logging.info("[FER] i'm in")
+            # Calculate of post training metrics for trustworthiness
+            # Get the start and the end time of the scenario to calculate the elapsed time
+            
+            # Wait to ensure it's completed
+            await asyncio.sleep(15)
+            
+            scenario = get_scenario_by_name(scenario_name)
+            
+            factsheet = Factsheet()
+            factsheet.populate_factsheet_post_train(scenario)
+    
+            # Get the weight of the different pillars
+            data_file_path = f"{os.environ.get('NEBULA_LOGS_DIR')}/{scenario_name}/trustworthiness/data.json"
+            with open(data_file_path, 'r') as data_file:
+                data = json.load(data_file)
+            
+            weights = {
+                "robustness": float(data["robustness_importance_percent"]),
+                "privacy": float(data["privacy_importance_percent"]),
+                "fairness": float(data["fairness_importance_percent"]),
+                "explainability": float(data["explainability_importance_percent"]),
+                "accountability": float(data["accountability_importance_percent"]),
+                "architectural_soundness": float(data["architectural_soundness_importance_percent"]),
+                "sustainability": float(data["sustainability_importance_percent"])
+            }
+    
+            trust_metric_manager = TrustMetricManager()
+            trust_metric_manager.evaluate(scenario, weights, use_weights=True)
+               
         finish_scenario_event.clear()
         scenarios_finished = scenarios_finished + 1
         stop_scenario(scenario_name)

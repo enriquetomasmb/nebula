@@ -47,7 +47,7 @@ def count_class_samples(scenario_name, dataloaders_files):
                 else:
                     result[l] = 1
 
-    name_file = f"{dirname}/files/{scenario_name}/count_class.json"
+    name_file = f"{os.environ.get('NEBULA_LOGS_DIR')}/{scenario_name}/trustworthiness/count_class.json"
     with open(name_file, "w") as f:
         json.dump(result, f)
 
@@ -65,7 +65,7 @@ def get_entropy(client_id, scenario_name, dataloader):
     result = {}
     client_entropy = {}
 
-    name_file = f"{dirname}/files/{scenario_name}/entropy.json"
+    name_file = f"{os.environ.get('NEBULA_LOGS_DIR')}/{scenario_name}/trustworthiness/entropy.json"
     if os.path.exists(name_file):
         with open(name_file, "r") as f:
             client_entropy = json.load(f)

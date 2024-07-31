@@ -78,6 +78,7 @@ async def initialize_databases():
             CREATE TABLE IF NOT EXISTS scenarios (
                 name TEXT PRIMARY KEY,
                 start_time TEXT NOT NULL,
+                completed_time TEXT NOT NULL,
                 end_time TEXT NOT NULL,
                 title TEXT NOT NULL,
                 description TEXT NOT NULL,
@@ -274,7 +275,7 @@ def get_all_scenarios_and_check_completed(sort_by="start_time"):
     return result
 
 
-def scenario_update_record(scenario_name, start_time, end_time, title, description, status, network_subnet, model, dataset, rounds, role):
+def scenario_update_record(scenario_name, start_time, completed_time, end_time, title, description, status, network_subnet, model, dataset, rounds, role):
     _conn = sqlite3.connect(scenario_db_file_location)
     _c = _conn.cursor()
 
@@ -284,11 +285,11 @@ def scenario_update_record(scenario_name, start_time, end_time, title, descripti
 
     if result is None:
         # Create a new record
-        _c.execute("INSERT INTO scenarios VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (scenario_name, start_time, end_time, title, description, status, network_subnet, model, dataset, rounds, role))
+        _c.execute("INSERT INTO scenarios VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (scenario_name, start_time, completed_time, end_time, title, description, status, network_subnet, model, dataset, rounds, role))
     else:
         # Update the record
         command = "UPDATE scenarios SET start_time = ?, end_time = ?, title = ?, description = ?, status = ?, network_subnet = ?, model = ?, dataset = ?, rounds = ?, role = ? WHERE name = ?;"
-        _c.execute(command, (start_time, end_time, title, description, status, network_subnet, model, dataset, rounds, role, scenario_name))
+        _c.execute(command, (start_time, completed_time, end_time, title, description, status, network_subnet, model, dataset, rounds, role, scenario_name))
 
     _conn.commit()
     _conn.close()
@@ -323,8 +324,9 @@ def scenario_set_status_to_completed(scenario_name):
     try:
         with sqlite3.connect(scenario_db_file_location) as _conn:
             _c = _conn.cursor()
-            command = "UPDATE scenarios SET status = 'completed' WHERE name = ?;"
-            _c.execute(command, (scenario_name,))
+            command = "UPDATE scenarios SET status = 'completed', completed_time = ? WHERE name = ?;"
+            current_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+            _c.execute(command, (current_time, scenario_name))
             _conn.commit()
             _conn.close()
     except sqlite3.Error as e:

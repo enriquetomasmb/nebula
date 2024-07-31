@@ -256,10 +256,10 @@ def get_elapsed_time(scenario):
         float: The elapsed time.
     """
     start_time = scenario[1]
-    end_time = scenario[2]
+    completed_time = scenario[2]
 
     start_date = datetime.strptime(start_time, "%d/%m/%Y %H:%M:%S")
-    end_date = datetime.strptime(end_time, "%d/%m/%Y %H:%M:%S")
+    end_date = datetime.strptime(completed_time, "%d/%m/%Y %H:%M:%S")
 
     elapsed_time = (end_date - start_date).total_seconds() / 60
 
@@ -439,7 +439,12 @@ def stop_emissions_tracking_and_save(tracker: EmissionsTracker, outdir: str, emi
     emissions_file = os.path.join(outdir, emissions_file)
 
     if exists(emissions_file):
-        df = pd.read_csv(emissions_file)
+        try:
+            df = pd.read_csv(emissions_file)
+        except pd.errors.EmptyDataError:
+            logging.info(f"The file {emissions_file} is empty.")
+        except Exception as e:
+            logging.error(f"Error reading the file {emissions_file}: {e}")
     else:
         df = pd.DataFrame(columns=["role", "energy_grid", "emissions", "workload", "CPU_model", "GPU_model"])
     try:

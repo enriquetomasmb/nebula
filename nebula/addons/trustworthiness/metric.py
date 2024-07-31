@@ -7,8 +7,8 @@ from json import JSONDecodeError
 
 import numpy as np
 import pandas as pd
-from numpy import NaN
-from tabulate import tabulate
+#from numpy import NaN
+#from tabulate import tabulate
 
 from nebula.addons.trustworthiness.pillar import TrustPillar
 from nebula.addons.trustworthiness.utils import write_results_json
@@ -39,9 +39,9 @@ class TrustMetricManager:
         """
         # Get scenario name
         scenario_name = scenario[0]
-        factsheet_file = os.path.join(dirname, f"files/{scenario_name}/{self.factsheet_file_nm}")
+        factsheet_file = os.path.join(f"{os.environ.get('NEBULA_LOGS_DIR')}/{scenario_name}/trustworthiness/{self.factsheet_file_nm}")
         metrics_cfg_file = os.path.join(dirname, f"configs/{self.eval_metrics_file_nm}")
-        results_file = os.path.join(dirname, f"files/{scenario_name}/{self.nebula_trust_results_nm}")
+        results_file = os.path.join(f"{os.environ.get('NEBULA_LOGS_DIR')}/{scenario_name}/trustworthiness/{self.nebula_trust_results_nm}")
 
         if not os.path.exists(factsheet_file):
             logger.error(f"{factsheet_file} is missing! Please check documentation.")
