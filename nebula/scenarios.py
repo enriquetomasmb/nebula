@@ -63,6 +63,7 @@ class Scenario:
         mobile_participants_percent,
         additional_participants,
         schema_additional_participants,
+        node_selection_strategy
     ):
         self.scenario_title = scenario_title
         self.scenario_description = scenario_description
@@ -104,6 +105,7 @@ class Scenario:
         self.mobile_participants_percent = mobile_participants_percent
         self.additional_participants = additional_participants
         self.schema_additional_participants = schema_additional_participants
+        self.node_selection_strategy = node_selection_strategy
 
     def attack_node_assign(
         self,
@@ -279,6 +281,11 @@ class ScenarioManagement:
             participant_config["mobility_args"]["radius_federation"] = self.scenario.radius_federation
             participant_config["mobility_args"]["scheme_mobility"] = self.scenario.scheme_mobility
             participant_config["mobility_args"]["round_frequency"] = self.scenario.round_frequency
+            participant_config["node_selection_strategy_args"]["strategy"] = self.scenario.node_selection_strategy
+            participant_config["resource_args"]["resource_constricted"] = node_config["resourceConstricted"]
+            participant_config["resource_args"]["resource_constraint_cpu"] = node_config["resourceConstraintCPU"]
+            participant_config["resource_args"]["resource_constraint_latency"] = node_config["resourceConstraintLatency"]
+
 
             with open(participant_file, "w") as f:
                 json.dump(participant_config, f, sort_keys=False, indent=2)
@@ -556,11 +563,15 @@ class ScenarioManagement:
                     - "host.docker.internal:host-gateway"
                 ipc: host
                 privileged: true
+                deploy:
+                    resources:
+                        limits:
+                            cpus: '{}'
                 command:
                     - /bin/bash
                     - -c
                     - |
-                        ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python3.11 /nebula/nebula/node.py {}
+                        {}ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python3.11 /nebula/nebula/node.py {}
                 networks:
                     nebula-net-scenario:
                         ipv4_address: {}
@@ -588,7 +599,7 @@ class ScenarioManagement:
                     - /bin/bash
                     - -c
                     - |
-                        ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python3.11 /nebula/nebula/node.py {}
+                        {}ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python3.11 /nebula/nebula/node.py {}
                 deploy:
                     resources:
                         reservations:
@@ -596,6 +607,8 @@ class ScenarioManagement:
                                 - driver: nvidia
                                   count: all
                                   capabilities: [gpu]
+                        limits:
+                            cpus: '{}'
                 networks:
                     nebula-net-scenario:
                         ipv4_address: {}
@@ -630,6 +643,18 @@ class ScenarioManagement:
         for node in self.config.participants:
             idx = node["device_args"]["idx"]
             path = f"/nebula/app/config/{self.scenario_name}/participant_{idx}.json"
+
+            tcset_cmd = ""
+            if node["resource_args"]["resource_constraint_latency"] != 0:
+                tcset_cmd = f"tcset eth0 --delay {node['resource_args']['resource_constraint_latency']} && "
+            if node["resource_args"]["resource_constraint_cpu"] == 0:
+                # If 0, the node shall have no CPU constraints
+                resource_constraint_cpu = os.cpu_count()
+                logging.info("Node has no Resource Constraint on CPU")
+            else:
+                resource_constraint_cpu = node["resource_args"]["resource_constraint_cpu"]
+                logging.info(f"Node has the following Resource Constraint on CPU :{resource_constraint_cpu}")
+
             logging.info("Starting node {} with configuration {}".format(idx, path))
             logging.info("Node {} is listening on ip {}".format(idx, node["network_args"]["ip"]))
             # Add one service for each participant
@@ -638,8 +663,10 @@ class ScenarioManagement:
                 services += participant_gpu_template.format(
                     idx,
                     self.root_path,
+                    tcset_cmd,
                     self.scenario.network_gateway,
                     path,
+                    resource_constraint_cpu,
                     node["network_args"]["ip"],
                     "proxy:" if self.scenario.simulation and self.use_blockchain else "",
                 )
@@ -648,6 +675,8 @@ class ScenarioManagement:
                 services += participant_template.format(
                     idx,
                     self.root_path,
+                    resource_constraint_cpu,
+                    tcset_cmd,
                     self.scenario.network_gateway,
                     path,
                     node["network_args"]["ip"],

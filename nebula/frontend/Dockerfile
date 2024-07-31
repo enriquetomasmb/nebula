@@ -17,6 +17,9 @@ RUN apt-get install -y nginx
 # Install curl and network tools
 RUN apt-get install -y curl net-tools
 
+# Install iproute2 to introduce Latency Constraints
+RUN apt-get install -y iproute2
+
 # Install pip
 RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 RUN python3.11 get-pip.py

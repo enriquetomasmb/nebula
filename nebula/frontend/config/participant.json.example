@@ -69,7 +69,15 @@
       "round_start": 0,
       "scheme": "random"
     }
-  },  
+  },
+  "node_selection_strategy_args" : {
+    "strategy": "default"
+  },
+  "resource_args": {
+    "resource_constricted": false,
+    "resource_constraint_cpu": 0,
+    "resource_constraint_latency": 0
+  },
   "data_args": {
     "dataset": "MNIST",
     "iid": false,
