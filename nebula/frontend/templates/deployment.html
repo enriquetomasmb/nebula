@@ -687,6 +687,38 @@
                         </div>
                     </div>
                 </div>
+                <!-- Node Selection Strategy -->
+                <div class="form-group row container-shadow tiny grey">
+                    <h5 class="step-number">Node Selection Strategy <i class="fa fa-bullseye"></i>
+                        <input type="checkbox" id="nodesel-strat-lock" onchange="lock('nodesel-strat-default-btn', 'nodesel-strat-all-btn', 'nodesel-strat-random-btn', 'nodesel-strat-priority-btn', checked)" style="display: none;">
+                        <label for="nodesel-strat-lock" class="icon-container" style="float: right;">
+                            <i class="fa fa-lock"></i>
+                        </label>
+                    </h5>
+
+                    <h5 class="step-title">Select the Node Selection Strategy to be used - <a href="https://files.ifi.uzh.ch/CSG/staff/feng/external/theses/MA-Chenfei-Ma.pdf" target="_blank">for more details see here</a></h5>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="nodeSelectionStrategyOptions"
+                           id="nodesel-strat-default-btn" value="default" checked>
+                        <label class="form-check-label" for="nodesel-strat-default-btn">Default Selection </label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="nodeSelectionStrategyOptions"
+                            id="nodesel-strat-all-btn" value="all">
+                        <label class="form-check-label" for="nodesel-strat-all-btn">All Selection</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="nodeSelectionStrategyOptions"
+                            id="nodesel-strat-random-btn" value="random">
+                        <label class="form-check-label" for="nodesel-strat-random-btn">Random Selection</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="nodeSelectionStrategyOptions"
+                            id="nodesel-strat-priority-btn" value="priority">
+                        <label class="form-check-label" for="nodesel-strat-priority-btn">Priority Selection</label>
+                    </div>
+                </div>
+
             </div>
         </form>
     </div>
@@ -971,6 +1003,9 @@
                     "malicious": Graph.graphData().nodes[i].malicious,
                     "proxy": Graph.graphData().nodes[i].proxy,
                     "start": Graph.graphData().nodes[i].start,
+                    "resourceConstricted": Graph.graphData().nodes[i].resourceConstricted,
+                    "resourceConstraintCPU": Graph.graphData().nodes[i].resourceConstraintCPU,
+                    "resourceConstraintLatency": Graph.graphData().nodes[i].resourceConstraintLatency,
                 }
             }
             var nodesGraph = Graph.graphData().nodes
@@ -1038,6 +1073,8 @@
             data["mobile_participants_percent"] = document.getElementById("mobileParticipantsPercent").value
             data["additional_participants"] = aditional_participants
             data["schema_additional_participants"] = document.getElementById("schemaAdditionalParticipantsSelect").value
+            // Step 16
+            data["node_selection_strategy"] = document.querySelector('input[name="nodeSelectionStrategyOptions"]:checked').value
             return data
         }
 
@@ -1662,6 +1699,10 @@
                 document.getElementById("without-mobility-btn").click();
                 document.getElementById("latitude").value =  document.getElementById("latitude").defaultValue;
             }
+            // Step 16
+            if(!document.getElementById("nodesel-strat-lock").checked){
+                document.getElementById("nodesel-strat-default-btn").checked = true;
+            }
         }
 
         //Update the actual position in the list of scenarios
@@ -1965,7 +2006,14 @@
 
                 document.getElementById("yes-button").addEventListener("click", function () {
 
-                    var data = scenarioStorage.scenariosList;
+                    // TODO : WORKAROUND !!
+                    // if setting data as scenarioStorage.scenariosList, the parameters from the resource constraints are lost
+                    // I am not sure why, and couldn't figure it out.
+                    // It works when i save the scenario manually and then only send this (the one saved last) scenario to the server
+                    // this needs to be fixed properly for multiple scenarios to work
+                    // var data = scenarioStorage.scenariosList;
+                    scenarioStorage.saveScenario()
+                    var data = [scenarioStorage.scenariosList[scenarioStorage.scenariosList.length - 1]]
 
                     // Hide the modal
                     $('#confirm-modal').modal('hide');
@@ -2245,6 +2293,9 @@
                     malicious: false,
                     proxy: false,
                     start: (i === 0),
+                    resourceConstricted: false,
+                    resourceConstraintCPU: 0,
+                    resourceConstraintLatency: 0,
                     neighbors: [],
                     links: []
                 })),
@@ -2455,7 +2506,61 @@
                     document.getElementById("participant-modal-content").appendChild(document.createElement("br"));
                     document.getElementById("participant-modal-content").appendChild(portInput);
 
-                    document.getElementById("participant-modal-content").innerHTML += "<br><b>Neighbors:</b> " + participant.neighbors.length + "<br><b>Role:</b> " + participant.role + "<br><b>Start:</b> " + participant.start;
+                    document.getElementById("participant-modal-content").innerHTML += "<br><b>Neighbors:</b> " +
+                        participant.neighbors.length + "<br><b>Role:</b> " +
+                        participant.role + "<br><b>Start:</b> " +
+                        participant.start;
+                    const resourceConstraintsDiv = document.createElement("div");
+                    resourceConstraintsDiv.innerHTML = `<br><h4>Add Resource Constraints to the node <small id="modelHelp" class="form-text text-muted"><i id="resourceConstraintsHelpIcon" class="fa fa-info-circle"></i>
+                        </small></h4>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="resource-constraints" id="without-resource-constraints-btn"
+                            checked>
+                        <label class="form-check-label" for="without-resource-constraints-btn">Disable Resource Constraints</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="resource-constraints" id="with-resource-constraints-btn">
+                        <label class="form-check-label" for="with-resource-constraints-btn">Enable Resource Constraints</label>
+                    </div>
+                    <div id="resource-constraints" style="display: none;">
+                            <h5 class="step-title">CPU Limit - <small>Choose a number between 0.3 and 1</small></h5>
+                           <div class="form-check form-check-inline">
+                            <input type="number" class="form-control" id="resource-constraint-cpu" placeholder="CPU Limit" min="0.3" max="1" step="0.1" value="0.3">
+                        </div>
+                            <h5 class="step-title">Additional Latency - <small>Choose a number between 1ms and 50ms</small></h5>
+                        <div class="form-check form-check-inline">
+                            <input type="number" class="form-control" id="resource-constraint-latency" placeholder="Additional Latency" min="1" max="50" step="1" value="1">
+                        </div>
+                    </div>
+`;
+
+                    document.getElementById("participant-modal-content").appendChild(resourceConstraintsDiv);
+                    contentResourceConstraintsHelp = '<ul>\n' +
+                        '                               <li>CPU: Limit the node to x cores via docker</li>' +
+                        '                               <li>Latency: Introduce additional networking latency to the nodes communications</li>' +
+                        '                             </ul>'
+                    var popoverTriggerEl = document.getElementById("resourceConstraintsHelpIcon");
+                    var popover = new bootstrap.Popover(popoverTriggerEl, {
+                        title: "Resource Constraints",
+                        content: contentResourceConstraintsHelp,
+                        trigger: "hover",
+                        placement: "right",
+                        html: true,
+                        container: "body",
+                        delay: { show: 500, hide: 100 },
+                    });
+                    // show or hide the configuration of the resource constraints
+                    withoutResourceConstraintsButton = document.getElementById("without-resource-constraints-btn");
+                    withoutResourceConstraintsButton.addEventListener("click", function () {
+                        document.getElementById("resource-constraints").style.display = "none";
+                    });
+                    withResourceConstraintsButton = document.getElementById("with-resource-constraints-btn");
+                    withResourceConstraintsButton.addEventListener("click", function () {
+                        document.getElementById("resource-constraints").style.display = "block";
+                    });
+                    // set the correct ids for the config fields
+                    document.getElementById("resource-constraint-cpu").setAttribute("id", "resource-constraint-cpu-" + i.toString());
+                    document.getElementById("resource-constraint-latency").setAttribute("id", "resource-constraint-latency-" + i.toString());
                     // Show the modal
                     $('#participant-modal').modal('show');
                 });
@@ -2500,6 +2605,11 @@
                     const participant = Graph.graphData().nodes[i];
                     participant.ip = document.getElementById("participant-" + i + "-ip").value;
                     participant.port = document.getElementById("participant-" + i + "-port").value;
+                    if (document.getElementById("with-resource-constraints-btn").checked) {
+                        participant.resourceConstricted = true;
+                        participant.resourceConstraintCPU = document.getElementById("resource-constraint-cpu-" + i).value;
+                        participant.resourceConstraintLatency = document.getElementById("resource-constraint-latency-" + i).value;
+                        }
                     Graph.graphData(Graph.graphData());
                 });
 
@@ -2611,6 +2721,9 @@
                 role: "aggregator",
                 malicious: false,
                 proxy: false,
+                resourceConstricted: false,
+                resourceConstraintCPU: 0,
+                resourceConstraintLatency: 0,
                 start: (i === 0),
                 neighbors: [],
                 links: [],
@@ -2767,6 +2880,9 @@
                         role: 'aggregator',
                         malicious: false,
                         proxy: false,
+                        resourceConstricted: false,
+                        resourceConstraintCPU: 0,
+                        resourceConstraintLatency: 0,
                         start: false
                     };
                     newNode.neighbors = [node];
