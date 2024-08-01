@@ -1,3 +1,4 @@
+import gc
 import logging
 from collections import OrderedDict
 import random
@@ -146,6 +147,7 @@ class Lightning:
         try:
             self.create_trainer()
             self.__trainer.fit(self.model, self.data)
+            self.__trainer = None
         except Exception as e:
             logging.error(f"Error training model: {e}")
             logging.error(traceback.format_exc())
@@ -154,6 +156,7 @@ class Lightning:
         try:
             self.create_trainer()
             self.__trainer.test(self.model, self.data, verbose=True)
+            self.__trainer = None
         except Exception as e:
             logging.error(f"Error testing model: {e}")
             logging.error(traceback.format_exc())
@@ -170,6 +173,9 @@ class Lightning:
         self._logger.global_step = self._logger.global_step + self._logger.local_step
         self._logger.local_step = 0
         self.round += 1
+        logging.info("Flushing memory cache at the end of round...")
+        torch.cuda.empty_cache()
+        gc.collect()
         pass
 
     def on_learning_cycle_end(self):

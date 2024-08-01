@@ -22,6 +22,7 @@ class Reporter:
         self.grace_time = self.config.participant["reporter_args"]["grace_time_reporter"]
         self.data_queue = asyncio.Queue()
         self.url = f'http://{self.config.participant["scenario_args"]["controller"]}/nebula/dashboard/{self.config.participant["scenario_args"]["name"]}/node/update'
+        self.counter = 0
 
     async def enqueue_data(self, name, value):
         await self.data_queue.put((name, value))
@@ -36,6 +37,10 @@ class Reporter:
                 await self.__report_status_to_controller()
             await self.__report_data_queue()
             await self.__report_resources()
+            self.counter += 1
+            if self.counter % 50 == 0:
+                logging.info(f"Reloading config file...")
+                self.cm.engine.config.reload_config_file()
             await asyncio.sleep(self.frequency)
 
     async def report_scenario_finished(self):
