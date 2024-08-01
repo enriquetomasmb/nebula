@@ -25,6 +25,33 @@ Module Contents
    This class is an abstract class that defines the interface for the NEBULA model.
 
 
+   .. py:attribute:: example_input_array
+
+
+   .. py:attribute:: learning_rate
+
+
+   .. py:attribute:: momentum
+      :value: 0.9
+
+
+
+   .. py:attribute:: weight_decay
+      :value: 0.004
+
+
+
+   .. py:attribute:: dropout_rate
+      :value: 0.5
+
+
+
+   .. py:attribute:: criterion
+
+
+   .. py:attribute:: model
+
+
    .. py:method:: forward(x)
 
       Forward pass of the model.

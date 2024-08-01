@@ -375,6 +375,26 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.addr"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.addr</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.host"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.host</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.port"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.port</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.config"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.id"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.id</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.register_endpoint"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.register_endpoint</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.wait_endpoint"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.wait_endpoint</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.connections_lock"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.connections_lock</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.connections_manager_lock"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.connections_manager_lock</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.connection_attempt_lock_incoming"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.connection_attempt_lock_incoming</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.connection_attempt_lock_outgoing"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.connection_attempt_lock_outgoing</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.pending_connections"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.pending_connections</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.incoming_connections"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.incoming_connections</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.outgoing_connections"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.outgoing_connections</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.received_messages_hashes"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.received_messages_hashes</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.receive_messages_lock"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.receive_messages_lock</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.connections_reconnect"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.connections_reconnect</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.max_connections"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.max_connections</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.network_engine"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.network_engine</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.stop_network_engine"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.stop_network_engine</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.engine"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.engine</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.connections"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.connections</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.mm"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.mm</span></code></a></li>
@@ -405,7 +425,9 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.include_received_message_hash"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.include_received_message_hash()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.send_message_to_neighbors"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.send_message_to_neighbors()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.send_message"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.send_message()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.send_messages"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.send_messages()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.send_model"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.send_model()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.send_models"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.send_models()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.establish_connection"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.establish_connection()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.connect"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.connect()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.register"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.register()</span></code></a></li>
@@ -418,6 +440,7 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.get_undirect_connections"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.get_undirect_connections()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.get_nearest_connections"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.get_nearest_connections()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.get_ready_connections"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.get_ready_connections()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.check_finished_experiment"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.check_finished_experiment()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -456,6 +479,106 @@ document.write(`
 <dd class="field-odd"><p><strong>engine</strong> (<a class="reference internal" href="../../engine/index.html#nebula.core.engine.Engine" title="nebula.core.engine.Engine"><em>nebula.core.engine.Engine</em></a>)</p>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.addr">
+<span class="sig-name descname"><span class="pre">addr</span></span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.addr" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.host">
+<span class="sig-name descname"><span class="pre">host</span></span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.host" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.port">
+<span class="sig-name descname"><span class="pre">port</span></span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.port" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.config" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.id" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.register_endpoint">
+<span class="sig-name descname"><span class="pre">register_endpoint</span></span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.register_endpoint" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.wait_endpoint">
+<span class="sig-name descname"><span class="pre">wait_endpoint</span></span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.wait_endpoint" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.connections_lock">
+<span class="sig-name descname"><span class="pre">connections_lock</span></span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.connections_lock" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.connections_manager_lock">
+<span class="sig-name descname"><span class="pre">connections_manager_lock</span></span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.connections_manager_lock" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.connection_attempt_lock_incoming">
+<span class="sig-name descname"><span class="pre">connection_attempt_lock_incoming</span></span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.connection_attempt_lock_incoming" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.connection_attempt_lock_outgoing">
+<span class="sig-name descname"><span class="pre">connection_attempt_lock_outgoing</span></span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.connection_attempt_lock_outgoing" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.pending_connections">
+<span class="sig-name descname"><span class="pre">pending_connections</span></span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.pending_connections" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.incoming_connections">
+<span class="sig-name descname"><span class="pre">incoming_connections</span></span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.incoming_connections" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.outgoing_connections">
+<span class="sig-name descname"><span class="pre">outgoing_connections</span></span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.outgoing_connections" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.received_messages_hashes">
+<span class="sig-name descname"><span class="pre">received_messages_hashes</span></span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.received_messages_hashes" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.receive_messages_lock">
+<span class="sig-name descname"><span class="pre">receive_messages_lock</span></span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.receive_messages_lock" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.connections_reconnect">
+<span class="sig-name descname"><span class="pre">connections_reconnect</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.connections_reconnect" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.max_connections">
+<span class="sig-name descname"><span class="pre">max_connections</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1000</span></em><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.max_connections" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.network_engine">
+<span class="sig-name descname"><span class="pre">network_engine</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.network_engine" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.stop_network_engine">
+<span class="sig-name descname"><span class="pre">stop_network_engine</span></span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.stop_network_engine" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.engine">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">engine</span></span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.engine" title="Link to this definition">#</a></dt>
@@ -593,7 +716,7 @@ document.write(`
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.include_received_message_hash">
-<span class="sig-name descname"><span class="pre">include_received_message_hash</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hash_message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.include_received_message_hash" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">include_received_message_hash</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hash_message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.include_received_message_hash" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -607,8 +730,18 @@ document.write(`
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.send_messages">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">send_messages</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">messages</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.send_messages" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.send_model">
 <em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">send_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dest_addr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">round</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">serialized_model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.send_model" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.send_models">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">send_models</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">models</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">round</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.send_models" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -638,32 +771,32 @@ document.write(`
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.get_all_addrs_current_connections">
-<span class="sig-name descname"><span class="pre">get_all_addrs_current_connections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">only_direct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_undirected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.get_all_addrs_current_connections" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_all_addrs_current_connections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">only_direct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_undirected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.get_all_addrs_current_connections" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.get_addrs_current_connections">
-<span class="sig-name descname"><span class="pre">get_addrs_current_connections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">only_direct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_undirected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">myself</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.get_addrs_current_connections" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_addrs_current_connections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">only_direct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">only_undirected</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">myself</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.get_addrs_current_connections" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.get_connection_by_addr">
-<span class="sig-name descname"><span class="pre">get_connection_by_addr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">addr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.get_connection_by_addr" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_connection_by_addr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">addr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.get_connection_by_addr" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.get_direct_connections">
-<span class="sig-name descname"><span class="pre">get_direct_connections</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.get_direct_connections" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_direct_connections</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.get_direct_connections" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.get_undirect_connections">
-<span class="sig-name descname"><span class="pre">get_undirect_connections</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.get_undirect_connections" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_undirect_connections</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.get_undirect_connections" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.get_nearest_connections">
-<span class="sig-name descname"><span class="pre">get_nearest_connections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.get_nearest_connections" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_nearest_connections</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.get_nearest_connections" title="Link to this definition">#</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>top</strong> (<em>int</em>)</p>
@@ -674,6 +807,11 @@ document.write(`
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.get_ready_connections">
 <span class="sig-name descname"><span class="pre">get_ready_connections</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.get_ready_connections" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.check_finished_experiment">
+<span class="sig-name descname"><span class="pre">check_finished_experiment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.check_finished_experiment" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -729,6 +867,26 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.addr"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.addr</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.host"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.host</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.port"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.port</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.config"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.id"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.id</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.register_endpoint"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.register_endpoint</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.wait_endpoint"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.wait_endpoint</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.connections_lock"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.connections_lock</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.connections_manager_lock"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.connections_manager_lock</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.connection_attempt_lock_incoming"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.connection_attempt_lock_incoming</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.connection_attempt_lock_outgoing"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.connection_attempt_lock_outgoing</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.pending_connections"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.pending_connections</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.incoming_connections"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.incoming_connections</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.outgoing_connections"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.outgoing_connections</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.received_messages_hashes"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.received_messages_hashes</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.receive_messages_lock"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.receive_messages_lock</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.connections_reconnect"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.connections_reconnect</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.max_connections"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.max_connections</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.network_engine"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.network_engine</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.stop_network_engine"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.stop_network_engine</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.engine"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.engine</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.connections"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.connections</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.mm"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.mm</span></code></a></li>
@@ -759,7 +917,9 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.include_received_message_hash"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.include_received_message_hash()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.send_message_to_neighbors"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.send_message_to_neighbors()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.send_message"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.send_message()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.send_messages"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.send_messages()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.send_model"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.send_model()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.send_models"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.send_models()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.establish_connection"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.establish_connection()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.connect"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.connect()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.register"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.register()</span></code></a></li>
@@ -772,6 +932,7 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.get_undirect_connections"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.get_undirect_connections()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.get_nearest_connections"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.get_nearest_connections()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.get_ready_connections"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.get_ready_connections()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.check_finished_experiment"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.check_finished_experiment()</span></code></a></li>
 </ul>
 </li>
 </ul>

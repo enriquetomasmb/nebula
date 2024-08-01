@@ -17,6 +17,18 @@ Module Contents
 
 .. py:class:: Mender
 
+   .. py:attribute:: server
+
+
+   .. py:attribute:: user
+
+
+   .. py:attribute:: password
+
+
+   .. py:attribute:: token
+
+
    .. py:method:: get_token()
 
 

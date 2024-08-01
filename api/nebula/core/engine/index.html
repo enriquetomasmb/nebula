@@ -379,6 +379,33 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.signal_handler"><code class="docutils literal notranslate"><span class="pre">signal_handler()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.print_banner"><code class="docutils literal notranslate"><span class="pre">print_banner()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine"><code class="docutils literal notranslate"><span class="pre">Engine</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.config"><code class="docutils literal notranslate"><span class="pre">Engine.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.idx"><code class="docutils literal notranslate"><span class="pre">Engine.idx</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.experiment_name"><code class="docutils literal notranslate"><span class="pre">Engine.experiment_name</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.ip"><code class="docutils literal notranslate"><span class="pre">Engine.ip</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.port"><code class="docutils literal notranslate"><span class="pre">Engine.port</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.addr"><code class="docutils literal notranslate"><span class="pre">Engine.addr</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.role"><code class="docutils literal notranslate"><span class="pre">Engine.role</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.name"><code class="docutils literal notranslate"><span class="pre">Engine.name</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.docker_id"><code class="docutils literal notranslate"><span class="pre">Engine.docker_id</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.client"><code class="docutils literal notranslate"><span class="pre">Engine.client</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.round"><code class="docutils literal notranslate"><span class="pre">Engine.round</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.total_rounds"><code class="docutils literal notranslate"><span class="pre">Engine.total_rounds</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.federation_nodes"><code class="docutils literal notranslate"><span class="pre">Engine.federation_nodes</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.initialized"><code class="docutils literal notranslate"><span class="pre">Engine.initialized</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.log_dir"><code class="docutils literal notranslate"><span class="pre">Engine.log_dir</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.security"><code class="docutils literal notranslate"><span class="pre">Engine.security</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.model_poisoning"><code class="docutils literal notranslate"><span class="pre">Engine.model_poisoning</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.poisoned_ratio"><code class="docutils literal notranslate"><span class="pre">Engine.poisoned_ratio</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.noise_type"><code class="docutils literal notranslate"><span class="pre">Engine.noise_type</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.msg"><code class="docutils literal notranslate"><span class="pre">Engine.msg</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.with_reputation"><code class="docutils literal notranslate"><span class="pre">Engine.with_reputation</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.is_dynamic_topology"><code class="docutils literal notranslate"><span class="pre">Engine.is_dynamic_topology</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.is_dynamic_aggregation"><code class="docutils literal notranslate"><span class="pre">Engine.is_dynamic_aggregation</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.target_aggregation"><code class="docutils literal notranslate"><span class="pre">Engine.target_aggregation</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.learning_cycle_lock"><code class="docutils literal notranslate"><span class="pre">Engine.learning_cycle_lock</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.federation_ready_lock"><code class="docutils literal notranslate"><span class="pre">Engine.federation_ready_lock</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.round_lock"><code class="docutils literal notranslate"><span class="pre">Engine.round_lock</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.cm"><code class="docutils literal notranslate"><span class="pre">Engine.cm</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.reporter"><code class="docutils literal notranslate"><span class="pre">Engine.reporter</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.event_manager"><code class="docutils literal notranslate"><span class="pre">Engine.event_manager</span></code></a></li>
@@ -393,15 +420,22 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.get_round"><code class="docutils literal notranslate"><span class="pre">Engine.get_round()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.get_federation_ready_lock"><code class="docutils literal notranslate"><span class="pre">Engine.get_federation_ready_lock()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.get_round_lock"><code class="docutils literal notranslate"><span class="pre">Engine.get_round_lock()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.create_trainer_service"><code class="docutils literal notranslate"><span class="pre">Engine.create_trainer_service()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.get_trainer_service"><code class="docutils literal notranslate"><span class="pre">Engine.get_trainer_service()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.create_trainer_module"><code class="docutils literal notranslate"><span class="pre">Engine.create_trainer_module()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.start_communications"><code class="docutils literal notranslate"><span class="pre">Engine.start_communications()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.deploy_federation"><code class="docutils literal notranslate"><span class="pre">Engine.deploy_federation()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.reputation_calculation"><code class="docutils literal notranslate"><span class="pre">Engine.reputation_calculation()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.send_reputation"><code class="docutils literal notranslate"><span class="pre">Engine.send_reputation()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.MaliciousNode"><code class="docutils literal notranslate"><span class="pre">MaliciousNode</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.MaliciousNode"><code class="docutils literal notranslate"><span class="pre">MaliciousNode</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.MaliciousNode.attack"><code class="docutils literal notranslate"><span class="pre">MaliciousNode.attack</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.MaliciousNode.fit_time"><code class="docutils literal notranslate"><span class="pre">MaliciousNode.fit_time</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.MaliciousNode.extra_time"><code class="docutils literal notranslate"><span class="pre">MaliciousNode.extra_time</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.MaliciousNode.round_start_attack"><code class="docutils literal notranslate"><span class="pre">MaliciousNode.round_start_attack</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.MaliciousNode.round_stop_attack"><code class="docutils literal notranslate"><span class="pre">MaliciousNode.round_stop_attack</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.MaliciousNode.aggregator_bening"><code class="docutils literal notranslate"><span class="pre">MaliciousNode.aggregator_bening</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.AggregatorNode"><code class="docutils literal notranslate"><span class="pre">AggregatorNode</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.ServerNode"><code class="docutils literal notranslate"><span class="pre">ServerNode</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.TrainerNode"><code class="docutils literal notranslate"><span class="pre">TrainerNode</span></code></a></li>
@@ -484,7 +518,142 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="nebula.core.engine.Engine">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.core.engine.</span></span><span class="sig-name descname"><span class="pre">Engine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Lightning</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">security</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_poisoning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poisoned_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gaussian'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.engine.Engine" title="Link to this definition">#</a></dt>
-<dd><dl class="py property">
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#nebula.core.engine.Engine.config" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.idx">
+<span class="sig-name descname"><span class="pre">idx</span></span><a class="headerlink" href="#nebula.core.engine.Engine.idx" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.experiment_name">
+<span class="sig-name descname"><span class="pre">experiment_name</span></span><a class="headerlink" href="#nebula.core.engine.Engine.experiment_name" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.ip">
+<span class="sig-name descname"><span class="pre">ip</span></span><a class="headerlink" href="#nebula.core.engine.Engine.ip" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.port">
+<span class="sig-name descname"><span class="pre">port</span></span><a class="headerlink" href="#nebula.core.engine.Engine.port" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.addr">
+<span class="sig-name descname"><span class="pre">addr</span></span><a class="headerlink" href="#nebula.core.engine.Engine.addr" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.role">
+<span class="sig-name descname"><span class="pre">role</span></span><a class="headerlink" href="#nebula.core.engine.Engine.role" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#nebula.core.engine.Engine.name" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.docker_id">
+<span class="sig-name descname"><span class="pre">docker_id</span></span><a class="headerlink" href="#nebula.core.engine.Engine.docker_id" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.client">
+<span class="sig-name descname"><span class="pre">client</span></span><a class="headerlink" href="#nebula.core.engine.Engine.client" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.round">
+<span class="sig-name descname"><span class="pre">round</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nebula.core.engine.Engine.round" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.total_rounds">
+<span class="sig-name descname"><span class="pre">total_rounds</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nebula.core.engine.Engine.total_rounds" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.federation_nodes">
+<span class="sig-name descname"><span class="pre">federation_nodes</span></span><a class="headerlink" href="#nebula.core.engine.Engine.federation_nodes" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.initialized">
+<span class="sig-name descname"><span class="pre">initialized</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#nebula.core.engine.Engine.initialized" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.log_dir">
+<span class="sig-name descname"><span class="pre">log_dir</span></span><a class="headerlink" href="#nebula.core.engine.Engine.log_dir" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.security">
+<span class="sig-name descname"><span class="pre">security</span></span><a class="headerlink" href="#nebula.core.engine.Engine.security" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.model_poisoning">
+<span class="sig-name descname"><span class="pre">model_poisoning</span></span><a class="headerlink" href="#nebula.core.engine.Engine.model_poisoning" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.poisoned_ratio">
+<span class="sig-name descname"><span class="pre">poisoned_ratio</span></span><a class="headerlink" href="#nebula.core.engine.Engine.poisoned_ratio" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.noise_type">
+<span class="sig-name descname"><span class="pre">noise_type</span></span><a class="headerlink" href="#nebula.core.engine.Engine.noise_type" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.msg">
+<span class="sig-name descname"><span class="pre">msg</span></span><a class="headerlink" href="#nebula.core.engine.Engine.msg" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.with_reputation">
+<span class="sig-name descname"><span class="pre">with_reputation</span></span><a class="headerlink" href="#nebula.core.engine.Engine.with_reputation" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.is_dynamic_topology">
+<span class="sig-name descname"><span class="pre">is_dynamic_topology</span></span><a class="headerlink" href="#nebula.core.engine.Engine.is_dynamic_topology" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.is_dynamic_aggregation">
+<span class="sig-name descname"><span class="pre">is_dynamic_aggregation</span></span><a class="headerlink" href="#nebula.core.engine.Engine.is_dynamic_aggregation" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.target_aggregation">
+<span class="sig-name descname"><span class="pre">target_aggregation</span></span><a class="headerlink" href="#nebula.core.engine.Engine.target_aggregation" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.learning_cycle_lock">
+<span class="sig-name descname"><span class="pre">learning_cycle_lock</span></span><a class="headerlink" href="#nebula.core.engine.Engine.learning_cycle_lock" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.federation_ready_lock">
+<span class="sig-name descname"><span class="pre">federation_ready_lock</span></span><a class="headerlink" href="#nebula.core.engine.Engine.federation_ready_lock" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.round_lock">
+<span class="sig-name descname"><span class="pre">round_lock</span></span><a class="headerlink" href="#nebula.core.engine.Engine.round_lock" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="nebula.core.engine.Engine.cm">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cm</span></span><a class="headerlink" href="#nebula.core.engine.Engine.cm" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
@@ -555,13 +724,8 @@ document.write(`
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="nebula.core.engine.Engine.create_trainer_service">
-<span class="sig-name descname"><span class="pre">create_trainer_service</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.engine.Engine.create_trainer_service" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nebula.core.engine.Engine.get_trainer_service">
-<span class="sig-name descname"><span class="pre">get_trainer_service</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.engine.Engine.get_trainer_service" title="Link to this definition">#</a></dt>
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.create_trainer_module">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">create_trainer_module</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.engine.Engine.create_trainer_module" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -590,6 +754,36 @@ document.write(`
 <dt class="sig sig-object py" id="nebula.core.engine.MaliciousNode">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.core.engine.</span></span><span class="sig-name descname"><span class="pre">MaliciousNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trainer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Lightning</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">security</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_poisoning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poisoned_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'gaussian'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.engine.MaliciousNode" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#nebula.core.engine.Engine" title="nebula.core.engine.Engine"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Engine</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.MaliciousNode.attack">
+<span class="sig-name descname"><span class="pre">attack</span></span><a class="headerlink" href="#nebula.core.engine.MaliciousNode.attack" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.MaliciousNode.fit_time">
+<span class="sig-name descname"><span class="pre">fit_time</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.0</span></em><a class="headerlink" href="#nebula.core.engine.MaliciousNode.fit_time" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.MaliciousNode.extra_time">
+<span class="sig-name descname"><span class="pre">extra_time</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.0</span></em><a class="headerlink" href="#nebula.core.engine.MaliciousNode.extra_time" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.MaliciousNode.round_start_attack">
+<span class="sig-name descname"><span class="pre">round_start_attack</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></em><a class="headerlink" href="#nebula.core.engine.MaliciousNode.round_start_attack" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.MaliciousNode.round_stop_attack">
+<span class="sig-name descname"><span class="pre">round_stop_attack</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></em><a class="headerlink" href="#nebula.core.engine.MaliciousNode.round_stop_attack" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.MaliciousNode.aggregator_bening">
+<span class="sig-name descname"><span class="pre">aggregator_bening</span></span><a class="headerlink" href="#nebula.core.engine.MaliciousNode.aggregator_bening" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -671,6 +865,33 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.signal_handler"><code class="docutils literal notranslate"><span class="pre">signal_handler()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.print_banner"><code class="docutils literal notranslate"><span class="pre">print_banner()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine"><code class="docutils literal notranslate"><span class="pre">Engine</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.config"><code class="docutils literal notranslate"><span class="pre">Engine.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.idx"><code class="docutils literal notranslate"><span class="pre">Engine.idx</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.experiment_name"><code class="docutils literal notranslate"><span class="pre">Engine.experiment_name</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.ip"><code class="docutils literal notranslate"><span class="pre">Engine.ip</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.port"><code class="docutils literal notranslate"><span class="pre">Engine.port</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.addr"><code class="docutils literal notranslate"><span class="pre">Engine.addr</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.role"><code class="docutils literal notranslate"><span class="pre">Engine.role</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.name"><code class="docutils literal notranslate"><span class="pre">Engine.name</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.docker_id"><code class="docutils literal notranslate"><span class="pre">Engine.docker_id</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.client"><code class="docutils literal notranslate"><span class="pre">Engine.client</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.round"><code class="docutils literal notranslate"><span class="pre">Engine.round</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.total_rounds"><code class="docutils literal notranslate"><span class="pre">Engine.total_rounds</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.federation_nodes"><code class="docutils literal notranslate"><span class="pre">Engine.federation_nodes</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.initialized"><code class="docutils literal notranslate"><span class="pre">Engine.initialized</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.log_dir"><code class="docutils literal notranslate"><span class="pre">Engine.log_dir</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.security"><code class="docutils literal notranslate"><span class="pre">Engine.security</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.model_poisoning"><code class="docutils literal notranslate"><span class="pre">Engine.model_poisoning</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.poisoned_ratio"><code class="docutils literal notranslate"><span class="pre">Engine.poisoned_ratio</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.noise_type"><code class="docutils literal notranslate"><span class="pre">Engine.noise_type</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.msg"><code class="docutils literal notranslate"><span class="pre">Engine.msg</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.with_reputation"><code class="docutils literal notranslate"><span class="pre">Engine.with_reputation</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.is_dynamic_topology"><code class="docutils literal notranslate"><span class="pre">Engine.is_dynamic_topology</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.is_dynamic_aggregation"><code class="docutils literal notranslate"><span class="pre">Engine.is_dynamic_aggregation</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.target_aggregation"><code class="docutils literal notranslate"><span class="pre">Engine.target_aggregation</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.learning_cycle_lock"><code class="docutils literal notranslate"><span class="pre">Engine.learning_cycle_lock</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.federation_ready_lock"><code class="docutils literal notranslate"><span class="pre">Engine.federation_ready_lock</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.round_lock"><code class="docutils literal notranslate"><span class="pre">Engine.round_lock</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.cm"><code class="docutils literal notranslate"><span class="pre">Engine.cm</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.reporter"><code class="docutils literal notranslate"><span class="pre">Engine.reporter</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.event_manager"><code class="docutils literal notranslate"><span class="pre">Engine.event_manager</span></code></a></li>
@@ -685,15 +906,22 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.get_round"><code class="docutils literal notranslate"><span class="pre">Engine.get_round()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.get_federation_ready_lock"><code class="docutils literal notranslate"><span class="pre">Engine.get_federation_ready_lock()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.get_round_lock"><code class="docutils literal notranslate"><span class="pre">Engine.get_round_lock()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.create_trainer_service"><code class="docutils literal notranslate"><span class="pre">Engine.create_trainer_service()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.get_trainer_service"><code class="docutils literal notranslate"><span class="pre">Engine.get_trainer_service()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.create_trainer_module"><code class="docutils literal notranslate"><span class="pre">Engine.create_trainer_module()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.start_communications"><code class="docutils literal notranslate"><span class="pre">Engine.start_communications()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.deploy_federation"><code class="docutils literal notranslate"><span class="pre">Engine.deploy_federation()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.reputation_calculation"><code class="docutils literal notranslate"><span class="pre">Engine.reputation_calculation()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.send_reputation"><code class="docutils literal notranslate"><span class="pre">Engine.send_reputation()</span></code></a></li>
 </ul>
 </li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.MaliciousNode"><code class="docutils literal notranslate"><span class="pre">MaliciousNode</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.MaliciousNode"><code class="docutils literal notranslate"><span class="pre">MaliciousNode</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.MaliciousNode.attack"><code class="docutils literal notranslate"><span class="pre">MaliciousNode.attack</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.MaliciousNode.fit_time"><code class="docutils literal notranslate"><span class="pre">MaliciousNode.fit_time</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.MaliciousNode.extra_time"><code class="docutils literal notranslate"><span class="pre">MaliciousNode.extra_time</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.MaliciousNode.round_start_attack"><code class="docutils literal notranslate"><span class="pre">MaliciousNode.round_start_attack</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.MaliciousNode.round_stop_attack"><code class="docutils literal notranslate"><span class="pre">MaliciousNode.round_stop_attack</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.MaliciousNode.aggregator_bening"><code class="docutils literal notranslate"><span class="pre">MaliciousNode.aggregator_bening</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.AggregatorNode"><code class="docutils literal notranslate"><span class="pre">AggregatorNode</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.ServerNode"><code class="docutils literal notranslate"><span class="pre">ServerNode</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.TrainerNode"><code class="docutils literal notranslate"><span class="pre">TrainerNode</span></code></a></li>

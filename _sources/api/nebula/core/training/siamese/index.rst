@@ -17,7 +17,26 @@ Module Contents
 
 .. py:class:: Siamese(model, data, config=None, logger=None)
 
+   .. py:attribute:: model
+
+
+   .. py:attribute:: data
+
+
+   .. py:attribute:: config
+
+
    .. py:property:: logger
+
+
+   .. py:attribute:: epochs
+      :value: 1
+
+
+
+   .. py:attribute:: round
+      :value: 0
+
 
 
    .. py:method:: get_round()

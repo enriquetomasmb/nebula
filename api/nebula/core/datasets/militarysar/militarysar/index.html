@@ -377,6 +377,16 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.RandomCrop"><code class="docutils literal notranslate"><span class="pre">RandomCrop</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.CenterCrop"><code class="docutils literal notranslate"><span class="pre">CenterCrop</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR"><code class="docutils literal notranslate"><span class="pre">MilitarySAR</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.is_train"><code class="docutils literal notranslate"><span class="pre">MilitarySAR.is_train</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.name"><code class="docutils literal notranslate"><span class="pre">MilitarySAR.name</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.data"><code class="docutils literal notranslate"><span class="pre">MilitarySAR.data</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.targets"><code class="docutils literal notranslate"><span class="pre">MilitarySAR.targets</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.serial_numbers"><code class="docutils literal notranslate"><span class="pre">MilitarySAR.serial_numbers</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.path_to_data"><code class="docutils literal notranslate"><span class="pre">MilitarySAR.path_to_data</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.transform"><code class="docutils literal notranslate"><span class="pre">MilitarySAR.transform</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.mode"><code class="docutils literal notranslate"><span class="pre">MilitarySAR.mode</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.image_list"><code class="docutils literal notranslate"><span class="pre">MilitarySAR.image_list</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.label_list"><code class="docutils literal notranslate"><span class="pre">MilitarySAR.label_list</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.get_targets"><code class="docutils literal notranslate"><span class="pre">MilitarySAR.get_targets()</span></code></a></li>
 </ul>
 </li>
@@ -440,6 +450,56 @@ document.write(`
 <dt class="sig sig-object py" id="nebula.core.datasets.militarysar.militarysar.MilitarySAR">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.core.datasets.militarysar.militarysar.</span></span><span class="sig-name descname"><span class="pre">MilitarySAR</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'soc'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_train</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.utils.data.Dataset</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.militarysar.militarysar.MilitarySAR.is_train">
+<span class="sig-name descname"><span class="pre">is_train</span></span><a class="headerlink" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.is_train" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.militarysar.militarysar.MilitarySAR.name">
+<span class="sig-name descname"><span class="pre">name</span></span><a class="headerlink" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.name" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.militarysar.militarysar.MilitarySAR.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.data" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.militarysar.militarysar.MilitarySAR.targets">
+<span class="sig-name descname"><span class="pre">targets</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.targets" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.militarysar.militarysar.MilitarySAR.serial_numbers">
+<span class="sig-name descname"><span class="pre">serial_numbers</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[]</span></em><a class="headerlink" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.serial_numbers" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.militarysar.militarysar.MilitarySAR.path_to_data">
+<span class="sig-name descname"><span class="pre">path_to_data</span></span><a class="headerlink" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.path_to_data" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.militarysar.militarysar.MilitarySAR.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><a class="headerlink" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.transform" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.militarysar.militarysar.MilitarySAR.mode">
+<span class="sig-name descname"><span class="pre">mode</span></span><a class="headerlink" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.mode" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.militarysar.militarysar.MilitarySAR.image_list">
+<span class="sig-name descname"><span class="pre">image_list</span></span><a class="headerlink" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.image_list" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.militarysar.militarysar.MilitarySAR.label_list">
+<span class="sig-name descname"><span class="pre">label_list</span></span><a class="headerlink" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.label_list" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.datasets.militarysar.militarysar.MilitarySAR.get_targets">
 <span class="sig-name descname"><span class="pre">get_targets</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.get_targets" title="Link to this definition">#</a></dt>
@@ -532,6 +592,16 @@ for loading and partitioning the dataset.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.RandomCrop"><code class="docutils literal notranslate"><span class="pre">RandomCrop</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.CenterCrop"><code class="docutils literal notranslate"><span class="pre">CenterCrop</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR"><code class="docutils literal notranslate"><span class="pre">MilitarySAR</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.is_train"><code class="docutils literal notranslate"><span class="pre">MilitarySAR.is_train</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.name"><code class="docutils literal notranslate"><span class="pre">MilitarySAR.name</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.data"><code class="docutils literal notranslate"><span class="pre">MilitarySAR.data</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.targets"><code class="docutils literal notranslate"><span class="pre">MilitarySAR.targets</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.serial_numbers"><code class="docutils literal notranslate"><span class="pre">MilitarySAR.serial_numbers</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.path_to_data"><code class="docutils literal notranslate"><span class="pre">MilitarySAR.path_to_data</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.transform"><code class="docutils literal notranslate"><span class="pre">MilitarySAR.transform</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.mode"><code class="docutils literal notranslate"><span class="pre">MilitarySAR.mode</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.image_list"><code class="docutils literal notranslate"><span class="pre">MilitarySAR.image_list</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.label_list"><code class="docutils literal notranslate"><span class="pre">MilitarySAR.label_list</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.militarysar.militarysar.MilitarySAR.get_targets"><code class="docutils literal notranslate"><span class="pre">MilitarySAR.get_targets()</span></code></a></li>
 </ul>
 </li>

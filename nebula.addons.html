@@ -389,8 +389,9 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.change_geo_location_nearest_neighbor_strategy"><code class="docutils literal notranslate"><span class="pre">Mobility.change_geo_location_nearest_neighbor_strategy()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.change_geo_location_random_strategy"><code class="docutils literal notranslate"><span class="pre">Mobility.change_geo_location_random_strategy()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.round"><code class="docutils literal notranslate"><span class="pre">Mobility.round</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.run"><code class="docutils literal notranslate"><span class="pre">Mobility.run()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.run_mobility"><code class="docutils literal notranslate"><span class="pre">Mobility.run_mobility()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.set_geo_location"><code class="docutils literal notranslate"><span class="pre">Mobility.set_geo_location()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.start"><code class="docutils literal notranslate"><span class="pre">Mobility.start()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -502,7 +503,7 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="nebula.addons.mobility.Mobility">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.addons.mobility.</span></span><span class="sig-name descname"><span class="pre">Mobility</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Thread</span></code></p>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>cm</strong> (<a class="reference internal" href="api/nebula/core/network/communications/index.html#nebula.core.network.communications.CommunicationsManager" title="nebula.core.network.communications.CommunicationsManager"><em>CommunicationsManager</em></a>)</p>
@@ -515,22 +516,22 @@ document.write(`
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.change_connections_based_on_distance">
-<span class="sig-name descname"><span class="pre">change_connections_based_on_distance</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.change_connections_based_on_distance" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">change_connections_based_on_distance</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.change_connections_based_on_distance" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.change_geo_location">
-<span class="sig-name descname"><span class="pre">change_geo_location</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.change_geo_location" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">change_geo_location</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.change_geo_location" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.change_geo_location_nearest_neighbor_strategy">
-<span class="sig-name descname"><span class="pre">change_geo_location_nearest_neighbor_strategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighbor_latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighbor_longitude</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.change_geo_location_nearest_neighbor_strategy" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">change_geo_location_nearest_neighbor_strategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighbor_latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighbor_longitude</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.change_geo_location_nearest_neighbor_strategy" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.change_geo_location_random_strategy">
-<span class="sig-name descname"><span class="pre">change_geo_location_random_strategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.change_geo_location_random_strategy" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">change_geo_location_random_strategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.change_geo_location_random_strategy" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py property">
@@ -539,18 +540,18 @@ document.write(`
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.run" title="Link to this definition">#</a></dt>
-<dd><p>Method representing the thread’s activity.</p>
-<p>You may override this method in a subclass. The standard run() method
-invokes the callable object passed to the object’s constructor as the
-target argument, if any, with sequential and keyword arguments taken
-from the args and kwargs arguments, respectively.</p>
-</dd></dl>
+<dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.run_mobility">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run_mobility</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.run_mobility" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.set_geo_location">
-<span class="sig-name descname"><span class="pre">set_geo_location</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.set_geo_location" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_geo_location</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.set_geo_location" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.start">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.start" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -613,8 +614,9 @@ from the args and kwargs arguments, respectively.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.change_geo_location_nearest_neighbor_strategy"><code class="docutils literal notranslate"><span class="pre">Mobility.change_geo_location_nearest_neighbor_strategy()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.change_geo_location_random_strategy"><code class="docutils literal notranslate"><span class="pre">Mobility.change_geo_location_random_strategy()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.round"><code class="docutils literal notranslate"><span class="pre">Mobility.round</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.run"><code class="docutils literal notranslate"><span class="pre">Mobility.run()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.run_mobility"><code class="docutils literal notranslate"><span class="pre">Mobility.run_mobility()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.set_geo_location"><code class="docutils literal notranslate"><span class="pre">Mobility.set_geo_location()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.start"><code class="docutils literal notranslate"><span class="pre">Mobility.start()</span></code></a></li>
 </ul>
 </li>
 </ul>

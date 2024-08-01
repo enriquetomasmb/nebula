@@ -375,6 +375,17 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.config"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.example_input_array"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.example_input_array</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.learning_rate"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.learning_rate</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.criterion"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.criterion</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.conv1"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.conv1</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.relu"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.relu</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.pool1"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.pool1</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.conv2"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.conv2</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.pool2"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.pool2</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.l1"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.l1</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.l2"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.l2</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.forward"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.forward()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.configure_optimizers"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.configure_optimizers()</span></code></a></li>
 </ul>
@@ -413,6 +424,61 @@ document.write(`
 <dd><p>Bases: <a class="reference internal" href="../../nebulamodel/index.html#nebula.core.models.nebulamodel.NebulaModel" title="nebula.core.models.nebulamodel.NebulaModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula.core.models.nebulamodel.NebulaModel</span></code></a></p>
 <p>Abstract class for the NEBULA model.</p>
 <p>This class is an abstract class that defines the interface for the NEBULA model.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.mnist.cnn.MNISTModelCNN.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.config" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.mnist.cnn.MNISTModelCNN.example_input_array">
+<span class="sig-name descname"><span class="pre">example_input_array</span></span><a class="headerlink" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.example_input_array" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.mnist.cnn.MNISTModelCNN.learning_rate">
+<span class="sig-name descname"><span class="pre">learning_rate</span></span><a class="headerlink" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.learning_rate" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.mnist.cnn.MNISTModelCNN.criterion">
+<span class="sig-name descname"><span class="pre">criterion</span></span><a class="headerlink" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.criterion" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.mnist.cnn.MNISTModelCNN.conv1">
+<span class="sig-name descname"><span class="pre">conv1</span></span><a class="headerlink" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.conv1" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.mnist.cnn.MNISTModelCNN.relu">
+<span class="sig-name descname"><span class="pre">relu</span></span><a class="headerlink" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.relu" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.mnist.cnn.MNISTModelCNN.pool1">
+<span class="sig-name descname"><span class="pre">pool1</span></span><a class="headerlink" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.pool1" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.mnist.cnn.MNISTModelCNN.conv2">
+<span class="sig-name descname"><span class="pre">conv2</span></span><a class="headerlink" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.conv2" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.mnist.cnn.MNISTModelCNN.pool2">
+<span class="sig-name descname"><span class="pre">pool2</span></span><a class="headerlink" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.pool2" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.mnist.cnn.MNISTModelCNN.l1">
+<span class="sig-name descname"><span class="pre">l1</span></span><a class="headerlink" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.l1" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.mnist.cnn.MNISTModelCNN.l2">
+<span class="sig-name descname"><span class="pre">l2</span></span><a class="headerlink" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.l2" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.models.mnist.cnn.MNISTModelCNN.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.forward" title="Link to this definition">#</a></dt>
@@ -478,6 +544,17 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.config"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.example_input_array"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.example_input_array</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.learning_rate"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.learning_rate</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.criterion"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.criterion</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.conv1"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.conv1</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.relu"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.relu</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.pool1"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.pool1</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.conv2"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.conv2</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.pool2"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.pool2</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.l1"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.l1</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.l2"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.l2</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.forward"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.forward()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.mnist.cnn.MNISTModelCNN.configure_optimizers"><code class="docutils literal notranslate"><span class="pre">MNISTModelCNN.configure_optimizers()</span></code></a></li>
 </ul>

@@ -26,6 +26,9 @@ Module Contents
    Note: https://arxiv.org/pdf/1803.01498.pdf
 
 
+   .. py:attribute:: beta
+
+
    .. py:method:: get_trimmedmean(weights)
 
 

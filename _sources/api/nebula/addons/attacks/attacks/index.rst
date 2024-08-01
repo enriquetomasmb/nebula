@@ -51,6 +51,12 @@ Module Contents
    Function to perform neuron inversion attack on the received weights.
 
 
+   .. py:attribute:: strength
+
+
+   .. py:attribute:: perc
+
+
    .. py:method:: attack(received_weights)
 
       Function to perform the attack on the received weights. It should return the
@@ -64,6 +70,12 @@ Module Contents
 
 
    Function to perform noise injection attack on the received weights.
+
+
+   .. py:attribute:: strength
+
+
+   .. py:attribute:: perc
 
 
    .. py:method:: attack(received_weights)
@@ -87,6 +99,9 @@ Module Contents
    on malicious node).
 
 
+   .. py:attribute:: layer_idx
+
+
    .. py:method:: attack(received_weights)
 
       Function to perform the attack on the received weights. It should return the
@@ -101,6 +116,11 @@ Module Contents
 
    Function to perform delayer attack on the received weights. It delays the
    weights for an indefinite number of rounds.
+
+
+   .. py:attribute:: weights
+      :value: None
+
 
 
    .. py:method:: attack(received_weights)

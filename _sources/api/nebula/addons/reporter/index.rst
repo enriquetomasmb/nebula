@@ -17,32 +17,49 @@ Module Contents
 
 .. py:class:: Reporter(config, trainer, cm)
 
-   Bases: :py:obj:`threading.Thread`
+   .. py:attribute:: config
 
 
-   A class that represents a thread of control.
+   .. py:attribute:: trainer
 
-   This class can be safely subclassed in a limited fashion. There are two ways
-   to specify the activity: by passing a callable object to the constructor, or
-   by overriding the run() method in a subclass.
+
+   .. py:attribute:: cm
+
+
+   .. py:attribute:: frequency
+
+
+   .. py:attribute:: grace_time
+
+
+   .. py:attribute:: data_queue
+
+
+   .. py:attribute:: url
+
+
+   .. py:attribute:: counter
+      :value: 0
 
 
 
    .. py:method:: enqueue_data(name, value)
+      :async:
 
 
-   .. py:method:: run()
 
-      Method representing the thread's activity.
+   .. py:method:: start()
+      :async:
 
-      You may override this method in a subclass. The standard run() method
-      invokes the callable object passed to the object's constructor as the
-      target argument, if any, with sequential and keyword arguments taken
-      from the args and kwargs arguments, respectively.
 
+
+   .. py:method:: run_reporter()
+      :async:
 
 
 
    .. py:method:: report_scenario_finished()
+      :async:
+
 
 

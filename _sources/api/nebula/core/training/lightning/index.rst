@@ -27,6 +27,25 @@ Module Contents
 
 
 
+   .. py:attribute:: model
+
+
+   .. py:attribute:: data
+
+
+   .. py:attribute:: config
+
+
+   .. py:attribute:: epochs
+      :value: 1
+
+
+
+   .. py:attribute:: round
+      :value: 0
+
+
+
    .. py:property:: logger
 
 

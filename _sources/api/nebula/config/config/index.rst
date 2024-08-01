@@ -33,6 +33,9 @@ Module Contents
 
 
 
+   .. py:attribute:: entity
+
+
    .. py:method:: get_topology_config()
 
 

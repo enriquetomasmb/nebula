@@ -375,6 +375,16 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN"><code class="docutils literal notranslate"><span class="pre">CNN</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN.config"><code class="docutils literal notranslate"><span class="pre">CNN.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN.example_input_array"><code class="docutils literal notranslate"><span class="pre">CNN.example_input_array</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN.criterion"><code class="docutils literal notranslate"><span class="pre">CNN.criterion</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN.conv1"><code class="docutils literal notranslate"><span class="pre">CNN.conv1</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN.conv2"><code class="docutils literal notranslate"><span class="pre">CNN.conv2</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN.res1"><code class="docutils literal notranslate"><span class="pre">CNN.res1</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN.conv3"><code class="docutils literal notranslate"><span class="pre">CNN.conv3</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN.conv4"><code class="docutils literal notranslate"><span class="pre">CNN.conv4</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN.res2"><code class="docutils literal notranslate"><span class="pre">CNN.res2</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN.classifier"><code class="docutils literal notranslate"><span class="pre">CNN.classifier</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN.forward"><code class="docutils literal notranslate"><span class="pre">CNN.forward()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN.configure_optimizers"><code class="docutils literal notranslate"><span class="pre">CNN.configure_optimizers()</span></code></a></li>
 </ul>
@@ -413,6 +423,56 @@ document.write(`
 <dd><p>Bases: <a class="reference internal" href="../../nebulamodel/index.html#nebula.core.models.nebulamodel.NebulaModel" title="nebula.core.models.nebulamodel.NebulaModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula.core.models.nebulamodel.NebulaModel</span></code></a></p>
 <p>Abstract class for the NEBULA model.</p>
 <p>This class is an abstract class that defines the interface for the NEBULA model.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar100.cnn.CNN.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#nebula.core.models.cifar100.cnn.CNN.config" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar100.cnn.CNN.example_input_array">
+<span class="sig-name descname"><span class="pre">example_input_array</span></span><a class="headerlink" href="#nebula.core.models.cifar100.cnn.CNN.example_input_array" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar100.cnn.CNN.criterion">
+<span class="sig-name descname"><span class="pre">criterion</span></span><a class="headerlink" href="#nebula.core.models.cifar100.cnn.CNN.criterion" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar100.cnn.CNN.conv1">
+<span class="sig-name descname"><span class="pre">conv1</span></span><a class="headerlink" href="#nebula.core.models.cifar100.cnn.CNN.conv1" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar100.cnn.CNN.conv2">
+<span class="sig-name descname"><span class="pre">conv2</span></span><a class="headerlink" href="#nebula.core.models.cifar100.cnn.CNN.conv2" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar100.cnn.CNN.res1">
+<span class="sig-name descname"><span class="pre">res1</span></span><a class="headerlink" href="#nebula.core.models.cifar100.cnn.CNN.res1" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar100.cnn.CNN.conv3">
+<span class="sig-name descname"><span class="pre">conv3</span></span><a class="headerlink" href="#nebula.core.models.cifar100.cnn.CNN.conv3" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar100.cnn.CNN.conv4">
+<span class="sig-name descname"><span class="pre">conv4</span></span><a class="headerlink" href="#nebula.core.models.cifar100.cnn.CNN.conv4" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar100.cnn.CNN.res2">
+<span class="sig-name descname"><span class="pre">res2</span></span><a class="headerlink" href="#nebula.core.models.cifar100.cnn.CNN.res2" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar100.cnn.CNN.classifier">
+<span class="sig-name descname"><span class="pre">classifier</span></span><a class="headerlink" href="#nebula.core.models.cifar100.cnn.CNN.classifier" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.models.cifar100.cnn.CNN.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar100.cnn.CNN.forward" title="Link to this definition">#</a></dt>
@@ -478,6 +538,16 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN"><code class="docutils literal notranslate"><span class="pre">CNN</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN.config"><code class="docutils literal notranslate"><span class="pre">CNN.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN.example_input_array"><code class="docutils literal notranslate"><span class="pre">CNN.example_input_array</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN.criterion"><code class="docutils literal notranslate"><span class="pre">CNN.criterion</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN.conv1"><code class="docutils literal notranslate"><span class="pre">CNN.conv1</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN.conv2"><code class="docutils literal notranslate"><span class="pre">CNN.conv2</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN.res1"><code class="docutils literal notranslate"><span class="pre">CNN.res1</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN.conv3"><code class="docutils literal notranslate"><span class="pre">CNN.conv3</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN.conv4"><code class="docutils literal notranslate"><span class="pre">CNN.conv4</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN.res2"><code class="docutils literal notranslate"><span class="pre">CNN.res2</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN.classifier"><code class="docutils literal notranslate"><span class="pre">CNN.classifier</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN.forward"><code class="docutils literal notranslate"><span class="pre">CNN.forward()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar100.cnn.CNN.configure_optimizers"><code class="docutils literal notranslate"><span class="pre">CNN.configure_optimizers()</span></code></a></li>
 </ul>

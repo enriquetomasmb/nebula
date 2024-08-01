@@ -39,6 +39,23 @@ Module Contents
    :type use_weights: bool
 
 
+   .. py:attribute:: name
+
+
+   .. py:attribute:: input_docs
+
+
+   .. py:attribute:: metrics
+
+
+   .. py:attribute:: result
+      :value: []
+
+
+
+   .. py:attribute:: use_weights
+
+
    .. py:method:: evaluate()
 
       Evaluate the trust score for the pillar.

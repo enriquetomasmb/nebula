@@ -374,7 +374,20 @@ document.write(`
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.new_dataset"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset.new_dataset</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.dataset"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset.dataset</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.indices"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset.indices</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.label_flipping"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset.label_flipping</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.data_poisoning"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset.data_poisoning</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.poisoned_persent"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset.poisoned_persent</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.poisoned_ratio"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset.poisoned_ratio</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.targeted"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset.targeted</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.target_label"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset.target_label</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.target_changed_label"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset.target_changed_label</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.noise_type"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset.noise_type</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -407,6 +420,61 @@ document.write(`
 <dt class="sig sig-object py" id="nebula.core.datasets.changeablesubset.ChangeableSubset">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.core.datasets.changeablesubset.</span></span><span class="sig-name descname"><span class="pre">ChangeableSubset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_flipping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_poisoning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poisoned_persent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poisoned_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targeted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_changed_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'salt'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.datasets.changeablesubset.ChangeableSubset" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.utils.data.Subset</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.changeablesubset.ChangeableSubset.new_dataset">
+<span class="sig-name descname"><span class="pre">new_dataset</span></span><a class="headerlink" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.new_dataset" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.changeablesubset.ChangeableSubset.dataset">
+<span class="sig-name descname"><span class="pre">dataset</span></span><a class="headerlink" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.dataset" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.changeablesubset.ChangeableSubset.indices">
+<span class="sig-name descname"><span class="pre">indices</span></span><a class="headerlink" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.indices" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.changeablesubset.ChangeableSubset.label_flipping">
+<span class="sig-name descname"><span class="pre">label_flipping</span></span><a class="headerlink" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.label_flipping" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.changeablesubset.ChangeableSubset.data_poisoning">
+<span class="sig-name descname"><span class="pre">data_poisoning</span></span><a class="headerlink" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.data_poisoning" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.changeablesubset.ChangeableSubset.poisoned_persent">
+<span class="sig-name descname"><span class="pre">poisoned_persent</span></span><a class="headerlink" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.poisoned_persent" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.changeablesubset.ChangeableSubset.poisoned_ratio">
+<span class="sig-name descname"><span class="pre">poisoned_ratio</span></span><a class="headerlink" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.poisoned_ratio" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.changeablesubset.ChangeableSubset.targeted">
+<span class="sig-name descname"><span class="pre">targeted</span></span><a class="headerlink" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.targeted" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.changeablesubset.ChangeableSubset.target_label">
+<span class="sig-name descname"><span class="pre">target_label</span></span><a class="headerlink" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.target_label" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.changeablesubset.ChangeableSubset.target_changed_label">
+<span class="sig-name descname"><span class="pre">target_changed_label</span></span><a class="headerlink" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.target_changed_label" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.changeablesubset.ChangeableSubset.noise_type">
+<span class="sig-name descname"><span class="pre">noise_type</span></span><a class="headerlink" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.noise_type" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </section>
@@ -459,7 +527,20 @@ document.write(`
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.new_dataset"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset.new_dataset</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.dataset"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset.dataset</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.indices"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset.indices</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.label_flipping"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset.label_flipping</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.data_poisoning"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset.data_poisoning</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.poisoned_persent"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset.poisoned_persent</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.poisoned_ratio"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset.poisoned_ratio</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.targeted"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset.targeted</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.target_label"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset.target_label</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.target_changed_label"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset.target_changed_label</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.changeablesubset.ChangeableSubset.noise_type"><code class="docutils literal notranslate"><span class="pre">ChangeableSubset.noise_type</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>

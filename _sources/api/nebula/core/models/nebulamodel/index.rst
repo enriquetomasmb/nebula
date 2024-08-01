@@ -10,6 +10,7 @@ Classes
 .. autoapisummary::
 
    nebula.core.models.nebulamodel.NebulaModel
+   nebula.core.models.nebulamodel.NebulaModelStandalone
 
 
 Module Contents
@@ -61,6 +62,30 @@ Module Contents
       :param : param print:
       :param : param plot:
 
+
+
+   .. py:attribute:: input_channels
+
+
+   .. py:attribute:: num_classes
+
+
+   .. py:attribute:: learning_rate
+
+
+   .. py:attribute:: train_metrics
+
+
+   .. py:attribute:: val_metrics
+
+
+   .. py:attribute:: test_metrics
+
+
+   .. py:attribute:: test_metrics_global
+
+
+   .. py:attribute:: global_number
 
 
    .. py:method:: forward(x)
@@ -125,6 +150,34 @@ Module Contents
 
       Returns:
 
+
+
+   .. py:method:: on_test_end()
+
+
+   .. py:method:: on_test_epoch_end()
+
+
+.. py:class:: NebulaModelStandalone(*args, **kwargs)
+
+   Bases: :py:obj:`NebulaModel`
+
+
+   Abstract class for the NEBULA model.
+
+   This class is an abstract class that defines the interface for the NEBULA model.
+
+
+   .. py:method:: on_train_end()
+
+
+   .. py:method:: on_train_epoch_end()
+
+
+   .. py:method:: on_validation_end()
+
+
+   .. py:method:: on_validation_epoch_end()
 
 
    .. py:method:: on_test_end()

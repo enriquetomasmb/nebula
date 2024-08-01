@@ -25,6 +25,36 @@ Module Contents
    This class is an abstract class that defines the interface for the NEBULA model.
 
 
+   .. py:attribute:: config
+
+
+   .. py:attribute:: example_input_array
+
+
+   .. py:attribute:: criterion
+
+
+   .. py:attribute:: conv1
+
+
+   .. py:attribute:: conv2
+
+
+   .. py:attribute:: res1
+
+
+   .. py:attribute:: conv3
+
+
+   .. py:attribute:: conv4
+
+
+   .. py:attribute:: res2
+
+
+   .. py:attribute:: classifier
+
+
    .. py:method:: forward(x)
 
       Forward pass of the model.

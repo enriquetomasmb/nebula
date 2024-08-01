@@ -38,6 +38,93 @@ Module Contents
 
 .. py:class:: Engine(model, dataset, config=Config, trainer=Lightning, security=False, model_poisoning=False, poisoned_ratio=0, noise_type='gaussian')
 
+   .. py:attribute:: config
+
+
+   .. py:attribute:: idx
+
+
+   .. py:attribute:: experiment_name
+
+
+   .. py:attribute:: ip
+
+
+   .. py:attribute:: port
+
+
+   .. py:attribute:: addr
+
+
+   .. py:attribute:: role
+
+
+   .. py:attribute:: name
+
+
+   .. py:attribute:: docker_id
+
+
+   .. py:attribute:: client
+
+
+   .. py:attribute:: round
+      :value: None
+
+
+
+   .. py:attribute:: total_rounds
+      :value: None
+
+
+
+   .. py:attribute:: federation_nodes
+
+
+   .. py:attribute:: initialized
+      :value: False
+
+
+
+   .. py:attribute:: log_dir
+
+
+   .. py:attribute:: security
+
+
+   .. py:attribute:: model_poisoning
+
+
+   .. py:attribute:: poisoned_ratio
+
+
+   .. py:attribute:: noise_type
+
+
+   .. py:attribute:: msg
+
+
+   .. py:attribute:: with_reputation
+
+
+   .. py:attribute:: is_dynamic_topology
+
+
+   .. py:attribute:: is_dynamic_aggregation
+
+
+   .. py:attribute:: target_aggregation
+
+
+   .. py:attribute:: learning_cycle_lock
+
+
+   .. py:attribute:: federation_ready_lock
+
+
+   .. py:attribute:: round_lock
+
+
    .. py:property:: cm
 
 
@@ -80,10 +167,9 @@ Module Contents
    .. py:method:: get_round_lock()
 
 
-   .. py:method:: create_trainer_service()
+   .. py:method:: create_trainer_module()
+      :async:
 
-
-   .. py:method:: get_trainer_service()
 
 
    .. py:method:: start_communications()
@@ -107,6 +193,32 @@ Module Contents
 .. py:class:: MaliciousNode(model, dataset, config=Config, trainer=Lightning, security=False, model_poisoning=False, poisoned_ratio=0, noise_type='gaussian')
 
    Bases: :py:obj:`Engine`
+
+
+   .. py:attribute:: attack
+
+
+   .. py:attribute:: fit_time
+      :value: 0.0
+
+
+
+   .. py:attribute:: extra_time
+      :value: 0.0
+
+
+
+   .. py:attribute:: round_start_attack
+      :value: 3
+
+
+
+   .. py:attribute:: round_stop_attack
+      :value: 6
+
+
+
+   .. py:attribute:: aggregator_bening
 
 
 .. py:class:: AggregatorNode(model, dataset, config=Config, trainer=Lightning, security=False, model_poisoning=False, poisoned_ratio=0, noise_type='gaussian')

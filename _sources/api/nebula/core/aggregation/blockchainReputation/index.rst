@@ -41,6 +41,12 @@ Module Contents
    .. py:attribute:: ALGORITHM_MAP
 
 
+   .. py:attribute:: config
+
+
+   .. py:attribute:: node_name
+
+
    .. py:method:: run_aggregation(model_buffer)
 
 
@@ -67,6 +73,9 @@ Module Contents
 .. py:class:: BlockchainHandler(home_address)
 
    Handles interaction with Oracle and Non-Validator Node of Blockchain Network
+
+
+   .. py:attribute:: round
 
 
    .. py:property:: oracle_url

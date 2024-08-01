@@ -376,6 +376,26 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection"><code class="docutils literal notranslate"><span class="pre">Connection</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.DEFAULT_FEDERATED_ROUND"><code class="docutils literal notranslate"><span class="pre">Connection.DEFAULT_FEDERATED_ROUND</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.cm"><code class="docutils literal notranslate"><span class="pre">Connection.cm</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.reader"><code class="docutils literal notranslate"><span class="pre">Connection.reader</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.writer"><code class="docutils literal notranslate"><span class="pre">Connection.writer</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.id"><code class="docutils literal notranslate"><span class="pre">Connection.id</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.host"><code class="docutils literal notranslate"><span class="pre">Connection.host</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.port"><code class="docutils literal notranslate"><span class="pre">Connection.port</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.addr"><code class="docutils literal notranslate"><span class="pre">Connection.addr</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.direct"><code class="docutils literal notranslate"><span class="pre">Connection.direct</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.active"><code class="docutils literal notranslate"><span class="pre">Connection.active</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.last_active"><code class="docutils literal notranslate"><span class="pre">Connection.last_active</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.compression"><code class="docutils literal notranslate"><span class="pre">Connection.compression</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.config"><code class="docutils literal notranslate"><span class="pre">Connection.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.federated_round"><code class="docutils literal notranslate"><span class="pre">Connection.federated_round</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.latitude"><code class="docutils literal notranslate"><span class="pre">Connection.latitude</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.longitude"><code class="docutils literal notranslate"><span class="pre">Connection.longitude</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.loop"><code class="docutils literal notranslate"><span class="pre">Connection.loop</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.read_task"><code class="docutils literal notranslate"><span class="pre">Connection.read_task</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.EOT_CHAR"><code class="docutils literal notranslate"><span class="pre">Connection.EOT_CHAR</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.COMPRESSION_CHAR"><code class="docutils literal notranslate"><span class="pre">Connection.COMPRESSION_CHAR</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.DATA_TYPE_PREFIXES"><code class="docutils literal notranslate"><span class="pre">Connection.DATA_TYPE_PREFIXES</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.get_addr"><code class="docutils literal notranslate"><span class="pre">Connection.get_addr()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.get_federated_round"><code class="docutils literal notranslate"><span class="pre">Connection.get_federated_round()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.update_round"><code class="docutils literal notranslate"><span class="pre">Connection.update_round()</span></code></a></li>
@@ -438,6 +458,106 @@ document.write(`
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nebula.core.network.connection.Connection.DEFAULT_FEDERATED_ROUND">
 <span class="sig-name descname"><span class="pre">DEFAULT_FEDERATED_ROUND</span></span><a class="headerlink" href="#nebula.core.network.connection.Connection.DEFAULT_FEDERATED_ROUND" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.cm">
+<span class="sig-name descname"><span class="pre">cm</span></span><a class="headerlink" href="#nebula.core.network.connection.Connection.cm" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.reader">
+<span class="sig-name descname"><span class="pre">reader</span></span><a class="headerlink" href="#nebula.core.network.connection.Connection.reader" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.writer">
+<span class="sig-name descname"><span class="pre">writer</span></span><a class="headerlink" href="#nebula.core.network.connection.Connection.writer" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.id">
+<span class="sig-name descname"><span class="pre">id</span></span><a class="headerlink" href="#nebula.core.network.connection.Connection.id" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.host">
+<span class="sig-name descname"><span class="pre">host</span></span><a class="headerlink" href="#nebula.core.network.connection.Connection.host" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.port">
+<span class="sig-name descname"><span class="pre">port</span></span><a class="headerlink" href="#nebula.core.network.connection.Connection.port" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.addr">
+<span class="sig-name descname"><span class="pre">addr</span></span><a class="headerlink" href="#nebula.core.network.connection.Connection.addr" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.direct">
+<span class="sig-name descname"><span class="pre">direct</span></span><a class="headerlink" href="#nebula.core.network.connection.Connection.direct" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.active">
+<span class="sig-name descname"><span class="pre">active</span></span><a class="headerlink" href="#nebula.core.network.connection.Connection.active" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.last_active">
+<span class="sig-name descname"><span class="pre">last_active</span></span><a class="headerlink" href="#nebula.core.network.connection.Connection.last_active" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.compression">
+<span class="sig-name descname"><span class="pre">compression</span></span><a class="headerlink" href="#nebula.core.network.connection.Connection.compression" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#nebula.core.network.connection.Connection.config" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.federated_round">
+<span class="sig-name descname"><span class="pre">federated_round</span></span><a class="headerlink" href="#nebula.core.network.connection.Connection.federated_round" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.latitude">
+<span class="sig-name descname"><span class="pre">latitude</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nebula.core.network.connection.Connection.latitude" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.longitude">
+<span class="sig-name descname"><span class="pre">longitude</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nebula.core.network.connection.Connection.longitude" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.loop">
+<span class="sig-name descname"><span class="pre">loop</span></span><a class="headerlink" href="#nebula.core.network.connection.Connection.loop" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.read_task">
+<span class="sig-name descname"><span class="pre">read_task</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nebula.core.network.connection.Connection.read_task" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.EOT_CHAR">
+<span class="sig-name descname"><span class="pre">EOT_CHAR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">b'\x01\x02\x03\x04'</span></em><a class="headerlink" href="#nebula.core.network.connection.Connection.EOT_CHAR" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.COMPRESSION_CHAR">
+<span class="sig-name descname"><span class="pre">COMPRESSION_CHAR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">b'\x05\x06\x07\x08'</span></em><a class="headerlink" href="#nebula.core.network.connection.Connection.COMPRESSION_CHAR" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.DATA_TYPE_PREFIXES">
+<span class="sig-name descname"><span class="pre">DATA_TYPE_PREFIXES</span></span><a class="headerlink" href="#nebula.core.network.connection.Connection.DATA_TYPE_PREFIXES" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -599,6 +719,26 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection"><code class="docutils literal notranslate"><span class="pre">Connection</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.DEFAULT_FEDERATED_ROUND"><code class="docutils literal notranslate"><span class="pre">Connection.DEFAULT_FEDERATED_ROUND</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.cm"><code class="docutils literal notranslate"><span class="pre">Connection.cm</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.reader"><code class="docutils literal notranslate"><span class="pre">Connection.reader</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.writer"><code class="docutils literal notranslate"><span class="pre">Connection.writer</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.id"><code class="docutils literal notranslate"><span class="pre">Connection.id</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.host"><code class="docutils literal notranslate"><span class="pre">Connection.host</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.port"><code class="docutils literal notranslate"><span class="pre">Connection.port</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.addr"><code class="docutils literal notranslate"><span class="pre">Connection.addr</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.direct"><code class="docutils literal notranslate"><span class="pre">Connection.direct</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.active"><code class="docutils literal notranslate"><span class="pre">Connection.active</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.last_active"><code class="docutils literal notranslate"><span class="pre">Connection.last_active</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.compression"><code class="docutils literal notranslate"><span class="pre">Connection.compression</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.config"><code class="docutils literal notranslate"><span class="pre">Connection.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.federated_round"><code class="docutils literal notranslate"><span class="pre">Connection.federated_round</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.latitude"><code class="docutils literal notranslate"><span class="pre">Connection.latitude</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.longitude"><code class="docutils literal notranslate"><span class="pre">Connection.longitude</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.loop"><code class="docutils literal notranslate"><span class="pre">Connection.loop</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.read_task"><code class="docutils literal notranslate"><span class="pre">Connection.read_task</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.EOT_CHAR"><code class="docutils literal notranslate"><span class="pre">Connection.EOT_CHAR</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.COMPRESSION_CHAR"><code class="docutils literal notranslate"><span class="pre">Connection.COMPRESSION_CHAR</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.DATA_TYPE_PREFIXES"><code class="docutils literal notranslate"><span class="pre">Connection.DATA_TYPE_PREFIXES</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.get_addr"><code class="docutils literal notranslate"><span class="pre">Connection.get_addr()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.get_federated_round"><code class="docutils literal notranslate"><span class="pre">Connection.get_federated_round()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.update_round"><code class="docutils literal notranslate"><span class="pre">Connection.update_round()</span></code></a></li>

@@ -36,3 +36,8 @@ Module Contents
 
 
 
+   .. py:method:: locked_async()
+      :async:
+
+
+

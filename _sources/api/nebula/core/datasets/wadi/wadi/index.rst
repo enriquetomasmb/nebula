@@ -21,6 +21,28 @@ Module Contents
    Bases: :py:obj:`torchvision.datasets.MNIST`
 
 
+   .. py:attribute:: partition_id
+
+
+   .. py:attribute:: partitions_number
+
+
+   .. py:attribute:: download_link
+      :value: 'XXXX'
+
+
+
+   .. py:attribute:: files
+      :value: ['X_train.npy', 'y_train.npy', 'X_test.npy', 'y_test.npy']
+
+
+
+   .. py:attribute:: train
+
+
+   .. py:attribute:: root
+
+
    .. py:method:: dataset_download()
 
 

@@ -384,6 +384,32 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.console_handler"><code class="docutils literal notranslate"><span class="pre">console_handler</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.signal_handler"><code class="docutils literal notranslate"><span class="pre">signal_handler()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller"><code class="docutils literal notranslate"><span class="pre">Controller</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.scenario_name"><code class="docutils literal notranslate"><span class="pre">Controller.scenario_name</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.start_date_scenario"><code class="docutils literal notranslate"><span class="pre">Controller.start_date_scenario</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.federation"><code class="docutils literal notranslate"><span class="pre">Controller.federation</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.topology"><code class="docutils literal notranslate"><span class="pre">Controller.topology</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.waf_port"><code class="docutils literal notranslate"><span class="pre">Controller.waf_port</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.frontend_port"><code class="docutils literal notranslate"><span class="pre">Controller.frontend_port</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.grafana_port"><code class="docutils literal notranslate"><span class="pre">Controller.grafana_port</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.loki_port"><code class="docutils literal notranslate"><span class="pre">Controller.loki_port</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.statistics_port"><code class="docutils literal notranslate"><span class="pre">Controller.statistics_port</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.simulation"><code class="docutils literal notranslate"><span class="pre">Controller.simulation</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.config_dir"><code class="docutils literal notranslate"><span class="pre">Controller.config_dir</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.test"><code class="docutils literal notranslate"><span class="pre">Controller.test</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.log_dir"><code class="docutils literal notranslate"><span class="pre">Controller.log_dir</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.cert_dir"><code class="docutils literal notranslate"><span class="pre">Controller.cert_dir</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.env_path"><code class="docutils literal notranslate"><span class="pre">Controller.env_path</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.production"><code class="docutils literal notranslate"><span class="pre">Controller.production</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.advanced_analytics"><code class="docutils literal notranslate"><span class="pre">Controller.advanced_analytics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.matrix"><code class="docutils literal notranslate"><span class="pre">Controller.matrix</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.root_path"><code class="docutils literal notranslate"><span class="pre">Controller.root_path</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.network_subnet"><code class="docutils literal notranslate"><span class="pre">Controller.network_subnet</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.network_gateway"><code class="docutils literal notranslate"><span class="pre">Controller.network_gateway</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.config"><code class="docutils literal notranslate"><span class="pre">Controller.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.topologymanager"><code class="docutils literal notranslate"><span class="pre">Controller.topologymanager</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.n_nodes"><code class="docutils literal notranslate"><span class="pre">Controller.n_nodes</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.mender"><code class="docutils literal notranslate"><span class="pre">Controller.mender</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.use_blockchain"><code class="docutils literal notranslate"><span class="pre">Controller.use_blockchain</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.start"><code class="docutils literal notranslate"><span class="pre">Controller.start()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.run_waf"><code class="docutils literal notranslate"><span class="pre">Controller.run_waf()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.run_frontend"><code class="docutils literal notranslate"><span class="pre">Controller.run_frontend()</span></code></a></li>
@@ -536,7 +562,137 @@ it is formatted using formatException() and appended to the message.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="nebula.controller.Controller">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.controller.</span></span><span class="sig-name descname"><span class="pre">Controller</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.controller.Controller" title="Link to this definition">#</a></dt>
-<dd><dl class="py method">
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.scenario_name">
+<span class="sig-name descname"><span class="pre">scenario_name</span></span><a class="headerlink" href="#nebula.controller.Controller.scenario_name" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.start_date_scenario">
+<span class="sig-name descname"><span class="pre">start_date_scenario</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nebula.controller.Controller.start_date_scenario" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.federation">
+<span class="sig-name descname"><span class="pre">federation</span></span><a class="headerlink" href="#nebula.controller.Controller.federation" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.topology">
+<span class="sig-name descname"><span class="pre">topology</span></span><a class="headerlink" href="#nebula.controller.Controller.topology" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.waf_port">
+<span class="sig-name descname"><span class="pre">waf_port</span></span><a class="headerlink" href="#nebula.controller.Controller.waf_port" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.frontend_port">
+<span class="sig-name descname"><span class="pre">frontend_port</span></span><a class="headerlink" href="#nebula.controller.Controller.frontend_port" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.grafana_port">
+<span class="sig-name descname"><span class="pre">grafana_port</span></span><a class="headerlink" href="#nebula.controller.Controller.grafana_port" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.loki_port">
+<span class="sig-name descname"><span class="pre">loki_port</span></span><a class="headerlink" href="#nebula.controller.Controller.loki_port" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.statistics_port">
+<span class="sig-name descname"><span class="pre">statistics_port</span></span><a class="headerlink" href="#nebula.controller.Controller.statistics_port" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.simulation">
+<span class="sig-name descname"><span class="pre">simulation</span></span><a class="headerlink" href="#nebula.controller.Controller.simulation" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.config_dir">
+<span class="sig-name descname"><span class="pre">config_dir</span></span><a class="headerlink" href="#nebula.controller.Controller.config_dir" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.test">
+<span class="sig-name descname"><span class="pre">test</span></span><a class="headerlink" href="#nebula.controller.Controller.test" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.log_dir">
+<span class="sig-name descname"><span class="pre">log_dir</span></span><a class="headerlink" href="#nebula.controller.Controller.log_dir" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.cert_dir">
+<span class="sig-name descname"><span class="pre">cert_dir</span></span><a class="headerlink" href="#nebula.controller.Controller.cert_dir" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.env_path">
+<span class="sig-name descname"><span class="pre">env_path</span></span><a class="headerlink" href="#nebula.controller.Controller.env_path" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.production">
+<span class="sig-name descname"><span class="pre">production</span></span><a class="headerlink" href="#nebula.controller.Controller.production" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.advanced_analytics">
+<span class="sig-name descname"><span class="pre">advanced_analytics</span></span><a class="headerlink" href="#nebula.controller.Controller.advanced_analytics" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.matrix">
+<span class="sig-name descname"><span class="pre">matrix</span></span><a class="headerlink" href="#nebula.controller.Controller.matrix" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.root_path">
+<span class="sig-name descname"><span class="pre">root_path</span></span><a class="headerlink" href="#nebula.controller.Controller.root_path" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.network_subnet">
+<span class="sig-name descname"><span class="pre">network_subnet</span></span><a class="headerlink" href="#nebula.controller.Controller.network_subnet" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.network_gateway">
+<span class="sig-name descname"><span class="pre">network_gateway</span></span><a class="headerlink" href="#nebula.controller.Controller.network_gateway" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#nebula.controller.Controller.config" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.topologymanager">
+<span class="sig-name descname"><span class="pre">topologymanager</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nebula.controller.Controller.topologymanager" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.n_nodes">
+<span class="sig-name descname"><span class="pre">n_nodes</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#nebula.controller.Controller.n_nodes" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.mender">
+<span class="sig-name descname"><span class="pre">mender</span></span><a class="headerlink" href="#nebula.controller.Controller.mender" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.use_blockchain">
+<span class="sig-name descname"><span class="pre">use_blockchain</span></span><a class="headerlink" href="#nebula.controller.Controller.use_blockchain" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="nebula.controller.Controller.start">
 <span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.controller.Controller.start" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
@@ -638,6 +794,32 @@ it is formatted using formatException() and appended to the message.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.console_handler"><code class="docutils literal notranslate"><span class="pre">console_handler</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.signal_handler"><code class="docutils literal notranslate"><span class="pre">signal_handler()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller"><code class="docutils literal notranslate"><span class="pre">Controller</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.scenario_name"><code class="docutils literal notranslate"><span class="pre">Controller.scenario_name</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.start_date_scenario"><code class="docutils literal notranslate"><span class="pre">Controller.start_date_scenario</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.federation"><code class="docutils literal notranslate"><span class="pre">Controller.federation</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.topology"><code class="docutils literal notranslate"><span class="pre">Controller.topology</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.waf_port"><code class="docutils literal notranslate"><span class="pre">Controller.waf_port</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.frontend_port"><code class="docutils literal notranslate"><span class="pre">Controller.frontend_port</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.grafana_port"><code class="docutils literal notranslate"><span class="pre">Controller.grafana_port</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.loki_port"><code class="docutils literal notranslate"><span class="pre">Controller.loki_port</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.statistics_port"><code class="docutils literal notranslate"><span class="pre">Controller.statistics_port</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.simulation"><code class="docutils literal notranslate"><span class="pre">Controller.simulation</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.config_dir"><code class="docutils literal notranslate"><span class="pre">Controller.config_dir</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.test"><code class="docutils literal notranslate"><span class="pre">Controller.test</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.log_dir"><code class="docutils literal notranslate"><span class="pre">Controller.log_dir</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.cert_dir"><code class="docutils literal notranslate"><span class="pre">Controller.cert_dir</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.env_path"><code class="docutils literal notranslate"><span class="pre">Controller.env_path</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.production"><code class="docutils literal notranslate"><span class="pre">Controller.production</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.advanced_analytics"><code class="docutils literal notranslate"><span class="pre">Controller.advanced_analytics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.matrix"><code class="docutils literal notranslate"><span class="pre">Controller.matrix</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.root_path"><code class="docutils literal notranslate"><span class="pre">Controller.root_path</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.network_subnet"><code class="docutils literal notranslate"><span class="pre">Controller.network_subnet</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.network_gateway"><code class="docutils literal notranslate"><span class="pre">Controller.network_gateway</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.config"><code class="docutils literal notranslate"><span class="pre">Controller.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.topologymanager"><code class="docutils literal notranslate"><span class="pre">Controller.topologymanager</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.n_nodes"><code class="docutils literal notranslate"><span class="pre">Controller.n_nodes</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.mender"><code class="docutils literal notranslate"><span class="pre">Controller.mender</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.use_blockchain"><code class="docutils literal notranslate"><span class="pre">Controller.use_blockchain</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.start"><code class="docutils literal notranslate"><span class="pre">Controller.start()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.run_waf"><code class="docutils literal notranslate"><span class="pre">Controller.run_waf()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.run_frontend"><code class="docutils literal notranslate"><span class="pre">Controller.run_frontend()</span></code></a></li>

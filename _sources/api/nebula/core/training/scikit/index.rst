@@ -17,6 +17,28 @@ Module Contents
 
 .. py:class:: Scikit(model, data, config=None, logger=None)
 
+   .. py:attribute:: model
+
+
+   .. py:attribute:: data
+
+
+   .. py:attribute:: config
+
+
+   .. py:attribute:: logger
+
+
+   .. py:attribute:: round
+      :value: 0
+
+
+
+   .. py:attribute:: epochs
+      :value: 1
+
+
+
    .. py:method:: set_model(model)
 
 

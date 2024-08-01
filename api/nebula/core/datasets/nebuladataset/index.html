@@ -375,6 +375,20 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset"><code class="docutils literal notranslate"><span class="pre">NebulaDataset</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.num_classes"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.num_classes</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.partition_id"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.partition_id</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.partitions_number"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.partitions_number</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.batch_size"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.batch_size</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.num_workers"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.num_workers</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.iid"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.iid</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.partition"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.partition</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.partition_parameter"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.partition_parameter</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.seed"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.seed</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.config"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.train_set"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.train_set</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.train_indices_map"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.train_indices_map</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.test_set"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.test_set</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.test_indices_map"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.test_indices_map</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.initialize_dataset"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.initialize_dataset()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.generate_non_iid_map"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.generate_non_iid_map()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.generate_iid_map"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.generate_iid_map()</span></code></a></li>
@@ -423,6 +437,76 @@ document.write(`
 <p>Abstract class for a partitioned dataset.</p>
 <p>Classes inheriting from this class need to implement specific methods
 for loading and partitioning the dataset.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.nebuladataset.NebulaDataset.num_classes">
+<span class="sig-name descname"><span class="pre">num_classes</span></span><a class="headerlink" href="#nebula.core.datasets.nebuladataset.NebulaDataset.num_classes" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.nebuladataset.NebulaDataset.partition_id">
+<span class="sig-name descname"><span class="pre">partition_id</span></span><a class="headerlink" href="#nebula.core.datasets.nebuladataset.NebulaDataset.partition_id" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.nebuladataset.NebulaDataset.partitions_number">
+<span class="sig-name descname"><span class="pre">partitions_number</span></span><a class="headerlink" href="#nebula.core.datasets.nebuladataset.NebulaDataset.partitions_number" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.nebuladataset.NebulaDataset.batch_size">
+<span class="sig-name descname"><span class="pre">batch_size</span></span><a class="headerlink" href="#nebula.core.datasets.nebuladataset.NebulaDataset.batch_size" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.nebuladataset.NebulaDataset.num_workers">
+<span class="sig-name descname"><span class="pre">num_workers</span></span><a class="headerlink" href="#nebula.core.datasets.nebuladataset.NebulaDataset.num_workers" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.nebuladataset.NebulaDataset.iid">
+<span class="sig-name descname"><span class="pre">iid</span></span><a class="headerlink" href="#nebula.core.datasets.nebuladataset.NebulaDataset.iid" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.nebuladataset.NebulaDataset.partition">
+<span class="sig-name descname"><span class="pre">partition</span></span><a class="headerlink" href="#nebula.core.datasets.nebuladataset.NebulaDataset.partition" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.nebuladataset.NebulaDataset.partition_parameter">
+<span class="sig-name descname"><span class="pre">partition_parameter</span></span><a class="headerlink" href="#nebula.core.datasets.nebuladataset.NebulaDataset.partition_parameter" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.nebuladataset.NebulaDataset.seed">
+<span class="sig-name descname"><span class="pre">seed</span></span><a class="headerlink" href="#nebula.core.datasets.nebuladataset.NebulaDataset.seed" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.nebuladataset.NebulaDataset.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#nebula.core.datasets.nebuladataset.NebulaDataset.config" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.nebuladataset.NebulaDataset.train_set">
+<span class="sig-name descname"><span class="pre">train_set</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nebula.core.datasets.nebuladataset.NebulaDataset.train_set" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.nebuladataset.NebulaDataset.train_indices_map">
+<span class="sig-name descname"><span class="pre">train_indices_map</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nebula.core.datasets.nebuladataset.NebulaDataset.train_indices_map" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.nebuladataset.NebulaDataset.test_set">
+<span class="sig-name descname"><span class="pre">test_set</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nebula.core.datasets.nebuladataset.NebulaDataset.test_set" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.nebuladataset.NebulaDataset.test_indices_map">
+<span class="sig-name descname"><span class="pre">test_indices_map</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nebula.core.datasets.nebuladataset.NebulaDataset.test_indices_map" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.datasets.nebuladataset.NebulaDataset.initialize_dataset">
 <em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">initialize_dataset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.datasets.nebuladataset.NebulaDataset.initialize_dataset" title="Link to this definition">#</a></dt>
@@ -724,6 +808,20 @@ The function also prints the class distribution in each subset for reference.</p
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset"><code class="docutils literal notranslate"><span class="pre">NebulaDataset</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.num_classes"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.num_classes</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.partition_id"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.partition_id</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.partitions_number"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.partitions_number</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.batch_size"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.batch_size</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.num_workers"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.num_workers</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.iid"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.iid</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.partition"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.partition</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.partition_parameter"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.partition_parameter</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.seed"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.seed</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.config"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.train_set"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.train_set</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.train_indices_map"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.train_indices_map</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.test_set"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.test_set</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.test_indices_map"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.test_indices_map</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.initialize_dataset"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.initialize_dataset()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.generate_non_iid_map"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.generate_non_iid_map()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.nebuladataset.NebulaDataset.generate_iid_map"><code class="docutils literal notranslate"><span class="pre">NebulaDataset.generate_iid_map()</span></code></a></li>

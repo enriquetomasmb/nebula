@@ -21,6 +21,26 @@ Module Contents
    Bases: :py:obj:`torchvision.datasets.MNIST`
 
 
+   .. py:attribute:: root
+
+
+   .. py:attribute:: download
+      :value: True
+
+
+
+   .. py:attribute:: train
+
+
+   .. py:attribute:: training_file
+
+
+   .. py:attribute:: test_file
+
+
+   .. py:attribute:: data_and_targets
+
+
    .. py:method:: dataset_download()
 
 

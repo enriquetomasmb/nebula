@@ -375,6 +375,17 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL"><code class="docutils literal notranslate"><span class="pre">SYSCALL</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.transform"><code class="docutils literal notranslate"><span class="pre">SYSCALL.transform</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.target_transform"><code class="docutils literal notranslate"><span class="pre">SYSCALL.target_transform</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.partition_id"><code class="docutils literal notranslate"><span class="pre">SYSCALL.partition_id</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.partitions_number"><code class="docutils literal notranslate"><span class="pre">SYSCALL.partitions_number</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.download"><code class="docutils literal notranslate"><span class="pre">SYSCALL.download</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.download_link"><code class="docutils literal notranslate"><span class="pre">SYSCALL.download_link</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.train"><code class="docutils literal notranslate"><span class="pre">SYSCALL.train</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.root"><code class="docutils literal notranslate"><span class="pre">SYSCALL.root</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.training_file"><code class="docutils literal notranslate"><span class="pre">SYSCALL.training_file</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.test_file"><code class="docutils literal notranslate"><span class="pre">SYSCALL.test_file</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.data_and_targets"><code class="docutils literal notranslate"><span class="pre">SYSCALL.data_and_targets</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.dataset_download"><code class="docutils literal notranslate"><span class="pre">SYSCALL.dataset_download()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.process"><code class="docutils literal notranslate"><span class="pre">SYSCALL.process()</span></code></a></li>
 </ul>
@@ -421,6 +432,61 @@ document.write(`
 <dt class="sig sig-object py" id="nebula.core.datasets.syscall.syscall.SYSCALL">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.core.datasets.syscall.syscall.</span></span><span class="sig-name descname"><span class="pre">SYSCALL</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">partition_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitions_number</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">root_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">download</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.datasets.syscall.syscall.SYSCALL" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">torchvision.datasets.MNIST</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.syscall.syscall.SYSCALL.transform">
+<span class="sig-name descname"><span class="pre">transform</span></span><a class="headerlink" href="#nebula.core.datasets.syscall.syscall.SYSCALL.transform" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.syscall.syscall.SYSCALL.target_transform">
+<span class="sig-name descname"><span class="pre">target_transform</span></span><a class="headerlink" href="#nebula.core.datasets.syscall.syscall.SYSCALL.target_transform" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.syscall.syscall.SYSCALL.partition_id">
+<span class="sig-name descname"><span class="pre">partition_id</span></span><a class="headerlink" href="#nebula.core.datasets.syscall.syscall.SYSCALL.partition_id" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.syscall.syscall.SYSCALL.partitions_number">
+<span class="sig-name descname"><span class="pre">partitions_number</span></span><a class="headerlink" href="#nebula.core.datasets.syscall.syscall.SYSCALL.partitions_number" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.syscall.syscall.SYSCALL.download">
+<span class="sig-name descname"><span class="pre">download</span></span><a class="headerlink" href="#nebula.core.datasets.syscall.syscall.SYSCALL.download" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.syscall.syscall.SYSCALL.download_link">
+<span class="sig-name descname"><span class="pre">download_link</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'https://files.ifi.uzh.ch/CSG/research/fl/data/syscall.zip'</span></em><a class="headerlink" href="#nebula.core.datasets.syscall.syscall.SYSCALL.download_link" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.syscall.syscall.SYSCALL.train">
+<span class="sig-name descname"><span class="pre">train</span></span><a class="headerlink" href="#nebula.core.datasets.syscall.syscall.SYSCALL.train" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.syscall.syscall.SYSCALL.root">
+<span class="sig-name descname"><span class="pre">root</span></span><a class="headerlink" href="#nebula.core.datasets.syscall.syscall.SYSCALL.root" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.syscall.syscall.SYSCALL.training_file">
+<span class="sig-name descname"><span class="pre">training_file</span></span><a class="headerlink" href="#nebula.core.datasets.syscall.syscall.SYSCALL.training_file" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.syscall.syscall.SYSCALL.test_file">
+<span class="sig-name descname"><span class="pre">test_file</span></span><a class="headerlink" href="#nebula.core.datasets.syscall.syscall.SYSCALL.test_file" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.syscall.syscall.SYSCALL.data_and_targets">
+<span class="sig-name descname"><span class="pre">data_and_targets</span></span><a class="headerlink" href="#nebula.core.datasets.syscall.syscall.SYSCALL.data_and_targets" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.datasets.syscall.syscall.SYSCALL.dataset_download">
 <span class="sig-name descname"><span class="pre">dataset_download</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.datasets.syscall.syscall.SYSCALL.dataset_download" title="Link to this definition">#</a></dt>
@@ -516,6 +582,17 @@ for loading and partitioning the dataset.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL"><code class="docutils literal notranslate"><span class="pre">SYSCALL</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.transform"><code class="docutils literal notranslate"><span class="pre">SYSCALL.transform</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.target_transform"><code class="docutils literal notranslate"><span class="pre">SYSCALL.target_transform</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.partition_id"><code class="docutils literal notranslate"><span class="pre">SYSCALL.partition_id</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.partitions_number"><code class="docutils literal notranslate"><span class="pre">SYSCALL.partitions_number</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.download"><code class="docutils literal notranslate"><span class="pre">SYSCALL.download</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.download_link"><code class="docutils literal notranslate"><span class="pre">SYSCALL.download_link</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.train"><code class="docutils literal notranslate"><span class="pre">SYSCALL.train</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.root"><code class="docutils literal notranslate"><span class="pre">SYSCALL.root</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.training_file"><code class="docutils literal notranslate"><span class="pre">SYSCALL.training_file</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.test_file"><code class="docutils literal notranslate"><span class="pre">SYSCALL.test_file</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.data_and_targets"><code class="docutils literal notranslate"><span class="pre">SYSCALL.data_and_targets</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.dataset_download"><code class="docutils literal notranslate"><span class="pre">SYSCALL.dataset_download()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.syscall.syscall.SYSCALL.process"><code class="docutils literal notranslate"><span class="pre">SYSCALL.process()</span></code></a></li>
 </ul>

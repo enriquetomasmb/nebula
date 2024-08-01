@@ -17,6 +17,29 @@ Module Contents
 
 .. py:class:: TopologyManager(scenario_name=None, n_nodes=5, b_symmetric=True, undirected_neighbor_num=5, topology=None)
 
+   .. py:attribute:: scenario_name
+
+
+   .. py:attribute:: n_nodes
+
+
+   .. py:attribute:: b_symmetric
+
+
+   .. py:attribute:: undirected_neighbor_num
+
+
+   .. py:attribute:: topology
+
+
+   .. py:attribute:: nodes
+
+
+   .. py:attribute:: b_fully_connected
+      :value: False
+
+
+
    .. py:method:: draw_graph(plot=False, path=None)
 
 

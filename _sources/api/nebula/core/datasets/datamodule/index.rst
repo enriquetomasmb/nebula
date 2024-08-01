@@ -20,6 +20,93 @@ Module Contents
    Bases: :py:obj:`lightning.LightningDataModule`
 
 
+   .. py:attribute:: train_set
+
+
+   .. py:attribute:: train_set_indices
+
+
+   .. py:attribute:: test_set
+
+
+   .. py:attribute:: test_set_indices
+
+
+   .. py:attribute:: local_test_set_indices
+
+
+   .. py:attribute:: partition_id
+
+
+   .. py:attribute:: partitions_number
+
+
+   .. py:attribute:: batch_size
+
+
+   .. py:attribute:: num_workers
+
+
+   .. py:attribute:: val_percent
+
+
+   .. py:attribute:: label_flipping
+
+
+   .. py:attribute:: data_poisoning
+
+
+   .. py:attribute:: poisoned_percent
+
+
+   .. py:attribute:: poisoned_ratio
+
+
+   .. py:attribute:: targeted
+
+
+   .. py:attribute:: target_label
+
+
+   .. py:attribute:: target_changed_label
+
+
+   .. py:attribute:: noise_type
+
+
+   .. py:attribute:: tr_subset
+
+
+   .. py:attribute:: train_size
+
+
+   .. py:attribute:: val_size
+
+
+   .. py:attribute:: global_te_subset
+
+
+   .. py:attribute:: local_te_subset
+
+
+   .. py:attribute:: train_loader
+
+
+   .. py:attribute:: val_loader
+
+
+   .. py:attribute:: test_loader
+
+
+   .. py:attribute:: global_test_loader
+
+
+   .. py:attribute:: random_sampler
+
+
+   .. py:attribute:: bootstrap_loader
+
+
    .. py:method:: train_dataloader()
 
 

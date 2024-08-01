@@ -26,6 +26,24 @@ Module Contents
    .. py:method:: log_metrics_by_epoch(phase, print_cm=False, plot_cm=False)
 
 
+   .. py:attribute:: config
+
+
+   .. py:attribute:: example_input_array
+
+
+   .. py:attribute:: learning_rate
+
+
+   .. py:attribute:: criterion
+
+
+   .. py:attribute:: model
+
+
+   .. py:attribute:: fc
+
+
    .. py:method:: forward(x)
 
 

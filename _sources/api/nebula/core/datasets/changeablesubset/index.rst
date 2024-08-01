@@ -20,3 +20,36 @@ Module Contents
    Bases: :py:obj:`torch.utils.data.Subset`
 
 
+   .. py:attribute:: new_dataset
+
+
+   .. py:attribute:: dataset
+
+
+   .. py:attribute:: indices
+
+
+   .. py:attribute:: label_flipping
+
+
+   .. py:attribute:: data_poisoning
+
+
+   .. py:attribute:: poisoned_persent
+
+
+   .. py:attribute:: poisoned_ratio
+
+
+   .. py:attribute:: targeted
+
+
+   .. py:attribute:: target_label
+
+
+   .. py:attribute:: target_changed_label
+
+
+   .. py:attribute:: noise_type
+
+

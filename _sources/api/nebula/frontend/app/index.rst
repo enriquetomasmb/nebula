@@ -38,6 +38,7 @@ Functions
 
    nebula.frontend.app.websocket_endpoint
    nebula.frontend.app.datetimeformat
+   nebula.frontend.app.add_global_context
    nebula.frontend.app.get_session
    nebula.frontend.app.set_default_user
    nebula.frontend.app.startup_event
@@ -54,11 +55,14 @@ Functions
    nebula.frontend.app.nebula_delete_user
    nebula.frontend.app.nebula_add_user
    nebula.frontend.app.nebula_update_user
+   nebula.frontend.app.nebula_dashboard_runningscenario
    nebula.frontend.app.nebula_dashboard
    nebula.frontend.app.nebula_dashboard_monitor
    nebula.frontend.app.update_topology
    nebula.frontend.app.nebula_update_node
    nebula.frontend.app.nebula_register_node
+   nebula.frontend.app.nebula_list_all_scenarios
+   nebula.frontend.app.nebula_erase_all_nodes
    nebula.frontend.app.nebula_wait_nodes
    nebula.frontend.app.nebula_monitor_log
    nebula.frontend.app.nebula_monitor_log_x
@@ -87,7 +91,7 @@ Module Contents
 
 .. py:class:: Settings
 
-   .. py:attribute:: debug
+   .. py:attribute:: production
       :type:  bool
 
 
@@ -139,6 +143,12 @@ Module Contents
 
 .. py:class:: ConnectionManager
 
+   .. py:attribute:: active_connections
+      :type:  list[fastapi.WebSocket]
+      :value: []
+
+
+
    .. py:method:: connect(websocket)
       :async:
 
@@ -166,6 +176,8 @@ Module Contents
 .. py:data:: templates
 
 .. py:function:: datetimeformat(value, format='%B %d, %Y %H:%M')
+
+.. py:function:: add_global_context(request)
 
 .. py:function:: get_session(request)
 
@@ -235,6 +247,10 @@ Module Contents
    :async:
 
 
+.. py:function:: nebula_dashboard_runningscenario()
+   :async:
+
+
 .. py:function:: nebula_dashboard(request, session = Depends(get_session))
    :async:
 
@@ -250,6 +266,14 @@ Module Contents
 
 
 .. py:function:: nebula_register_node(scenario_name, request)
+   :async:
+
+
+.. py:function:: nebula_list_all_scenarios(session = Depends(get_session))
+   :async:
+
+
+.. py:function:: nebula_erase_all_nodes(session = Depends(get_session))
    :async:
 
 
@@ -326,8 +350,12 @@ Module Contents
 
 
 .. py:function:: run_scenario(scenario_data, role)
+   :async:
+
 
 .. py:function:: run_scenarios(data, role)
+   :async:
+
 
 .. py:function:: nebula_dashboard_deployment_run(request, background_tasks, session = Depends(get_session))
    :async:

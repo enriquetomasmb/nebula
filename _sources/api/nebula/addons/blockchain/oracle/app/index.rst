@@ -53,6 +53,12 @@ Module Contents
 
 .. py:class:: Oracle
 
+   .. py:attribute:: acc
+
+
+   .. py:attribute:: contract_obj
+
+
    .. py:property:: contract_abi
 
 

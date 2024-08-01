@@ -375,7 +375,14 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder"><code class="docutils literal notranslate"><span class="pre">Forwarder</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder.run"><code class="docutils literal notranslate"><span class="pre">Forwarder.run()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder.config"><code class="docutils literal notranslate"><span class="pre">Forwarder.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder.cm"><code class="docutils literal notranslate"><span class="pre">Forwarder.cm</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder.pending_messages"><code class="docutils literal notranslate"><span class="pre">Forwarder.pending_messages</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder.pending_messages_lock"><code class="docutils literal notranslate"><span class="pre">Forwarder.pending_messages_lock</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder.interval"><code class="docutils literal notranslate"><span class="pre">Forwarder.interval</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder.number_forwarded_messages"><code class="docutils literal notranslate"><span class="pre">Forwarder.number_forwarded_messages</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder.messages_interval"><code class="docutils literal notranslate"><span class="pre">Forwarder.messages_interval</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder.start"><code class="docutils literal notranslate"><span class="pre">Forwarder.start()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder.run_forwarder"><code class="docutils literal notranslate"><span class="pre">Forwarder.run_forwarder()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder.process_pending_messages"><code class="docutils literal notranslate"><span class="pre">Forwarder.process_pending_messages()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder.forward"><code class="docutils literal notranslate"><span class="pre">Forwarder.forward()</span></code></a></li>
@@ -401,7 +408,7 @@ document.write(`
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="../../../../../nebula.core.network.html#nebula.core.network.forwarder.Forwarder" title="nebula.core.network.forwarder.Forwarder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Forwarder</span></code></a></p></td>
-<td><p>A class that represents a thread of control.</p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
@@ -412,25 +419,50 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="nebula.core.network.forwarder.Forwarder">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.core.network.forwarder.</span></span><span class="sig-name descname"><span class="pre">Forwarder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.forwarder.Forwarder" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">threading.Thread</span></code></p>
-<p>A class that represents a thread of control.</p>
-<p>This class can be safely subclassed in a limited fashion. There are two ways
-to specify the activity: by passing a callable object to the constructor, or
-by overriding the run() method in a subclass.</p>
-<dl class="field-list simple">
+<dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>cm</strong> (<a class="reference internal" href="../communications/index.html#nebula.core.network.communications.CommunicationsManager" title="nebula.core.network.communications.CommunicationsManager"><em>nebula.core.network.communications.CommunicationsManager</em></a>)</p>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.forwarder.Forwarder.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#nebula.core.network.forwarder.Forwarder.config" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.forwarder.Forwarder.cm">
+<span class="sig-name descname"><span class="pre">cm</span></span><a class="headerlink" href="#nebula.core.network.forwarder.Forwarder.cm" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.forwarder.Forwarder.pending_messages">
+<span class="sig-name descname"><span class="pre">pending_messages</span></span><a class="headerlink" href="#nebula.core.network.forwarder.Forwarder.pending_messages" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.forwarder.Forwarder.pending_messages_lock">
+<span class="sig-name descname"><span class="pre">pending_messages_lock</span></span><a class="headerlink" href="#nebula.core.network.forwarder.Forwarder.pending_messages_lock" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.forwarder.Forwarder.interval">
+<span class="sig-name descname"><span class="pre">interval</span></span><a class="headerlink" href="#nebula.core.network.forwarder.Forwarder.interval" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.forwarder.Forwarder.number_forwarded_messages">
+<span class="sig-name descname"><span class="pre">number_forwarded_messages</span></span><a class="headerlink" href="#nebula.core.network.forwarder.Forwarder.number_forwarded_messages" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.forwarder.Forwarder.messages_interval">
+<span class="sig-name descname"><span class="pre">messages_interval</span></span><a class="headerlink" href="#nebula.core.network.forwarder.Forwarder.messages_interval" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
-<dt class="sig sig-object py" id="nebula.core.network.forwarder.Forwarder.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.forwarder.Forwarder.run" title="Link to this definition">#</a></dt>
-<dd><p>Method representing the thread’s activity.</p>
-<p>You may override this method in a subclass. The standard run() method
-invokes the callable object passed to the object’s constructor as the
-target argument, if any, with sequential and keyword arguments taken
-from the args and kwargs arguments, respectively.</p>
-</dd></dl>
+<dt class="sig sig-object py" id="nebula.core.network.forwarder.Forwarder.start">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.forwarder.Forwarder.start" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.network.forwarder.Forwarder.run_forwarder">
@@ -444,7 +476,7 @@ from the args and kwargs arguments, respectively.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.network.forwarder.Forwarder.forward">
-<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr_from</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.forwarder.Forwarder.forward" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">msg</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr_from</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.forwarder.Forwarder.forward" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -500,7 +532,14 @@ from the args and kwargs arguments, respectively.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder"><code class="docutils literal notranslate"><span class="pre">Forwarder</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder.run"><code class="docutils literal notranslate"><span class="pre">Forwarder.run()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder.config"><code class="docutils literal notranslate"><span class="pre">Forwarder.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder.cm"><code class="docutils literal notranslate"><span class="pre">Forwarder.cm</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder.pending_messages"><code class="docutils literal notranslate"><span class="pre">Forwarder.pending_messages</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder.pending_messages_lock"><code class="docutils literal notranslate"><span class="pre">Forwarder.pending_messages_lock</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder.interval"><code class="docutils literal notranslate"><span class="pre">Forwarder.interval</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder.number_forwarded_messages"><code class="docutils literal notranslate"><span class="pre">Forwarder.number_forwarded_messages</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder.messages_interval"><code class="docutils literal notranslate"><span class="pre">Forwarder.messages_interval</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder.start"><code class="docutils literal notranslate"><span class="pre">Forwarder.start()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder.run_forwarder"><code class="docutils literal notranslate"><span class="pre">Forwarder.run_forwarder()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder.process_pending_messages"><code class="docutils literal notranslate"><span class="pre">Forwarder.process_pending_messages()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.forwarder.Forwarder.forward"><code class="docutils literal notranslate"><span class="pre">Forwarder.forward()</span></code></a></li>

@@ -375,6 +375,16 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.config"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.example_input_array"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN.example_input_array</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.learning_rate"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN.learning_rate</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.criterion"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN.criterion</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.filter_sizes"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN.filter_sizes</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.n_filters"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN.n_filters</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.convs"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN.convs</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.fc"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN.fc</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.dropout"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN.dropout</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.epoch_global_number"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN.epoch_global_number</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.forward"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN.forward()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.configure_optimizers"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN.configure_optimizers()</span></code></a></li>
 </ul>
@@ -413,6 +423,56 @@ document.write(`
 <dd><p>Bases: <a class="reference internal" href="../../nebulamodel/index.html#nebula.core.models.nebulamodel.NebulaModel" title="nebula.core.models.nebulamodel.NebulaModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula.core.models.nebulamodel.NebulaModel</span></code></a></p>
 <p>Abstract class for the NEBULA model.</p>
 <p>This class is an abstract class that defines the interface for the NEBULA model.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.cnn.SentimentModelCNN.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.config" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.cnn.SentimentModelCNN.example_input_array">
+<span class="sig-name descname"><span class="pre">example_input_array</span></span><a class="headerlink" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.example_input_array" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.cnn.SentimentModelCNN.learning_rate">
+<span class="sig-name descname"><span class="pre">learning_rate</span></span><a class="headerlink" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.learning_rate" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.cnn.SentimentModelCNN.criterion">
+<span class="sig-name descname"><span class="pre">criterion</span></span><a class="headerlink" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.criterion" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.cnn.SentimentModelCNN.filter_sizes">
+<span class="sig-name descname"><span class="pre">filter_sizes</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">[2,</span> <span class="pre">3,</span> <span class="pre">4]</span></em><a class="headerlink" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.filter_sizes" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.cnn.SentimentModelCNN.n_filters">
+<span class="sig-name descname"><span class="pre">n_filters</span></span><a class="headerlink" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.n_filters" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.cnn.SentimentModelCNN.convs">
+<span class="sig-name descname"><span class="pre">convs</span></span><a class="headerlink" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.convs" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.cnn.SentimentModelCNN.fc">
+<span class="sig-name descname"><span class="pre">fc</span></span><a class="headerlink" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.fc" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.cnn.SentimentModelCNN.dropout">
+<span class="sig-name descname"><span class="pre">dropout</span></span><a class="headerlink" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.dropout" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.cnn.SentimentModelCNN.epoch_global_number">
+<span class="sig-name descname"><span class="pre">epoch_global_number</span></span><a class="headerlink" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.epoch_global_number" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.models.sentiment140.cnn.SentimentModelCNN.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.forward" title="Link to this definition">#</a></dt>
@@ -478,6 +538,16 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.config"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.example_input_array"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN.example_input_array</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.learning_rate"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN.learning_rate</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.criterion"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN.criterion</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.filter_sizes"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN.filter_sizes</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.n_filters"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN.n_filters</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.convs"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN.convs</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.fc"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN.fc</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.dropout"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN.dropout</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.epoch_global_number"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN.epoch_global_number</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.forward"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN.forward()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.cnn.SentimentModelCNN.configure_optimizers"><code class="docutils literal notranslate"><span class="pre">SentimentModelCNN.configure_optimizers()</span></code></a></li>
 </ul>

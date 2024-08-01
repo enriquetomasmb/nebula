@@ -380,6 +380,8 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.create_aggregator"><code class="docutils literal notranslate"><span class="pre">create_aggregator()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.create_target_aggregator"><code class="docutils literal notranslate"><span class="pre">create_target_aggregator()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.Aggregator"><code class="docutils literal notranslate"><span class="pre">Aggregator</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.Aggregator.config"><code class="docutils literal notranslate"><span class="pre">Aggregator.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.Aggregator.engine"><code class="docutils literal notranslate"><span class="pre">Aggregator.engine</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.Aggregator.cm"><code class="docutils literal notranslate"><span class="pre">Aggregator.cm</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.Aggregator.run_aggregation"><code class="docutils literal notranslate"><span class="pre">Aggregator.run_aggregation()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.Aggregator.update_federation_nodes"><code class="docutils literal notranslate"><span class="pre">Aggregator.update_federation_nodes()</span></code></a></li>
@@ -388,6 +390,7 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.Aggregator.get_nodes_pending_models_to_aggregate"><code class="docutils literal notranslate"><span class="pre">Aggregator.get_nodes_pending_models_to_aggregate()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.Aggregator.include_model_in_buffer"><code class="docutils literal notranslate"><span class="pre">Aggregator.include_model_in_buffer()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.Aggregator.get_aggregation"><code class="docutils literal notranslate"><span class="pre">Aggregator.get_aggregation()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.Aggregator.include_next_model_in_buffer"><code class="docutils literal notranslate"><span class="pre">Aggregator.include_next_model_in_buffer()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.Aggregator.print_model_size"><code class="docutils literal notranslate"><span class="pre">Aggregator.print_model_size()</span></code></a></li>
 </ul>
 </li>
@@ -471,6 +474,16 @@ document.write(`
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">abc.ABC</span></code></p>
 <p>Helper class that provides a standard way to create an ABC using
 inheritance.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.aggregation.aggregator.Aggregator.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#nebula.core.aggregation.aggregator.Aggregator.config" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.aggregation.aggregator.Aggregator.engine">
+<span class="sig-name descname"><span class="pre">engine</span></span><a class="headerlink" href="#nebula.core.aggregation.aggregator.Aggregator.engine" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="nebula.core.aggregation.aggregator.Aggregator.cm">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">cm</span></span><a class="headerlink" href="#nebula.core.aggregation.aggregator.Aggregator.cm" title="Link to this definition">#</a></dt>
@@ -483,7 +496,7 @@ inheritance.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.aggregation.aggregator.Aggregator.update_federation_nodes">
-<span class="sig-name descname"><span class="pre">update_federation_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">federation_nodes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.aggregation.aggregator.Aggregator.update_federation_nodes" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">update_federation_nodes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">federation_nodes</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.aggregation.aggregator.Aggregator.update_federation_nodes" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -493,7 +506,7 @@ inheritance.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.aggregation.aggregator.Aggregator.reset">
-<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.aggregation.aggregator.Aggregator.reset" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.aggregation.aggregator.Aggregator.reset" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -508,7 +521,12 @@ inheritance.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.aggregation.aggregator.Aggregator.get_aggregation">
-<span class="sig-name descname"><span class="pre">get_aggregation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.aggregation.aggregator.Aggregator.get_aggregation" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_aggregation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.aggregation.aggregator.Aggregator.get_aggregation" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.aggregation.aggregator.Aggregator.include_next_model_in_buffer">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">include_next_model_in_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">round</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.aggregation.aggregator.Aggregator.include_next_model_in_buffer" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -579,6 +597,8 @@ inheritance.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.create_aggregator"><code class="docutils literal notranslate"><span class="pre">create_aggregator()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.create_target_aggregator"><code class="docutils literal notranslate"><span class="pre">create_target_aggregator()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.Aggregator"><code class="docutils literal notranslate"><span class="pre">Aggregator</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.Aggregator.config"><code class="docutils literal notranslate"><span class="pre">Aggregator.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.Aggregator.engine"><code class="docutils literal notranslate"><span class="pre">Aggregator.engine</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.Aggregator.cm"><code class="docutils literal notranslate"><span class="pre">Aggregator.cm</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.Aggregator.run_aggregation"><code class="docutils literal notranslate"><span class="pre">Aggregator.run_aggregation()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.Aggregator.update_federation_nodes"><code class="docutils literal notranslate"><span class="pre">Aggregator.update_federation_nodes()</span></code></a></li>
@@ -587,6 +607,7 @@ inheritance.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.Aggregator.get_nodes_pending_models_to_aggregate"><code class="docutils literal notranslate"><span class="pre">Aggregator.get_nodes_pending_models_to_aggregate()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.Aggregator.include_model_in_buffer"><code class="docutils literal notranslate"><span class="pre">Aggregator.include_model_in_buffer()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.Aggregator.get_aggregation"><code class="docutils literal notranslate"><span class="pre">Aggregator.get_aggregation()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.Aggregator.include_next_model_in_buffer"><code class="docutils literal notranslate"><span class="pre">Aggregator.include_next_model_in_buffer()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.aggregator.Aggregator.print_model_size"><code class="docutils literal notranslate"><span class="pre">Aggregator.print_model_size()</span></code></a></li>
 </ul>
 </li>

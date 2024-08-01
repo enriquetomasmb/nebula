@@ -17,26 +17,29 @@ Module Contents
 
 .. py:class:: Forwarder(config, cm)
 
-   Bases: :py:obj:`threading.Thread`
+   .. py:attribute:: config
 
 
-   A class that represents a thread of control.
-
-   This class can be safely subclassed in a limited fashion. There are two ways
-   to specify the activity: by passing a callable object to the constructor, or
-   by overriding the run() method in a subclass.
+   .. py:attribute:: cm
 
 
+   .. py:attribute:: pending_messages
 
-   .. py:method:: run()
 
-      Method representing the thread's activity.
+   .. py:attribute:: pending_messages_lock
 
-      You may override this method in a subclass. The standard run() method
-      invokes the callable object passed to the object's constructor as the
-      target argument, if any, with sequential and keyword arguments taken
-      from the args and kwargs arguments, respectively.
 
+   .. py:attribute:: interval
+
+
+   .. py:attribute:: number_forwarded_messages
+
+
+   .. py:attribute:: messages_interval
+
+
+   .. py:method:: start()
+      :async:
 
 
 
@@ -51,5 +54,7 @@ Module Contents
 
 
    .. py:method:: forward(msg, addr_from)
+      :async:
+
 
 

@@ -33,6 +33,42 @@ Module Contents
    Bases: :py:obj:`torch.utils.data.Dataset`
 
 
+   .. py:attribute:: is_train
+
+
+   .. py:attribute:: name
+
+
+   .. py:attribute:: data
+      :value: []
+
+
+
+   .. py:attribute:: targets
+      :value: []
+
+
+
+   .. py:attribute:: serial_numbers
+      :value: []
+
+
+
+   .. py:attribute:: path_to_data
+
+
+   .. py:attribute:: transform
+
+
+   .. py:attribute:: mode
+
+
+   .. py:attribute:: image_list
+
+
+   .. py:attribute:: label_list
+
+
    .. py:method:: get_targets()
 
 

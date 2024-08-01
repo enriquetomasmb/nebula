@@ -54,13 +54,43 @@ Module Contents
    .. py:method:: log_metrics_by_epoch(phase, print_cm=False, plot_cm=False)
 
 
+   .. py:attribute:: train_metrics
+
+
+   .. py:attribute:: val_metrics
+
+
+   .. py:attribute:: test_metrics
+
+
+   .. py:attribute:: implementation
+
+
+   .. py:attribute:: classifier
+
+
+   .. py:attribute:: example_input_array
+
+
+   .. py:attribute:: learning_rate
+
+
+   .. py:attribute:: criterion
+
+
+   .. py:attribute:: model
+
+
+   .. py:attribute:: epoch_global_number
+
+
    .. py:method:: forward(x)
 
 
    .. py:method:: configure_optimizers()
 
 
-   .. py:method:: step(batch, phase)
+   .. py:method:: step(batch, batch_idx, phase)
 
 
    .. py:method:: training_step(batch, batch_id)

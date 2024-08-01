@@ -375,8 +375,25 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility"><code class="docutils literal notranslate"><span class="pre">Mobility</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.config"><code class="docutils literal notranslate"><span class="pre">Mobility.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.cm"><code class="docutils literal notranslate"><span class="pre">Mobility.cm</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.grace_time"><code class="docutils literal notranslate"><span class="pre">Mobility.grace_time</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.period"><code class="docutils literal notranslate"><span class="pre">Mobility.period</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.mobility"><code class="docutils literal notranslate"><span class="pre">Mobility.mobility</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.mobility_type"><code class="docutils literal notranslate"><span class="pre">Mobility.mobility_type</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.radius_federation"><code class="docutils literal notranslate"><span class="pre">Mobility.radius_federation</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.scheme_mobility"><code class="docutils literal notranslate"><span class="pre">Mobility.scheme_mobility</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.round_frequency"><code class="docutils literal notranslate"><span class="pre">Mobility.round_frequency</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.max_distance_with_direct_connections"><code class="docutils literal notranslate"><span class="pre">Mobility.max_distance_with_direct_connections</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.max_movement_random_strategy"><code class="docutils literal notranslate"><span class="pre">Mobility.max_movement_random_strategy</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.max_movement_nearest_strategy"><code class="docutils literal notranslate"><span class="pre">Mobility.max_movement_nearest_strategy</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.max_initiate_approximation"><code class="docutils literal notranslate"><span class="pre">Mobility.max_initiate_approximation</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.network_conditions"><code class="docutils literal notranslate"><span class="pre">Mobility.network_conditions</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.current_network_conditions"><code class="docutils literal notranslate"><span class="pre">Mobility.current_network_conditions</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.mobility_msg"><code class="docutils literal notranslate"><span class="pre">Mobility.mobility_msg</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.round"><code class="docutils literal notranslate"><span class="pre">Mobility.round</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.run"><code class="docutils literal notranslate"><span class="pre">Mobility.run()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.start"><code class="docutils literal notranslate"><span class="pre">Mobility.start()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.run_mobility"><code class="docutils literal notranslate"><span class="pre">Mobility.run_mobility()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.change_geo_location_random_strategy"><code class="docutils literal notranslate"><span class="pre">Mobility.change_geo_location_random_strategy()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.change_geo_location_nearest_neighbor_strategy"><code class="docutils literal notranslate"><span class="pre">Mobility.change_geo_location_nearest_neighbor_strategy()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.set_geo_location"><code class="docutils literal notranslate"><span class="pre">Mobility.set_geo_location()</span></code></a></li>
@@ -405,7 +422,7 @@ document.write(`
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="../../../../nebula.addons.html#nebula.addons.mobility.Mobility" title="nebula.addons.mobility.Mobility"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Mobility</span></code></a></p></td>
-<td><p>A class that represents a thread of control.</p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
@@ -416,54 +433,129 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="nebula.addons.mobility.Mobility">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.addons.mobility.</span></span><span class="sig-name descname"><span class="pre">Mobility</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">threading.Thread</span></code></p>
-<p>A class that represents a thread of control.</p>
-<p>This class can be safely subclassed in a limited fashion. There are two ways
-to specify the activity: by passing a callable object to the constructor, or
-by overriding the run() method in a subclass.</p>
-<dl class="field-list simple">
+<dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>cm</strong> (<a class="reference internal" href="../../core/network/communications/index.html#nebula.core.network.communications.CommunicationsManager" title="nebula.core.network.communications.CommunicationsManager"><em>nebula.core.network.communications.CommunicationsManager</em></a>)</p>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#nebula.addons.mobility.Mobility.config" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.cm">
+<span class="sig-name descname"><span class="pre">cm</span></span><a class="headerlink" href="#nebula.addons.mobility.Mobility.cm" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.grace_time">
+<span class="sig-name descname"><span class="pre">grace_time</span></span><a class="headerlink" href="#nebula.addons.mobility.Mobility.grace_time" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.period">
+<span class="sig-name descname"><span class="pre">period</span></span><a class="headerlink" href="#nebula.addons.mobility.Mobility.period" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.mobility">
+<span class="sig-name descname"><span class="pre">mobility</span></span><a class="headerlink" href="#nebula.addons.mobility.Mobility.mobility" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.mobility_type">
+<span class="sig-name descname"><span class="pre">mobility_type</span></span><a class="headerlink" href="#nebula.addons.mobility.Mobility.mobility_type" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.radius_federation">
+<span class="sig-name descname"><span class="pre">radius_federation</span></span><a class="headerlink" href="#nebula.addons.mobility.Mobility.radius_federation" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.scheme_mobility">
+<span class="sig-name descname"><span class="pre">scheme_mobility</span></span><a class="headerlink" href="#nebula.addons.mobility.Mobility.scheme_mobility" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.round_frequency">
+<span class="sig-name descname"><span class="pre">round_frequency</span></span><a class="headerlink" href="#nebula.addons.mobility.Mobility.round_frequency" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.max_distance_with_direct_connections">
+<span class="sig-name descname"><span class="pre">max_distance_with_direct_connections</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">300</span></em><a class="headerlink" href="#nebula.addons.mobility.Mobility.max_distance_with_direct_connections" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.max_movement_random_strategy">
+<span class="sig-name descname"><span class="pre">max_movement_random_strategy</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">100</span></em><a class="headerlink" href="#nebula.addons.mobility.Mobility.max_movement_random_strategy" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.max_movement_nearest_strategy">
+<span class="sig-name descname"><span class="pre">max_movement_nearest_strategy</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">100</span></em><a class="headerlink" href="#nebula.addons.mobility.Mobility.max_movement_nearest_strategy" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.max_initiate_approximation">
+<span class="sig-name descname"><span class="pre">max_initiate_approximation</span></span><a class="headerlink" href="#nebula.addons.mobility.Mobility.max_initiate_approximation" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.network_conditions">
+<span class="sig-name descname"><span class="pre">network_conditions</span></span><a class="headerlink" href="#nebula.addons.mobility.Mobility.network_conditions" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.current_network_conditions">
+<span class="sig-name descname"><span class="pre">current_network_conditions</span></span><a class="headerlink" href="#nebula.addons.mobility.Mobility.current_network_conditions" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.mobility_msg">
+<span class="sig-name descname"><span class="pre">mobility_msg</span></span><a class="headerlink" href="#nebula.addons.mobility.Mobility.mobility_msg" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.round">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">round</span></span><a class="headerlink" href="#nebula.addons.mobility.Mobility.round" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.run" title="Link to this definition">#</a></dt>
-<dd><p>Method representing the thread’s activity.</p>
-<p>You may override this method in a subclass. The standard run() method
-invokes the callable object passed to the object’s constructor as the
-target argument, if any, with sequential and keyword arguments taken
-from the args and kwargs arguments, respectively.</p>
-</dd></dl>
+<dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.start">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.start" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.run_mobility">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run_mobility</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.run_mobility" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.change_geo_location_random_strategy">
-<span class="sig-name descname"><span class="pre">change_geo_location_random_strategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.change_geo_location_random_strategy" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">change_geo_location_random_strategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.change_geo_location_random_strategy" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.change_geo_location_nearest_neighbor_strategy">
-<span class="sig-name descname"><span class="pre">change_geo_location_nearest_neighbor_strategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighbor_latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighbor_longitude</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.change_geo_location_nearest_neighbor_strategy" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">change_geo_location_nearest_neighbor_strategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">distance</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighbor_latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">neighbor_longitude</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.change_geo_location_nearest_neighbor_strategy" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.set_geo_location">
-<span class="sig-name descname"><span class="pre">set_geo_location</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.set_geo_location" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_geo_location</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">latitude</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">longitude</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.set_geo_location" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.change_geo_location">
-<span class="sig-name descname"><span class="pre">change_geo_location</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.change_geo_location" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">change_geo_location</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.change_geo_location" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.addons.mobility.Mobility.change_connections_based_on_distance">
-<span class="sig-name descname"><span class="pre">change_connections_based_on_distance</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.change_connections_based_on_distance" title="Link to this definition">#</a></dt>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">change_connections_based_on_distance</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.mobility.Mobility.change_connections_based_on_distance" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -524,8 +616,25 @@ from the args and kwargs arguments, respectively.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility"><code class="docutils literal notranslate"><span class="pre">Mobility</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.config"><code class="docutils literal notranslate"><span class="pre">Mobility.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.cm"><code class="docutils literal notranslate"><span class="pre">Mobility.cm</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.grace_time"><code class="docutils literal notranslate"><span class="pre">Mobility.grace_time</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.period"><code class="docutils literal notranslate"><span class="pre">Mobility.period</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.mobility"><code class="docutils literal notranslate"><span class="pre">Mobility.mobility</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.mobility_type"><code class="docutils literal notranslate"><span class="pre">Mobility.mobility_type</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.radius_federation"><code class="docutils literal notranslate"><span class="pre">Mobility.radius_federation</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.scheme_mobility"><code class="docutils literal notranslate"><span class="pre">Mobility.scheme_mobility</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.round_frequency"><code class="docutils literal notranslate"><span class="pre">Mobility.round_frequency</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.max_distance_with_direct_connections"><code class="docutils literal notranslate"><span class="pre">Mobility.max_distance_with_direct_connections</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.max_movement_random_strategy"><code class="docutils literal notranslate"><span class="pre">Mobility.max_movement_random_strategy</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.max_movement_nearest_strategy"><code class="docutils literal notranslate"><span class="pre">Mobility.max_movement_nearest_strategy</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.max_initiate_approximation"><code class="docutils literal notranslate"><span class="pre">Mobility.max_initiate_approximation</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.network_conditions"><code class="docutils literal notranslate"><span class="pre">Mobility.network_conditions</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.current_network_conditions"><code class="docutils literal notranslate"><span class="pre">Mobility.current_network_conditions</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.mobility_msg"><code class="docutils literal notranslate"><span class="pre">Mobility.mobility_msg</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.round"><code class="docutils literal notranslate"><span class="pre">Mobility.round</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.run"><code class="docutils literal notranslate"><span class="pre">Mobility.run()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.start"><code class="docutils literal notranslate"><span class="pre">Mobility.start()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.run_mobility"><code class="docutils literal notranslate"><span class="pre">Mobility.run_mobility()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.change_geo_location_random_strategy"><code class="docutils literal notranslate"><span class="pre">Mobility.change_geo_location_random_strategy()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.change_geo_location_nearest_neighbor_strategy"><code class="docutils literal notranslate"><span class="pre">Mobility.change_geo_location_nearest_neighbor_strategy()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.mobility.Mobility.set_geo_location"><code class="docutils literal notranslate"><span class="pre">Mobility.set_geo_location()</span></code></a></li>

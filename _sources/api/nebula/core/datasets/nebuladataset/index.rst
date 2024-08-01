@@ -26,6 +26,56 @@ Module Contents
    for loading and partitioning the dataset.
 
 
+   .. py:attribute:: num_classes
+
+
+   .. py:attribute:: partition_id
+
+
+   .. py:attribute:: partitions_number
+
+
+   .. py:attribute:: batch_size
+
+
+   .. py:attribute:: num_workers
+
+
+   .. py:attribute:: iid
+
+
+   .. py:attribute:: partition
+
+
+   .. py:attribute:: partition_parameter
+
+
+   .. py:attribute:: seed
+
+
+   .. py:attribute:: config
+
+
+   .. py:attribute:: train_set
+      :value: None
+
+
+
+   .. py:attribute:: train_indices_map
+      :value: None
+
+
+
+   .. py:attribute:: test_set
+      :value: None
+
+
+
+   .. py:attribute:: test_indices_map
+      :value: None
+
+
+
    .. py:method:: initialize_dataset()
       :abstractmethod:
 

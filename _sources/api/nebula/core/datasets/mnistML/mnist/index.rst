@@ -27,6 +27,24 @@ Module Contents
 
 
 
+   .. py:attribute:: partition_id
+
+
+   .. py:attribute:: partitions_number
+
+
+   .. py:attribute:: iid
+
+
+   .. py:attribute:: data_dir
+
+
+   .. py:attribute:: train_set
+
+
+   .. py:attribute:: test_set
+
+
    .. py:method:: train_dataloader()
 
 

@@ -375,12 +375,36 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.ContrastiveLoss"><code class="docutils literal notranslate"><span class="pre">ContrastiveLoss</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.ContrastiveLoss.mu"><code class="docutils literal notranslate"><span class="pre">ContrastiveLoss.mu</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.ContrastiveLoss.cross_entropy_loss"><code class="docutils literal notranslate"><span class="pre">ContrastiveLoss.cross_entropy_loss</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.ContrastiveLoss.forward"><code class="docutils literal notranslate"><span class="pre">ContrastiveLoss.forward()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel"><code class="docutils literal notranslate"><span class="pre">DualAggModel</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.process_metrics"><code class="docutils literal notranslate"><span class="pre">DualAggModel.process_metrics()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.log_metrics_by_epoch"><code class="docutils literal notranslate"><span class="pre">DualAggModel.log_metrics_by_epoch()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.input_channels"><code class="docutils literal notranslate"><span class="pre">DualAggModel.input_channels</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.num_classes"><code class="docutils literal notranslate"><span class="pre">DualAggModel.num_classes</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.learning_rate"><code class="docutils literal notranslate"><span class="pre">DualAggModel.learning_rate</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.mu"><code class="docutils literal notranslate"><span class="pre">DualAggModel.mu</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.local_train_metrics"><code class="docutils literal notranslate"><span class="pre">DualAggModel.local_train_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.local_val_metrics"><code class="docutils literal notranslate"><span class="pre">DualAggModel.local_val_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.local_test_metrics"><code class="docutils literal notranslate"><span class="pre">DualAggModel.local_test_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.historical_train_metrics"><code class="docutils literal notranslate"><span class="pre">DualAggModel.historical_train_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.historical_val_metrics"><code class="docutils literal notranslate"><span class="pre">DualAggModel.historical_val_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.historical_test_metrics"><code class="docutils literal notranslate"><span class="pre">DualAggModel.historical_test_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.global_train_metrics"><code class="docutils literal notranslate"><span class="pre">DualAggModel.global_train_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.global_val_metrics"><code class="docutils literal notranslate"><span class="pre">DualAggModel.global_val_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.global_test_metrics"><code class="docutils literal notranslate"><span class="pre">DualAggModel.global_test_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.local_epoch_global_number"><code class="docutils literal notranslate"><span class="pre">DualAggModel.local_epoch_global_number</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.historical_epoch_global_number"><code class="docutils literal notranslate"><span class="pre">DualAggModel.historical_epoch_global_number</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.global_epoch_global_number"><code class="docutils literal notranslate"><span class="pre">DualAggModel.global_epoch_global_number</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.config"><code class="docutils literal notranslate"><span class="pre">DualAggModel.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.example_input_array"><code class="docutils literal notranslate"><span class="pre">DualAggModel.example_input_array</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.criterion"><code class="docutils literal notranslate"><span class="pre">DualAggModel.criterion</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.model"><code class="docutils literal notranslate"><span class="pre">DualAggModel.model</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.historical_model"><code class="docutils literal notranslate"><span class="pre">DualAggModel.historical_model</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.global_model"><code class="docutils literal notranslate"><span class="pre">DualAggModel.global_model</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.forward"><code class="docutils literal notranslate"><span class="pre">DualAggModel.forward()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.configure_optimizers"><code class="docutils literal notranslate"><span class="pre">DualAggModel.configure_optimizers()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.step"><code class="docutils literal notranslate"><span class="pre">DualAggModel.step()</span></code></a></li>
@@ -434,6 +458,16 @@ document.write(`
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.core.models.cifar10.dualagg.</span></span><span class="sig-name descname"><span class="pre">ContrastiveLoss</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mu</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.ContrastiveLoss" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">torch.nn.Module</span></code></p>
 <p>Contrastive loss function.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.ContrastiveLoss.mu">
+<span class="sig-name descname"><span class="pre">mu</span></span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.ContrastiveLoss.mu" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.ContrastiveLoss.cross_entropy_loss">
+<span class="sig-name descname"><span class="pre">cross_entropy_loss</span></span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.ContrastiveLoss.cross_entropy_loss" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.ContrastiveLoss.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">local_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">historical_out</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.ContrastiveLoss.forward" title="Link to this definition">#</a></dt>
@@ -500,6 +534,116 @@ multiplied by a scaling factor mu.</p>
 :param : param plot_cm:</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.input_channels">
+<span class="sig-name descname"><span class="pre">input_channels</span></span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.input_channels" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.num_classes">
+<span class="sig-name descname"><span class="pre">num_classes</span></span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.num_classes" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.learning_rate">
+<span class="sig-name descname"><span class="pre">learning_rate</span></span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.learning_rate" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.mu">
+<span class="sig-name descname"><span class="pre">mu</span></span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.mu" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.local_train_metrics">
+<span class="sig-name descname"><span class="pre">local_train_metrics</span></span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.local_train_metrics" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.local_val_metrics">
+<span class="sig-name descname"><span class="pre">local_val_metrics</span></span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.local_val_metrics" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.local_test_metrics">
+<span class="sig-name descname"><span class="pre">local_test_metrics</span></span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.local_test_metrics" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.historical_train_metrics">
+<span class="sig-name descname"><span class="pre">historical_train_metrics</span></span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.historical_train_metrics" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.historical_val_metrics">
+<span class="sig-name descname"><span class="pre">historical_val_metrics</span></span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.historical_val_metrics" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.historical_test_metrics">
+<span class="sig-name descname"><span class="pre">historical_test_metrics</span></span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.historical_test_metrics" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.global_train_metrics">
+<span class="sig-name descname"><span class="pre">global_train_metrics</span></span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.global_train_metrics" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.global_val_metrics">
+<span class="sig-name descname"><span class="pre">global_val_metrics</span></span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.global_val_metrics" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.global_test_metrics">
+<span class="sig-name descname"><span class="pre">global_test_metrics</span></span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.global_test_metrics" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.local_epoch_global_number">
+<span class="sig-name descname"><span class="pre">local_epoch_global_number</span></span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.local_epoch_global_number" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.historical_epoch_global_number">
+<span class="sig-name descname"><span class="pre">historical_epoch_global_number</span></span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.historical_epoch_global_number" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.global_epoch_global_number">
+<span class="sig-name descname"><span class="pre">global_epoch_global_number</span></span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.global_epoch_global_number" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.config" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.example_input_array">
+<span class="sig-name descname"><span class="pre">example_input_array</span></span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.example_input_array" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.criterion">
+<span class="sig-name descname"><span class="pre">criterion</span></span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.criterion" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.model" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.historical_model">
+<span class="sig-name descname"><span class="pre">historical_model</span></span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.historical_model" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.global_model">
+<span class="sig-name descname"><span class="pre">global_model</span></span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.global_model" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'local'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.forward" title="Link to this definition">#</a></dt>
@@ -513,7 +657,7 @@ multiplied by a scaling factor mu.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.models.cifar10.dualagg.DualAggModel.step">
-<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.step" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.dualagg.DualAggModel.step" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -651,12 +795,36 @@ multiplied by a scaling factor mu.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.ContrastiveLoss"><code class="docutils literal notranslate"><span class="pre">ContrastiveLoss</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.ContrastiveLoss.mu"><code class="docutils literal notranslate"><span class="pre">ContrastiveLoss.mu</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.ContrastiveLoss.cross_entropy_loss"><code class="docutils literal notranslate"><span class="pre">ContrastiveLoss.cross_entropy_loss</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.ContrastiveLoss.forward"><code class="docutils literal notranslate"><span class="pre">ContrastiveLoss.forward()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel"><code class="docutils literal notranslate"><span class="pre">DualAggModel</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.process_metrics"><code class="docutils literal notranslate"><span class="pre">DualAggModel.process_metrics()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.log_metrics_by_epoch"><code class="docutils literal notranslate"><span class="pre">DualAggModel.log_metrics_by_epoch()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.input_channels"><code class="docutils literal notranslate"><span class="pre">DualAggModel.input_channels</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.num_classes"><code class="docutils literal notranslate"><span class="pre">DualAggModel.num_classes</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.learning_rate"><code class="docutils literal notranslate"><span class="pre">DualAggModel.learning_rate</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.mu"><code class="docutils literal notranslate"><span class="pre">DualAggModel.mu</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.local_train_metrics"><code class="docutils literal notranslate"><span class="pre">DualAggModel.local_train_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.local_val_metrics"><code class="docutils literal notranslate"><span class="pre">DualAggModel.local_val_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.local_test_metrics"><code class="docutils literal notranslate"><span class="pre">DualAggModel.local_test_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.historical_train_metrics"><code class="docutils literal notranslate"><span class="pre">DualAggModel.historical_train_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.historical_val_metrics"><code class="docutils literal notranslate"><span class="pre">DualAggModel.historical_val_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.historical_test_metrics"><code class="docutils literal notranslate"><span class="pre">DualAggModel.historical_test_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.global_train_metrics"><code class="docutils literal notranslate"><span class="pre">DualAggModel.global_train_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.global_val_metrics"><code class="docutils literal notranslate"><span class="pre">DualAggModel.global_val_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.global_test_metrics"><code class="docutils literal notranslate"><span class="pre">DualAggModel.global_test_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.local_epoch_global_number"><code class="docutils literal notranslate"><span class="pre">DualAggModel.local_epoch_global_number</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.historical_epoch_global_number"><code class="docutils literal notranslate"><span class="pre">DualAggModel.historical_epoch_global_number</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.global_epoch_global_number"><code class="docutils literal notranslate"><span class="pre">DualAggModel.global_epoch_global_number</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.config"><code class="docutils literal notranslate"><span class="pre">DualAggModel.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.example_input_array"><code class="docutils literal notranslate"><span class="pre">DualAggModel.example_input_array</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.criterion"><code class="docutils literal notranslate"><span class="pre">DualAggModel.criterion</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.model"><code class="docutils literal notranslate"><span class="pre">DualAggModel.model</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.historical_model"><code class="docutils literal notranslate"><span class="pre">DualAggModel.historical_model</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.global_model"><code class="docutils literal notranslate"><span class="pre">DualAggModel.global_model</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.forward"><code class="docutils literal notranslate"><span class="pre">DualAggModel.forward()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.configure_optimizers"><code class="docutils literal notranslate"><span class="pre">DualAggModel.configure_optimizers()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.dualagg.DualAggModel.step"><code class="docutils literal notranslate"><span class="pre">DualAggModel.step()</span></code></a></li>

@@ -46,6 +46,15 @@ Module Contents
    inheritance.
 
 
+   .. py:attribute:: aggregator
+
+
+   .. py:attribute:: trainer
+
+
+   .. py:attribute:: engine
+
+
    .. py:method:: get_round()
 
 
@@ -64,6 +73,18 @@ Module Contents
    inheritance.
 
 
+   .. py:attribute:: aggregator
+
+
+   .. py:attribute:: trainer
+
+
+   .. py:attribute:: engine
+
+
+   .. py:attribute:: addr
+
+
    .. py:method:: get_round()
 
 
@@ -74,6 +95,49 @@ Module Contents
 
 
 .. py:class:: Propagator(cm)
+
+   .. py:attribute:: engine
+      :type:  nebula.core.engine.Engine
+
+
+   .. py:attribute:: config
+      :type:  nebula.config.config.Config
+
+
+   .. py:attribute:: addr
+
+
+   .. py:attribute:: cm
+      :type:  nebula.core.network.communications.CommunicationsManager
+
+
+   .. py:attribute:: aggregator
+      :type:  nebula.core.aggregation.aggregator.Aggregator
+
+
+   .. py:attribute:: trainer
+      :type:  nebula.core.training.lightning.Lightning
+
+
+   .. py:attribute:: status_history
+
+
+   .. py:attribute:: interval
+
+
+   .. py:attribute:: model_interval
+
+
+   .. py:attribute:: early_stop
+
+
+   .. py:attribute:: stable_rounds_count
+      :value: 0
+
+
+
+   .. py:attribute:: strategies
+
 
    .. py:method:: start()
 
@@ -88,11 +152,6 @@ Module Contents
 
 
    .. py:method:: propagate(strategy_id)
-      :async:
-
-
-
-   .. py:method:: propagate_continuously(strategy_id)
       :async:
 
 

@@ -17,6 +17,72 @@ Module Contents
 
 .. py:class:: CommunicationsManager(engine)
 
+   .. py:attribute:: addr
+
+
+   .. py:attribute:: host
+
+
+   .. py:attribute:: port
+
+
+   .. py:attribute:: config
+
+
+   .. py:attribute:: id
+
+
+   .. py:attribute:: register_endpoint
+
+
+   .. py:attribute:: wait_endpoint
+
+
+   .. py:attribute:: connections_lock
+
+
+   .. py:attribute:: connections_manager_lock
+
+
+   .. py:attribute:: connection_attempt_lock_incoming
+
+
+   .. py:attribute:: connection_attempt_lock_outgoing
+
+
+   .. py:attribute:: pending_connections
+
+
+   .. py:attribute:: incoming_connections
+
+
+   .. py:attribute:: outgoing_connections
+
+
+   .. py:attribute:: received_messages_hashes
+
+
+   .. py:attribute:: receive_messages_lock
+
+
+   .. py:attribute:: connections_reconnect
+      :value: []
+
+
+
+   .. py:attribute:: max_connections
+      :value: 1000
+
+
+
+   .. py:attribute:: network_engine
+      :value: None
+
+
+
+   .. py:attribute:: stop_network_engine
+
+
    .. py:property:: engine
 
 
@@ -127,6 +193,8 @@ Module Contents
 
 
    .. py:method:: include_received_message_hash(hash_message)
+      :async:
+
 
 
    .. py:method:: send_message_to_neighbors(message, neighbors=None, interval=0)
@@ -139,7 +207,17 @@ Module Contents
 
 
 
+   .. py:method:: send_messages(messages, interval=0)
+      :async:
+
+
+
    .. py:method:: send_model(dest_addr, round, serialized_model, weight=1)
+      :async:
+
+
+
+   .. py:method:: send_models(models, round)
       :async:
 
 
@@ -170,23 +248,38 @@ Module Contents
 
 
    .. py:method:: get_all_addrs_current_connections(only_direct=False, only_undirected=False)
+      :async:
+
 
 
    .. py:method:: get_addrs_current_connections(only_direct=False, only_undirected=False, myself=False)
+      :async:
+
 
 
    .. py:method:: get_connection_by_addr(addr)
+      :async:
+
 
 
    .. py:method:: get_direct_connections()
+      :async:
+
 
 
    .. py:method:: get_undirect_connections()
+      :async:
+
 
 
    .. py:method:: get_nearest_connections(top = 1)
+      :async:
+
 
 
    .. py:method:: get_ready_connections()
+
+
+   .. py:method:: check_finished_experiment()
 
 

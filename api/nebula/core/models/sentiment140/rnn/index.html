@@ -375,6 +375,22 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.config"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.example_input_array"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.example_input_array</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.learning_rate"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.learning_rate</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.embedding_dim"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.embedding_dim</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.hidden_dim"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.hidden_dim</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.n_layers"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.n_layers</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.bidirectional"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.bidirectional</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.output_dim"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.output_dim</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.encoder"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.encoder</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.fc"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.fc</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.dropout"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.dropout</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.criterion"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.criterion</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.l1"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.l1</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.l2"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.l2</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.l3"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.l3</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.epoch_global_number"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.epoch_global_number</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.forward"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.forward()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.configure_optimizers"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.configure_optimizers()</span></code></a></li>
 </ul>
@@ -413,6 +429,86 @@ document.write(`
 <dd><p>Bases: <a class="reference internal" href="../../nebulamodel/index.html#nebula.core.models.nebulamodel.NebulaModel" title="nebula.core.models.nebulamodel.NebulaModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula.core.models.nebulamodel.NebulaModel</span></code></a></p>
 <p>Abstract class for the NEBULA model.</p>
 <p>This class is an abstract class that defines the interface for the NEBULA model.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.rnn.SentimentModelRNN.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.config" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.rnn.SentimentModelRNN.example_input_array">
+<span class="sig-name descname"><span class="pre">example_input_array</span></span><a class="headerlink" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.example_input_array" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.rnn.SentimentModelRNN.learning_rate">
+<span class="sig-name descname"><span class="pre">learning_rate</span></span><a class="headerlink" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.learning_rate" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.rnn.SentimentModelRNN.embedding_dim">
+<span class="sig-name descname"><span class="pre">embedding_dim</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">300</span></em><a class="headerlink" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.embedding_dim" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.rnn.SentimentModelRNN.hidden_dim">
+<span class="sig-name descname"><span class="pre">hidden_dim</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">256</span></em><a class="headerlink" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.hidden_dim" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.rnn.SentimentModelRNN.n_layers">
+<span class="sig-name descname"><span class="pre">n_layers</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.n_layers" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.rnn.SentimentModelRNN.bidirectional">
+<span class="sig-name descname"><span class="pre">bidirectional</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.bidirectional" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.rnn.SentimentModelRNN.output_dim">
+<span class="sig-name descname"><span class="pre">output_dim</span></span><a class="headerlink" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.output_dim" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.rnn.SentimentModelRNN.encoder">
+<span class="sig-name descname"><span class="pre">encoder</span></span><a class="headerlink" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.encoder" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.rnn.SentimentModelRNN.fc">
+<span class="sig-name descname"><span class="pre">fc</span></span><a class="headerlink" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.fc" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.rnn.SentimentModelRNN.dropout">
+<span class="sig-name descname"><span class="pre">dropout</span></span><a class="headerlink" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.dropout" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.rnn.SentimentModelRNN.criterion">
+<span class="sig-name descname"><span class="pre">criterion</span></span><a class="headerlink" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.criterion" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.rnn.SentimentModelRNN.l1">
+<span class="sig-name descname"><span class="pre">l1</span></span><a class="headerlink" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.l1" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.rnn.SentimentModelRNN.l2">
+<span class="sig-name descname"><span class="pre">l2</span></span><a class="headerlink" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.l2" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.rnn.SentimentModelRNN.l3">
+<span class="sig-name descname"><span class="pre">l3</span></span><a class="headerlink" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.l3" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.sentiment140.rnn.SentimentModelRNN.epoch_global_number">
+<span class="sig-name descname"><span class="pre">epoch_global_number</span></span><a class="headerlink" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.epoch_global_number" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.models.sentiment140.rnn.SentimentModelRNN.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.forward" title="Link to this definition">#</a></dt>
@@ -478,6 +574,22 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.config"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.example_input_array"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.example_input_array</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.learning_rate"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.learning_rate</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.embedding_dim"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.embedding_dim</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.hidden_dim"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.hidden_dim</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.n_layers"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.n_layers</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.bidirectional"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.bidirectional</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.output_dim"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.output_dim</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.encoder"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.encoder</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.fc"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.fc</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.dropout"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.dropout</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.criterion"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.criterion</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.l1"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.l1</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.l2"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.l2</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.l3"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.l3</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.epoch_global_number"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.epoch_global_number</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.forward"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.forward()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.sentiment140.rnn.SentimentModelRNN.configure_optimizers"><code class="docutils literal notranslate"><span class="pre">SentimentModelRNN.configure_optimizers()</span></code></a></li>
 </ul>

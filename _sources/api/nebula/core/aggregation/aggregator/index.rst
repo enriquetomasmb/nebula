@@ -54,6 +54,12 @@ Module Contents
    inheritance.
 
 
+   .. py:attribute:: config
+
+
+   .. py:attribute:: engine
+
+
    .. py:property:: cm
 
 
@@ -63,12 +69,16 @@ Module Contents
 
 
    .. py:method:: update_federation_nodes(federation_nodes)
+      :async:
+
 
 
    .. py:method:: set_waiting_global_update()
 
 
    .. py:method:: reset()
+      :async:
+
 
 
    .. py:method:: get_nodes_pending_models_to_aggregate()
@@ -80,6 +90,13 @@ Module Contents
 
 
    .. py:method:: get_aggregation()
+      :async:
+
+
+
+   .. py:method:: include_next_model_in_buffer(model, weight, source=None, round=None)
+      :async:
+
 
 
    .. py:method:: print_model_size(model)

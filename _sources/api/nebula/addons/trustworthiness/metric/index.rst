@@ -33,6 +33,21 @@ Module Contents
    Manager class to help store the output directory and handle calls from the FL framework.
 
 
+   .. py:attribute:: factsheet_file_nm
+      :value: 'factsheet.json'
+
+
+
+   .. py:attribute:: eval_metrics_file_nm
+      :value: 'eval_metrics.json'
+
+
+
+   .. py:attribute:: nebula_trust_results_nm
+      :value: 'nebula_trust_results.json'
+
+
+
    .. py:method:: evaluate(scenario, weights, use_weights=False)
 
       Evaluates the trustworthiness score.

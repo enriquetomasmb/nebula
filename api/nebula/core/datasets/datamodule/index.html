@@ -375,6 +375,35 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule"><code class="docutils literal notranslate"><span class="pre">DataModule</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.train_set"><code class="docutils literal notranslate"><span class="pre">DataModule.train_set</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.train_set_indices"><code class="docutils literal notranslate"><span class="pre">DataModule.train_set_indices</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.test_set"><code class="docutils literal notranslate"><span class="pre">DataModule.test_set</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.test_set_indices"><code class="docutils literal notranslate"><span class="pre">DataModule.test_set_indices</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.local_test_set_indices"><code class="docutils literal notranslate"><span class="pre">DataModule.local_test_set_indices</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.partition_id"><code class="docutils literal notranslate"><span class="pre">DataModule.partition_id</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.partitions_number"><code class="docutils literal notranslate"><span class="pre">DataModule.partitions_number</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.batch_size"><code class="docutils literal notranslate"><span class="pre">DataModule.batch_size</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.num_workers"><code class="docutils literal notranslate"><span class="pre">DataModule.num_workers</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.val_percent"><code class="docutils literal notranslate"><span class="pre">DataModule.val_percent</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.label_flipping"><code class="docutils literal notranslate"><span class="pre">DataModule.label_flipping</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.data_poisoning"><code class="docutils literal notranslate"><span class="pre">DataModule.data_poisoning</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.poisoned_percent"><code class="docutils literal notranslate"><span class="pre">DataModule.poisoned_percent</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.poisoned_ratio"><code class="docutils literal notranslate"><span class="pre">DataModule.poisoned_ratio</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.targeted"><code class="docutils literal notranslate"><span class="pre">DataModule.targeted</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.target_label"><code class="docutils literal notranslate"><span class="pre">DataModule.target_label</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.target_changed_label"><code class="docutils literal notranslate"><span class="pre">DataModule.target_changed_label</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.noise_type"><code class="docutils literal notranslate"><span class="pre">DataModule.noise_type</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.tr_subset"><code class="docutils literal notranslate"><span class="pre">DataModule.tr_subset</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.train_size"><code class="docutils literal notranslate"><span class="pre">DataModule.train_size</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.val_size"><code class="docutils literal notranslate"><span class="pre">DataModule.val_size</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.global_te_subset"><code class="docutils literal notranslate"><span class="pre">DataModule.global_te_subset</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.local_te_subset"><code class="docutils literal notranslate"><span class="pre">DataModule.local_te_subset</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.train_loader"><code class="docutils literal notranslate"><span class="pre">DataModule.train_loader</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.val_loader"><code class="docutils literal notranslate"><span class="pre">DataModule.val_loader</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.test_loader"><code class="docutils literal notranslate"><span class="pre">DataModule.test_loader</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.global_test_loader"><code class="docutils literal notranslate"><span class="pre">DataModule.global_test_loader</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.random_sampler"><code class="docutils literal notranslate"><span class="pre">DataModule.random_sampler</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.bootstrap_loader"><code class="docutils literal notranslate"><span class="pre">DataModule.bootstrap_loader</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.train_dataloader"><code class="docutils literal notranslate"><span class="pre">DataModule.train_dataloader()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.val_dataloader"><code class="docutils literal notranslate"><span class="pre">DataModule.val_dataloader()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.test_dataloader"><code class="docutils literal notranslate"><span class="pre">DataModule.test_dataloader()</span></code></a></li>
@@ -413,6 +442,151 @@ document.write(`
 <dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.core.datasets.datamodule.</span></span><span class="sig-name descname"><span class="pre">DataModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">train_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_set_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_set</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_set_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">local_test_set_indices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partition_id</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partitions_number</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">32</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">val_percent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_flipping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_poisoning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poisoned_persent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">poisoned_ratio</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targeted</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_changed_label</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'salt'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">lightning.LightningDataModule</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.train_set">
+<span class="sig-name descname"><span class="pre">train_set</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.train_set" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.train_set_indices">
+<span class="sig-name descname"><span class="pre">train_set_indices</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.train_set_indices" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.test_set">
+<span class="sig-name descname"><span class="pre">test_set</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.test_set" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.test_set_indices">
+<span class="sig-name descname"><span class="pre">test_set_indices</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.test_set_indices" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.local_test_set_indices">
+<span class="sig-name descname"><span class="pre">local_test_set_indices</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.local_test_set_indices" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.partition_id">
+<span class="sig-name descname"><span class="pre">partition_id</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.partition_id" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.partitions_number">
+<span class="sig-name descname"><span class="pre">partitions_number</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.partitions_number" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.batch_size">
+<span class="sig-name descname"><span class="pre">batch_size</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.batch_size" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.num_workers">
+<span class="sig-name descname"><span class="pre">num_workers</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.num_workers" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.val_percent">
+<span class="sig-name descname"><span class="pre">val_percent</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.val_percent" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.label_flipping">
+<span class="sig-name descname"><span class="pre">label_flipping</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.label_flipping" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.data_poisoning">
+<span class="sig-name descname"><span class="pre">data_poisoning</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.data_poisoning" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.poisoned_percent">
+<span class="sig-name descname"><span class="pre">poisoned_percent</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.poisoned_percent" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.poisoned_ratio">
+<span class="sig-name descname"><span class="pre">poisoned_ratio</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.poisoned_ratio" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.targeted">
+<span class="sig-name descname"><span class="pre">targeted</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.targeted" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.target_label">
+<span class="sig-name descname"><span class="pre">target_label</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.target_label" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.target_changed_label">
+<span class="sig-name descname"><span class="pre">target_changed_label</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.target_changed_label" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.noise_type">
+<span class="sig-name descname"><span class="pre">noise_type</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.noise_type" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.tr_subset">
+<span class="sig-name descname"><span class="pre">tr_subset</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.tr_subset" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.train_size">
+<span class="sig-name descname"><span class="pre">train_size</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.train_size" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.val_size">
+<span class="sig-name descname"><span class="pre">val_size</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.val_size" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.global_te_subset">
+<span class="sig-name descname"><span class="pre">global_te_subset</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.global_te_subset" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.local_te_subset">
+<span class="sig-name descname"><span class="pre">local_te_subset</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.local_te_subset" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.train_loader">
+<span class="sig-name descname"><span class="pre">train_loader</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.train_loader" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.val_loader">
+<span class="sig-name descname"><span class="pre">val_loader</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.val_loader" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.test_loader">
+<span class="sig-name descname"><span class="pre">test_loader</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.test_loader" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.global_test_loader">
+<span class="sig-name descname"><span class="pre">global_test_loader</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.global_test_loader" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.random_sampler">
+<span class="sig-name descname"><span class="pre">random_sampler</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.random_sampler" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.bootstrap_loader">
+<span class="sig-name descname"><span class="pre">bootstrap_loader</span></span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.bootstrap_loader" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.datasets.datamodule.DataModule.train_dataloader">
 <span class="sig-name descname"><span class="pre">train_dataloader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.datasets.datamodule.DataModule.train_dataloader" title="Link to this definition">#</a></dt>
@@ -486,6 +660,35 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule"><code class="docutils literal notranslate"><span class="pre">DataModule</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.train_set"><code class="docutils literal notranslate"><span class="pre">DataModule.train_set</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.train_set_indices"><code class="docutils literal notranslate"><span class="pre">DataModule.train_set_indices</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.test_set"><code class="docutils literal notranslate"><span class="pre">DataModule.test_set</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.test_set_indices"><code class="docutils literal notranslate"><span class="pre">DataModule.test_set_indices</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.local_test_set_indices"><code class="docutils literal notranslate"><span class="pre">DataModule.local_test_set_indices</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.partition_id"><code class="docutils literal notranslate"><span class="pre">DataModule.partition_id</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.partitions_number"><code class="docutils literal notranslate"><span class="pre">DataModule.partitions_number</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.batch_size"><code class="docutils literal notranslate"><span class="pre">DataModule.batch_size</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.num_workers"><code class="docutils literal notranslate"><span class="pre">DataModule.num_workers</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.val_percent"><code class="docutils literal notranslate"><span class="pre">DataModule.val_percent</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.label_flipping"><code class="docutils literal notranslate"><span class="pre">DataModule.label_flipping</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.data_poisoning"><code class="docutils literal notranslate"><span class="pre">DataModule.data_poisoning</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.poisoned_percent"><code class="docutils literal notranslate"><span class="pre">DataModule.poisoned_percent</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.poisoned_ratio"><code class="docutils literal notranslate"><span class="pre">DataModule.poisoned_ratio</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.targeted"><code class="docutils literal notranslate"><span class="pre">DataModule.targeted</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.target_label"><code class="docutils literal notranslate"><span class="pre">DataModule.target_label</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.target_changed_label"><code class="docutils literal notranslate"><span class="pre">DataModule.target_changed_label</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.noise_type"><code class="docutils literal notranslate"><span class="pre">DataModule.noise_type</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.tr_subset"><code class="docutils literal notranslate"><span class="pre">DataModule.tr_subset</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.train_size"><code class="docutils literal notranslate"><span class="pre">DataModule.train_size</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.val_size"><code class="docutils literal notranslate"><span class="pre">DataModule.val_size</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.global_te_subset"><code class="docutils literal notranslate"><span class="pre">DataModule.global_te_subset</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.local_te_subset"><code class="docutils literal notranslate"><span class="pre">DataModule.local_te_subset</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.train_loader"><code class="docutils literal notranslate"><span class="pre">DataModule.train_loader</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.val_loader"><code class="docutils literal notranslate"><span class="pre">DataModule.val_loader</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.test_loader"><code class="docutils literal notranslate"><span class="pre">DataModule.test_loader</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.global_test_loader"><code class="docutils literal notranslate"><span class="pre">DataModule.global_test_loader</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.random_sampler"><code class="docutils literal notranslate"><span class="pre">DataModule.random_sampler</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.bootstrap_loader"><code class="docutils literal notranslate"><span class="pre">DataModule.bootstrap_loader</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.train_dataloader"><code class="docutils literal notranslate"><span class="pre">DataModule.train_dataloader()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.val_dataloader"><code class="docutils literal notranslate"><span class="pre">DataModule.val_dataloader()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.datasets.datamodule.DataModule.test_dataloader"><code class="docutils literal notranslate"><span class="pre">DataModule.test_dataloader()</span></code></a></li>

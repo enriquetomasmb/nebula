@@ -378,12 +378,15 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.cossim_euclidean"><code class="docutils literal notranslate"><span class="pre">cossim_euclidean()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.BlockchainReputation"><code class="docutils literal notranslate"><span class="pre">BlockchainReputation</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.BlockchainReputation.ALGORITHM_MAP"><code class="docutils literal notranslate"><span class="pre">BlockchainReputation.ALGORITHM_MAP</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.BlockchainReputation.config"><code class="docutils literal notranslate"><span class="pre">BlockchainReputation.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.BlockchainReputation.node_name"><code class="docutils literal notranslate"><span class="pre">BlockchainReputation.node_name</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.BlockchainReputation.run_aggregation"><code class="docutils literal notranslate"><span class="pre">BlockchainReputation.run_aggregation()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.print_table"><code class="docutils literal notranslate"><span class="pre">print_table()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.print_with_frame"><code class="docutils literal notranslate"><span class="pre">print_with_frame()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.BlockchainHandler"><code class="docutils literal notranslate"><span class="pre">BlockchainHandler</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.BlockchainHandler.round"><code class="docutils literal notranslate"><span class="pre">BlockchainHandler.round</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.BlockchainHandler.oracle_url"><code class="docutils literal notranslate"><span class="pre">BlockchainHandler.oracle_url</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.BlockchainHandler.rest_header"><code class="docutils literal notranslate"><span class="pre">BlockchainHandler.rest_header</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.BlockchainHandler.verify_balance"><code class="docutils literal notranslate"><span class="pre">BlockchainHandler.verify_balance()</span></code></a></li>
@@ -465,6 +468,16 @@ Returns: aggregated model</p>
 <span class="sig-name descname"><span class="pre">ALGORITHM_MAP</span></span><a class="headerlink" href="#nebula.core.aggregation.blockchainReputation.BlockchainReputation.ALGORITHM_MAP" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.aggregation.blockchainReputation.BlockchainReputation.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#nebula.core.aggregation.blockchainReputation.BlockchainReputation.config" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.aggregation.blockchainReputation.BlockchainReputation.node_name">
+<span class="sig-name descname"><span class="pre">node_name</span></span><a class="headerlink" href="#nebula.core.aggregation.blockchainReputation.BlockchainReputation.node_name" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.aggregation.blockchainReputation.BlockchainReputation.run_aggregation">
 <span class="sig-name descname"><span class="pre">run_aggregation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_buffer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.aggregation.blockchainReputation.BlockchainReputation.run_aggregation" title="Link to this definition">#</a></dt>
@@ -519,6 +532,11 @@ Returns: aggregated model</p>
 <dt class="sig sig-object py" id="nebula.core.aggregation.blockchainReputation.BlockchainHandler">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.core.aggregation.blockchainReputation.</span></span><span class="sig-name descname"><span class="pre">BlockchainHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">home_address</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.aggregation.blockchainReputation.BlockchainHandler" title="Link to this definition">#</a></dt>
 <dd><p>Handles interaction with Oracle and Non-Validator Node of Blockchain Network</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.aggregation.blockchainReputation.BlockchainHandler.round">
+<span class="sig-name descname"><span class="pre">round</span></span><a class="headerlink" href="#nebula.core.aggregation.blockchainReputation.BlockchainHandler.round" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py property">
 <dt class="sig sig-object py" id="nebula.core.aggregation.blockchainReputation.BlockchainHandler.oracle_url">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">oracle_url</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#nebula.core.aggregation.blockchainReputation.BlockchainHandler.oracle_url" title="Link to this definition">#</a></dt>
@@ -695,12 +713,15 @@ Returns: None</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.cossim_euclidean"><code class="docutils literal notranslate"><span class="pre">cossim_euclidean()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.BlockchainReputation"><code class="docutils literal notranslate"><span class="pre">BlockchainReputation</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.BlockchainReputation.ALGORITHM_MAP"><code class="docutils literal notranslate"><span class="pre">BlockchainReputation.ALGORITHM_MAP</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.BlockchainReputation.config"><code class="docutils literal notranslate"><span class="pre">BlockchainReputation.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.BlockchainReputation.node_name"><code class="docutils literal notranslate"><span class="pre">BlockchainReputation.node_name</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.BlockchainReputation.run_aggregation"><code class="docutils literal notranslate"><span class="pre">BlockchainReputation.run_aggregation()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.print_table"><code class="docutils literal notranslate"><span class="pre">print_table()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.print_with_frame"><code class="docutils literal notranslate"><span class="pre">print_with_frame()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.BlockchainHandler"><code class="docutils literal notranslate"><span class="pre">BlockchainHandler</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.BlockchainHandler.round"><code class="docutils literal notranslate"><span class="pre">BlockchainHandler.round</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.BlockchainHandler.oracle_url"><code class="docutils literal notranslate"><span class="pre">BlockchainHandler.oracle_url</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.BlockchainHandler.rest_header"><code class="docutils literal notranslate"><span class="pre">BlockchainHandler.rest_header</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.aggregation.blockchainReputation.BlockchainHandler.verify_balance"><code class="docutils literal notranslate"><span class="pre">BlockchainHandler.verify_balance()</span></code></a></li>

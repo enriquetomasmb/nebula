@@ -24,6 +24,12 @@ Module Contents
    Contrastive loss function.
 
 
+   .. py:attribute:: mu
+
+
+   .. py:attribute:: cross_entropy_loss
+
+
    .. py:method:: forward(local_out, global_out, historical_out, labels)
 
       Calculates the contrastive loss between the local output, global output, and historical output.
@@ -81,6 +87,72 @@ Module Contents
 
 
 
+   .. py:attribute:: input_channels
+
+
+   .. py:attribute:: num_classes
+
+
+   .. py:attribute:: learning_rate
+
+
+   .. py:attribute:: mu
+
+
+   .. py:attribute:: local_train_metrics
+
+
+   .. py:attribute:: local_val_metrics
+
+
+   .. py:attribute:: local_test_metrics
+
+
+   .. py:attribute:: historical_train_metrics
+
+
+   .. py:attribute:: historical_val_metrics
+
+
+   .. py:attribute:: historical_test_metrics
+
+
+   .. py:attribute:: global_train_metrics
+
+
+   .. py:attribute:: global_val_metrics
+
+
+   .. py:attribute:: global_test_metrics
+
+
+   .. py:attribute:: local_epoch_global_number
+
+
+   .. py:attribute:: historical_epoch_global_number
+
+
+   .. py:attribute:: global_epoch_global_number
+
+
+   .. py:attribute:: config
+
+
+   .. py:attribute:: example_input_array
+
+
+   .. py:attribute:: criterion
+
+
+   .. py:attribute:: model
+
+
+   .. py:attribute:: historical_model
+
+
+   .. py:attribute:: global_model
+
+
    .. py:method:: forward(x, mode='local')
 
       Forward pass of the model.
@@ -90,7 +162,7 @@ Module Contents
    .. py:method:: configure_optimizers()
 
 
-   .. py:method:: step(batch, phase)
+   .. py:method:: step(batch, batch_idx, phase)
 
 
    .. py:method:: training_step(batch, batch_id)

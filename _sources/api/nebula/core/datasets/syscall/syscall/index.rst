@@ -21,6 +21,41 @@ Module Contents
    Bases: :py:obj:`torchvision.datasets.MNIST`
 
 
+   .. py:attribute:: transform
+
+
+   .. py:attribute:: target_transform
+
+
+   .. py:attribute:: partition_id
+
+
+   .. py:attribute:: partitions_number
+
+
+   .. py:attribute:: download
+
+
+   .. py:attribute:: download_link
+      :value: 'https://files.ifi.uzh.ch/CSG/research/fl/data/syscall.zip'
+
+
+
+   .. py:attribute:: train
+
+
+   .. py:attribute:: root
+
+
+   .. py:attribute:: training_file
+
+
+   .. py:attribute:: test_file
+
+
+   .. py:attribute:: data_and_targets
+
+
    .. py:method:: dataset_download()
 
 

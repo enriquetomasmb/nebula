@@ -383,6 +383,16 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.process_metrics"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.process_metrics()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.log_metrics_by_epoch"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.log_metrics_by_epoch()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.train_metrics"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.train_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.val_metrics"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.val_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.test_metrics"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.test_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.implementation"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.implementation</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.classifier"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.classifier</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.example_input_array"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.example_input_array</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.learning_rate"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.learning_rate</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.criterion"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.criterion</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.model"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.model</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.epoch_global_number"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.epoch_global_number</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.forward"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.forward()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.configure_optimizers"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.configure_optimizers()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.step"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.step()</span></code></a></li>
@@ -484,6 +494,56 @@ document.write(`
 <span class="sig-name descname"><span class="pre">log_metrics_by_epoch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">phase</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_cm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">plot_cm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.log_metrics_by_epoch" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.train_metrics">
+<span class="sig-name descname"><span class="pre">train_metrics</span></span><a class="headerlink" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.train_metrics" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.val_metrics">
+<span class="sig-name descname"><span class="pre">val_metrics</span></span><a class="headerlink" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.val_metrics" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.test_metrics">
+<span class="sig-name descname"><span class="pre">test_metrics</span></span><a class="headerlink" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.test_metrics" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.implementation">
+<span class="sig-name descname"><span class="pre">implementation</span></span><a class="headerlink" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.implementation" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.classifier">
+<span class="sig-name descname"><span class="pre">classifier</span></span><a class="headerlink" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.classifier" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.example_input_array">
+<span class="sig-name descname"><span class="pre">example_input_array</span></span><a class="headerlink" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.example_input_array" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.learning_rate">
+<span class="sig-name descname"><span class="pre">learning_rate</span></span><a class="headerlink" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.learning_rate" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.criterion">
+<span class="sig-name descname"><span class="pre">criterion</span></span><a class="headerlink" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.criterion" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.model" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.epoch_global_number">
+<span class="sig-name descname"><span class="pre">epoch_global_number</span></span><a class="headerlink" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.epoch_global_number" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.forward" title="Link to this definition">#</a></dt>
@@ -496,7 +556,7 @@ document.write(`
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.step">
-<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.step" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">phase</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.step" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -590,6 +650,16 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.process_metrics"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.process_metrics()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.log_metrics_by_epoch"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.log_metrics_by_epoch()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.train_metrics"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.train_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.val_metrics"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.val_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.test_metrics"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.test_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.implementation"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.implementation</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.classifier"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.classifier</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.example_input_array"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.example_input_array</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.learning_rate"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.learning_rate</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.criterion"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.criterion</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.model"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.model</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.epoch_global_number"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.epoch_global_number</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.forward"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.forward()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.configure_optimizers"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.configure_optimizers()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.cifar10.resnet.CIFAR10ModelResNet.step"><code class="docutils literal notranslate"><span class="pre">CIFAR10ModelResNet.step()</span></code></a></li>

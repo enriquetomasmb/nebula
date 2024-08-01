@@ -381,18 +381,24 @@ document.write(`
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.GLLNeuronInversionAttack"><code class="docutils literal notranslate"><span class="pre">GLLNeuronInversionAttack</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.GLLNeuronInversionAttack.strength"><code class="docutils literal notranslate"><span class="pre">GLLNeuronInversionAttack.strength</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.GLLNeuronInversionAttack.perc"><code class="docutils literal notranslate"><span class="pre">GLLNeuronInversionAttack.perc</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.GLLNeuronInversionAttack.attack"><code class="docutils literal notranslate"><span class="pre">GLLNeuronInversionAttack.attack()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.NoiseInjectionAttack"><code class="docutils literal notranslate"><span class="pre">NoiseInjectionAttack</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.NoiseInjectionAttack.strength"><code class="docutils literal notranslate"><span class="pre">NoiseInjectionAttack.strength</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.NoiseInjectionAttack.perc"><code class="docutils literal notranslate"><span class="pre">NoiseInjectionAttack.perc</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.NoiseInjectionAttack.attack"><code class="docutils literal notranslate"><span class="pre">NoiseInjectionAttack.attack()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.SwappingWeightsAttack"><code class="docutils literal notranslate"><span class="pre">SwappingWeightsAttack</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.SwappingWeightsAttack.layer_idx"><code class="docutils literal notranslate"><span class="pre">SwappingWeightsAttack.layer_idx</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.SwappingWeightsAttack.attack"><code class="docutils literal notranslate"><span class="pre">SwappingWeightsAttack.attack()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.DelayerAttack"><code class="docutils literal notranslate"><span class="pre">DelayerAttack</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.DelayerAttack.weights"><code class="docutils literal notranslate"><span class="pre">DelayerAttack.weights</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.DelayerAttack.attack"><code class="docutils literal notranslate"><span class="pre">DelayerAttack.attack()</span></code></a></li>
 </ul>
 </li>
@@ -470,6 +476,16 @@ attacked weights.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.addons.attacks.attacks.</span></span><span class="sig-name descname"><span class="pre">GLLNeuronInversionAttack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strength</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.attacks.attacks.GLLNeuronInversionAttack" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#nebula.addons.attacks.attacks.Attack" title="nebula.addons.attacks.attacks.Attack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Attack</span></code></a></p>
 <p>Function to perform neuron inversion attack on the received weights.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.attacks.attacks.GLLNeuronInversionAttack.strength">
+<span class="sig-name descname"><span class="pre">strength</span></span><a class="headerlink" href="#nebula.addons.attacks.attacks.GLLNeuronInversionAttack.strength" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.attacks.attacks.GLLNeuronInversionAttack.perc">
+<span class="sig-name descname"><span class="pre">perc</span></span><a class="headerlink" href="#nebula.addons.attacks.attacks.GLLNeuronInversionAttack.perc" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.addons.attacks.attacks.GLLNeuronInversionAttack.attack">
 <span class="sig-name descname"><span class="pre">attack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">received_weights</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.attacks.attacks.GLLNeuronInversionAttack.attack" title="Link to this definition">#</a></dt>
@@ -484,6 +500,16 @@ attacked weights.</p>
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.addons.attacks.attacks.</span></span><span class="sig-name descname"><span class="pre">NoiseInjectionAttack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">strength</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">perc</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1.0</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.attacks.attacks.NoiseInjectionAttack" title="Link to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#nebula.addons.attacks.attacks.Attack" title="nebula.addons.attacks.attacks.Attack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Attack</span></code></a></p>
 <p>Function to perform noise injection attack on the received weights.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.attacks.attacks.NoiseInjectionAttack.strength">
+<span class="sig-name descname"><span class="pre">strength</span></span><a class="headerlink" href="#nebula.addons.attacks.attacks.NoiseInjectionAttack.strength" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.attacks.attacks.NoiseInjectionAttack.perc">
+<span class="sig-name descname"><span class="pre">perc</span></span><a class="headerlink" href="#nebula.addons.attacks.attacks.NoiseInjectionAttack.perc" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.addons.attacks.attacks.NoiseInjectionAttack.attack">
 <span class="sig-name descname"><span class="pre">attack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">received_weights</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.attacks.attacks.NoiseInjectionAttack.attack" title="Link to this definition">#</a></dt>
@@ -503,6 +529,11 @@ attack performance is not consistent due to its stochasticity.</p>
 or it may be slow (scales quadratically with the layer size).
 Do not apply to last layer, as it would make the attack detectable (high loss
 on malicious node).</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.attacks.attacks.SwappingWeightsAttack.layer_idx">
+<span class="sig-name descname"><span class="pre">layer_idx</span></span><a class="headerlink" href="#nebula.addons.attacks.attacks.SwappingWeightsAttack.layer_idx" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.addons.attacks.attacks.SwappingWeightsAttack.attack">
 <span class="sig-name descname"><span class="pre">attack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">received_weights</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.attacks.attacks.SwappingWeightsAttack.attack" title="Link to this definition">#</a></dt>
@@ -518,6 +549,11 @@ attacked weights.</p>
 <dd><p>Bases: <a class="reference internal" href="#nebula.addons.attacks.attacks.Attack" title="nebula.addons.attacks.attacks.Attack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Attack</span></code></a></p>
 <p>Function to perform delayer attack on the received weights. It delays the
 weights for an indefinite number of rounds.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.attacks.attacks.DelayerAttack.weights">
+<span class="sig-name descname"><span class="pre">weights</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nebula.addons.attacks.attacks.DelayerAttack.weights" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.addons.attacks.attacks.DelayerAttack.attack">
 <span class="sig-name descname"><span class="pre">attack</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">received_weights</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.attacks.attacks.DelayerAttack.attack" title="Link to this definition">#</a></dt>
@@ -584,18 +620,24 @@ attacked weights.</p>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.GLLNeuronInversionAttack"><code class="docutils literal notranslate"><span class="pre">GLLNeuronInversionAttack</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.GLLNeuronInversionAttack.strength"><code class="docutils literal notranslate"><span class="pre">GLLNeuronInversionAttack.strength</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.GLLNeuronInversionAttack.perc"><code class="docutils literal notranslate"><span class="pre">GLLNeuronInversionAttack.perc</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.GLLNeuronInversionAttack.attack"><code class="docutils literal notranslate"><span class="pre">GLLNeuronInversionAttack.attack()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.NoiseInjectionAttack"><code class="docutils literal notranslate"><span class="pre">NoiseInjectionAttack</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.NoiseInjectionAttack.strength"><code class="docutils literal notranslate"><span class="pre">NoiseInjectionAttack.strength</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.NoiseInjectionAttack.perc"><code class="docutils literal notranslate"><span class="pre">NoiseInjectionAttack.perc</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.NoiseInjectionAttack.attack"><code class="docutils literal notranslate"><span class="pre">NoiseInjectionAttack.attack()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.SwappingWeightsAttack"><code class="docutils literal notranslate"><span class="pre">SwappingWeightsAttack</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.SwappingWeightsAttack.layer_idx"><code class="docutils literal notranslate"><span class="pre">SwappingWeightsAttack.layer_idx</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.SwappingWeightsAttack.attack"><code class="docutils literal notranslate"><span class="pre">SwappingWeightsAttack.attack()</span></code></a></li>
 </ul>
 </li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.DelayerAttack"><code class="docutils literal notranslate"><span class="pre">DelayerAttack</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.DelayerAttack.weights"><code class="docutils literal notranslate"><span class="pre">DelayerAttack.weights</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.attacks.attacks.DelayerAttack.attack"><code class="docutils literal notranslate"><span class="pre">DelayerAttack.attack()</span></code></a></li>
 </ul>
 </li>

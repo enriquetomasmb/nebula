@@ -104,6 +104,90 @@ Module Contents
 
 .. py:class:: Controller(args)
 
+   .. py:attribute:: scenario_name
+
+
+   .. py:attribute:: start_date_scenario
+      :value: None
+
+
+
+   .. py:attribute:: federation
+
+
+   .. py:attribute:: topology
+
+
+   .. py:attribute:: waf_port
+
+
+   .. py:attribute:: frontend_port
+
+
+   .. py:attribute:: grafana_port
+
+
+   .. py:attribute:: loki_port
+
+
+   .. py:attribute:: statistics_port
+
+
+   .. py:attribute:: simulation
+
+
+   .. py:attribute:: config_dir
+
+
+   .. py:attribute:: test
+
+
+   .. py:attribute:: log_dir
+
+
+   .. py:attribute:: cert_dir
+
+
+   .. py:attribute:: env_path
+
+
+   .. py:attribute:: production
+
+
+   .. py:attribute:: advanced_analytics
+
+
+   .. py:attribute:: matrix
+
+
+   .. py:attribute:: root_path
+
+
+   .. py:attribute:: network_subnet
+
+
+   .. py:attribute:: network_gateway
+
+
+   .. py:attribute:: config
+
+
+   .. py:attribute:: topologymanager
+      :value: None
+
+
+
+   .. py:attribute:: n_nodes
+      :value: 0
+
+
+
+   .. py:attribute:: mender
+
+
+   .. py:attribute:: use_blockchain
+
+
    .. py:method:: start()
 
 

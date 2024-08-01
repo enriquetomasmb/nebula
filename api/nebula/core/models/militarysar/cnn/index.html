@@ -375,6 +375,13 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN"><code class="docutils literal notranslate"><span class="pre">MilitarySARModelCNN</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.example_input_array"><code class="docutils literal notranslate"><span class="pre">MilitarySARModelCNN.example_input_array</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.learning_rate"><code class="docutils literal notranslate"><span class="pre">MilitarySARModelCNN.learning_rate</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.momentum"><code class="docutils literal notranslate"><span class="pre">MilitarySARModelCNN.momentum</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.weight_decay"><code class="docutils literal notranslate"><span class="pre">MilitarySARModelCNN.weight_decay</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.dropout_rate"><code class="docutils literal notranslate"><span class="pre">MilitarySARModelCNN.dropout_rate</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.criterion"><code class="docutils literal notranslate"><span class="pre">MilitarySARModelCNN.criterion</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.model"><code class="docutils literal notranslate"><span class="pre">MilitarySARModelCNN.model</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.forward"><code class="docutils literal notranslate"><span class="pre">MilitarySARModelCNN.forward()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.configure_optimizers"><code class="docutils literal notranslate"><span class="pre">MilitarySARModelCNN.configure_optimizers()</span></code></a></li>
 </ul>
@@ -413,6 +420,41 @@ document.write(`
 <dd><p>Bases: <a class="reference internal" href="../../nebulamodel/index.html#nebula.core.models.nebulamodel.NebulaModel" title="nebula.core.models.nebulamodel.NebulaModel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">nebula.core.models.nebulamodel.NebulaModel</span></code></a></p>
 <p>Abstract class for the NEBULA model.</p>
 <p>This class is an abstract class that defines the interface for the NEBULA model.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.militarysar.cnn.MilitarySARModelCNN.example_input_array">
+<span class="sig-name descname"><span class="pre">example_input_array</span></span><a class="headerlink" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.example_input_array" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.militarysar.cnn.MilitarySARModelCNN.learning_rate">
+<span class="sig-name descname"><span class="pre">learning_rate</span></span><a class="headerlink" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.learning_rate" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.militarysar.cnn.MilitarySARModelCNN.momentum">
+<span class="sig-name descname"><span class="pre">momentum</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.9</span></em><a class="headerlink" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.momentum" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.militarysar.cnn.MilitarySARModelCNN.weight_decay">
+<span class="sig-name descname"><span class="pre">weight_decay</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.004</span></em><a class="headerlink" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.weight_decay" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.militarysar.cnn.MilitarySARModelCNN.dropout_rate">
+<span class="sig-name descname"><span class="pre">dropout_rate</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0.5</span></em><a class="headerlink" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.dropout_rate" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.militarysar.cnn.MilitarySARModelCNN.criterion">
+<span class="sig-name descname"><span class="pre">criterion</span></span><a class="headerlink" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.criterion" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.models.militarysar.cnn.MilitarySARModelCNN.model">
+<span class="sig-name descname"><span class="pre">model</span></span><a class="headerlink" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.model" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.models.militarysar.cnn.MilitarySARModelCNN.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.forward" title="Link to this definition">#</a></dt>
@@ -478,6 +520,13 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN"><code class="docutils literal notranslate"><span class="pre">MilitarySARModelCNN</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.example_input_array"><code class="docutils literal notranslate"><span class="pre">MilitarySARModelCNN.example_input_array</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.learning_rate"><code class="docutils literal notranslate"><span class="pre">MilitarySARModelCNN.learning_rate</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.momentum"><code class="docutils literal notranslate"><span class="pre">MilitarySARModelCNN.momentum</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.weight_decay"><code class="docutils literal notranslate"><span class="pre">MilitarySARModelCNN.weight_decay</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.dropout_rate"><code class="docutils literal notranslate"><span class="pre">MilitarySARModelCNN.dropout_rate</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.criterion"><code class="docutils literal notranslate"><span class="pre">MilitarySARModelCNN.criterion</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.model"><code class="docutils literal notranslate"><span class="pre">MilitarySARModelCNN.model</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.forward"><code class="docutils literal notranslate"><span class="pre">MilitarySARModelCNN.forward()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.militarysar.cnn.MilitarySARModelCNN.configure_optimizers"><code class="docutils literal notranslate"><span class="pre">MilitarySARModelCNN.configure_optimizers()</span></code></a></li>
 </ul>

@@ -25,6 +25,39 @@ Module Contents
    This class is an abstract class that defines the interface for the NEBULA model.
 
 
+   .. py:attribute:: config
+
+
+   .. py:attribute:: example_input_array
+
+
+   .. py:attribute:: learning_rate
+
+
+   .. py:attribute:: criterion
+
+
+   .. py:attribute:: fc1
+
+
+   .. py:attribute:: fc2
+
+
+   .. py:attribute:: fc3
+
+
+   .. py:attribute:: fc4
+
+
+   .. py:attribute:: fc5
+
+
+   .. py:attribute:: fc6
+
+
+   .. py:attribute:: epoch_global_number
+
+
    .. py:method:: encode(x)
 
 

@@ -30,6 +30,16 @@ Module Contents
 
 .. py:class:: Factsheet
 
+   .. py:attribute:: factsheet_file_nm
+      :value: 'factsheet.json'
+
+
+
+   .. py:attribute:: factsheet_template_file_nm
+      :value: 'factsheet_template.json'
+
+
+
    .. py:method:: populate_factsheet_pre_train(data, scenario_name)
 
       Populates the factsheet with values before the training.

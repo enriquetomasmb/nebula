@@ -375,7 +375,14 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health"><code class="docutils literal notranslate"><span class="pre">Health</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health.run"><code class="docutils literal notranslate"><span class="pre">Health.run()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health.addr"><code class="docutils literal notranslate"><span class="pre">Health.addr</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health.config"><code class="docutils literal notranslate"><span class="pre">Health.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health.cm"><code class="docutils literal notranslate"><span class="pre">Health.cm</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health.period"><code class="docutils literal notranslate"><span class="pre">Health.period</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health.alive_interval"><code class="docutils literal notranslate"><span class="pre">Health.alive_interval</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health.check_alive_interval"><code class="docutils literal notranslate"><span class="pre">Health.check_alive_interval</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health.timeout"><code class="docutils literal notranslate"><span class="pre">Health.timeout</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health.start"><code class="docutils literal notranslate"><span class="pre">Health.start()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health.run_send_alive"><code class="docutils literal notranslate"><span class="pre">Health.run_send_alive()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health.run_check_alive"><code class="docutils literal notranslate"><span class="pre">Health.run_check_alive()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health.alive"><code class="docutils literal notranslate"><span class="pre">Health.alive()</span></code></a></li>
@@ -401,7 +408,7 @@ document.write(`
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#nebula.core.network.health.Health" title="nebula.core.network.health.Health"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Health</span></code></a></p></td>
-<td><p>A class that represents a thread of control.</p></td>
+<td><p></p></td>
 </tr>
 </tbody>
 </table>
@@ -412,25 +419,50 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="nebula.core.network.health.Health">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.core.network.health.</span></span><span class="sig-name descname"><span class="pre">Health</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">addr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.health.Health" title="Link to this definition">#</a></dt>
-<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">threading.Thread</span></code></p>
-<p>A class that represents a thread of control.</p>
-<p>This class can be safely subclassed in a limited fashion. There are two ways
-to specify the activity: by passing a callable object to the constructor, or
-by overriding the run() method in a subclass.</p>
-<dl class="field-list simple">
+<dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>cm</strong> (<a class="reference internal" href="../communications/index.html#nebula.core.network.communications.CommunicationsManager" title="nebula.core.network.communications.CommunicationsManager"><em>nebula.core.network.communications.CommunicationsManager</em></a>)</p>
 </dd>
 </dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.health.Health.addr">
+<span class="sig-name descname"><span class="pre">addr</span></span><a class="headerlink" href="#nebula.core.network.health.Health.addr" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.health.Health.config">
+<span class="sig-name descname"><span class="pre">config</span></span><a class="headerlink" href="#nebula.core.network.health.Health.config" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.health.Health.cm">
+<span class="sig-name descname"><span class="pre">cm</span></span><a class="headerlink" href="#nebula.core.network.health.Health.cm" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.health.Health.period">
+<span class="sig-name descname"><span class="pre">period</span></span><a class="headerlink" href="#nebula.core.network.health.Health.period" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.health.Health.alive_interval">
+<span class="sig-name descname"><span class="pre">alive_interval</span></span><a class="headerlink" href="#nebula.core.network.health.Health.alive_interval" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.health.Health.check_alive_interval">
+<span class="sig-name descname"><span class="pre">check_alive_interval</span></span><a class="headerlink" href="#nebula.core.network.health.Health.check_alive_interval" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.health.Health.timeout">
+<span class="sig-name descname"><span class="pre">timeout</span></span><a class="headerlink" href="#nebula.core.network.health.Health.timeout" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py method">
-<dt class="sig sig-object py" id="nebula.core.network.health.Health.run">
-<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.health.Health.run" title="Link to this definition">#</a></dt>
-<dd><p>Method representing the thread’s activity.</p>
-<p>You may override this method in a subclass. The standard run() method
-invokes the callable object passed to the object’s constructor as the
-target argument, if any, with sequential and keyword arguments taken
-from the args and kwargs arguments, respectively.</p>
-</dd></dl>
+<dt class="sig sig-object py" id="nebula.core.network.health.Health.start">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.health.Health.start" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.network.health.Health.run_send_alive">
@@ -500,7 +532,14 @@ from the args and kwargs arguments, respectively.</p>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health"><code class="docutils literal notranslate"><span class="pre">Health</span></code></a><ul class="nav section-nav flex-column">
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health.run"><code class="docutils literal notranslate"><span class="pre">Health.run()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health.addr"><code class="docutils literal notranslate"><span class="pre">Health.addr</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health.config"><code class="docutils literal notranslate"><span class="pre">Health.config</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health.cm"><code class="docutils literal notranslate"><span class="pre">Health.cm</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health.period"><code class="docutils literal notranslate"><span class="pre">Health.period</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health.alive_interval"><code class="docutils literal notranslate"><span class="pre">Health.alive_interval</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health.check_alive_interval"><code class="docutils literal notranslate"><span class="pre">Health.check_alive_interval</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health.timeout"><code class="docutils literal notranslate"><span class="pre">Health.timeout</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health.start"><code class="docutils literal notranslate"><span class="pre">Health.start()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health.run_send_alive"><code class="docutils literal notranslate"><span class="pre">Health.run_send_alive()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health.run_check_alive"><code class="docutils literal notranslate"><span class="pre">Health.run_check_alive()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.health.Health.alive"><code class="docutils literal notranslate"><span class="pre">Health.alive()</span></code></a></li>

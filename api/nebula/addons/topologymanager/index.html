@@ -375,6 +375,13 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.topologymanager.TopologyManager"><code class="docutils literal notranslate"><span class="pre">TopologyManager</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.topologymanager.TopologyManager.scenario_name"><code class="docutils literal notranslate"><span class="pre">TopologyManager.scenario_name</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.topologymanager.TopologyManager.n_nodes"><code class="docutils literal notranslate"><span class="pre">TopologyManager.n_nodes</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.topologymanager.TopologyManager.b_symmetric"><code class="docutils literal notranslate"><span class="pre">TopologyManager.b_symmetric</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.topologymanager.TopologyManager.undirected_neighbor_num"><code class="docutils literal notranslate"><span class="pre">TopologyManager.undirected_neighbor_num</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.topologymanager.TopologyManager.topology"><code class="docutils literal notranslate"><span class="pre">TopologyManager.topology</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.topologymanager.TopologyManager.nodes"><code class="docutils literal notranslate"><span class="pre">TopologyManager.nodes</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.topologymanager.TopologyManager.b_fully_connected"><code class="docutils literal notranslate"><span class="pre">TopologyManager.b_fully_connected</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.topologymanager.TopologyManager.draw_graph"><code class="docutils literal notranslate"><span class="pre">TopologyManager.draw_graph()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.topologymanager.TopologyManager.generate_topology"><code class="docutils literal notranslate"><span class="pre">TopologyManager.generate_topology()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.topologymanager.TopologyManager.generate_server_topology"><code class="docutils literal notranslate"><span class="pre">TopologyManager.generate_server_topology()</span></code></a></li>
@@ -421,7 +428,42 @@ document.write(`
 <dl class="py class">
 <dt class="sig sig-object py" id="nebula.addons.topologymanager.TopologyManager">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.addons.topologymanager.</span></span><span class="sig-name descname"><span class="pre">TopologyManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scenario_name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_nodes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b_symmetric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">undirected_neighbor_num</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topology</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.topologymanager.TopologyManager" title="Link to this definition">#</a></dt>
-<dd><dl class="py method">
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.topologymanager.TopologyManager.scenario_name">
+<span class="sig-name descname"><span class="pre">scenario_name</span></span><a class="headerlink" href="#nebula.addons.topologymanager.TopologyManager.scenario_name" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.topologymanager.TopologyManager.n_nodes">
+<span class="sig-name descname"><span class="pre">n_nodes</span></span><a class="headerlink" href="#nebula.addons.topologymanager.TopologyManager.n_nodes" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.topologymanager.TopologyManager.b_symmetric">
+<span class="sig-name descname"><span class="pre">b_symmetric</span></span><a class="headerlink" href="#nebula.addons.topologymanager.TopologyManager.b_symmetric" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.topologymanager.TopologyManager.undirected_neighbor_num">
+<span class="sig-name descname"><span class="pre">undirected_neighbor_num</span></span><a class="headerlink" href="#nebula.addons.topologymanager.TopologyManager.undirected_neighbor_num" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.topologymanager.TopologyManager.topology">
+<span class="sig-name descname"><span class="pre">topology</span></span><a class="headerlink" href="#nebula.addons.topologymanager.TopologyManager.topology" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.topologymanager.TopologyManager.nodes">
+<span class="sig-name descname"><span class="pre">nodes</span></span><a class="headerlink" href="#nebula.addons.topologymanager.TopologyManager.nodes" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.topologymanager.TopologyManager.b_fully_connected">
+<span class="sig-name descname"><span class="pre">b_fully_connected</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#nebula.addons.topologymanager.TopologyManager.b_fully_connected" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="nebula.addons.topologymanager.TopologyManager.draw_graph">
 <span class="sig-name descname"><span class="pre">draw_graph</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.addons.topologymanager.TopologyManager.draw_graph" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
@@ -539,6 +581,13 @@ document.write(`
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.topologymanager.TopologyManager"><code class="docutils literal notranslate"><span class="pre">TopologyManager</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.topologymanager.TopologyManager.scenario_name"><code class="docutils literal notranslate"><span class="pre">TopologyManager.scenario_name</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.topologymanager.TopologyManager.n_nodes"><code class="docutils literal notranslate"><span class="pre">TopologyManager.n_nodes</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.topologymanager.TopologyManager.b_symmetric"><code class="docutils literal notranslate"><span class="pre">TopologyManager.b_symmetric</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.topologymanager.TopologyManager.undirected_neighbor_num"><code class="docutils literal notranslate"><span class="pre">TopologyManager.undirected_neighbor_num</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.topologymanager.TopologyManager.topology"><code class="docutils literal notranslate"><span class="pre">TopologyManager.topology</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.topologymanager.TopologyManager.nodes"><code class="docutils literal notranslate"><span class="pre">TopologyManager.nodes</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.topologymanager.TopologyManager.b_fully_connected"><code class="docutils literal notranslate"><span class="pre">TopologyManager.b_fully_connected</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.topologymanager.TopologyManager.draw_graph"><code class="docutils literal notranslate"><span class="pre">TopologyManager.draw_graph()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.topologymanager.TopologyManager.generate_topology"><code class="docutils literal notranslate"><span class="pre">TopologyManager.generate_topology()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.topologymanager.TopologyManager.generate_server_topology"><code class="docutils literal notranslate"><span class="pre">TopologyManager.generate_server_topology()</span></code></a></li>

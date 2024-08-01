@@ -20,6 +20,76 @@ Module Contents
    .. py:attribute:: DEFAULT_FEDERATED_ROUND
 
 
+   .. py:attribute:: cm
+
+
+   .. py:attribute:: reader
+
+
+   .. py:attribute:: writer
+
+
+   .. py:attribute:: id
+
+
+   .. py:attribute:: host
+
+
+   .. py:attribute:: port
+
+
+   .. py:attribute:: addr
+
+
+   .. py:attribute:: direct
+
+
+   .. py:attribute:: active
+
+
+   .. py:attribute:: last_active
+
+
+   .. py:attribute:: compression
+
+
+   .. py:attribute:: config
+
+
+   .. py:attribute:: federated_round
+
+
+   .. py:attribute:: latitude
+      :value: None
+
+
+
+   .. py:attribute:: longitude
+      :value: None
+
+
+
+   .. py:attribute:: loop
+
+
+   .. py:attribute:: read_task
+      :value: None
+
+
+
+   .. py:attribute:: EOT_CHAR
+      :value: b'\x01\x02\x03\x04'
+
+
+
+   .. py:attribute:: COMPRESSION_CHAR
+      :value: b'\x05\x06\x07\x08'
+
+
+
+   .. py:attribute:: DATA_TYPE_PREFIXES
+
+
    .. py:method:: get_addr()
 
 

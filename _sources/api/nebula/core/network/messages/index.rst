@@ -17,6 +17,15 @@ Module Contents
 
 .. py:class:: MessagesManager(addr, config, cm)
 
+   .. py:attribute:: addr
+
+
+   .. py:attribute:: config
+
+
+   .. py:attribute:: cm
+
+
    .. py:method:: generate_discovery_message(action, latitude=0.0, longitude=0.0)
 
 

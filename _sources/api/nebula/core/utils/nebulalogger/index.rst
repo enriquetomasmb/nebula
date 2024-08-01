@@ -20,6 +20,25 @@ Module Contents
    Bases: :py:obj:`aim.pytorch_lightning.AimLogger`
 
 
+   .. py:attribute:: config
+
+
+   .. py:attribute:: engine
+
+
+   .. py:attribute:: scenario_start_time
+
+
+   .. py:attribute:: local_step
+      :value: 0
+
+
+
+   .. py:attribute:: global_step
+      :value: 0
+
+
+
    .. py:method:: finalize(status = '')
 
 
