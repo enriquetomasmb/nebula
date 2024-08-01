@@ -121,7 +121,8 @@ class CommunicationsManager:
                 await self.handle_control_message(source, message_wrapper.control_message)
             elif message_wrapper.HasField("federation_message"):
                 if await self.include_received_message_hash(hashlib.md5(data).hexdigest()):
-                    await self.forwarder.forward(data, addr_from=addr_from)
+                    if self.config.participant["device_args"]["proxy"] or message_wrapper.federation_message.action == nebula_pb2.FederationMessage.Action.Value("FEDERATION_START"):
+                        await self.forwarder.forward(data, addr_from=addr_from)
                     await self.handle_federation_message(source, message_wrapper.federation_message)
             elif message_wrapper.HasField("model_message"):
                 if await self.include_received_message_hash(hashlib.md5(data).hexdigest()):
@@ -239,6 +240,15 @@ class CommunicationsManager:
 
         else:
             logging.info(f"🤖  handle_model_message | Tried to add a model while learning is not running")
+            if message.round != -1:
+                # Be sure that the model message is from the initialization round (round = -1)
+                logging.info(f"🤖  handle_model_message | Saving model from {source} for future round {message.round}")
+                await self.engine.aggregator.include_next_model_in_buffer(
+                    message.parameters,
+                    message.weight,
+                    source=source,
+                    round=message.round,
+                )
         return
 
     async def handle_connection_message(self, source, message):
