@@ -2,6 +2,10 @@ import asyncio
 import logging
 import os
 import docker
+import psutil
+import socket
+import time
+
 from nebula.addons.functions import print_msg_box
 from nebula.addons.attacks.attacks import create_attack
 from nebula.addons.reporter import Reporter
@@ -166,6 +170,7 @@ class Engine:
                 self._connection_disconnect_callback,
                 self._start_federation_callback,
                 self._federation_models_included_callback,
+                self.__nss_features_message_callback,
             ]
         )
 
@@ -292,6 +297,11 @@ class Engine:
             logging.error(f"Error updating round in connection: {e}")
         finally:
             await self.cm.get_connections_lock().release_async()
+
+    @event_handler(nebula_pb2.NSSFeaturesMessage, None)
+    async def __nss_features_message_callback(self, source, message):
+        logging.info(f"📝  handle_nss_features_message | Trigger | Received NSS features message from {source}")
+        pass
 
     async def create_trainer_module(self):
         asyncio.create_task(self._start_learning())
@@ -431,8 +441,18 @@ class Engine:
             logging.info(f"[Role {self.role}] Starting learning cycle...")
             await self.aggregator.update_federation_nodes(self.federation_nodes)
             await self._extended_learning_cycle()
-
             await self.get_round_lock().acquire_async()
+
+            # Extract Features needed for Node Selection Strategy
+            self.__nss_extract_features()
+            # Broadcast Features
+            logging.info(f"Broadcasting NSS features to the rest of the topology: {self.nss_features}")
+            message = self.cm.mm.generate_nss_features_message(self.nss_features)
+            await self.cm.send_message_to_neighbors(message)
+
+            _nss_features_msg = f"""NSS features for round {self.round}:\nCPU Usage (%): {self.nss_features['cpu_percent']}%\nBytes Sent: {self.nss_features['bytes_sent']}\nBytes Received: {self.nss_features['bytes_received']}\nLoss: {self.nss_features['loss']}\nData Size: {self.nss_features['data_size']}"""
+            print_msg_box(msg=_nss_features_msg, indent=2, title="NSS features")
+
             print_msg_box(msg=f"Round {self.round} of {self.total_rounds} finished.", indent=2, title="Round information")
             self.aggregator.reset()
             self.trainer.on_round_end()
@@ -517,6 +537,28 @@ class Engine:
         logging.info(f"Sending REPUTATION to the rest of the topology: {malicious_nodes}")
         message = self.cm.mm.generate_federation_message(nebula_pb2.FederationMessage.Action.REPUTATION, malicious_nodes)
         await self.cm.send_message_to_neighbors(message)
+
+    def __nss_get_latency(self, h, p):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        start = time.time()
+        s.connect((h, p))
+        s.close()
+        return (time.time() - start) * 1000
+
+    def __nss_extract_features(self):
+        """
+        Extract the features necessary for the node selection strategy.
+        """
+        nss_features = {}
+        nss_features["cpu_percent"] = psutil.cpu_percent()
+        net_io_counters = psutil.net_io_counters()
+        nss_features["bytes_sent"] = net_io_counters.bytes_sent
+        nss_features["bytes_received"] = net_io_counters.bytes_recv
+        # TODO
+        # nss_features["loss"] = float(self.trainer.???()["Train/Loss"])
+        nss_features["loss"] = 99.99
+        nss_features["data_size"] = self.trainer.get_model_weight()
+        self.nss_features = nss_features
 
 
 class MaliciousNode(Engine):

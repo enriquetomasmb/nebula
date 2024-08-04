@@ -22,6 +22,7 @@ message Wrapper {
     ModelMessage model_message = 5;
     ConnectionMessage connection_message = 6;
     ResponseMessage response_message = 7;
+    NSSFeaturesMessage nss_features_message = 8;
   }
 }
 
@@ -77,4 +78,13 @@ message ConnectionMessage {
 // Response transmits the outcome of a requested operation, including any errors.
 message ResponseMessage {
   string response = 1;      // Outcome of the requested operation.
+}
+
+// Message for Node Selection Strategy (NSS) features.
+message NSSFeaturesMessage {
+  float cpu_percent = 1;
+  int32 bytes_sent = 2;
+  int32 bytes_received = 3;
+  float loss = 4;
+  int32 data_size = 5;
 }

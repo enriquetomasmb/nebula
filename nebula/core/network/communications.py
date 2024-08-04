@@ -133,6 +133,8 @@ class CommunicationsManager:
                     await self.handle_model_message(source, message_wrapper.model_message)
             elif message_wrapper.HasField("connection_message"):
                 await self.handle_connection_message(source, message_wrapper.connection_message)
+            elif message_wrapper.HasField("nss_features_message"):
+                await self.handle_nss_features_message(source, message_wrapper.nss_features_message)
             else:
                 logging.info(f"Unknown handler for message: {message_wrapper}")
         except Exception as e:
@@ -239,6 +241,13 @@ class CommunicationsManager:
             await self.engine.event_manager.trigger_event(source, message)
         except Exception as e:
             logging.error(f"🔗  handle_connection_message | Error while processing: {message.action} | {e}")
+
+    async def handle_nss_features_message(self, source, message):
+        try:
+            logging.error(f"🔍  handle_nss_features_message | Received Message from: {source}")
+            await self.engine.event_manager.trigger_event(source, message)
+        except Exception as e:
+            logging.error(f"🔍  handle_nss_features_message | Error while processing: {message} | {e}")
 
     def get_connections_lock(self):
         return self.connections_lock
