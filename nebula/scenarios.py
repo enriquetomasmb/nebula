@@ -281,6 +281,7 @@ class ScenarioManagement:
             participant_config["mobility_args"]["radius_federation"] = self.scenario.radius_federation
             participant_config["mobility_args"]["scheme_mobility"] = self.scenario.scheme_mobility
             participant_config["mobility_args"]["round_frequency"] = self.scenario.round_frequency
+            participant_config["node_selection_strategy_args"]["enabled"] = False if self.scenario.node_selection_strategy == "default" else True
             participant_config["node_selection_strategy_args"]["strategy"] = self.scenario.node_selection_strategy
             participant_config["resource_args"]["resource_constricted"] = node_config["resourceConstricted"]
             participant_config["resource_args"]["resource_constraint_cpu"] = node_config["resourceConstraintCPU"]

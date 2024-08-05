@@ -13,6 +13,9 @@ from nebula.core.aggregation.aggregator import create_aggregator, create_malicio
 from nebula.core.eventmanager import EventManager, event_handler
 from nebula.core.network.communications import CommunicationsManager
 from nebula.core.pb import nebula_pb2
+from nebula.core.selectors.all_selector import AllSelector
+from nebula.core.selectors.priority_selector import PrioritySelector
+from nebula.core.selectors.random_selector import RandomSelector
 from nebula.core.utils.locker import Locker
 from lightning.pytorch.loggers import CSVLogger
 from nebula.core.utils.nebulalogger_tensorboard import NebulaTensorBoardLogger
@@ -90,7 +93,6 @@ class Engine:
         self.client = docker.from_env()
 
         print_banner()
-
         print_msg_box(msg=f"Name {self.name}\nRole: {self.role}", indent=2, title="Node information")
 
         self._trainer = None
@@ -100,6 +102,19 @@ class Engine:
         self.federation_nodes = set()
         self.initialized = False
         self.log_dir = os.path.join(config.participant["tracking_args"]["log_dir"], self.experiment_name)
+
+        self.node_selection_strategy_enabled = config.participant["node_selection_strategy_args"]["enabled"]
+        if self.node_selection_strategy_enabled:
+            self.nss_selector = config.participant["node_selection_strategy_args"]["strategy"]
+            if self.nss_selector == "all":
+                self.node_selection_strategy_selector = AllSelector()
+            elif self.nss_selector == "priority":
+                self.node_selection_strategy_selector = PrioritySelector()
+            elif self.nss_selector == "random":
+                self.node_selection_strategy_selector = RandomSelector()
+        nss_info_msg = f"Enabled: {self.node_selection_strategy_enabled}\n{f'Selector: {self.nss_selector}' if self.node_selection_strategy_enabled else ''}"
+        print_msg_box(msg=nss_info_msg, indent=2, title="NSS Info")
+
 
         self.security = security
         self.model_poisoning = model_poisoning
@@ -301,7 +316,18 @@ class Engine:
     @event_handler(nebula_pb2.NSSFeaturesMessage, None)
     async def __nss_features_message_callback(self, source, message):
         logging.info(f"📝  handle_nss_features_message | Trigger | Received NSS features message from {source}")
-        pass
+        if message is not None:
+            latency = self.__nss_get_latency(source)
+            features = {}
+            features["cpu_percent"] = message.cpu_percent
+            features["bytes_sent"] = message.bytes_sent
+            features["bytes_received"] = message.bytes_received
+            features["loss"] = message.loss
+            features["data_size"] = message.data_size
+            features["latency"] = latency
+            for neighbor in await self._get_current_neighbors():
+                self.node_selection_strategy_selector.add_neighbor(neighbor)
+            self.node_selection_strategy_selector.add_node_features(source, features)
 
     async def create_trainer_module(self):
         asyncio.create_task(self._start_learning())
@@ -443,15 +469,15 @@ class Engine:
             await self._extended_learning_cycle()
             await self.get_round_lock().acquire_async()
 
-            # Extract Features needed for Node Selection Strategy
-            self.__nss_extract_features()
-            # Broadcast Features
-            logging.info(f"Broadcasting NSS features to the rest of the topology: {self.nss_features}")
-            message = self.cm.mm.generate_nss_features_message(self.nss_features)
-            await self.cm.send_message_to_neighbors(message)
-
-            _nss_features_msg = f"""NSS features for round {self.round}:\nCPU Usage (%): {self.nss_features['cpu_percent']}%\nBytes Sent: {self.nss_features['bytes_sent']}\nBytes Received: {self.nss_features['bytes_received']}\nLoss: {self.nss_features['loss']}\nData Size: {self.nss_features['data_size']}"""
-            print_msg_box(msg=_nss_features_msg, indent=2, title="NSS features")
+            if self.node_selection_strategy_enabled:
+                # Extract Features needed for Node Selection Strategy
+                self.__nss_extract_features()
+                # Broadcast Features
+                logging.info(f"Broadcasting NSS features to the rest of the topology ...")
+                message = self.cm.mm.generate_nss_features_message(self.nss_features)
+                await self.cm.send_message_to_neighbors(message)
+                _nss_features_msg = f"""NSS features for round {self.round}:\nCPU Usage (%): {self.nss_features['cpu_percent']}%\nBytes Sent: {self.nss_features['bytes_sent']}\nBytes Received: {self.nss_features['bytes_received']}\nLoss: {self.nss_features['loss']}\nData Size: {self.nss_features['data_size']}"""
+                print_msg_box(msg=_nss_features_msg, indent=2, title="NSS features (this node)")
 
             print_msg_box(msg=f"Round {self.round} of {self.total_rounds} finished.", indent=2, title="Round information")
             self.aggregator.reset()
@@ -538,10 +564,11 @@ class Engine:
         message = self.cm.mm.generate_federation_message(nebula_pb2.FederationMessage.Action.REPUTATION, malicious_nodes)
         await self.cm.send_message_to_neighbors(message)
 
-    def __nss_get_latency(self, h, p):
+    def __nss_get_latency(self, source):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        host, port = source.split(":")
         start = time.time()
-        s.connect((h, p))
+        s.connect((host, int(port)))
         s.close()
         return (time.time() - start) * 1000
 
@@ -556,10 +583,13 @@ class Engine:
         nss_features["bytes_received"] = net_io_counters.bytes_recv
         # TODO
         # nss_features["loss"] = float(self.trainer.???()["Train/Loss"])
-        nss_features["loss"] = 99.99
+        nss_features["loss"] = -1
         nss_features["data_size"] = self.trainer.get_model_weight()
         self.nss_features = nss_features
 
+    async def _get_current_neighbors(self):
+        current_connections = await self.cm.get_all_addrs_current_connections(only_direct = True)
+        return set(current_connections)
 
 class MaliciousNode(Engine):
 

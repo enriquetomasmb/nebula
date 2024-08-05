@@ -71,6 +71,7 @@
     }
   },
   "node_selection_strategy_args" : {
+    "enabled": false,
     "strategy": "default"
   },
   "resource_args": {

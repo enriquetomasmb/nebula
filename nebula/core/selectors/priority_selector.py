@@ -75,10 +75,8 @@ class PrioritySelector(Selector):
         logging.info(f"[PrioritySelector] Features: {feature_array}")
 
         # Prevent 0 denominator:
-        if self.feature_weights.cpu_percent == 0:
-            self.feature_weights.cpu_percent = 0.01
-        if self.feature_weights.latency == 0:
-            self.feature_weights.latency = 0.01
+        self.feature_weights.cpu_percent = self.feature_weights.cpu_percent + 0.000001
+        self.feature_weights.latency = self.feature_weights.latency + 0.000001
 
         # Invert the weights of cpu_percent & latency
         self.feature_weights.cpu_percent = 1 / self.feature_weights.cpu_percent
