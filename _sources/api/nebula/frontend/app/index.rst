@@ -95,6 +95,10 @@ Module Contents
       :type:  bool
 
 
+   .. py:attribute:: gpu_available
+      :type:  bool
+
+
    .. py:attribute:: advanced_analytics
       :type:  bool
 

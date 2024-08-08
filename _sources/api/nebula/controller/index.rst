@@ -188,6 +188,11 @@ Module Contents
    .. py:attribute:: use_blockchain
 
 
+   .. py:attribute:: gpu_available
+      :value: False
+
+
+
    .. py:method:: start()
 
 
