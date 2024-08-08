@@ -700,7 +700,7 @@
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="nodeSelectionStrategyOptions"
                            id="nodesel-strat-default-btn" value="default" checked>
-                        <label class="form-check-label" for="nodesel-strat-default-btn">Default Selection </label>
+                        <label class="form-check-label" for="nodesel-strat-default-btn">Default (No Strategy / Selector)</label>
                     </div>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="nodeSelectionStrategyOptions"
@@ -2527,10 +2527,12 @@
                            <div class="form-check form-check-inline">
                             <input type="number" class="form-control" id="resource-constraint-cpu" placeholder="CPU Limit" min="0.01" max="1" step="0.01" value="0.3">
                         </div>
-                            <h5 class="step-title">Additional Latency - <small>Choose a number between 1ms and 50ms</small></h5>
+                            <h5 class="step-title">Additional Latency - <small>Choose a number between 0ms and 50ms</small></h5>
                         <div class="form-check form-check-inline">
-                            <input type="number" class="form-control" id="resource-constraint-latency" placeholder="Additional Latency" min="1" max="50" step="1" value="1">
+                            <input type="number" class="form-control" id="resource-constraint-latency" placeholder="Additional Latency" min="0" max="50" step="1" value="0">
                         </div>
+                        <br>
+                        <button type="button" style="margin-top:10px" class="btn btn-secondary" id="random_constraints_button">Generate random constraints</button>
                     </div>
 `;
 
@@ -2573,6 +2575,10 @@
                     // set the correct ids for the config fields
                     document.getElementById("resource-constraint-cpu").setAttribute("id", "resource-constraint-cpu-" + i.toString());
                     document.getElementById("resource-constraint-latency").setAttribute("id", "resource-constraint-latency-" + i.toString());
+                    // add event listener to the random constraints button
+                    document.getElementById("random_constraints_button").addEventListener("click", function () {
+                        addRandomConstraints(i);
+                    });
                     // Show the modal
                     $('#participant-modal').modal('show');
                 });
@@ -2644,6 +2650,10 @@
                 document.getElementById("participant-0-start-btn").title = `Participant 0 (start node)`;
                 Graph.graphData().nodes[0].start = true;
             }
+        }
+        function addRandomConstraints(n) {
+            document.getElementById("resource-constraint-cpu-"+String(n)).value = (Math.random() * 0.7 + 0.3).toFixed(2);
+            document.getElementById("resource-constraint-latency-"+String(n)).value = Math.floor(Math.random() * 50) + 1
         }
     </script>
 
