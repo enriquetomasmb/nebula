@@ -450,8 +450,12 @@
                     <div class="form-check">
                         <select class="form-control" id="resourceUsage" name="resources"
                             style="display: inline; width: 20%">
+                            {% if gpu_available %}
                             <option value="gpu" selected>GPU</option>
                             <option value="cpu">CPU</option>
+                            {% else %}
+                            <option value="cpu" selected>CPU</option>
+                            {% endif %}
                         </select>
                     </div>
                 </div>

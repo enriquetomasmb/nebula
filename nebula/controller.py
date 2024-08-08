@@ -80,6 +80,7 @@ class Controller:
         self.n_nodes = 0
         self.mender = None if self.simulation else Mender()
         self.use_blockchain = args.use_blockchain if hasattr(args, "use_blockchain") else False
+        self.gpu_available = False
 
     def start(self):
         banner = """
@@ -334,6 +335,7 @@ class Controller:
                     - ./config/nebula:/etc/nginx/sites-available/default
                 environment:
                     - NEBULA_PRODUCTION={production}
+                    - NEBULA_GPU_AVAILABLE={gpu_available}
                     - NEBULA_ADVANCED_ANALYTICS={advanced_analytics}
                     - SERVER_LOG=/nebula/app/logs/server.log
                     - NEBULA_LOGS_DIR=/nebula/app/logs/
@@ -377,10 +379,16 @@ class Controller:
                     external: true
         """
         )
+        
+        try:
+            subprocess.check_call(["nvidia-smi"])
+            self.gpu_available = True
+        except Exception as e:
+            logging.info("No GPU available for the frontend, nodes will be deploy in CPU mode")
 
         # Generate the Docker Compose file dynamically
         services = ""
-        services += frontend_template.format(production=self.production, advanced_analytics=self.advanced_analytics, path=self.root_path, gw="192.168.10.1", ip="192.168.10.100", frontend_port=self.frontend_port, statistics_port=self.statistics_port)
+        services += frontend_template.format(production=self.production, gpu_available=self.gpu_available, advanced_analytics=self.advanced_analytics, path=self.root_path, gw="192.168.10.1", ip="192.168.10.100", frontend_port=self.frontend_port, statistics_port=self.statistics_port)
         docker_compose_file = docker_compose_template.format(services)
 
         if self.production:

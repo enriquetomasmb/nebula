@@ -57,6 +57,7 @@ from typing import Any, Dict
 
 class Settings:
     production: bool = os.environ.get("NEBULA_PRODUCTION", "False") == "True"
+    gpu_available: bool = os.environ.get("NEBULA_GPU_AVAILABLE", "False") == "True"
     advanced_analytics: bool = os.environ.get("NEBULA_ADVANCED_ANALYTICS", "False") == "True"
     log_dir: str = os.environ.get("NEBULA_LOGS_DIR")
     config_dir: str = os.environ.get("NEBULA_CONFIG_DIR")
@@ -933,7 +934,7 @@ async def nebula_dashboard_download_logs_metrics(scenario_name: str, request: Re
 @app.get("/nebula/dashboard/deployment/", response_class=HTMLResponse)
 async def nebula_dashboard_deployment(request: Request, session: Dict = Depends(get_session)):
     scenario_running = get_running_scenario()
-    return templates.TemplateResponse("deployment.html", {"request": request, "scenario_running": scenario_running, "user_logged_in": session.get("user")})
+    return templates.TemplateResponse("deployment.html", {"request": request, "scenario_running": scenario_running, "user_logged_in": session.get("user"), "gpu_available": settings.gpu_available})
 
 
 def attack_node_assign(
