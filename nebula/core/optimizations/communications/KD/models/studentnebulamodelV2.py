@@ -4,23 +4,23 @@ import torch
 
 from nebula.core.models.nebulamodel import NebulaModel
 
+
 class StudentNebulaModelV2(NebulaModel, ABC):
 
     def __init__(
-            self,
-            input_channels=1,
-            num_classes=10,
-            learning_rate=1e-3,
-            metrics=None,
-            confusion_matrix=None,
-            seed=None,
-            teacher_model=None,
-            T=2,
-            beta=1,
-            decreasing_beta=False,
-            limit_beta=0.1,
-            send_logic=None
-
+        self,
+        input_channels=1,
+        num_classes=10,
+        learning_rate=1e-3,
+        metrics=None,
+        confusion_matrix=None,
+        seed=None,
+        teacher_model=None,
+        T=2,
+        beta=1,
+        decreasing_beta=False,
+        limit_beta=0.1,
+        send_logic=None,
     ):
         super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed)
 
@@ -59,8 +59,10 @@ class StudentNebulaModelV2(NebulaModel, ABC):
                     own_state[name].copy_(param)
                 except Exception as e:
                     raise RuntimeError(
-                        'While copying the parameter named {}, whose dimensions in the saved model are {} and whose dimensions in the current model are {}, an error occurred: {}'.format(
-                            name, param.size(), own_state[name].size(), e))
+                        "While copying the parameter named {}, whose dimensions in the saved model are {} and whose dimensions in the current model are {}, an error occurred: {}".format(
+                            name, param.size(), own_state[name].size(), e
+                        )
+                    ) from e
             elif strict:
                 # If the mode is strict, warn that this parameter was not found.
                 missing_keys.append(name)
@@ -70,15 +72,12 @@ class StudentNebulaModelV2(NebulaModel, ABC):
             missing_keys = set(own_state.keys()) - set(state_dict.keys())
             unexpected_keys = set(state_dict.keys()) - set(own_state.keys())
             if len(missing_keys) > 0 or len(unexpected_keys) > 0:
-                message = "Error loading state_dict, missing keys:{} and unexpected keys:{}".format(missing_keys,
-                                                                                                    unexpected_keys)
+                message = "Error loading state_dict, missing keys:{} and unexpected keys:{}".format(missing_keys, unexpected_keys)
                 raise KeyError(message)
-
 
         return
 
-
-    def state_dict(self, destination=None, prefix='', keep_vars=False):
+    def state_dict(self, destination=None, prefix="", keep_vars=False):
         """
         si send_logic() == 0: solo envía el modelo estudiante
         si send_logic() == 1: solo envía las capas fully connected
@@ -86,14 +85,13 @@ class StudentNebulaModelV2(NebulaModel, ABC):
         if self.send_logic() == 0:
             original_state = super().state_dict(destination, prefix, keep_vars)
             # Filter out teacher model parameters
-            filtered_state = {k: v for k, v in original_state.items() if not k.startswith('teacher_model.')}
+            filtered_state = {k: v for k, v in original_state.items() if not k.startswith("teacher_model.")}
         elif self.send_logic() == 1:
             original_state = super().state_dict(destination, prefix, keep_vars)
-            filtered_state = {k: v for k, v in original_state.items() if not k.startswith('teacher_model.')}
-            filtered_state = {k: v for k, v in filtered_state.items() if k.startswith('l2.')}
+            filtered_state = {k: v for k, v in original_state.items() if not k.startswith("teacher_model.")}
+            filtered_state = {k: v for k, v in filtered_state.items() if k.startswith("l2.")}
 
         return filtered_state
-
 
     def send_logic(self):
         """
@@ -102,14 +100,15 @@ class StudentNebulaModelV2(NebulaModel, ABC):
         if self.send_logic_method is None:
             return 0
 
-        if self.send_logic_method == 'model':
+        if self.send_logic_method == "model":
             return 0
-        elif self.send_logic_method == 'mixed_2rounds':
+
+        if self.send_logic_method == "mixed_2rounds":
             if self.send_logic_counter % 2 == 0:
                 return 0
-            else:
-                return 1
+            return 1
 
+        return 0
 
     def send_logic_step(self):
         """
@@ -122,12 +121,10 @@ class StudentNebulaModelV2(NebulaModel, ABC):
                 self.beta = 0
 
         if self.send_logic_method is None:
-            return 'model'
-        if self.send_logic_method == 'mixed_2rounds':
+            return "model"
+        if self.send_logic_method == "mixed_2rounds":
 
             if self.send_logic_counter % 2 == 0:
-                return 'linear_layers'
-            else:
-                return 'model'
-        else:
-            return 'unknown'
+                return "linear_layers"
+            return "model"
+        return "unknown"

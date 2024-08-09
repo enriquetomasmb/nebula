@@ -1,4 +1,5 @@
 import torch
+
 from nebula.core.aggregation.aggregator import Aggregator
 
 
@@ -18,11 +19,11 @@ class ProtoFedAvg(Aggregator):
         proto_flag = False
         prototypes = dict()
         for node, model_info in models.items():
-            if 'protos' in model_info[0]:
+            if "protos" in model_info[0]:
                 proto_flag = True
-                prototypes[node] = model_info[0]['protos'], model_info[1]
+                prototypes[node] = model_info[0]["protos"], model_info[1]
                 # Eliminamos los prototipos del modelo
-                del model_info[0]['protos']
+                del model_info[0]["protos"]
 
         models = list(models.values())
 
@@ -51,7 +52,7 @@ class ProtoFedAvg(Aggregator):
         if proto_flag:
             # Agregamos los prototipos
             agregated_protos = self.__agregate_prototypes(prototypes)
-            accum['protos'] = agregated_protos
+            accum["protos"] = agregated_protos
 
         return accum
 

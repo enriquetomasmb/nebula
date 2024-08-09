@@ -1,19 +1,20 @@
-from nebula.core.optimizations.communications.KD.models.teachernebulamodel import TeacherNebulaModel
-
+import logging
 from abc import ABC
 
-import logging
+from nebula.core.optimizations.communications.KD.models.teachernebulamodel import TeacherNebulaModel
+
 
 class ProtoTeacherNebulaModel(TeacherNebulaModel, ABC):
 
     def __init__(
-            self,
-            input_channels=1,
-            num_classes=10,
-            learning_rate=1e-3,
-            metrics=None,
-            confusion_matrix=None,
-            seed=None):
+        self,
+        input_channels=1,
+        num_classes=10,
+        learning_rate=1e-3,
+        metrics=None,
+        confusion_matrix=None,
+        seed=None,
+    ):
 
         super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed)
 
@@ -33,10 +34,10 @@ class ProtoTeacherNebulaModel(TeacherNebulaModel, ABC):
         proto = dict()
         for label, proto_info in self.agg_protos_label.items():
 
-            if proto_info['count'] > 1:
-                proto[label] = (proto_info['sum'] / proto_info['count']).to('cpu')
+            if proto_info["count"] > 1:
+                proto[label] = (proto_info["sum"] / proto_info["count"]).to("cpu")
             else:
-                proto[label] = proto_info['sum'].to('cpu')
+                proto[label] = proto_info["sum"].to("cpu")
 
         logging.info(f"[ProtoFashionMNISTModelCNN.get_protos] Protos: {proto}")
         return proto

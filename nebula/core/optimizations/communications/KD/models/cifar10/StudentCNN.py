@@ -1,9 +1,8 @@
 import torch
 
-from nebula.core.optimizations.communications.KD.utils.KD import DistillKL
-from nebula.core.optimizations.communications.KD.models.cifar10.TeacherCNN import TeacherCIFAR10ModelCNN, \
-    MDTeacherCIFAR10ModelCNN
+from nebula.core.optimizations.communications.KD.models.cifar10.TeacherCNN import MDTeacherCIFAR10ModelCNN, TeacherCIFAR10ModelCNN
 from nebula.core.optimizations.communications.KD.models.studentnebulamodelV2 import StudentNebulaModelV2
+from nebula.core.optimizations.communications.KD.utils.KD import DistillKL
 
 
 class StudentCIFAR10ModelCNN(StudentNebulaModelV2):
@@ -12,35 +11,45 @@ class StudentCIFAR10ModelCNN(StudentNebulaModelV2):
     """
 
     def __init__(
-            self,
-            input_channels=3,
-            num_classes=10,
-            learning_rate=1e-3,
-            metrics=None,
-            confusion_matrix=None,
-            seed=None,teacher_model=None,
-            T=2,
-            beta=1,
-            decreasing_beta=False,
-            limit_beta=0.1,
-            mutual_distilation="KD",
-            teacher_beta=100,
-            send_logic=None
+        self,
+        input_channels=3,
+        num_classes=10,
+        learning_rate=1e-3,
+        metrics=None,
+        confusion_matrix=None,
+        seed=None,
+        teacher_model=None,
+        T=2,
+        beta=1,
+        decreasing_beta=False,
+        limit_beta=0.1,
+        mutual_distilation="KD",
+        teacher_beta=100,
+        send_logic=None,
     ):
         if teacher_model is None:
             if mutual_distilation is not None and mutual_distilation == "MD":
-                    teacher_model = MDTeacherCIFAR10ModelCNN(beta=teacher_beta)
+                teacher_model = MDTeacherCIFAR10ModelCNN(beta=teacher_beta)
             elif mutual_distilation is not None and mutual_distilation == "KD":
                 teacher_model = TeacherCIFAR10ModelCNN()
 
-        super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed, teacher_model, T, beta, decreasing_beta, limit_beta, send_logic)
+        super().__init__(
+            input_channels,
+            num_classes,
+            learning_rate,
+            metrics,
+            confusion_matrix,
+            seed,
+            teacher_model,
+            T,
+            beta,
+            decreasing_beta,
+            limit_beta,
+            send_logic,
+        )
 
-        self.config = {
-            'beta1': 0.851436,
-            'beta2': 0.999689,
-            'amsgrad': True
-        }
-        
+        self.config = {"beta1": 0.851436, "beta2": 0.999689, "amsgrad": True}
+
         self.example_input_array = torch.rand(1, 3, 32, 32)
         self.mutual_distilation = mutual_distilation
         self.criterion_cls = torch.torch.nn.CrossEntropyLoss()
@@ -55,7 +64,7 @@ class StudentCIFAR10ModelCNN(StudentNebulaModelV2):
             torch.nn.BatchNorm2d(32),
             torch.nn.ReLU(),
             torch.nn.MaxPool2d(kernel_size=2, stride=2),
-            torch.nn.Dropout(0.25)
+            torch.nn.Dropout(0.25),
         )
 
         self.layer2 = torch.nn.Sequential(
@@ -66,7 +75,7 @@ class StudentCIFAR10ModelCNN(StudentNebulaModelV2):
             torch.nn.BatchNorm2d(64),
             torch.nn.ReLU(),
             torch.nn.MaxPool2d(kernel_size=2, stride=2),
-            torch.nn.Dropout(0.25)
+            torch.nn.Dropout(0.25),
         )
 
         self.layer3 = torch.nn.Sequential(
@@ -77,14 +86,14 @@ class StudentCIFAR10ModelCNN(StudentNebulaModelV2):
             torch.nn.BatchNorm2d(128),
             torch.nn.ReLU(),
             torch.nn.MaxPool2d(kernel_size=2, stride=2),
-            torch.nn.Dropout(0.25)
+            torch.nn.Dropout(0.25),
         )
 
         self.fc_layer = torch.nn.Sequential(
             torch.nn.Linear(128 * 4 * 4, 512),
             torch.nn.ReLU(),
             torch.nn.Dropout(0.5),
-            torch.nn.Linear(512, num_classes)
+            torch.nn.Linear(512, num_classes),
         )
 
     def forward(self, x, is_feat=False):
@@ -100,12 +109,16 @@ class StudentCIFAR10ModelCNN(StudentNebulaModelV2):
 
         if is_feat:
             return [conv1, conv2, conv3], logits
-        else:
-            return logits
+        return logits
 
     def configure_optimizers(self):
         """ """
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate, betas=(self.config['beta1'], self.config['beta2']), amsgrad=self.config['amsgrad'])
+        optimizer = torch.optim.Adam(
+            self.parameters(),
+            lr=self.learning_rate,
+            betas=(self.config["beta1"], self.config["beta2"]),
+            amsgrad=self.config["amsgrad"],
+        )
         return optimizer
 
     def step(self, batch, batch_idx, phase):
@@ -130,7 +143,7 @@ class StudentCIFAR10ModelCNN(StudentNebulaModelV2):
 
         return loss
 
-    def state_dict(self, destination=None, prefix='', keep_vars=False):
+    def state_dict(self, destination=None, prefix="", keep_vars=False):
         """
         if send_logic() == 0: only send the student model
         if send_logic() == 1: only send the fc_layer
@@ -138,10 +151,10 @@ class StudentCIFAR10ModelCNN(StudentNebulaModelV2):
         if self.send_logic() == 0:
             original_state = super().state_dict(destination, prefix, keep_vars)
             # Filter out teacher model parameters
-            filtered_state = {k: v for k, v in original_state.items() if not k.startswith('teacher_model.')}
+            filtered_state = {k: v for k, v in original_state.items() if not k.startswith("teacher_model.")}
         elif self.send_logic() == 1:
             original_state = super().state_dict(destination, prefix, keep_vars)
-            filtered_state = {k: v for k, v in original_state.items() if not k.startswith('teacher_model.')}
-            filtered_state = {k: v for k, v in filtered_state.items() if k.startswith('fc_layer.')}
+            filtered_state = {k: v for k, v in original_state.items() if not k.startswith("teacher_model.")}
+            filtered_state = {k: v for k, v in filtered_state.items() if k.startswith("fc_layer.")}
 
         return filtered_state

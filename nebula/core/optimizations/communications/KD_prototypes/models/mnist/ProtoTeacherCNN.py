@@ -1,11 +1,10 @@
 import copy
 
 import torch
-import torch.nn as nn
+from torch import nn
 import torch.nn.functional as F
 
 from nebula.core.optimizations.communications.KD.utils.AT import Attention
-
 from nebula.core.optimizations.communications.KD_prototypes.models.prototeachernebulamodel import ProtoTeacherNebulaModel
 
 
@@ -14,16 +13,15 @@ class ProtoTeacherMNISTModelCNN(ProtoTeacherNebulaModel):
     LightningModule for MNIST.
     """
 
-
     def __init__(
-            self,
-            input_channels=1,
-            num_classes=10,
-            learning_rate=1e-3,
-            metrics=None,
-            confusion_matrix=None,
-            seed=None,
-            beta=1
+        self,
+        input_channels=1,
+        num_classes=10,
+        learning_rate=1e-3,
+        metrics=None,
+        confusion_matrix=None,
+        seed=None,
+        beta=1,
     ):
         super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed)
 
@@ -33,23 +31,22 @@ class ProtoTeacherMNISTModelCNN(ProtoTeacherNebulaModel):
         self.criterion_mse = torch.nn.MSELoss()
 
         self.conv1 = torch.nn.Conv2d(
-            in_channels=input_channels, out_channels=64, kernel_size=(5, 5), padding="same"
+            in_channels=input_channels,
+            out_channels=64,
+            kernel_size=(5, 5),
+            padding="same",
         )
         self.relu = torch.nn.ReLU()
         self.pool1 = torch.nn.MaxPool2d(kernel_size=(2, 2), stride=2)
-        self.conv2 = torch.nn.Conv2d(
-            in_channels=64, out_channels=128, kernel_size=(5, 5), padding="same"
-        )
+        self.conv2 = torch.nn.Conv2d(in_channels=64, out_channels=128, kernel_size=(5, 5), padding="same")
         self.pool2 = torch.nn.MaxPool2d(kernel_size=(2, 2), stride=2)
         self.l1 = torch.nn.Linear(7 * 7 * 128, 2048)
         self.l2 = torch.nn.Linear(2048, num_classes)
 
-
-
     def forward_train(self, x, is_feat=False, softmax=True):
         """Forward pass only for train the model.
-            is_feat: bool, if True return the features of the model.
-            softmax: bool, if True apply softmax to the logits.
+        is_feat: bool, if True return the features of the model.
+        softmax: bool, if True apply softmax to the logits.
         """
         # Reshape the input tensor
         input_layer = x.view(-1, 1, 28, 28)
@@ -72,14 +69,11 @@ class ProtoTeacherMNISTModelCNN(ProtoTeacherNebulaModel):
         if is_feat:
             if softmax:
                 return F.log_softmax(logits, dim=1), dense, [conv1, conv2]
-            else:
-                return logits, dense, [conv1, conv2]
-        else:
-            if softmax:
-                return F.log_softmax(logits, dim=1), dense
-            else:
-                return logits, dense
+            return logits, dense, [conv1, conv2]
 
+        if softmax:
+            return F.log_softmax(logits, dim=1), dense
+        return logits, dense
 
     def forward(self, x):
         """Forward pass for inference the model, if model have prototypes"""
@@ -118,7 +112,7 @@ class ProtoTeacherMNISTModelCNN(ProtoTeacherNebulaModel):
         return distances.argmin(dim=1)
 
     def configure_optimizers(self):
-        """ Configure the optimizer for training. """
+        """Configure the optimizer for training."""
         optimizer = torch.optim.Adam(
             self.parameters(),
             lr=self.learning_rate,
@@ -150,7 +144,7 @@ class ProtoTeacherMNISTModelCNN(ProtoTeacherNebulaModel):
             loss2 = self.criterion_mse(proto_new, protos)
 
         # Combine the losses
-        loss = loss1 + self.beta*loss2
+        loss = loss1 + self.beta * loss2
         self.process_metrics(phase, logits, labels, loss)
 
         if phase == "Train":
@@ -159,11 +153,10 @@ class ProtoTeacherMNISTModelCNN(ProtoTeacherNebulaModel):
                 label = labels_g[i].item()
                 if label not in self.agg_protos_label:
                     self.agg_protos_label[label] = dict(sum=torch.zeros_like(protos[i, :]), count=0)
-                self.agg_protos_label[label]['sum'] += protos[i, :].detach().clone()
-                self.agg_protos_label[label]['count'] += 1
+                self.agg_protos_label[label]["sum"] += protos[i, :].detach().clone()
+                self.agg_protos_label[label]["count"] += 1
 
         return loss
-
 
 
 class MDProtoTeacherMNISTModelCNN(ProtoTeacherNebulaModel):
@@ -171,18 +164,17 @@ class MDProtoTeacherMNISTModelCNN(ProtoTeacherNebulaModel):
     LightningModule for MNIST.
     """
 
-
     def __init__(
-            self,
-            input_channels=1,
-            num_classes=10,
-            learning_rate=1e-3,
-            metrics=None,
-            confusion_matrix=None,
-            seed=None,
-            beta=1,
-            p=2,
-            beta_md=1000
+        self,
+        input_channels=1,
+        num_classes=10,
+        learning_rate=1e-3,
+        metrics=None,
+        confusion_matrix=None,
+        seed=None,
+        beta=1,
+        p=2,
+        beta_md=1000,
     ):
         super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed)
         self.p = p
@@ -195,23 +187,22 @@ class MDProtoTeacherMNISTModelCNN(ProtoTeacherNebulaModel):
         self.criterion_kd = Attention(self.p)
         self.student_model = None
         self.conv1 = torch.nn.Conv2d(
-            in_channels=input_channels, out_channels=64, kernel_size=(5, 5), padding="same"
+            in_channels=input_channels,
+            out_channels=64,
+            kernel_size=(5, 5),
+            padding="same",
         )
         self.relu = torch.nn.ReLU()
         self.pool1 = torch.nn.MaxPool2d(kernel_size=(2, 2), stride=2)
-        self.conv2 = torch.nn.Conv2d(
-            in_channels=64, out_channels=128, kernel_size=(5, 5), padding="same"
-        )
+        self.conv2 = torch.nn.Conv2d(in_channels=64, out_channels=128, kernel_size=(5, 5), padding="same")
         self.pool2 = torch.nn.MaxPool2d(kernel_size=(2, 2), stride=2)
         self.l1 = torch.nn.Linear(7 * 7 * 128, 2048)
         self.l2 = torch.nn.Linear(2048, num_classes)
 
-
-
     def forward_train(self, x, is_feat=False, softmax=True):
         """Forward pass only for train the model.
-            is_feat: bool, if True return the features of the model.
-            softmax: bool, if True apply softmax to the logits.
+        is_feat: bool, if True return the features of the model.
+        softmax: bool, if True apply softmax to the logits.
         """
         # Reshape the input tensor
         input_layer = x.view(-1, 1, 28, 28)
@@ -234,14 +225,11 @@ class MDProtoTeacherMNISTModelCNN(ProtoTeacherNebulaModel):
         if is_feat:
             if softmax:
                 return F.log_softmax(logits, dim=1), dense, [conv1, conv2]
-            else:
-                return logits, dense, [conv1, conv2]
-        else:
-            if softmax:
-                return F.log_softmax(logits, dim=1), dense
-            else:
-                return logits, dense
+            return logits, dense, [conv1, conv2]
 
+        if softmax:
+            return F.log_softmax(logits, dim=1), dense
+        return logits, dense
 
     def forward(self, x):
         """Forward pass for inference the model, if model have prototypes"""
@@ -279,7 +267,7 @@ class MDProtoTeacherMNISTModelCNN(ProtoTeacherNebulaModel):
         return distances.argmin(dim=1)
 
     def configure_optimizers(self):
-        """ Configure the optimizer for training. """
+        """Configure the optimizer for training."""
         optimizer = torch.optim.Adam(
             self.parameters(),
             lr=self.learning_rate,
@@ -324,7 +312,7 @@ class MDProtoTeacherMNISTModelCNN(ProtoTeacherNebulaModel):
             loss_kd = 0 * loss_nll
 
         # Combine the losses
-        loss = loss_nll + self.beta*loss_mse + self.beta_md*loss_kd
+        loss = loss_nll + self.beta * loss_mse + self.beta_md * loss_kd
         self.process_metrics(phase, logits, labels, loss)
 
         if phase == "Train":
@@ -333,8 +321,8 @@ class MDProtoTeacherMNISTModelCNN(ProtoTeacherNebulaModel):
                 label = labels_g[i].item()
                 if label not in self.agg_protos_label:
                     self.agg_protos_label[label] = dict(sum=torch.zeros_like(protos[i, :]), count=0)
-                self.agg_protos_label[label]['sum'] += protos[i, :].detach().clone()
-                self.agg_protos_label[label]['count'] += 1
+                self.agg_protos_label[label]["sum"] += protos[i, :].detach().clone()
+                self.agg_protos_label[label]["count"] += 1
 
         return loss
 
@@ -343,6 +331,5 @@ class MDProtoTeacherMNISTModelCNN(ProtoTeacherNebulaModel):
         For cyclic dependency problem, a copy of the student model is created, the teacher_model attribute is removed.
         """
         self.student_model = copy.deepcopy(student_model)
-        if hasattr(self.student_model, 'teacher_model'):
+        if hasattr(self.student_model, "teacher_model"):
             del self.student_model.teacher_model
-

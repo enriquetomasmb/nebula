@@ -1,29 +1,27 @@
-
 import torch
 
-from nebula.core.optimizations.communications.KD.utils.KD import DistillKL
-from nebula.core.optimizations.communications.KD.models.fashionmnist.TeacherCNN import MDTeacherFashionMNISTModelCNN, \
-    TeacherFashionMNISTModelCNN
-
+from nebula.core.optimizations.communications.KD.models.fashionmnist.TeacherCNN import MDTeacherFashionMNISTModelCNN, TeacherFashionMNISTModelCNN
 from nebula.core.optimizations.communications.KD.models.studentnebulamodelV2 import StudentNebulaModelV2
+from nebula.core.optimizations.communications.KD.utils.KD import DistillKL
+
 
 class StudentFashionMNISTModelCNN(StudentNebulaModelV2):
     def __init__(
-            self,
-            input_channels=1,
-            num_classes=10,
-            learning_rate=1e-3,
-            metrics=None,
-            confusion_matrix=None,
-            seed=None,
-            teacher_model=None,
-            T=2,
-            beta=1,
-            decreasing_beta=False,
-            limit_beta=0.1,
-            mutual_distilation="KD",
-            teacher_beta=100,
-            send_logic=None
+        self,
+        input_channels=1,
+        num_classes=10,
+        learning_rate=1e-3,
+        metrics=None,
+        confusion_matrix=None,
+        seed=None,
+        teacher_model=None,
+        T=2,
+        beta=1,
+        decreasing_beta=False,
+        limit_beta=0.1,
+        mutual_distilation="KD",
+        teacher_beta=100,
+        send_logic=None,
     ):
 
         if teacher_model is None:
@@ -32,27 +30,41 @@ class StudentFashionMNISTModelCNN(StudentNebulaModelV2):
             elif mutual_distilation is not None and mutual_distilation == "KD":
                 teacher_model = TeacherFashionMNISTModelCNN()
 
-        super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed, teacher_model, T, beta, decreasing_beta, limit_beta, send_logic)
+        super().__init__(
+            input_channels,
+            num_classes,
+            learning_rate,
+            metrics,
+            confusion_matrix,
+            seed,
+            teacher_model,
+            T,
+            beta,
+            decreasing_beta,
+            limit_beta,
+            send_logic,
+        )
         self.mutual_distilation = mutual_distilation
         self.example_input_array = torch.zeros(1, 1, 28, 28)
         self.criterion_cls = torch.nn.CrossEntropyLoss()
         self.criterion_div = DistillKL(self.T)
 
         self.conv1 = torch.nn.Conv2d(
-            in_channels=input_channels, out_channels=32, kernel_size=(5, 5), padding="same"
+            in_channels=input_channels,
+            out_channels=32,
+            kernel_size=(5, 5),
+            padding="same",
         )
         self.relu = torch.nn.ReLU()
         self.pool1 = torch.nn.MaxPool2d(kernel_size=(2, 2), stride=2)
-        self.conv2 = torch.nn.Conv2d(
-            in_channels=32, out_channels=64, kernel_size=(5, 5), padding="same"
-        )
+        self.conv2 = torch.nn.Conv2d(in_channels=32, out_channels=64, kernel_size=(5, 5), padding="same")
         self.pool2 = torch.nn.MaxPool2d(kernel_size=(2, 2), stride=2)
         self.l1 = torch.nn.Linear(7 * 7 * 64, 2048)
         self.l2 = torch.nn.Linear(2048, num_classes)
 
     def forward(self, x, is_feat=False):
         """Forward pass of the model.
-            is_feat: bool, if True return the features of the model.
+        is_feat: bool, if True return the features of the model.
         """
         # Reshape the input tensor
         input_layer = x.view(-1, 1, 28, 28)
@@ -74,11 +86,10 @@ class StudentFashionMNISTModelCNN(StudentNebulaModelV2):
 
         if is_feat:
             return [conv1, conv2], logits
-        else:
-            return logits
+        return logits
 
     def configure_optimizers(self):
-        """ Configure the optimizer for training. """
+        """Configure the optimizer for training."""
         optimizer = torch.optim.Adam(
             self.parameters(),
             lr=self.learning_rate,

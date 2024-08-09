@@ -4,19 +4,19 @@ import torch
 
 from nebula.core.models.nebulamodel import NebulaModel
 
+
 class StudentNebulaModel(NebulaModel, ABC):
 
     def __init__(
-            self,
-            input_channels=1,
-            num_classes=10,
-            learning_rate=1e-3,
-            metrics=None,
-            confusion_matrix=None,
-            seed=None,
-            teacher_model=None,
-            T=2
-
+        self,
+        input_channels=1,
+        num_classes=10,
+        learning_rate=1e-3,
+        metrics=None,
+        confusion_matrix=None,
+        seed=None,
+        teacher_model=None,
+        T=2,
     ):
         super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed)
 
@@ -47,8 +47,10 @@ class StudentNebulaModel(NebulaModel, ABC):
                     own_state[name].copy_(param)
                 except Exception as e:
                     raise RuntimeError(
-                        'While copying the parameter named {}, whose dimensions in the saved model are {} and whose dimensions in the current model are {}, an error occurred: {}'.format(
-                            name, param.size(), own_state[name].size(), e))
+                        "While copying the parameter named {}, whose dimensions in the saved model are {} and whose dimensions in the current model are {}, an error occurred: {}".format(
+                            name, param.size(), own_state[name].size(), e
+                        )
+                    ) from e
             elif strict:
                 # If the mode is strict, warn that this parameter was not found.
                 missing_keys.append(name)
@@ -58,16 +60,13 @@ class StudentNebulaModel(NebulaModel, ABC):
             missing_keys = set(own_state.keys()) - set(state_dict.keys())
             unexpected_keys = set(state_dict.keys()) - set(own_state.keys())
             if len(missing_keys) > 0 or len(unexpected_keys) > 0:
-                message = "Error loading state_dict, missing keys:{} and unexpected keys:{}".format(missing_keys,
-                                                                                                    unexpected_keys)
+                message = "Error loading state_dict, missing keys:{} and unexpected keys:{}".format(missing_keys, unexpected_keys)
                 raise KeyError(message)
-
 
         return
 
-
-    def state_dict(self, destination=None, prefix='', keep_vars=False):
+    def state_dict(self, destination=None, prefix="", keep_vars=False):
         original_state = super().state_dict(destination, prefix, keep_vars)
         # Filter out teacher model parameters
-        filtered_state = {k: v for k, v in original_state.items() if not k.startswith('teacher_model.')}
+        filtered_state = {k: v for k, v in original_state.items() if not k.startswith("teacher_model.")}
         return filtered_state

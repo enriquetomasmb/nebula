@@ -1,29 +1,23 @@
-from abc import ABC, abstractmethod
-import torch
-from nebula.addons.functions import print_msg_box
-import lightning as pl
-from torchmetrics.classification import (
-    MulticlassAccuracy,
-    MulticlassRecall,
-    MulticlassPrecision,
-    MulticlassF1Score,
-    MulticlassConfusionMatrix,
-)
-from torchmetrics import MetricCollection
-import seaborn as sns
+from abc import ABC
+
 import matplotlib.pyplot as plt
+import seaborn as sns
+import torch
+
+from nebula.addons.functions import print_msg_box
 from nebula.core.models.nebulamodel import NebulaModel
+
 
 class TeacherNebulaModel(NebulaModel, ABC):
 
     def __init__(
-            self,
-            input_channels=1,
-            num_classes=10,
-            learning_rate=1e-3,
-            metrics=None,
-            confusion_matrix=None,
-            seed=None,
+        self,
+        input_channels=1,
+        num_classes=10,
+        learning_rate=1e-3,
+        metrics=None,
+        confusion_matrix=None,
+        seed=None,
     ):
         super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed)
 
@@ -49,10 +43,12 @@ class TeacherNebulaModel(NebulaModel, ABC):
             self.val_metrics.update(y_pred_classes, y)
         elif phase == "Test (Local)":
             self.test_metrics.update(y_pred_classes, y)
-            self.cm.update(y_pred_classes, y) if self.cm is not None else None
+            if self.cm is not None:
+                self.cm.update(y_pred_classes, y)
         elif phase == "Test (Global)":
             self.test_metrics_global.update(y_pred_classes, y)
-            self.cm_global.update(y_pred_classes, y) if self.cm_global is not None else None
+            if self.cm is not None:
+                self.cm.update(y_pred_classes, y)
         else:
             raise NotImplementedError
 
@@ -61,8 +57,6 @@ class TeacherNebulaModel(NebulaModel, ABC):
         Log metrics for the given phase.
         Args:
             phase (str): One of 'Train', 'Validation', 'Test (Local)', or 'Test (Global)'
-            print_cm (bool): Print confusion matrix
-            plot_cm (bool): Plot confusion matrix
         """
         if phase == "Train":
             output = self.train_metrics.compute()
@@ -82,16 +76,19 @@ class TeacherNebulaModel(NebulaModel, ABC):
         metrics_str = ""
         for key, value in output.items():
             metrics_str += f"{key}: {value:.4f}\n"
-        print_msg_box(metrics_str, indent=2, title=f"Teacher/{phase} Metrics | Step: {self.global_number[phase]}")
+        print_msg_box(
+            metrics_str,
+            indent=2,
+            title=f"Teacher/{phase} Metrics | Step: {self.global_number[phase]}",
+        )
 
     def generate_confusion_matrix(self, phase, print_cm=False, plot_cm=False):
         """
         Generate and plot the confusion matrix for the given phase.
         Args:
             phase (str): One of 'Train', 'Validation', 'Test (Local)', or 'Test (Global)'
-            :param phase:
-            :param print:
-            :param plot:
+            print_cm (bool): Print confusion matrix
+            plot_cm (bool): Plot confusion matrix
         """
         if phase == "Test (Local)":
             if self.cm is None:
@@ -104,12 +101,12 @@ class TeacherNebulaModel(NebulaModel, ABC):
         else:
             raise NotImplementedError
 
-        print(f"\nTeacher/{phase}/ConfusionMatrix\n", cm) if print_cm else None
+        if print_cm:
+            print(f"\nTeacher/{phase}/ConfusionMatrix\n", cm)
         if plot_cm:
-            # TODO: Improve with strings for class names
             cm_numpy = cm.numpy()
             cm_numpy = cm_numpy.astype(int)
-            classes = [i for i in range(self.num_classes)]
+            classes = list(range(self.num_classes))
             fig, ax = plt.subplots(figsize=(10, 10))
             ax = plt.subplot()
             sns.heatmap(cm_numpy, annot=True, fmt="d", cmap="Blues", ax=ax)
@@ -120,4 +117,7 @@ class TeacherNebulaModel(NebulaModel, ABC):
             ax.yaxis.set_ticklabels(classes, rotation=0)
             self.logger.log_figure(fig, step=self.global_number[phase], name=f"Teacher/{phase}/CM")
             plt.close()
-        self.cm.reset() if phase == "Test (Local)" else self.cm_global.reset()
+        if phase == "Test (Local)":
+            self.cm.reset()
+        else:
+            self.cm_global.reset()

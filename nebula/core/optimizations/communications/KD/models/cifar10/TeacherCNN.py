@@ -1,7 +1,10 @@
-import torch
 import copy
+
+import torch
+
 from nebula.core.optimizations.communications.KD.models.teachernebulamodel import TeacherNebulaModel
 from nebula.core.optimizations.communications.KD.utils.AT import Attention
+
 
 class TeacherCIFAR10ModelCNN(TeacherNebulaModel):
     """
@@ -9,21 +12,17 @@ class TeacherCIFAR10ModelCNN(TeacherNebulaModel):
     """
 
     def __init__(
-            self,
-            input_channels=3,
-            num_classes=10,
-            learning_rate=1e-3,
-            metrics=None,
-            confusion_matrix=None,
-            seed=None
+        self,
+        input_channels=3,
+        num_classes=10,
+        learning_rate=1e-3,
+        metrics=None,
+        confusion_matrix=None,
+        seed=None,
     ):
         super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed)
 
-        self.config = {
-            'beta1': 0.851436,
-            'beta2': 0.999689,
-            'amsgrad': True
-        }
+        self.config = {"beta1": 0.851436, "beta2": 0.999689, "amsgrad": True}
 
         self.example_input_array = torch.rand(1, 3, 32, 32)
         self.learning_rate = learning_rate
@@ -41,7 +40,7 @@ class TeacherCIFAR10ModelCNN(TeacherNebulaModel):
             torch.nn.BatchNorm2d(64),
             torch.nn.ReLU(),
             torch.nn.MaxPool2d(kernel_size=2, stride=2),
-            torch.nn.Dropout(0.3)
+            torch.nn.Dropout(0.3),
         )
 
         self.layer2 = torch.nn.Sequential(
@@ -55,7 +54,7 @@ class TeacherCIFAR10ModelCNN(TeacherNebulaModel):
             torch.nn.BatchNorm2d(128),
             torch.nn.ReLU(),
             torch.nn.MaxPool2d(kernel_size=2, stride=2),
-            torch.nn.Dropout(0.4)
+            torch.nn.Dropout(0.4),
         )
 
         self.layer3 = torch.nn.Sequential(
@@ -69,7 +68,7 @@ class TeacherCIFAR10ModelCNN(TeacherNebulaModel):
             torch.nn.BatchNorm2d(256),
             torch.nn.ReLU(),
             torch.nn.MaxPool2d(kernel_size=2, stride=2),
-            torch.nn.Dropout(0.5)
+            torch.nn.Dropout(0.5),
         )
 
         self.fc_layer = torch.nn.Sequential(
@@ -79,7 +78,7 @@ class TeacherCIFAR10ModelCNN(TeacherNebulaModel):
             torch.nn.Linear(1024, 512),
             torch.nn.ReLU(),
             torch.nn.Dropout(0.5),
-            torch.nn.Linear(512, num_classes)
+            torch.nn.Linear(512, num_classes),
         )
 
     def forward(self, x, is_feat=False):
@@ -95,13 +94,16 @@ class TeacherCIFAR10ModelCNN(TeacherNebulaModel):
 
         if is_feat:
             return [conv1, conv2, conv3], logits
-        else:
-            return logits
+        return logits
 
     def configure_optimizers(self):
         """ """
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate,
-                                     betas=(self.config['beta1'], self.config['beta2']), amsgrad=self.config['amsgrad'])
+        optimizer = torch.optim.Adam(
+            self.parameters(),
+            lr=self.learning_rate,
+            betas=(self.config["beta1"], self.config["beta2"]),
+            amsgrad=self.config["amsgrad"],
+        )
         return optimizer
 
     def step(self, batch, batch_idx, phase):
@@ -123,24 +125,20 @@ class MDTeacherCIFAR10ModelCNN(TeacherNebulaModel):
     """
 
     def __init__(
-            self,
-            input_channels=3,
-            num_classes=10,
-            learning_rate=1e-3,
-            metrics=None,
-            confusion_matrix=None,
-            seed=None,
-            p=2,
-            beta=1000
+        self,
+        input_channels=3,
+        num_classes=10,
+        learning_rate=1e-3,
+        metrics=None,
+        confusion_matrix=None,
+        seed=None,
+        p=2,
+        beta=1000,
     ):
         super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed)
         self.p = p
         self.beta = beta
-        self.config = {
-            'beta1': 0.851436,
-            'beta2': 0.999689,
-            'amsgrad': True
-        }
+        self.config = {"beta1": 0.851436, "beta2": 0.999689, "amsgrad": True}
 
         self.example_input_array = torch.rand(1, 3, 32, 32)
         self.criterion_cls = torch.torch.nn.CrossEntropyLoss()
@@ -158,7 +156,7 @@ class MDTeacherCIFAR10ModelCNN(TeacherNebulaModel):
             torch.nn.BatchNorm2d(64),
             torch.nn.ReLU(),
             torch.nn.MaxPool2d(kernel_size=2, stride=2),
-            torch.nn.Dropout(0.3)
+            torch.nn.Dropout(0.3),
         )
 
         self.layer2 = torch.nn.Sequential(
@@ -172,7 +170,7 @@ class MDTeacherCIFAR10ModelCNN(TeacherNebulaModel):
             torch.nn.BatchNorm2d(128),
             torch.nn.ReLU(),
             torch.nn.MaxPool2d(kernel_size=2, stride=2),
-            torch.nn.Dropout(0.4)
+            torch.nn.Dropout(0.4),
         )
 
         self.layer3 = torch.nn.Sequential(
@@ -186,7 +184,7 @@ class MDTeacherCIFAR10ModelCNN(TeacherNebulaModel):
             torch.nn.BatchNorm2d(256),
             torch.nn.ReLU(),
             torch.nn.MaxPool2d(kernel_size=2, stride=2),
-            torch.nn.Dropout(0.5)
+            torch.nn.Dropout(0.5),
         )
 
         self.fc_layer = torch.nn.Sequential(
@@ -196,7 +194,7 @@ class MDTeacherCIFAR10ModelCNN(TeacherNebulaModel):
             torch.nn.Linear(1024, 512),
             torch.nn.ReLU(),
             torch.nn.Dropout(0.5),
-            torch.nn.Linear(512, num_classes)
+            torch.nn.Linear(512, num_classes),
         )
 
     def forward(self, x, is_feat=False):
@@ -212,13 +210,16 @@ class MDTeacherCIFAR10ModelCNN(TeacherNebulaModel):
 
         if is_feat:
             return [conv1, conv2, conv3], logits
-        else:
-            return logits
+        return logits
 
     def configure_optimizers(self):
         """ """
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate,
-                                     betas=(self.config['beta1'], self.config['beta2']), amsgrad=self.config['amsgrad'])
+        optimizer = torch.optim.Adam(
+            self.parameters(),
+            lr=self.learning_rate,
+            betas=(self.config["beta1"], self.config["beta2"]),
+            amsgrad=self.config["amsgrad"],
+        )
         return optimizer
 
     def set_student_model(self, student_model):
@@ -226,7 +227,7 @@ class MDTeacherCIFAR10ModelCNN(TeacherNebulaModel):
         For cyclic dependency problem, a copy of the student model is created, the teacher_model attribute is removed.
         """
         self.student_model = copy.deepcopy(student_model)
-        if hasattr(self.student_model, 'teacher_model'):
+        if hasattr(self.student_model, "teacher_model"):
             del self.student_model.teacher_model
 
     def step(self, batch, batch_idx, phase):

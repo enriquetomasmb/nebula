@@ -1,9 +1,11 @@
 import torch
-import torch.nn as nn
+from torch import nn
 import torch.nn.functional as F
+
 
 class RKDLoss(nn.Module):
     """Relational Knowledge Disitllation, CVPR2019"""
+
     def __init__(self, w_d=25, w_a=50):
         super(RKDLoss, self).__init__()
         self.w_d = w_d
@@ -28,11 +30,11 @@ class RKDLoss(nn.Module):
         # RKD Angle loss
         with torch.no_grad():
             # From Bxdim -> 1xBxdim - Bx1xdim = BxBxdim
-            td = (teacher.unsqueeze(0) - teacher.unsqueeze(1))
+            td = teacher.unsqueeze(0) - teacher.unsqueeze(1)
             norm_td = F.normalize(td, p=2, dim=2)
             t_angle = torch.bmm(norm_td, norm_td.transpose(1, 2)).view(-1)
 
-        sd = (student.unsqueeze(0) - student.unsqueeze(1))
+        sd = student.unsqueeze(0) - student.unsqueeze(1)
         norm_sd = F.normalize(sd, p=2, dim=2)
         s_angle = torch.bmm(norm_sd, norm_sd.transpose(1, 2)).view(-1)
 

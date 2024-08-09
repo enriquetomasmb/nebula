@@ -1,11 +1,12 @@
 import torch
-import torch.nn as nn
+from torch import nn
 import torch.nn.functional as F
 
 from nebula.core.optimizations.communications.KD.utils.KD import DistillKL
-
-from nebula.core.optimizations.communications.KD_prototypes.models.fashionmnist.ProtoTeacherCNN import \
-    MDProtoTeacherFashionMNISTModelCNN, ProtoTeacherFashionMNISTModelCNN
+from nebula.core.optimizations.communications.KD_prototypes.models.fashionmnist.ProtoTeacherCNN import (
+    MDProtoTeacherFashionMNISTModelCNN,
+    ProtoTeacherFashionMNISTModelCNN,
+)
 from nebula.core.optimizations.communications.KD_prototypes.models.protostudentnebulamodel import ProtoStudentNebulaModel
 
 
@@ -14,22 +15,21 @@ class ProtoStudentFashionMNISTModelCNN(ProtoStudentNebulaModel):
     LightningModule for MNIST.
     """
 
-
     def __init__(
-            self,
-            input_channels=1,
-            num_classes=10,
-            learning_rate=1e-3,
-            metrics=None,
-            confusion_matrix=None,
-            seed=None,
-            teacher_model=None,
-            T=2,
-            beta_kd=1,
-            beta_proto=1,
-            mutual_distilation=False,
-            teacher_beta=100,
-            send_logic=None
+        self,
+        input_channels=1,
+        num_classes=10,
+        learning_rate=1e-3,
+        metrics=None,
+        confusion_matrix=None,
+        seed=None,
+        teacher_model=None,
+        T=2,
+        beta_kd=1,
+        beta_proto=1,
+        mutual_distilation=False,
+        teacher_beta=100,
+        send_logic=None,
     ):
         if teacher_model is None:
             if mutual_distilation:
@@ -37,8 +37,18 @@ class ProtoStudentFashionMNISTModelCNN(ProtoStudentNebulaModel):
             else:
                 teacher_model = ProtoTeacherFashionMNISTModelCNN()
 
-        super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed, teacher_model, T,mutual_distilation,send_logic)
-
+        super().__init__(
+            input_channels,
+            num_classes,
+            learning_rate,
+            metrics,
+            confusion_matrix,
+            seed,
+            teacher_model,
+            T,
+            mutual_distilation,
+            send_logic,
+        )
 
         self.example_input_array = torch.zeros(1, 1, 28, 28)
         self.beta_proto = beta_proto
@@ -49,23 +59,22 @@ class ProtoStudentFashionMNISTModelCNN(ProtoStudentNebulaModel):
         self.criterion_div = DistillKL(self.T)
 
         self.conv1 = torch.nn.Conv2d(
-            in_channels=input_channels, out_channels=32, kernel_size=(5, 5), padding="same"
+            in_channels=input_channels,
+            out_channels=32,
+            kernel_size=(5, 5),
+            padding="same",
         )
         self.relu = torch.nn.ReLU()
         self.pool1 = torch.nn.MaxPool2d(kernel_size=(2, 2), stride=2)
-        self.conv2 = torch.nn.Conv2d(
-            in_channels=32, out_channels=64, kernel_size=(5, 5), padding="same"
-        )
+        self.conv2 = torch.nn.Conv2d(in_channels=32, out_channels=64, kernel_size=(5, 5), padding="same")
         self.pool2 = torch.nn.MaxPool2d(kernel_size=(2, 2), stride=2)
         self.l1 = torch.nn.Linear(7 * 7 * 64, 2048)
         self.l2 = torch.nn.Linear(2048, num_classes)
 
-
-
     def forward_train(self, x, is_feat=False, softmax=True):
         """Forward pass only for train the model.
-            is_feat: bool, if True return the features of the model.
-            softmax: bool, if True apply softmax to the logits.
+        is_feat: bool, if True return the features of the model.
+        softmax: bool, if True apply softmax to the logits.
         """
         # Reshape the input tensor
         input_layer = x.view(-1, 1, 28, 28)
@@ -88,14 +97,11 @@ class ProtoStudentFashionMNISTModelCNN(ProtoStudentNebulaModel):
         if is_feat:
             if softmax:
                 return F.log_softmax(logits, dim=1), dense, [conv1, conv2]
-            else:
-                return logits, dense, [conv1, conv2]
-        else:
-            if softmax:
-                return F.log_softmax(logits, dim=1), dense
-            else:
-                return logits, dense
+            return logits, dense, [conv1, conv2]
 
+        if softmax:
+            return F.log_softmax(logits, dim=1), dense
+        return logits, dense
 
     def forward(self, x):
         """Forward pass for inference the model, if model have prototypes"""
@@ -133,7 +139,7 @@ class ProtoStudentFashionMNISTModelCNN(ProtoStudentNebulaModel):
         return distances.argmin(dim=1)
 
     def configure_optimizers(self):
-        """ Configure the optimizer for training. """
+        """Configure the optimizer for training."""
         optimizer = torch.optim.Adam(
             self.parameters(),
             lr=self.learning_rate,
@@ -176,7 +182,7 @@ class ProtoStudentFashionMNISTModelCNN(ProtoStudentNebulaModel):
         loss4 = self.criterion_mse(protos_copy, teacher_protos)
 
         # Combine the losses
-        loss = loss1 + self.beta_proto*loss2 + self.beta_kd*(0.5*loss3 + 0.5*loss4)
+        loss = loss1 + self.beta_proto * loss2 + self.beta_kd * (0.5 * loss3 + 0.5 * loss4)
 
         self.process_metrics(phase, logits, labels, loss)
 
@@ -187,9 +193,7 @@ class ProtoStudentFashionMNISTModelCNN(ProtoStudentNebulaModel):
                 label = labels_g[i].item()
                 if label not in self.agg_protos_label:
                     self.agg_protos_label[label] = dict(sum=torch.zeros_like(protos[i, :]), count=0)
-                self.agg_protos_label[label]['sum'] += protos[i, :].detach().clone()
-                self.agg_protos_label[label]['count'] += 1
+                self.agg_protos_label[label]["sum"] += protos[i, :].detach().clone()
+                self.agg_protos_label[label]["count"] += 1
 
         return loss
-
-

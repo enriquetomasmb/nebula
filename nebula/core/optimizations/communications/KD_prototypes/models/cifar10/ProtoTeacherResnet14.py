@@ -1,11 +1,10 @@
 import copy
 
 import torch
-import torch.nn as nn
+from torch import nn
 import torch.nn.functional as F
 
 from nebula.core.optimizations.communications.KD.utils.AT import Attention
-
 from nebula.core.optimizations.communications.KD_prototypes.models.cifar10.ProtoTeacherResnet import ProtoTeacherResNet
 
 
@@ -14,21 +13,30 @@ class ProtoTeacherCIFAR10ModelResnet14(ProtoTeacherResNet):
     LightningModule for MNIST.
     """
 
-
     def __init__(
-            self,
-            input_channels=3,
-            num_classes=10,
-            learning_rate=1e-3,
-            metrics=None,
-            confusion_matrix=None,
-            seed=None,
-            beta=1,
-            depth=14,
-            num_filters=[16, 16, 32, 64],
-            block_name='BasicBlock'
+        self,
+        input_channels=3,
+        num_classes=10,
+        learning_rate=1e-3,
+        metrics=None,
+        confusion_matrix=None,
+        seed=None,
+        beta=1,
+        depth=14,
+        num_filters=[16, 16, 32, 64],
+        block_name="BasicBlock",
     ):
-        super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed, depth, num_filters, block_name)
+        super().__init__(
+            input_channels,
+            num_classes,
+            learning_rate,
+            metrics,
+            confusion_matrix,
+            seed,
+            depth,
+            num_filters,
+            block_name,
+        )
 
         self.example_input_array = torch.rand(1, 3, 32, 32)
         self.beta = beta
@@ -37,8 +45,8 @@ class ProtoTeacherCIFAR10ModelResnet14(ProtoTeacherResNet):
 
     def forward_train(self, x, is_feat=False, softmax=True):
         """Forward pass only for train the model.
-            is_feat: bool, if True return the features of the model.
-            softmax: bool, if True apply softmax to the logits.
+        is_feat: bool, if True return the features of the model.
+        softmax: bool, if True apply softmax to the logits.
         """
         x = self.conv1(x)
         x = self.bn1(x)
@@ -60,14 +68,17 @@ class ProtoTeacherCIFAR10ModelResnet14(ProtoTeacherResNet):
 
         if is_feat:
             if softmax:
-                return F.log_softmax(logits, dim=1), dense, [conv1, conv2, conv3, conv4, conv5]
-            else:
-                return logits, dense, [conv1, conv2, conv3, conv4, conv5]
-        else:
-            if softmax:
-                return F.log_softmax(logits, dim=1), dense
-            else:
-                return logits, dense
+                return (
+                    F.log_softmax(logits, dim=1),
+                    dense,
+                    [conv1, conv2, conv3, conv4, conv5],
+                )
+
+            return logits, dense, [conv1, conv2, conv3, conv4, conv5]
+
+        if softmax:
+            return F.log_softmax(logits, dim=1), dense
+        return logits, dense
 
     def forward(self, x):
         """Forward pass for inference the model, if model have prototypes"""
@@ -106,8 +117,12 @@ class ProtoTeacherCIFAR10ModelResnet14(ProtoTeacherResNet):
 
     def configure_optimizers(self):
         """ """
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate,
-                                     betas=(self.config['beta1'], self.config['beta2']), amsgrad=self.config['amsgrad'])
+        optimizer = torch.optim.Adam(
+            self.parameters(),
+            lr=self.learning_rate,
+            betas=(self.config["beta1"], self.config["beta2"]),
+            amsgrad=self.config["amsgrad"],
+        )
         return optimizer
 
     def step(self, batch, batch_idx, phase):
@@ -133,7 +148,7 @@ class ProtoTeacherCIFAR10ModelResnet14(ProtoTeacherResNet):
             loss2 = self.criterion_mse(proto_new, protos)
 
         # Combine the losses
-        loss = loss1 + self.beta*loss2
+        loss = loss1 + self.beta * loss2
         self.process_metrics(phase, logits, labels, loss)
 
         if phase == "Train":
@@ -142,11 +157,10 @@ class ProtoTeacherCIFAR10ModelResnet14(ProtoTeacherResNet):
                 label = labels_g[i].item()
                 if label not in self.agg_protos_label:
                     self.agg_protos_label[label] = dict(sum=torch.zeros_like(protos[i, :]), count=0)
-                self.agg_protos_label[label]['sum'] += protos[i, :].detach().clone()
-                self.agg_protos_label[label]['count'] += 1
+                self.agg_protos_label[label]["sum"] += protos[i, :].detach().clone()
+                self.agg_protos_label[label]["count"] += 1
 
         return loss
-
 
 
 class MDProtoTeacherCIFAR10ModelResnet14(ProtoTeacherResNet):
@@ -154,24 +168,32 @@ class MDProtoTeacherCIFAR10ModelResnet14(ProtoTeacherResNet):
     LightningModule for MNIST.
     """
 
-
     def __init__(
-            self,
-            input_channels=3,
-            num_classes=10,
-            learning_rate=1e-3,
-            metrics=None,
-            confusion_matrix=None,
-            seed=None,
-            beta=1,
-            p=2,
-            beta_md=1000,
-            depth=14,
-            num_filters=[16, 16, 32, 64],
-            block_name='BasicBlock'
-
+        self,
+        input_channels=3,
+        num_classes=10,
+        learning_rate=1e-3,
+        metrics=None,
+        confusion_matrix=None,
+        seed=None,
+        beta=1,
+        p=2,
+        beta_md=1000,
+        depth=14,
+        num_filters=[16, 16, 32, 64],
+        block_name="BasicBlock",
     ):
-        super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed, depth, num_filters, block_name)
+        super().__init__(
+            input_channels,
+            num_classes,
+            learning_rate,
+            metrics,
+            confusion_matrix,
+            seed,
+            depth,
+            num_filters,
+            block_name,
+        )
 
         self.p = p
         self.beta_md = beta_md
@@ -185,8 +207,8 @@ class MDProtoTeacherCIFAR10ModelResnet14(ProtoTeacherResNet):
 
     def forward_train(self, x, is_feat=False, softmax=True):
         """Forward pass only for train the model.
-            is_feat: bool, if True return the features of the model.
-            softmax: bool, if True apply softmax to the logits.
+        is_feat: bool, if True return the features of the model.
+        softmax: bool, if True apply softmax to the logits.
         """
         x = self.conv1(x)
         x = self.bn1(x)
@@ -208,14 +230,16 @@ class MDProtoTeacherCIFAR10ModelResnet14(ProtoTeacherResNet):
 
         if is_feat:
             if softmax:
-                return F.log_softmax(logits, dim=1), dense, [conv1, conv2, conv3, conv4, conv5]
-            else:
-                return logits, dense, [conv1, conv2, conv3, conv4, conv5]
-        else:
-            if softmax:
-                return F.log_softmax(logits, dim=1), dense
-            else:
-                return logits, dense
+                return (
+                    F.log_softmax(logits, dim=1),
+                    dense,
+                    [conv1, conv2, conv3, conv4, conv5],
+                )
+            return logits, dense, [conv1, conv2, conv3, conv4, conv5]
+
+        if softmax:
+            return F.log_softmax(logits, dim=1), dense
+        return logits, dense
 
     def forward(self, x):
         """Forward pass for inference the model, if model have prototypes"""
@@ -254,8 +278,12 @@ class MDProtoTeacherCIFAR10ModelResnet14(ProtoTeacherResNet):
 
     def configure_optimizers(self):
         """ """
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate,
-                                     betas=(self.config['beta1'], self.config['beta2']), amsgrad=self.config['amsgrad'])
+        optimizer = torch.optim.Adam(
+            self.parameters(),
+            lr=self.learning_rate,
+            betas=(self.config["beta1"], self.config["beta2"]),
+            amsgrad=self.config["amsgrad"],
+        )
         return optimizer
 
     def step(self, batch, batch_idx, phase):
@@ -294,7 +322,7 @@ class MDProtoTeacherCIFAR10ModelResnet14(ProtoTeacherResNet):
             loss_kd = 0 * loss_nll
 
         # Combine the losses
-        loss = loss_nll + self.beta*loss_mse + self.beta_md*loss_kd
+        loss = loss_nll + self.beta * loss_mse + self.beta_md * loss_kd
         self.process_metrics(phase, logits, labels, loss)
 
         if phase == "Train":
@@ -303,8 +331,8 @@ class MDProtoTeacherCIFAR10ModelResnet14(ProtoTeacherResNet):
                 label = labels_g[i].item()
                 if label not in self.agg_protos_label:
                     self.agg_protos_label[label] = dict(sum=torch.zeros_like(protos[i, :]), count=0)
-                self.agg_protos_label[label]['sum'] += protos[i, :].detach().clone()
-                self.agg_protos_label[label]['count'] += 1
+                self.agg_protos_label[label]["sum"] += protos[i, :].detach().clone()
+                self.agg_protos_label[label]["count"] += 1
 
         return loss
 
@@ -313,6 +341,5 @@ class MDProtoTeacherCIFAR10ModelResnet14(ProtoTeacherResNet):
         For cyclic dependency problem, a copy of the student model is created, the teacher_model attribute is removed.
         """
         self.student_model = copy.deepcopy(student_model)
-        if hasattr(self.student_model, 'teacher_model'):
+        if hasattr(self.student_model, "teacher_model"):
             del self.student_model.teacher_model
-

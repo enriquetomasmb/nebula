@@ -1,10 +1,11 @@
-import torch
 import logging
-import io
-from collections import OrderedDict
-import gzip
 
 from nebula.core.training.lightning import Lightning
+
+
+class ParameterProtoAndModelSettingError(Exception):
+    """Custom exception for errors setting model parameters."""
+
 
 class ProtoQuantizationLightning(Lightning):
     """
@@ -29,15 +30,15 @@ class ProtoQuantizationLightning(Lightning):
         # Convert parameters back to float32
         logging.info("[Learner] Decoding parameters...")
         for key, value in params.items():
-            if key != 'protos':
+            if key != "protos":
                 params[key] = value.float()
         # Imprimimos la key de los parametros para debug
         # logging.info("[Learner] Keys of parameters: {}".format(params.keys()))
 
         try:
             self.model.load_state_dict(params)
-        except:
-            raise Exception("Error setting parameters")
+        except Exception as e:
+            raise ParameterProtoAndModelSettingError("Error setting parameters") from e
 
     def get_model_parameters(self, bytes=False, initialize=False):
         if initialize:
@@ -46,8 +47,7 @@ class ProtoQuantizationLightning(Lightning):
             # logging.info("Keys: {}".format(list(model.keys())))
             if bytes:
                 return self.serialize_model(self.model.state_dict())
-            else:
-                return self.model.state_dict()
+            return self.model.state_dict()
 
         model = self.model.state_dict()
         # Convert parameters to float16 before saving to reduce data size
@@ -56,10 +56,10 @@ class ProtoQuantizationLightning(Lightning):
         # logging.info("[Learner] Keys of parameters: {}".format(model.keys()))
         # quantize parameters to half precision, only if the key is not 'protos'
         for key, value in model.items():
-            if key != 'protos':
+            if key != "protos":
                 model[key] = value.half()
 
         if bytes:
             return self.serialize_model(model)
-        else:
-            return model
+
+        return model

@@ -1,15 +1,16 @@
 import torch
-import torch.nn as nn
+from torch import nn
 import torch.nn.functional as F
 
 from nebula.core.optimizations.communications.KD.utils.normalize import Normalize
+
 
 class SemCKDLoss(nn.Module):
     """Cross-Layer Distillation with Semantic Calibration, AAAI2021"""
 
     def __init__(self):
         super(SemCKDLoss, self).__init__()
-        self.crit = nn.MSELoss(reduction='none')
+        self.crit = nn.MSELoss(reduction="none")
 
     def forward(self, s_value, f_target, weight):
         bsz, num_stu, num_tea = weight.shape
@@ -31,10 +32,24 @@ class AAEmbed(nn.Module):
         self.num_mid_channel = 2 * num_target_channels
 
         def conv1x1(input_channels, num_classes, stride=1):
-            return nn.Conv2d(input_channels, num_classes, kernel_size=1, padding=0, stride=stride, bias=False)
+            return nn.Conv2d(
+                input_channels,
+                num_classes,
+                kernel_size=1,
+                padding=0,
+                stride=stride,
+                bias=False,
+            )
 
         def conv3x3(input_channels, num_classes, stride=1):
-            return nn.Conv2d(input_channels, num_classes, kernel_size=3, padding=1, stride=stride, bias=False)
+            return nn.Conv2d(
+                input_channels,
+                num_classes,
+                kernel_size=3,
+                padding=1,
+                stride=stride,
+                bias=False,
+            )
 
         self.regressor = nn.Sequential(
             conv1x1(num_input_channels, self.num_mid_channel),
@@ -50,8 +65,10 @@ class AAEmbed(nn.Module):
         x = self.regressor(x)
         return x
 
+
 class MLPEmbed(nn.Module):
     """non-linear embed by MLP"""
+
     def __init__(self, dim_in=1024, dim_out=128):
         super(MLPEmbed, self).__init__()
         self.linear1 = nn.Linear(dim_in, 2 * dim_out)
@@ -65,6 +82,7 @@ class MLPEmbed(nn.Module):
         x = self.l2norm(self.linear2(x))
         return x
 
+
 class SelfA(nn.Module):
     """Cross layer Self Attention"""
 
@@ -73,13 +91,21 @@ class SelfA(nn.Module):
 
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
         for i in range(t_len):
-            setattr(self, 'key_weight' + str(i), MLPEmbed(input_channel, input_channel // factor))
+            setattr(
+                self,
+                "key_weight" + str(i),
+                MLPEmbed(input_channel, input_channel // factor),
+            )
         for i in range(s_len):
-            setattr(self, 'query_weight' + str(i), MLPEmbed(input_channel, input_channel // factor))
+            setattr(
+                self,
+                "query_weight" + str(i),
+                MLPEmbed(input_channel, input_channel // factor),
+            )
 
         for i in range(s_len):
             for j in range(t_len):
-                setattr(self, 'regressor' + str(i) + str(j), AAEmbed(s_n[i], s_t[j]))
+                setattr(self, "regressor" + str(i) + str(j), AAEmbed(s_n[i], s_t[j]))
 
     def forward(self, feat_s, feat_t):
 
@@ -99,14 +125,14 @@ class SelfA(nn.Module):
         proj_key = proj_key[:, :, None]
 
         for i in range(1, len(sim_t)):
-            temp_proj_key = getattr(self, 'key_weight' + str(i))(sim_t[i])
+            temp_proj_key = getattr(self, "key_weight" + str(i))(sim_t[i])
             proj_key = torch.cat([proj_key, temp_proj_key[:, :, None]], 2)
 
         # query of source layers
         proj_query = self.query_weight0(sim_s[0])
         proj_query = proj_query[:, None, :]
         for i in range(1, len(sim_s)):
-            temp_proj_query = getattr(self, 'query_weight' + str(i))(sim_s[i])
+            temp_proj_query = getattr(self, "query_weight" + str(i))(sim_s[i])
             proj_query = torch.cat([proj_query, temp_proj_query[:, None, :]], 1)
 
         # attention weight
@@ -123,11 +149,11 @@ class SelfA(nn.Module):
                 s_H, t_H = feat_s[i].shape[2], feat_t[j].shape[2]
                 if s_H > t_H:
                     input = F.adaptive_avg_pool2d(feat_s[i], (t_H, t_H))
-                    proj_value_stu[i].append(getattr(self, 'regressor' + str(i) + str(j))(input))
+                    proj_value_stu[i].append(getattr(self, "regressor" + str(i) + str(j))(input))
                     value_tea[i].append(feat_t[j])
                 elif s_H < t_H or s_H == t_H:
                     target = F.adaptive_avg_pool2d(feat_t[j], (s_H, s_H))
-                    proj_value_stu[i].append(getattr(self, 'regressor' + str(i) + str(j))(feat_s[i]))
+                    proj_value_stu[i].append(getattr(self, "regressor" + str(i) + str(j))(feat_s[i]))
                     value_tea[i].append(target)
 
         return proj_value_stu, value_tea, attention

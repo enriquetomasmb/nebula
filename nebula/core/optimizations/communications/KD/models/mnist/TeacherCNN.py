@@ -1,24 +1,24 @@
-
-import torch
 import copy
 
-from nebula.core.optimizations.communications.KD.utils.AT import Attention
+import torch
 
 from nebula.core.optimizations.communications.KD.models.teachernebulamodel import TeacherNebulaModel
+from nebula.core.optimizations.communications.KD.utils.AT import Attention
 
 
 class TeacherMNISTModelCNN(TeacherNebulaModel):
     """
-        Techer model for FashionMNIST.
+    Techer model for FashionMNIST.
     """
+
     def __init__(
-            self,
-            input_channels=1,
-            num_classes=10,
-            learning_rate=1e-3,
-            metrics=None,
-            confusion_matrix=None,
-            seed=None,
+        self,
+        input_channels=1,
+        num_classes=10,
+        learning_rate=1e-3,
+        metrics=None,
+        confusion_matrix=None,
+        seed=None,
     ):
         super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed)
         self.example_input_array = torch.zeros(1, 1, 28, 28)
@@ -26,20 +26,21 @@ class TeacherMNISTModelCNN(TeacherNebulaModel):
         self.criterion = torch.nn.CrossEntropyLoss()
 
         self.conv1 = torch.nn.Conv2d(
-            in_channels=input_channels, out_channels=64, kernel_size=(5, 5), padding="same"
+            in_channels=input_channels,
+            out_channels=64,
+            kernel_size=(5, 5),
+            padding="same",
         )
         self.relu = torch.nn.ReLU()
         self.pool1 = torch.nn.MaxPool2d(kernel_size=(2, 2), stride=2)
-        self.conv2 = torch.nn.Conv2d(
-            in_channels=64, out_channels=128, kernel_size=(5, 5), padding="same"
-        )
+        self.conv2 = torch.nn.Conv2d(in_channels=64, out_channels=128, kernel_size=(5, 5), padding="same")
         self.pool2 = torch.nn.MaxPool2d(kernel_size=(2, 2), stride=2)
         self.l1 = torch.nn.Linear(7 * 7 * 128, 4096)
         self.l2 = torch.nn.Linear(4096, num_classes)
 
     def forward(self, x, is_feat=False):
         """Forward pass of the model.
-            is_feat: bool, if True return the features of the model.
+        is_feat: bool, if True return the features of the model.
         """
         # Reshape the input tensor
         input_layer = x.view(-1, 1, 28, 28)
@@ -61,11 +62,10 @@ class TeacherMNISTModelCNN(TeacherNebulaModel):
 
         if is_feat:
             return [conv1, conv2], logits
-        else:
-            return logits
+        return logits
 
     def configure_optimizers(self):
-        """ Configure the optimizer for training. """
+        """Configure the optimizer for training."""
         optimizer = torch.optim.Adam(
             self.parameters(),
             lr=self.learning_rate,
@@ -84,18 +84,19 @@ class TeacherMNISTModelCNN(TeacherNebulaModel):
 
 class MDTeacherMNISTModelCNN(TeacherNebulaModel):
     """
-        Techer model for FashionMNIST.
+    Techer model for FashionMNIST.
     """
+
     def __init__(
-            self,
-            input_channels=1,
-            num_classes=10,
-            learning_rate=1e-3,
-            metrics=None,
-            confusion_matrix=None,
-            seed=None,
-            p=2,
-            beta=1000,
+        self,
+        input_channels=1,
+        num_classes=10,
+        learning_rate=1e-3,
+        metrics=None,
+        confusion_matrix=None,
+        seed=None,
+        p=2,
+        beta=1000,
     ):
         super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed)
         self.p = p
@@ -109,20 +110,21 @@ class MDTeacherMNISTModelCNN(TeacherNebulaModel):
         self.student_model = None
 
         self.conv1 = torch.nn.Conv2d(
-            in_channels=input_channels, out_channels=64, kernel_size=(5, 5), padding="same"
+            in_channels=input_channels,
+            out_channels=64,
+            kernel_size=(5, 5),
+            padding="same",
         )
         self.relu = torch.nn.ReLU()
         self.pool1 = torch.nn.MaxPool2d(kernel_size=(2, 2), stride=2)
-        self.conv2 = torch.nn.Conv2d(
-            in_channels=64, out_channels=128, kernel_size=(5, 5), padding="same"
-        )
+        self.conv2 = torch.nn.Conv2d(in_channels=64, out_channels=128, kernel_size=(5, 5), padding="same")
         self.pool2 = torch.nn.MaxPool2d(kernel_size=(2, 2), stride=2)
         self.l1 = torch.nn.Linear(7 * 7 * 128, 4096)
         self.l2 = torch.nn.Linear(4096, num_classes)
 
     def forward(self, x, is_feat=False):
         """Forward pass of the model.
-            is_feat: bool, if True return the features of the model.
+        is_feat: bool, if True return the features of the model.
         """
         # Reshape the input tensor
         input_layer = x.view(-1, 1, 28, 28)
@@ -144,11 +146,10 @@ class MDTeacherMNISTModelCNN(TeacherNebulaModel):
 
         if is_feat:
             return [conv1, conv2], logits
-        else:
-            return logits
+        return logits
 
     def configure_optimizers(self):
-        """ Configure the optimizer for training. """
+        """Configure the optimizer for training."""
         optimizer = torch.optim.Adam(
             self.parameters(),
             lr=self.learning_rate,
@@ -162,7 +163,7 @@ class MDTeacherMNISTModelCNN(TeacherNebulaModel):
         For cyclic dependency problem, a copy of the student model is created, the teacher_model attribute is removed.
         """
         self.student_model = copy.deepcopy(student_model)
-        if hasattr(self.student_model, 'teacher_model'):
+        if hasattr(self.student_model, "teacher_model"):
             del self.student_model.teacher_model
 
     def step(self, batch, batch_idx, phase):
@@ -187,4 +188,3 @@ class MDTeacherMNISTModelCNN(TeacherNebulaModel):
         loss = loss_cls + self.beta * loss_kd
         self.process_metrics(phase, logit_t, labels, loss)
         return loss
-
