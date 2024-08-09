@@ -1,49 +1,64 @@
+"""
+This module extends a ResNet model for CIFAR10 classification in a federated learning context, specifically utilizing prototype aggregation.
+The `ProtoCIFAR10ModelResNet8` class inherits from `CIFAR10ModelResNet8` and adds functionality to handle prototype-based learning.
+"""
 
-from nebula.core.optimizations.communications.prototypes.models.cifar10.resnet import CIFAR10ModelResNet8
+import logging
 
 import torch
 import torch.nn.functional as F
-import logging
 
-__all__ = ['resnet']
+from nebula.core.research.FedProto.models.cifar10.resnet import (
+    CIFAR10ModelResNet8,
+)
+
 
 class ProtoCIFAR10ModelResNet8(CIFAR10ModelResNet8):
     """
     LightningModule for CIFAR10.
     """
+
     def __init__(
-            self,
-            input_channels=3,
-            num_classes=10,
-            learning_rate=1e-3,
-            metrics=None,
-            confusion_matrix=None,
-            seed=None,
-            depth=8,
-            num_filters=[16, 16, 32, 64],
-            block_name='BasicBlock',
-            beta=1,
+        self,
+        input_channels=3,
+        num_classes=10,
+        learning_rate=1e-3,
+        metrics=None,
+        confusion_matrix=None,
+        seed=None,
+        depth=8,
+        num_filters=[16, 16, 32, 64],
+        block_name="BasicBlock",
+        beta=1,
     ):
 
-
-        super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed, depth, num_filters, block_name)
-        self.config = {
-            'beta1': 0.851436,
-            'beta2': 0.999689,
-            'amsgrad': True
-        }
+        super().__init__(
+            input_channels,
+            num_classes,
+            learning_rate,
+            metrics,
+            confusion_matrix,
+            seed,
+            depth,
+            num_filters,
+            block_name,
+        )
+        self.config = {"beta1": 0.851436, "beta2": 0.999689, "amsgrad": True}
 
         self.beta = beta
         self.example_input_array = torch.rand(1, 3, 32, 32)
         self.criterion_nll = torch.nn.NLLLoss()
         self.loss_mse = torch.nn.MSELoss()
-        self.global_protos = dict()
-        self.agg_protos_label = dict()
+        self.global_protos = {}
+        self.agg_protos_label = {}
 
     def configure_optimizers(self):
-        """ """
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate,
-                                     betas=(self.config['beta1'], self.config['beta2']), amsgrad=self.config['amsgrad'])
+        optimizer = torch.optim.Adam(
+            self.parameters(),
+            lr=self.learning_rate,
+            betas=(self.config["beta1"], self.config["beta2"]),
+            amsgrad=self.config["amsgrad"],
+        )
         return optimizer
 
     def step(self, batch, batch_idx, phase):
@@ -72,8 +87,8 @@ class ProtoCIFAR10ModelResNet8(CIFAR10ModelResNet8):
                 label = labels[i].item()
                 if label not in self.agg_protos_label:
                     self.agg_protos_label[label] = dict(sum=torch.zeros_like(protos[i, :]), count=0)
-                self.agg_protos_label[label]['sum'] += protos[i, :].detach().clone()
-                self.agg_protos_label[label]['count'] += 1
+                self.agg_protos_label[label]["sum"] += protos[i, :].detach().clone()
+                self.agg_protos_label[label]["count"] += 1
 
         return loss
 
@@ -82,19 +97,19 @@ class ProtoCIFAR10ModelResNet8(CIFAR10ModelResNet8):
         if len(self.agg_protos_label) == 0:
             return {k: v.cpu() for k, v in self.global_protos.items()}
 
-        proto = dict()
+        proto = {}
         for label, proto_info in self.agg_protos_label.items():
 
-            if proto_info['count'] > 1:
-                proto[label] = (proto_info['sum'] / proto_info['count']).to('cpu')
+            if proto_info["count"] > 1:
+                proto[label] = (proto_info["sum"] / proto_info["count"]).to("cpu")
             else:
-                proto[label] = proto_info['sum'].to('cpu')
+                proto[label] = proto_info["sum"].to("cpu")
 
         logging.info(f"[ProtoCIFAR10ModelResNet8.get_protos] Protos: {proto}")
         return proto
 
     def set_protos(self, protos):
-        self.agg_protos_label = dict()
+        self.agg_protos_label = {}
         self.global_protos = {k: v.to(self.device) for k, v in protos.items()}
 
     def forward_train(self, x):
@@ -103,18 +118,12 @@ class ProtoCIFAR10ModelResNet8(CIFAR10ModelResNet8):
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)
-        f0 = x
-
-        x, f1_pre = self.layer1(x)
-        f1 = x
-        x, f2_pre = self.layer2(x)
-        f2 = x
-        x, f3_pre = self.layer3(x)
-        f3 = x
-
+        x, _ = self.layer1(x)
+        x, _ = self.layer2(x)
+        x, _ = self.layer3(x)
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
-        f4 = x
+
         dense = self.fc_dense(x)
         logits = self.fc(dense)
 
@@ -129,18 +138,12 @@ class ProtoCIFAR10ModelResNet8(CIFAR10ModelResNet8):
         x = self.conv1(x)
         x = self.bn1(x)
         x = self.relu(x)  # 32x32
-        f0 = x
-
-        x, f1_pre = self.layer1(x)  # 32x32
-        f1 = x
-        x, f2_pre = self.layer2(x)  # 16x16
-        f2 = x
-        x, f3_pre = self.layer3(x)  # 8x8
-        f3 = x
-
+        x, _ = self.layer1(x)  # 32x32
+        x, _ = self.layer2(x)  # 16x16
+        x, _ = self.layer3(x)  # 8x8
         x = self.avgpool(x)
         x = x.view(x.size(0), -1)
-        f4 = x
+
         dense = self.fc_dense(x)
 
         # Calculate the distances
@@ -155,9 +158,3 @@ class ProtoCIFAR10ModelResNet8(CIFAR10ModelResNet8):
 
         # Return the predicted class based on the closest prototype
         return distances.argmin(dim=1)
-
-
-
-
-
-

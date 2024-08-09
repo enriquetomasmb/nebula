@@ -1,26 +1,25 @@
-'''Resnet for cifar dataset.
+"""Resnet for cifar dataset.
 Ported form
 https://github.com/facebook/fb.resnet.torch
 and
 https://github.com/pytorch/vision/blob/master/torchvision/models/resnet.py
 (c) YANG, Wei
-'''
-import torch
-import torch.nn as nn
-import torch.nn.functional as F
-import math
+"""
+
 from abc import ABC
 
+import torch
+from torch import nn
+import torch.nn.functional as F
 
-__all__ = ['resnet']
+__all__ = ["resnet"]
 
 from nebula.core.models.nebulamodel import NebulaModel
 
 
 def conv3x3(in_planes, out_planes, stride=1):
     """3x3 convolution with padding"""
-    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride,
-                     padding=1, bias=False)
+    return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False)
 
 
 class BasicBlock(nn.Module):
@@ -55,8 +54,8 @@ class BasicBlock(nn.Module):
         out = F.relu(out)
         if self.is_last:
             return out, preact
-        else:
-            return out
+
+        return out
 
 
 class Bottleneck(nn.Module):
@@ -67,8 +66,7 @@ class Bottleneck(nn.Module):
         self.is_last = is_last
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, bias=False)
         self.bn1 = nn.BatchNorm2d(planes)
-        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride,
-                               padding=1, bias=False)
+        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
         self.bn2 = nn.BatchNorm2d(planes)
         self.conv3 = nn.Conv2d(planes, planes * 4, kernel_size=1, bias=False)
         self.bn3 = nn.BatchNorm2d(planes * 4)
@@ -98,42 +96,41 @@ class Bottleneck(nn.Module):
         out = F.relu(out)
         if self.is_last:
             return out, preact
-        else:
-            return out
+
+        return out
 
 
 class CIFAR10ModelResNet8(NebulaModel, ABC):
 
     def __init__(
-            self,
-            input_channels=3,
-            num_classes=10,
-            learning_rate=1e-3,
-            metrics=None,
-            confusion_matrix=None,
-            seed=None,
-            depth=8,
-            num_filters=[16, 16, 32, 64],
-            block_name='BasicBlock'
+        self,
+        input_channels=3,
+        num_classes=10,
+        learning_rate=1e-3,
+        metrics=None,
+        confusion_matrix=None,
+        seed=None,
+        depth=8,
+        num_filters=[16, 16, 32, 64],
+        block_name="BasicBlock",
     ):
         super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed)
-        num_classes = num_classes
+        self.num_classes = num_classes
         # Model type specifies number of layers for CIFAR-10 model
-        if block_name.lower() == 'basicblock':
-            assert (depth - 2) % 6 == 0, 'When use basicblock, depth should be 6n+2, e.g. 20, 32, 44, 56, 110, 1202'
+        if block_name.lower() == "basicblock":
+            assert (depth - 2) % 6 == 0, "When use basicblock, depth should be 6n+2, e.g. 20, 32, 44, 56, 110, 1202"
             n = (depth - 2) // 6
             block = BasicBlock
-        elif block_name.lower() == 'bottleneck':
-            assert (depth - 2) % 9 == 0, 'When use bottleneck, depth should be 9n+2, e.g. 20, 29, 47, 56, 110, 1199'
+        elif block_name.lower() == "bottleneck":
+            assert (depth - 2) % 9 == 0, "When use bottleneck, depth should be 9n+2, e.g. 20, 29, 47, 56, 110, 1199"
             n = (depth - 2) // 9
             block = Bottleneck
         else:
-            raise ValueError('block_name shoule be Basicblock or Bottleneck')
+            raise ValueError("block_name shoule be Basicblock or Bottleneck")
         self.example_input_array = torch.rand(1, 3, 32, 32)
         self.criterion_cls = nn.CrossEntropyLoss()
         self.inplanes = num_filters[0]
-        self.conv1 = nn.Conv2d(3, num_filters[0], kernel_size=3, padding=1,
-                               bias=False)
+        self.conv1 = nn.Conv2d(3, num_filters[0], kernel_size=3, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(num_filters[0])
         self.relu = nn.ReLU(inplace=True)
         self.layer1 = self._make_layer(block, num_filters[1], n)
@@ -145,7 +142,7 @@ class CIFAR10ModelResNet8(NebulaModel, ABC):
 
         for m in self.modules():
             if isinstance(m, nn.Conv2d):
-                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+                nn.init.kaiming_normal_(m.weight, mode="fan_out", nonlinearity="relu")
             elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
@@ -154,8 +151,13 @@ class CIFAR10ModelResNet8(NebulaModel, ABC):
         downsample = None
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
-                nn.Conv2d(self.inplanes, planes * block.expansion,
-                          kernel_size=1, stride=stride, bias=False),
+                nn.Conv2d(
+                    self.inplanes,
+                    planes * block.expansion,
+                    kernel_size=1,
+                    stride=stride,
+                    bias=False,
+                ),
                 nn.BatchNorm2d(planes * block.expansion),
             )
 
@@ -163,7 +165,7 @@ class CIFAR10ModelResNet8(NebulaModel, ABC):
         layers.append(block(self.inplanes, planes, stride, downsample, is_last=(blocks == 1)))
         self.inplanes = planes * block.expansion
         for i in range(1, blocks):
-            layers.append(block(self.inplanes, planes, is_last=(i == blocks-1)))
+            layers.append(block(self.inplanes, planes, is_last=(i == blocks - 1)))
 
         return nn.Sequential(*layers)
 
@@ -187,10 +189,9 @@ class CIFAR10ModelResNet8(NebulaModel, ABC):
             bn2 = self.layer2[-1].bn2
             bn3 = self.layer3[-1].bn2
         else:
-            raise NotImplementedError('ResNet unknown block error !!!')
+            raise NotImplementedError("ResNet unknown block error !!!")
 
         return [bn1, bn2, bn3]
-
 
     def forward(self, x, is_feat=False, preact=False):
         x = self.conv1(x)
@@ -214,10 +215,10 @@ class CIFAR10ModelResNet8(NebulaModel, ABC):
         if is_feat:
             if preact:
                 return [f0, f1_pre, f2_pre, f3_pre, f4], x
-            else:
-                return [f0, f1, f2, f3, f4], x
-        else:
-            return x
+
+            return [f0, f1, f2, f3, f4], x
+
+        return x
 
     def step(self, batch, batch_idx, phase):
         images, labels = batch
@@ -229,9 +230,15 @@ class CIFAR10ModelResNet8(NebulaModel, ABC):
 
     def configure_optimizers(self):
         """ """
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate,
-                                     betas=(self.config['beta1'], self.config['beta2']), amsgrad=self.config['amsgrad'])
+        optimizer = torch.optim.Adam(
+            self.parameters(),
+            lr=self.learning_rate,
+            betas=(self.config["beta1"], self.config["beta2"]),
+            amsgrad=self.config["amsgrad"],
+        )
         return optimizer
+
+
 """
 def resnet8(**kwargs):
     return ResNet(8, [16, 16, 32, 64], 'basicblock', **kwargs)
@@ -240,4 +247,3 @@ def resnet8(**kwargs):
 def resnet14(**kwargs):
     return ResNet(14, [16, 16, 32, 64], 'basicblock', **kwargs)
 """
-

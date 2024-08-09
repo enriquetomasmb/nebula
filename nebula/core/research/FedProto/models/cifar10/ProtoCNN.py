@@ -1,8 +1,9 @@
-import torch
-
-import torch.nn as nn
-import torch.nn.functional as F
 import logging
+
+import torch
+from torch import nn
+import torch.nn.functional as F
+
 from nebula.core.models.nebulamodel import NebulaModel
 
 
@@ -12,26 +13,22 @@ class ProtoCIFAR10ModelCNN(NebulaModel):
     """
 
     def __init__(
-            self,
-            input_channels=3,
-            num_classes=10,
-            learning_rate=1e-3,
-            metrics=None,
-            confusion_matrix=None,
-            seed=None,
-            beta=1
+        self,
+        input_channels=3,
+        num_classes=10,
+        learning_rate=1e-3,
+        metrics=None,
+        confusion_matrix=None,
+        seed=None,
+        beta=1,
     ):
         super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed)
-        self.config = {
-            'beta1': 0.851436,
-            'beta2': 0.999689,
-            'amsgrad': True
-        }
-        
+        self.config = {"beta1": 0.851436, "beta2": 0.999689, "amsgrad": True}
+
         self.example_input_array = torch.rand(1, 3, 32, 32)
         self.beta = beta
-        self.global_protos = dict()
-        self.agg_protos_label = dict()
+        self.global_protos = {}
+        self.agg_protos_label = {}
         self.criterion_nll = nn.NLLLoss()
         self.loss_mse = torch.nn.MSELoss()
 
@@ -44,7 +41,7 @@ class ProtoCIFAR10ModelCNN(NebulaModel):
             torch.nn.BatchNorm2d(32),
             torch.nn.ReLU(),
             torch.nn.MaxPool2d(kernel_size=2, stride=2),
-            torch.nn.Dropout(0.25)
+            torch.nn.Dropout(0.25),
         )
 
         self.layer2 = torch.nn.Sequential(
@@ -55,7 +52,7 @@ class ProtoCIFAR10ModelCNN(NebulaModel):
             torch.nn.BatchNorm2d(64),
             torch.nn.ReLU(),
             torch.nn.MaxPool2d(kernel_size=2, stride=2),
-            torch.nn.Dropout(0.25)
+            torch.nn.Dropout(0.25),
         )
 
         self.layer3 = torch.nn.Sequential(
@@ -66,14 +63,10 @@ class ProtoCIFAR10ModelCNN(NebulaModel):
             torch.nn.BatchNorm2d(128),
             torch.nn.ReLU(),
             torch.nn.MaxPool2d(kernel_size=2, stride=2),
-            torch.nn.Dropout(0.25)
+            torch.nn.Dropout(0.25),
         )
 
-        self.fc_layer_dense = torch.nn.Sequential(
-            torch.nn.Linear(128 * 4 * 4, 512),
-            torch.nn.ReLU(),
-            torch.nn.Dropout(0.5)
-        )
+        self.fc_layer_dense = torch.nn.Sequential(torch.nn.Linear(128 * 4 * 4, 512), torch.nn.ReLU(), torch.nn.Dropout(0.5))
 
         self.fc_layer = torch.nn.Linear(512, num_classes)
 
@@ -99,7 +92,6 @@ class ProtoCIFAR10ModelCNN(NebulaModel):
         logits = self.fc_layer(dense)
 
         return F.log_softmax(logits, dim=1), dense
-
 
     def forward(self, x):
         """
@@ -128,10 +120,14 @@ class ProtoCIFAR10ModelCNN(NebulaModel):
 
         return distances.argmin(dim=1)
 
-
     def configure_optimizers(self):
         """ """
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate, betas=(self.config['beta1'], self.config['beta2']), amsgrad=self.config['amsgrad'])
+        optimizer = torch.optim.Adam(
+            self.parameters(),
+            lr=self.learning_rate,
+            betas=(self.config["beta1"], self.config["beta2"]),
+            amsgrad=self.config["amsgrad"],
+        )
         return optimizer
 
     def step(self, batch, batch_idx, phase):
@@ -139,7 +135,7 @@ class ProtoCIFAR10ModelCNN(NebulaModel):
         y_pred, protos = self.forward_train(images)
         loss1 = self.criterion_nll(y_pred, labels)
 
-        #Compute loss 2 if the model has prototypes
+        # Compute loss 2 if the model has prototypes
         if len(self.global_protos) == 0:
             loss2 = 0 * loss1
         else:
@@ -147,7 +143,7 @@ class ProtoCIFAR10ModelCNN(NebulaModel):
             i = 0
             for label in labels:
                 if label.item() in self.global_protos.keys():
-                    protos_new[i,:] = self.global_protos[label.item()].data
+                    protos_new[i, :] = self.global_protos[label.item()].data
                 i += 1
             # Compute the loss for the prototypes
             loss2 = self.loss_mse(protos, protos_new)
@@ -160,8 +156,8 @@ class ProtoCIFAR10ModelCNN(NebulaModel):
                 label = labels[i].item()
                 if label not in self.agg_protos_label:
                     self.agg_protos_label[label] = dict(sum=torch.zeros_like(protos[i, :]), count=0)
-                self.agg_protos_label[label]['sum'] += protos[i, :].detach().clone()
-                self.agg_protos_label[label]['count'] += 1
+                self.agg_protos_label[label]["sum"] += protos[i, :].detach().clone()
+                self.agg_protos_label[label]["count"] += 1
 
         return loss
 
@@ -170,17 +166,17 @@ class ProtoCIFAR10ModelCNN(NebulaModel):
         if len(self.agg_protos_label) == 0:
             return {k: v.cpu() for k, v in self.global_protos.items()}
 
-        proto = dict()
+        proto = {}
         for label, proto_info in self.agg_protos_label.items():
 
-            if proto_info['count'] > 1:
-                proto[label] = (proto_info['sum'] / proto_info['count']).to('cpu')
+            if proto_info["count"] > 1:
+                proto[label] = (proto_info["sum"] / proto_info["count"]).to("cpu")
             else:
-                proto[label] = proto_info['sum'].to('cpu')
+                proto[label] = proto_info["sum"].to("cpu")
 
         logging.info(f"[ProtoCIFAR10ModelCNN.get_protos] Protos: {proto}")
         return proto
 
     def set_protos(self, protos):
-        self.agg_protos_label = dict()
+        self.agg_protos_label = {}
         self.global_protos = {k: v.to(self.device) for k, v in protos.items()}
