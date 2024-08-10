@@ -581,9 +581,7 @@ class Engine:
         net_io_counters = psutil.net_io_counters()
         nss_features["bytes_sent"] = net_io_counters.bytes_sent
         nss_features["bytes_received"] = net_io_counters.bytes_recv
-        # TODO
-        # nss_features["loss"] = float(self.trainer.???()["Train/Loss"])
-        nss_features["loss"] = -1
+        nss_features["loss"] = self.trainer.model.loss
         nss_features["data_size"] = self.trainer.get_model_weight()
         self.nss_features = nss_features
 

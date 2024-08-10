@@ -128,6 +128,7 @@ class NebulaModel(pl.LightningModule, ABC):
         self.input_channels = input_channels
         self.num_classes = num_classes
         self.learning_rate = learning_rate
+        self.loss = -1
 
         if metrics is None:
             metrics = MetricCollection(
@@ -180,7 +181,9 @@ class NebulaModel(pl.LightningModule, ABC):
 
         Returns:
         """
-        return self.step(batch, batch_idx=batch_idx, phase="Train")
+        loss = self.step(batch, batch_idx=batch_idx, phase="Train")
+        self.loss = loss
+        return loss
 
     def on_train_end(self):
         self.global_number["Train"] += 1
