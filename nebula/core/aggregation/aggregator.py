@@ -191,6 +191,12 @@ class Aggregator(ABC):
         else:
             logging.info(f"🔄  get_aggregation | All models accounted for, proceeding with aggregation.")
 
+        logging.info(f"🔄  get_aggregation | Removing pending models not selected by the NSS Selector...")
+        for node in list(self._pending_models_to_aggregate.keys()):
+            if node not in self.engine.node_selection_strategy_selector.selected_nodes:
+                logging.info(f"🔄  get_aggregation | Removing model from {node} as it was not selected by the NSS Selector.")
+                del self._pending_models_to_aggregate[node]
+        logging.info(f"🔄  get_aggregation | Final nodes for aggregation: {self._pending_models_to_aggregate.keys()}")
         return self.run_aggregation(self._pending_models_to_aggregate)
 
     async def include_next_model_in_buffer(self, model, weight, source=None, round=None):

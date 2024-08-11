@@ -17,9 +17,10 @@ class AllSelector(Selector):
         logging.info(f"[AllSelector] available neighbors: {neighbors}")
         if len(neighbors) == 0:
             logging.error(
-                "[AllSelector] Trying to select neighbors when there are no neighbors"
+                "[AllSelector] Trying to select neighbors when there are no neighbors - aggregating itself only"
             )
-            return None
-        selected_nodes = neighbors
-        logging.info(f"[AllSelector] selection finished - selected_nodes: {selected_nodes}")
-        return selected_nodes
+            self.selected_nodes = [node.addr]
+        else:
+            self.selected_nodes = neighbors + [node.addr]
+            logging.info(f"[AllSelector] selection finished - selected_nodes: {self.selected_nodes}")
+        return self.selected_nodes

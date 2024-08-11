@@ -325,8 +325,7 @@ class Engine:
             features["loss"] = message.loss
             features["data_size"] = message.data_size
             features["latency"] = latency
-            for neighbor in await self._get_current_neighbors():
-                self.node_selection_strategy_selector.add_neighbor(neighbor)
+            self.node_selection_strategy_selector.add_neighbor(source)
             self.node_selection_strategy_selector.add_node_features(source, features)
 
     async def create_trainer_module(self):
@@ -459,15 +458,12 @@ class Engine:
         while self.round is not None and self.round < self.total_rounds:
             print_msg_box(msg=f"Round {self.round} of {self.total_rounds} started.", indent=2, title="Round information")
             self.trainer.on_round_start()
-            self.federation_nodes = await self.cm.get_addrs_current_connections(only_direct=True, myself=True)
+            self.federation_nodes = await self.cm.get_addrs_current_connections(only_direct = True, myself = True)
             logging.info(f"Federation nodes: {self.federation_nodes}")
             direct_connections = await self.cm.get_addrs_current_connections(only_direct=True)
             undirected_connections = await self.cm.get_addrs_current_connections(only_undirected=True)
             logging.info(f"Direct connections: {direct_connections} | Undirected connections: {undirected_connections}")
             logging.info(f"[Role {self.role}] Starting learning cycle...")
-            await self.aggregator.update_federation_nodes(self.federation_nodes)
-            await self._extended_learning_cycle()
-            await self.get_round_lock().acquire_async()
 
             if self.node_selection_strategy_enabled:
                 # Extract Features needed for Node Selection Strategy
@@ -478,6 +474,11 @@ class Engine:
                 await self.cm.send_message_to_neighbors(message)
                 _nss_features_msg = f"""NSS features for round {self.round}:\nCPU Usage (%): {self.nss_features['cpu_percent']}%\nBytes Sent: {self.nss_features['bytes_sent']}\nBytes Received: {self.nss_features['bytes_received']}\nLoss: {self.nss_features['loss']}\nData Size: {self.nss_features['data_size']}"""
                 print_msg_box(msg=_nss_features_msg, indent=2, title="NSS features (this node)")
+                self.node_selection_strategy_selector.node_selection(self)
+
+            await self.aggregator.update_federation_nodes(self.federation_nodes)
+            await self._extended_learning_cycle()
+            await self.get_round_lock().acquire_async()
 
             print_msg_box(msg=f"Round {self.round} of {self.total_rounds} finished.", indent=2, title="Round information")
             self.aggregator.reset()

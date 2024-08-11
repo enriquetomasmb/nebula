@@ -26,14 +26,16 @@ class RandomSelector(Selector):
         neighbors = self.neighbors_list.copy()
         if len(neighbors) == 0:
             logging.error(
-                "[RandomSelector] Trying to select neighbors when there are no neighbors"
+                "[RandomSelector] Trying to select neighbors when there are no neighbors - aggregating itself only"
             )
-            return None
+            self.selected_nodes = [node.addr]
+            return self.selected_nodes
         logging.info(f"[RandomSelector] available neighbors: {neighbors}")
         num_selected = max(
             self.MIN_AMOUNT_OF_SELECTED_NEIGHBORS,
             math.floor(len(neighbors) * self.MAX_PERCENT_SELECTABLE_NEIGHBORS)
         )
         selected_nodes = np.random.choice(neighbors, num_selected, replace = False).tolist()
-        logging.info(f"[RandomSelector] selection finished, selected_nodes: {selected_nodes}")
-        return selected_nodes
+        self.selected_nodes = selected_nodes + [node.addr]
+        logging.info(f"[RandomSelector] selection finished, selected_nodes: {self.selected_nodes}")
+        return self.selected_nodes

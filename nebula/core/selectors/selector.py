@@ -19,6 +19,7 @@ class Selector():
     def __init__(self, config = None):
         self.config = config
         self.neighbors_list = []
+        self.selected_nodes = []
         self.features = {}
         self.ages = {}
 
@@ -49,7 +50,11 @@ class Selector():
 
     def add_neighbor(self, neighbor):
         logging.info("[Selector] Adding Neighbor: {}".format(neighbor))
-        self.neighbors_list.append(neighbor)
+        if neighbor not in self.neighbors_list:
+            self.neighbors_list.append(neighbor)
+
+    def reset_neighbors(self):
+        self.neighbors_list = []
 
     def node_selection(self, node):
         """To be overridden by the subclasses (selectors)"""

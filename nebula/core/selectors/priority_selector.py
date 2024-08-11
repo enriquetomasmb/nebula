@@ -40,9 +40,10 @@ class PrioritySelector(Selector):
 
         if len(neighbors) == 0:
             logging.error(
-                "[PrioritySelector] Trying to select neighbors when there are no neighbors"
+                "[PrioritySelector] Trying to select neighbors when there are no neighbors - aggregating itself only"
             )
-            return node
+            self.selected_nodes = [node.addr]
+            return self.selected_nodes
 
         num_selected = max(
             self.MIN_AMOUNT_OF_SELECTED_NEIGHBORS,
@@ -108,6 +109,9 @@ class PrioritySelector(Selector):
             if node not in selected_nodes:
                 self.ages[node] = self.ages[node] + 2
 
-        logging.info(f"[PrioritySelector] selection finished, selected_nodes: {selected_nodes}")
+        # Add own node
+        self.selected_nodes = selected_nodes + [node.addr]
 
-        return selected_nodes
+        logging.info(f"[PrioritySelector] selection finished, selected_nodes: {self.selected_nodes}")
+
+        return self.selected_nodes
