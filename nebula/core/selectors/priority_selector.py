@@ -53,35 +53,29 @@ class PrioritySelector(Selector):
         availability = []
         feature_array = np.empty((7, 0))
 
-        for node in neighbors:
-            feature_list = list((self.features[node]["loss"],
-                                 self.features[node]["cpu_percent"],
-                                 self.features[node]["data_size"],
-                                 self.features[node]["bytes_received"],
-                                 self.features[node]["bytes_sent"],
-                                 self.features[node]["latency"],
-                                 self.ages[node]))
+        for neighbor in neighbors:
+            if neighbor not in self.ages.keys():
+                self.ages[neighbor] = 1
+
+            # Invert CPU Percent/Latency, 0.000001 is added to avoid division by zero
+            feature_list = list((self.features[neighbor]["loss"],
+                                 1/(self.features[neighbor]["cpu_percent"] + 0.000001),
+                                 self.features[neighbor]["data_size"],
+                                 self.features[neighbor]["bytes_received"],
+                                 self.features[neighbor]["bytes_sent"],
+                                 1/(self.features[neighbor]["latency"] + 0.000001),
+                                 self.ages[neighbor]))
 
             # Set loss to 100 if loss metric is unavailable
             if feature_list[0] == -1:
                 feature_list[0] = 100
 
-            logging.info(f"[PrioritySelector] Features for node {node}: {feature_list}")
+            logging.info(f"[PrioritySelector] Features for node {neighbor}: {feature_list}")
 
-            availability.append(self.features[node]["availability"])
+            availability.append(self.features[neighbor]["availability"])
 
             feature = np.array(feature_list).reshape(-1, 1).astype(np.float64)
             feature_array = np.append(feature_array, feature, axis = 1)
-
-        logging.info(f"[PrioritySelector] Features: {feature_array}")
-
-        # Prevent 0 denominator:
-        self.feature_weights.cpu_percent = self.feature_weights.cpu_percent + 0.000001
-        self.feature_weights.latency = self.feature_weights.latency + 0.000001
-
-        # Invert the weights of cpu_percent & latency
-        self.feature_weights.cpu_percent = 1 / self.feature_weights.cpu_percent
-        self.feature_weights.latency = 1 / self.feature_weights.latency
 
         # Normalized features
         feature_array_normed = normalize(feature_array, axis = 1, norm = 'l1')
@@ -89,8 +83,6 @@ class PrioritySelector(Selector):
         # Add weight to features
         weight = np.array(self.FEATURE_WEIGHTS).reshape(-1, 1)
         feature_array_weighted = np.multiply(feature_array_normed, weight)
-
-        logging.info(f"[PrioritySelector] Features weighted: {feature_array_weighted}")
 
         # Before availability
         scores = np.sum(feature_array_weighted, axis = 0)
@@ -105,9 +97,9 @@ class PrioritySelector(Selector):
             neighbors, num_selected, replace = False, p = p[0]).tolist()
 
         # Update ages
-        for node in neighbors:
-            if node not in selected_nodes:
-                self.ages[node] = self.ages[node] + 2
+        for neighbor in neighbors:
+            if neighbor not in selected_nodes:
+                self.ages[neighbor] = self.ages[neighbor] + 2
 
         # Add own node
         self.selected_nodes = selected_nodes + [node.addr]
