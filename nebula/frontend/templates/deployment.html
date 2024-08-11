@@ -517,7 +517,11 @@
                         <select class="form-control" id="poisoning-attack-select" name="poisoning-attack"
                             style="display: inline; width: 80%">
                             <option selected>No Attack</option>
-                            <option>Label Flipping</option>
+                            <option value="label_flipping">Label Flipping</option>
+                            <option value="label_flipping_targeted_specific">Label Flipping (targeted, specific)</option>
+                            <option value="label_flipping_targeted_unspecific">Label Flipping (targeted, unspecific)</option>
+                            <option value="label_flipping_untargeted">Label Flipping (untargeted)</option>
+                            <option value="label_flipping_fang">Label Flipping (Fang)</option>
                             <option>Sample Poisoning</option>
                             <option>Model Poisoning</option>
                             <option>GLLNeuronInversionAttack</option>
@@ -526,22 +530,129 @@
                             <option>DelayerAttack</option>
                         </select>
                     </div>
-                    <h5 class="step-title">% malicious nodes</h5>
-                    <div class="form-check form-check-inline">
-                        <input type="number" class="form-control" id="poisoned-node-percent"
-                            placeholder="% malicious nodes" min="0" value="0" style="display: inline; width: 80%">
+                    <script>
+                        document.getElementById('poisoning-attack-select').addEventListener('change', function () {
+                            var attack = document.getElementById('poisoning-attack-select').value;
+                            let list_of_attack_config_div_ids = [
+                                "options_label_flipping_targeted_specific",
+                                "options_label_flipping_targeted_unspecific",
+                                "options_label_flipping_untargeted",
+                                "options_label_flipping_fang",
+                                "other_attacks_config"
+                            ];
+                            list_of_attack_config_div_ids.forEach(function (div_id) {
+                                document.getElementById(div_id).style.display = 'none';
+                            });
+                            if (attack === 'label_flipping_targeted_specific') {
+                                document.getElementById('options_label_flipping_targeted_specific').style.display = 'block';
+                            } else if (attack === 'label_flipping_targeted_unspecific') {
+                                document.getElementById('options_label_flipping_targeted_unspecific').style.display = 'block';
+                            } else if (attack === 'label_flipping_untargeted') {
+                                document.getElementById('options_label_flipping_untargeted').style.display = 'block';
+                            } else if (attack === 'label_flipping_fang') {
+                                document.getElementById('label_flipping_fang').style.display = 'block';
+                            } else {
+                                document.getElementById('other_attacks_config').style.display = 'block';
+                            }
+                        });
+                        function getLabelFlippingConfig(){
+                            if (document.getElementById('poisoning-attack-select').value.includes('label_flipping')) {
+                                var attack = document.getElementById('poisoning-attack-select').value;
+                                if (attack === 'label_flipping_targeted_specific') {
+                                    return {
+                                        attack: attack,
+                                        label_og: document.getElementById('options_label_flipping_targeted_specific_config_label_og').value,
+                                        label_goal: document.getElementById('options_label_flipping_targeted_specific_config_label_goal').value,
+                                        node_percent: document.getElementById('options_label_flipping_targeted_specific_config_label_node_percent').value
+                                    };
+                                } else if (attack === "label_flipping_targeted_unspecific") {
+                                    return {
+                                        attack: attack,
+                                        label_og: document.getElementById('options_label_flipping_targeted_unspecific_config_label_og').value,
+                                        node_percent: document.getElementById('aoptions_label_flipping_targeted_unspecific_config_node_percent').value
+                                    }
+                                } else if (attack === "label_flipping_untargeted") {
+                                    return {
+                                        attack: attack,
+                                        sample_percent: document.getElementById('options_label_flipping_untargeted_config_sample_percent').value,
+                                        node_percent: document.getElementById('options_label_flipping_untargeted_config_node_percent').value
+                                    }
+                                } else if (attack === "label_flipping_fang") {
+                                    return {
+                                        attack: attack,
+                                        node_percent: document.getElementById('options_label_flipping_fang_config_node_percent').value
+                                    };
+                                } else {
+                                    return {}
+                                }
+                                }
+                            else {
+                                return {}
+                            }
+                        }
+                    </script>
+                    <div id="options_label_flipping_targeted_specific" style="display: none; margin-top:20px">
+                        Replace
+                        <select id="options_label_flipping_targeted_specific_config_label_og" class="form-control" style="display: inline; width: 6%;" size="11" multiple>
+                            <option value="">Choose ...</option>
+                            {% for i in range(10) %}
+                            <option>{{ i }}</option>
+                            {% endfor %}
+                        </select>
+                        with
+                        <select id="options_label_flipping_targeted_specific_config_label_goal" class="form-control" style="display: inline; width: 6%">
+                            <option value="">Choose ...</option>
+                            {% for i in range(10) %}
+                            <option>{{ i }}</option>
+                            {% endfor %}
+                        </select>
+                        on
+                        <input type="number" class="form-control" id="options_label_flipping_targeted_specific_config_label_node_percent" step="1" min="0" max="100" value="20" style="display: inline; width: 4%">
+                        % of nodes.<br>You may choose more than one label to replace.
                     </div>
-                    <h5 class="step-title">% samples poisoned by each malicious node</h5>
-                    <div class="form-check form-check-inline">
-                        <input type="number" class="form-control" id="poisoned-sample-percent"
-                            placeholder="% samples poisoned in each malicious node" min="0" value="0"
-                            style="display: inline; width: 80%">
+                    <div id="options_label_flipping_targeted_unspecific" style="display: none; margin-top:20px">
+                        Replace
+                        <select id="options_label_flipping_targeted_unspecific_config_label_og" class="form-control" style="display: inline; width: 6%;" size="11" multiple>
+                            <option value="">Choose ...</option>
+                            {% for i in range(10) %}
+                            <option>{{ i }}</option>
+                            {% endfor %}
+                        </select>
+                        with a random label on
+                        <input type="number" class="form-control" id="aoptions_label_flipping_targeted_unspecific_config_node_percent" step="1" min="0" max="100" value="20" style="display: inline; width: 4%">
+                        % of nodes.<br>You may choose more than one label to replace.
                     </div>
-                    <h5 class="step-title">% poisoned noise</h5>
-                    <div class="form-check form-check-inline">
-                        <input type="number" class="form-control" id="poisoned-noise-percent"
-                            placeholder="% noise in each poisoned sample" min="0" value="0"
-                            style="display: inline; width: 80%">
+                    <div id="options_label_flipping_untargeted" style="display: none;">
+                        Randomly change
+                        <input type="number" class="form-control" id="options_label_flipping_untargeted_config_sample_percent" value="80" style="display: inline; width: 5%">
+                        % of the labels on
+                        <input type="number" class="form-control" id="options_label_flipping_untargeted_config_node_percent" value="20" style="display: inline; width: 5%">
+                        % of the nodes
+                    </div>
+                    <div id="options_label_flipping_fang" style="display: none;">
+                        Run attack on
+                        <input type="number" class="form-control" id="options_label_flipping_fang_config_node_percent" step="1" min="0" max="100" value="20" style="display: inline; width: 5%">
+                        % of nodes
+                    </div>
+
+                    <div id="other_attacks_config" style="display: none;">
+                        <h5 class="step-title">% malicious nodes</h5>
+                        <div class="form-check form-check-inline">
+                            <input type="number" class="form-control" id="poisoned-node-percent"
+                                placeholder="% malicious nodes" min="0" value="0" style="display: inline; width: 80%">
+                        </div>
+                        <h5 class="step-title">% samples poisoned by each malicious node</h5>
+                        <div class="form-check form-check-inline">
+                            <input type="number" class="form-control" id="poisoned-sample-percent"
+                                placeholder="% samples poisoned in each malicious node" min="0" value="0"
+                                style="display: inline; width: 80%">
+                        </div>
+                        <h5 class="step-title">% poisoned noise</h5>
+                        <div class="form-check form-check-inline">
+                            <input type="number" class="form-control" id="poisoned-noise-percent"
+                                placeholder="% noise in each poisoned sample" min="0" value="0"
+                                style="display: inline; width: 80%">
+                        </div>
                     </div>
                 </div>
                 <!-- Advanced Defense -->
@@ -1053,6 +1164,7 @@
             data["epochs"] = document.getElementById("epochs").value
             // Step 13
             data["attacks"] = document.getElementById("poisoning-attack-select").value
+            data["label_flipping_config"] = getLabelFlippingConfig()
             data["poisoned_node_percent"] = document.getElementById("poisoned-node-percent").value
             data["poisoned_sample_percent"] = document.getElementById("poisoned-sample-percent").value
             data["poisoned_noise_percent"] = document.getElementById("poisoned-noise-percent").value
