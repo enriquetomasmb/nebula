@@ -43,7 +43,7 @@ class ProtoTeacherCIFAR10ModelResnet14(ProtoTeacherResNet):
         self.criterion_nll = nn.NLLLoss()
         self.criterion_mse = torch.nn.MSELoss()
 
-    def forward_train(self, x, is_feat=False, softmax=True):
+    def forward_train(self, x, softmax=True, is_feat=False):
         """Forward pass only for train the model.
         is_feat: bool, if True return the features of the model.
         softmax: bool, if True apply softmax to the logits.
@@ -205,7 +205,7 @@ class MDProtoTeacherCIFAR10ModelResnet14(ProtoTeacherResNet):
         self.criterion_kd = Attention(self.p)
         self.student_model = None
 
-    def forward_train(self, x, is_feat=False, softmax=True):
+    def forward_train(self, x, softmax=True, is_feat=False):
         """Forward pass only for train the model.
         is_feat: bool, if True return the features of the model.
         softmax: bool, if True apply softmax to the logits.

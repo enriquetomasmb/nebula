@@ -1,8 +1,9 @@
+import lightning as pl
+import matplotlib.pyplot as plt
+import seaborn as sns
+import torch
 from torch import nn
 from torchmetrics import MetricCollection
-
-import lightning as pl
-import torch
 from torchmetrics.classification import (
     MulticlassAccuracy,
     MulticlassRecall,
@@ -21,17 +22,6 @@ classifiers = {
     "resnet34": resnet34(),
     "resnet50": resnet50(),
 }
-
-
-def conv_block(input_channels, num_classes, pool=False):
-    layers = [
-        nn.Conv2d(input_channels, num_classes, kernel_size=3, padding=1),
-        nn.BatchNorm2d(num_classes),
-        nn.ReLU(inplace=True),
-    ]
-    if pool:
-        layers.append(nn.MaxPool2d(2))
-    return nn.Sequential(*layers)
 
 
 class CIFAR10ModelResNet(pl.LightningModule):
@@ -75,11 +65,9 @@ class CIFAR10ModelResNet(pl.LightningModule):
 
         if self.cm is not None:
             cm = self.cm.compute().cpu()
-            print(f"{phase}Epoch/CM\n", cm) if print_cm else None
+            if print_cm:
+                print(f"{phase}Epoch/CM\n", cm)
             if plot_cm:
-                import seaborn as sns
-                import matplotlib.pyplot as plt
-
                 plt.figure(figsize=(10, 7))
                 ax = sns.heatmap(cm.numpy(), annot=True, fmt="d", cmap="Blues")
                 ax.set_xlabel("Predicted labels")
@@ -87,8 +75,8 @@ class CIFAR10ModelResNet(pl.LightningModule):
                 ax.set_title("Confusion Matrix")
                 ax.set_xticks(range(10))
                 ax.set_yticks(range(10))
-                ax.xaxis.set_ticklabels([i for i in range(10)])
-                ax.yaxis.set_ticklabels([i for i in range(10)])
+                ax.xaxis.set_ticklabels(list(range(10)))
+                ax.yaxis.set_ticklabels(list(range(10)))
                 self.logger.experiment.add_figure(
                     f"{phase}Epoch/CM",
                     ax.get_figure(),
@@ -166,7 +154,7 @@ class CIFAR10ModelResNet(pl.LightningModule):
                 conv4 = conv_block(256, 512, pool=True)
                 res2 = nn.Sequential(conv_block(512, 512), conv_block(512, 512))
 
-                self.classifier = nn.Sequential(nn.MaxPool2d(4), nn.Flatten(), nn.Linear(512, num_classes))
+                classifier = nn.Sequential(nn.MaxPool2d(4), nn.Flatten(), nn.Linear(512, num_classes))
 
                 return dict(
                     conv1=conv1,
@@ -175,20 +163,20 @@ class CIFAR10ModelResNet(pl.LightningModule):
                     conv3=conv3,
                     conv4=conv4,
                     res2=res2,
-                    classifier=self.classifier,
+                    classifier=classifier,
                 )
 
-            elif self.implementation in classifiers.keys():
+            if self.implementation in classifiers:
                 model = classifiers[self.classifier]
                 model.fc = torch.nn.Linear(model.fc.in_features, 10)
                 return model
-            else:
-                raise NotImplementedError()
 
-        elif self.implementation == "timm":
             raise NotImplementedError()
-        else:
+
+        if self.implementation == "timm":
             raise NotImplementedError()
+
+        raise NotImplementedError()
 
     def forward(self, x):
         if not isinstance(x, torch.Tensor):
@@ -204,15 +192,21 @@ class CIFAR10ModelResNet(pl.LightningModule):
                 out = self.model["res2"](out) + out
                 out = self.model["classifier"](out)
                 return out
-            else:
-                return self.model(x)
-        elif self.implementation == "timm":
-            raise NotImplementedError()
-        else:
+
+            return self.model(x)
+        if self.implementation == "timm":
             raise NotImplementedError()
 
+        raise NotImplementedError()
+
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=1e-2, weight_decay=1e-4)
+        if self.implementation == "scratch" and self.classifier == "resnet9":
+            params = []
+            for key, module in self.model.items():
+                params += list(module.parameters())
+            optimizer = torch.optim.Adam(params, lr=self.learning_rate, weight_decay=1e-4)
+        else:
+            optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate, weight_decay=1e-4)
         return optimizer
 
     def step(self, batch, batch_idx, phase):

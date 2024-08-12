@@ -52,7 +52,7 @@ class FedGPDMNISTModelCNN(FedGPDNebulaModel):
         self.l1 = torch.nn.Linear(7 * 7 * 64, 2048)
         self.l2 = torch.nn.Linear(2048, num_classes)
 
-    def forward_train(self, x, is_feat=False, softmax=True):
+    def forward_train(self, x, softmax=True, is_feat=False):
         """Forward pass only for train the model.
         is_feat: bool, if True return the features of the model.
         softmax: bool, if True apply softmax to the logits.

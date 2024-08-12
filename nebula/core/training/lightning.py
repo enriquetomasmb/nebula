@@ -1,7 +1,7 @@
+import copy
 import gc
 import logging
 from collections import OrderedDict
-import random
 import traceback
 import hashlib
 import io
@@ -9,9 +9,20 @@ import gzip
 import torch
 from lightning import Trainer
 from lightning.pytorch.callbacks import LearningRateMonitor, RichModelSummary
-import copy
 from torch.nn import functional as F
 from nebula.core.utils.deterministic import enable_deterministic
+
+
+class ParameterSerializeError(Exception):
+    """Custom exception for errors setting model parameters."""
+
+
+class ParameterDeserializeError(Exception):
+    """Custom exception for errors setting model parameters."""
+
+
+class ParameterSettingError(Exception):
+    """Custom exception for errors setting model parameters."""
 
 
 class Lightning:
@@ -24,7 +35,7 @@ class Lightning:
         self.data = data
         self.config = config
         self._logger = logger
-        self.__trainer = None
+        self._trainer = None
         self.epochs = 1
         logging.getLogger("lightning.pytorch").setLevel(logging.ERROR)
         self.round = 0
@@ -47,8 +58,8 @@ class Lightning:
         num_gpus = torch.cuda.device_count()
         if self.config.participant["device_args"]["accelerator"] == "gpu" and num_gpus > 0:
             gpu_index = self.config.participant["device_args"]["idx"] % num_gpus
-            logging.info("Creating trainer with accelerator GPU ({})".format(gpu_index))
-            self.__trainer = Trainer(
+            logging.info(f"Creating trainer with accelerator GPU ({gpu_index}")
+            self._trainer = Trainer(
                 callbacks=[RichModelSummary(max_depth=1), LearningRateMonitor(logging_interval="epoch")],
                 max_epochs=self.epochs,
                 accelerator=self.config.participant["device_args"]["accelerator"],
@@ -60,7 +71,7 @@ class Lightning:
             )
         else:
             logging.info("Creating trainer with accelerator CPU")
-            self.__trainer = Trainer(
+            self._trainer = Trainer(
                 callbacks=[RichModelSummary(max_depth=1), LearningRateMonitor(logging_interval="epoch")],
                 max_epochs=self.epochs,
                 accelerator=self.config.participant["device_args"]["accelerator"],
@@ -70,7 +81,7 @@ class Lightning:
                 enable_model_summary=False,
                 # deterministic=True
             )
-        logging.info(f"Trainer strategy: {self.__trainer.strategy}")
+        logging.info(f"Trainer strategy: {self._trainer.strategy}")
 
     def validate_neighbour_model(self, neighbour_model_param):
         avg_loss = 0
@@ -98,7 +109,7 @@ class Lightning:
                 num_samples += inputs.size(0)
 
         avg_loss = running_loss / len(bootstrap_dataloader)
-        logging.info("Computed neighbor loss over {} data samples".format(num_samples))
+        logging.info(f"Computed neighbor loss over {num_samples} data samples")
         return avg_loss
 
     def get_hash_model(self):
@@ -106,7 +117,7 @@ class Lightning:
         Returns:
             str: SHA256 hash of model parameters
         """
-        return hashlib.sha256(self.serialize_model()).hexdigest()
+        return hashlib.sha256(self.serialize_model(self.model)).hexdigest()
 
     def set_epochs(self, epochs):
         self.epochs = epochs
@@ -118,8 +129,8 @@ class Lightning:
             with gzip.GzipFile(fileobj=buffer, mode="wb") as f:
                 torch.save(model, f)
             return buffer.getvalue()
-        except:
-            raise Exception("Error serializing model")
+        except Exception as e:
+            raise ParameterSerializeError("Error serializing model") from e
 
     def deserialize_model(self, data):
         # From https://pytorch.org/docs/stable/notes/serialization.html
@@ -128,37 +139,42 @@ class Lightning:
             with gzip.GzipFile(fileobj=buffer, mode="rb") as f:
                 params_dict = torch.load(f, map_location="cpu")
             return OrderedDict(params_dict)
-        except:
-            raise Exception("Error decoding parameters")
+        except Exception as e:
+            raise ParameterDeserializeError("Error decoding parameters") from e
 
     def set_model_parameters(self, params, initialize=False):
         try:
             self.model.load_state_dict(params)
-        except:
-            raise Exception("Error setting parameters")
+        except Exception as e:
+            raise ParameterSettingError("Error setting parameters") from e
 
     def get_model_parameters(self, bytes=False):
         if bytes:
             return self.serialize_model(self.model.state_dict())
-        else:
-            return self.model.state_dict()
+        return self.model.state_dict()
 
     def train(self):
         try:
             self.create_trainer()
-            self.__trainer.fit(self.model, self.data)
-            self.__trainer = None
-        except Exception as e:
-            logging.error(f"Error training model: {e}")
+            self._trainer.fit(self.model, self.data)
+            self._trainer = None
+        except (RuntimeError, ValueError) as e:
+            logging.error(f"Error training  model: {e}")
+            logging.error(traceback.format_exc())
+        except Exception as e:  # pylint: disable=broad-except
+            logging.error(f"Unexpected error during training : {e}")
             logging.error(traceback.format_exc())
 
     def test(self):
         try:
             self.create_trainer()
-            self.__trainer.test(self.model, self.data, verbose=True)
-            self.__trainer = None
-        except Exception as e:
-            logging.error(f"Error testing model: {e}")
+            self._trainer.test(self.model, self.data, verbose=True)
+            self._trainer = None
+        except (RuntimeError, ValueError) as e:
+            logging.error(f"Error testing  model: {e}")
+            logging.error(traceback.format_exc())
+        except Exception as e:  # pylint: disable=broad-except
+            logging.error(f"Unexpected error during testing : {e}")
             logging.error(traceback.format_exc())
 
     def get_model_weight(self):
@@ -167,7 +183,6 @@ class Lightning:
     def on_round_start(self):
         self._logger.log_data({"Round": self.round})
         # self.reporter.enqueue_data("Round", self.round)
-        pass
 
     def on_round_end(self):
         self._logger.global_step = self._logger.global_step + self._logger.local_step
@@ -176,9 +191,7 @@ class Lightning:
         logging.info("Flushing memory cache at the end of round...")
         torch.cuda.empty_cache()
         gc.collect()
-        pass
 
     def on_learning_cycle_end(self):
         self._logger.log_data({"Round": self.round})
         # self.reporter.enqueue_data("Round", self.round)
-        pass

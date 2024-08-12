@@ -64,7 +64,7 @@ class ProtoStudentCIFAR10ModelResnet8(ProtoStudentResNet):
         self.criterion_cls = torch.nn.CrossEntropyLoss()
         self.criterion_div = DistillKL(self.T)
 
-    def forward_train(self, x, is_feat=False, softmax=True):
+    def forward_train(self, x, softmax=True, is_feat=False):
         """Forward pass only for train the model.
         is_feat: bool, if True return the features of the model.
         softmax: bool, if True apply softmax to the logits.
