@@ -110,7 +110,8 @@
     "poisoned_ratio": 0,
     "target_label": 0,
     "noise_type": "salt",
-    "target_changed_label": 0    
+    "target_changed_label": 0,
+    "label_flipping_config": {}
   },
   "tracking_args": {
     "enable_remote_tracking": false,

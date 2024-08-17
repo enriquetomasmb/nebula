@@ -45,6 +45,7 @@ class Scenario:
         network_gateway,
         epochs,
         attacks,
+        label_flipping_config,
         poisoned_node_percent,
         poisoned_sample_percent,
         poisoned_noise_percent,
@@ -87,7 +88,8 @@ class Scenario:
         self.network_gateway = network_gateway
         self.epochs = epochs
         self.attacks = attacks
-        self.poisoned_node_percent = poisoned_node_percent
+        self.label_flipping_config = label_flipping_config
+        self.poisoned_node_percent = label_flipping_config['node_percent'] if label_flipping_config else poisoned_node_percent
         self.poisoned_sample_percent = poisoned_sample_percent
         self.poisoned_noise_percent = poisoned_noise_percent
         self.with_reputation = with_reputation
@@ -115,6 +117,7 @@ class Scenario:
         poisoned_node_percent,
         poisoned_sample_percent,
         poisoned_noise_percent,
+        label_flipping_config
     ):
         """Identify which nodes will be attacked"""
         import random
@@ -150,6 +153,7 @@ class Scenario:
             nodes[node]["attacks"] = node_att
             nodes[node]["poisoned_sample_percent"] = attack_sample_percent
             nodes[node]["poisoned_ratio"] = poisoned_ratio
+            nodes[node]["label_flipping_config"] = label_flipping_config
         return nodes
 
     def mobility_assign(self, nodes, mobile_participants_percent):
@@ -221,7 +225,6 @@ class ScenarioManagement:
         settings_file = os.path.join(self.config_dir, "settings.json")
         with open(settings_file, "w") as f:
             json.dump(settings, f, sort_keys=False, indent=2)
-
         self.scenario.nodes = self.scenario.attack_node_assign(
             self.scenario.nodes,
             self.scenario.federation,
@@ -229,6 +232,7 @@ class ScenarioManagement:
             int(self.scenario.poisoned_node_percent),
             int(self.scenario.poisoned_sample_percent),
             int(self.scenario.poisoned_noise_percent),
+            self.scenario.label_flipping_config
         )
 
         if self.scenario.mobility:
@@ -239,6 +243,7 @@ class ScenarioManagement:
 
         # Save node settings
         for node in self.scenario.nodes:
+            print(f"Node {node}: {self.scenario.nodes[node]}")
             node_config = self.scenario.nodes[node]
             participant_file = os.path.join(self.config_dir, f'participant_{node_config["id"]}.json')
             os.makedirs(os.path.dirname(participant_file), exist_ok=True)
@@ -269,6 +274,7 @@ class ScenarioManagement:
             participant_config["adversarial_args"]["attacks"] = node_config["attacks"]
             participant_config["adversarial_args"]["poisoned_sample_percent"] = node_config["poisoned_sample_percent"]
             participant_config["adversarial_args"]["poisoned_ratio"] = node_config["poisoned_ratio"]
+            participant_config["adversarial_args"]["label_flipping_config"] = node_config["label_flipping_config"]
             participant_config["defense_args"]["with_reputation"] = self.scenario.with_reputation
             participant_config["defense_args"]["is_dynamic_topology"] = self.scenario.is_dynamic_topology
             participant_config["defense_args"]["is_dynamic_aggregation"] = self.scenario.is_dynamic_aggregation

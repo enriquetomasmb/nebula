@@ -57,6 +57,7 @@ async def main():
     additional_node_round = config.participant["mobility_args"]["additional_node"]["round_start"]
 
     attacks = config.participant["adversarial_args"]["attacks"]
+    label_flipping_config = config.participant["adversarial_args"]["label_flipping_config"]
     poisoned_persent = config.participant["adversarial_args"]["poisoned_sample_percent"]
     poisoned_ratio = config.participant["adversarial_args"]["poisoned_ratio"]
     targeted = str(config.participant["adversarial_args"]["targeted"])
@@ -69,10 +70,10 @@ async def main():
     label_flipping = False
     data_poisoning = False
     model_poisoning = False
-    if attacks == "Label Flipping":
+    if "label_flipping" in attacks:
         label_flipping = True
         poisoned_ratio = 0
-        if targeted == "true" or targeted == "True":
+        if "_targeted" in attacks:
             targeted = True
         else:
             targeted = False
@@ -162,6 +163,7 @@ async def main():
         partitions_number=n_nodes,
         batch_size=dataset.batch_size,
         label_flipping=label_flipping,
+        label_flipping_config=label_flipping_config,
         data_poisoning=data_poisoning,
         poisoned_persent=poisoned_persent,
         poisoned_ratio=poisoned_ratio,

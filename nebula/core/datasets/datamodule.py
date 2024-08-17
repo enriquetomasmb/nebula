@@ -18,6 +18,7 @@ class DataModule(LightningDataModule):
         num_workers=0,
         val_percent=0.1,
         label_flipping=False,
+        label_flipping_config=None,
         data_poisoning=False,
         poisoned_persent=0,
         poisoned_ratio=0,
@@ -38,6 +39,7 @@ class DataModule(LightningDataModule):
         self.num_workers = num_workers
         self.val_percent = val_percent
         self.label_flipping = label_flipping
+        self.label_flipping_config = label_flipping_config
         self.data_poisoning = data_poisoning
         self.poisoned_percent = poisoned_persent
         self.poisoned_ratio = poisoned_ratio
@@ -56,6 +58,7 @@ class DataModule(LightningDataModule):
             train_set,
             train_set_indices,
             label_flipping=self.label_flipping,
+            label_flipping_config = self.label_flipping_config,
             data_poisoning=self.data_poisoning,
             poisoned_persent=self.poisoned_percent,
             poisoned_ratio=self.poisoned_ratio,
