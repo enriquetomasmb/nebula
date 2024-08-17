@@ -15,6 +15,7 @@ def create_aggregator(config, engine):
     from nebula.core.aggregation.krum import Krum
     from nebula.core.aggregation.median import Median
     from nebula.core.aggregation.trimmedmean import TrimmedMean
+    from nebula.core.aggregation.bulyan import Bulyan
     from nebula.core.aggregation.blockchainReputation import BlockchainReputation
 
     ALGORITHM_MAP = {
@@ -22,6 +23,7 @@ def create_aggregator(config, engine):
         "Krum": Krum,
         "Median": Median,
         "TrimmedMean": TrimmedMean,
+        "Bulyan": Bulyan,
         "BlockchainReputation": BlockchainReputation,
     }
     algorithm = config.participant["aggregator_args"]["algorithm"]
@@ -37,12 +39,14 @@ def create_target_aggregator(config, engine):
     from nebula.core.aggregation.krum import Krum
     from nebula.core.aggregation.median import Median
     from nebula.core.aggregation.trimmedmean import TrimmedMean
+    from nebula.core.aggregation.bulyan import Bulyan
 
     ALGORITHM_MAP = {
         "FedAvg": FedAvg,
         "Krum": Krum,
         "Median": Median,
         "TrimmedMean": TrimmedMean,
+        "Bulyan": Bulyan,
     }
     algorithm = config.participant["defense_args"]["target_aggregation"]
     aggregator = ALGORITHM_MAP.get(algorithm)

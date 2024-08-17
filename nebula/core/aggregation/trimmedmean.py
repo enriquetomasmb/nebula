@@ -21,8 +21,8 @@ class TrimmedMean(Aggregator):
         weight_len = len(weights)
 
         if weight_len <= 2 * self.beta:
-            remaining_wrights = weights
-            res = torch.mean(remaining_wrights, 0)
+            remaining_weights = weights
+            res = torch.mean(remaining_weights, 0)
 
         else:
             # remove the largest and smallest β items
@@ -44,7 +44,11 @@ class TrimmedMean(Aggregator):
     def run_aggregation(self, models):
         super().run_aggregation(models)
 
-        models = list(models.values())
+        try:
+            models = list(models.values())
+        except AttributeError:
+            pass
+
         models_params = [m for m, _ in models]
 
         total_models = len(models)
