@@ -99,6 +99,10 @@
                         <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
                             <input type="checkbox" id="mod-median" value="Median" style="margin-right: 10px; margin-left: 10px;">Median
                         </label>
+                        <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
+                            <input type="checkbox" id="mod-bulyan" value="Bulyan" style="margin-right: 10px; margin-left: 10px;">Bulyan
+                        </label>
+
                     </div>
                     <hr>
                     <h5>Topology <i class="fa fa-sitemap"></i>
@@ -350,6 +354,7 @@
                             <option>Krum</option>
                             <option>TrimmedMean</option>
                             <option>Median</option>
+                            <option>Bulyan</option>
                             <option>BlockchainReputation</option>
                         </select>
                     </div>
@@ -696,11 +701,30 @@
                                     <option>FedAvg</option>
                                     <option>TrimmedMean</option>
                                     <option>Median</option>
+                                    <option>Bulyan</option>
                                 </select>
                             </div>
                         </div>
                     </div>
                 </div>
+            <script>
+                document.getElementById('aggregationSelect').addEventListener('change', function () {
+                    if (document.getElementById('aggregationSelect').value === 'Bulyan') {
+                        if (document.getElementById('info-participants-number').innerText < 5) {
+                            alert('Bulyan aggregation requires at least 5 nodes');
+                            document.getElementById('aggregationSelect').value = 'Krum';
+                        }
+                    }
+                });
+                document.getElementById("mod-bulyan").addEventListener('change', function () {
+                    if (document.getElementById('mod-bulyan').checked === true) {
+                        if (document.getElementById('info-participants-number').innerText < 5) {
+                            alert('Bulyan aggregation requires at least 5 nodes');
+                            document.getElementById('mod-bulyan').checked = false;
+                        }
+                    }
+                });
+            </script>
                 <!-- Mobility -->
                 <div class="form-group row container-shadow tiny grey">
                     <h5 class="step-number">Mobility <i class="fa fa-car"></i>
@@ -1976,7 +2000,7 @@
 
         //Check all the options
         document.getElementById("mod-aggregation").addEventListener("change", function() {
-            selectALL(['mod-fedavg', 'mod-krum', 'mod-trimmed', 'mod-median'], document.getElementById("mod-aggregation").checked);
+            selectALL(['mod-fedavg', 'mod-krum', 'mod-trimmed', 'mod-median', 'mod-bulyan'], document.getElementById("mod-aggregation").checked);
         });
         document.getElementById("mod-topology").addEventListener("change", function() {
             selectALL(['mod-fully', 'mod-ring', 'mod-star'], document.getElementById("mod-topology").checked);
@@ -2001,7 +2025,7 @@
             }
 
             //One or more options selected in every case
-            var aggregation_methods = ['mod-fedavg', 'mod-krum', 'mod-trimmed', 'mod-median'];
+            var aggregation_methods = ['mod-fedavg', 'mod-krum', 'mod-trimmed', 'mod-median', 'mod-bulyan'];
             if (!atLeastOneChecked(aggregation_methods)) {
                 alert("Please, select one aggregation method at least.");
                 return;
