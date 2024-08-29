@@ -52,6 +52,7 @@ class Scenario:
         with_reputation,
         is_dynamic_topology,
         is_dynamic_aggregation,
+        dynamic_aggregation_mode,
         target_aggregation,
         random_geo,
         latitude,
@@ -95,6 +96,7 @@ class Scenario:
         self.with_reputation = with_reputation
         self.is_dynamic_topology = is_dynamic_topology
         self.is_dynamic_aggregation = is_dynamic_aggregation
+        self.dynamic_aggregation_mode = dynamic_aggregation_mode
         self.target_aggregation = target_aggregation
         self.random_geo = random_geo
         self.latitude = latitude
@@ -279,6 +281,7 @@ class ScenarioManagement:
             participant_config["defense_args"]["is_dynamic_topology"] = self.scenario.is_dynamic_topology
             participant_config["defense_args"]["is_dynamic_aggregation"] = self.scenario.is_dynamic_aggregation
             participant_config["defense_args"]["target_aggregation"] = self.scenario.target_aggregation
+            participant_config["defense_args"]["dynamic_aggregation_mode"] = self.scenario.dynamic_aggregation_mode
             participant_config["mobility_args"]["random_geo"] = self.scenario.random_geo
             participant_config["mobility_args"]["latitude"] = self.scenario.latitude
             participant_config["mobility_args"]["longitude"] = self.scenario.longitude
