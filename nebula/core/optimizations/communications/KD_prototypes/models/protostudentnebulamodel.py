@@ -17,7 +17,11 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
         seed=None,
         teacher_model=None,
         T=2,
-        mutual_distilation=False,
+        beta_kd=1,
+        beta_proto=1,
+        decreasing_beta=False,
+        limit_beta=0.1,
+        mutual_distilation="KD",
         send_logic=None,
     ):
         super().__init__(
@@ -36,6 +40,10 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
             self.send_logic_method = send_logic
         else:
             self.send_logic_method = None
+        self.beta_kd = beta_kd
+        self.beta_proto = beta_proto
+        self.decreasing_beta = decreasing_beta
+        self.limit_beta = limit_beta
         self.send_logic_counter = 0
         self.mutual_distilation = mutual_distilation
         self.global_protos = dict()
@@ -156,12 +164,20 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
         if send_logic() == 0: only send the student model
         if send_logic() == 1: only send the protos
         """
+        self.send_logic_counter += 1
+        if self.decreasing_beta:
+            self.beta_kd = self.beta_kd / 2
+            self.beta_proto = self.beta_proto / 2
+            if self.beta_kd < self.limit_beta:
+                self.beta_kd = 0
+            if self.beta_proto < self.limit_beta:
+                self.beta_proto = 0
+
         if self.send_logic_method is None:
             return "model"
-
         if self.send_logic_method == "mixed_2rounds":
-            self.send_logic_counter += 1
+
             if self.send_logic_counter % 2 == 0:
-                return "protos"
+                return "linear_layers"
             return "model"
         return "unknown"

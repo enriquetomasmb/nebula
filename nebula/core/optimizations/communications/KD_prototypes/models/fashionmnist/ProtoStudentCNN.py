@@ -27,14 +27,16 @@ class ProtoStudentFashionMNISTModelCNN(ProtoStudentNebulaModel):
         T=2,
         beta_kd=1,
         beta_proto=1,
-        mutual_distilation=False,
+        decreasing_beta=False,
+        limit_beta=0.1,
+        mutual_distilation="KD",
         teacher_beta=100,
         send_logic=None,
     ):
         if teacher_model is None:
-            if mutual_distilation:
+            if mutual_distilation is not None and mutual_distilation == "MD":
                 teacher_model = MDProtoTeacherFashionMNISTModelCNN(beta=teacher_beta)
-            else:
+            elif mutual_distilation is not None and mutual_distilation == "KD":
                 teacher_model = ProtoTeacherFashionMNISTModelCNN()
 
         super().__init__(
@@ -46,13 +48,15 @@ class ProtoStudentFashionMNISTModelCNN(ProtoStudentNebulaModel):
             seed,
             teacher_model,
             T,
+            beta_kd,
+            beta_proto,
+            decreasing_beta,
+            limit_beta,
             mutual_distilation,
             send_logic,
         )
 
         self.example_input_array = torch.zeros(1, 1, 28, 28)
-        self.beta_proto = beta_proto
-        self.beta_kd = beta_kd
         self.criterion_nll = nn.NLLLoss()
         self.criterion_mse = torch.nn.MSELoss()
         self.criterion_cls = torch.nn.CrossEntropyLoss()

@@ -1,15 +1,43 @@
 import torch
 import torch.multiprocessing
-from nebula.core.optimizations.communications.KD.models.cifar10.resnet import CIFAR10ModelResNet8
-from nebula.core.optimizations.communications.KD.models.cifar10.TeacherResnet import MDTeacherCIFAR10ModelResNet14, TeacherCIFAR10ModelResNet14
+from torch import nn
+import torch.nn.functional as F
+from nebula.core.optimizations.communications.KD.models.studentnebulamodelV2 import StudentNebulaModelV2
 from nebula.core.optimizations.communications.KD.utils.KD import DistillKL
 
-torch.multiprocessing.set_sharing_strategy("file_system")
 
-__all__ = ["resnet"]
+class BasicBlock(nn.Module):
+    expansion = 1
+
+    def __init__(self, in_planes, planes, stride=1, downsample=None):
+        super(BasicBlock, self).__init__()
+        self.conv1 = nn.Conv2d(in_planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(planes)
+        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=1, padding=1, bias=False)
+        self.bn2 = nn.BatchNorm2d(planes)
+        self.downsample = downsample
+        self.stride = stride
+
+    def forward(self, x):
+        identity = x
+
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = F.relu(out)
+
+        out = self.conv2(out)
+        out = self.bn2(out)
+
+        if self.downsample is not None:
+            identity = self.downsample(x)
+
+        out += identity
+        out = F.relu(out)
+
+        return out
 
 
-class StudentModelResNet8(CIFAR10ModelResNet8):
+class StudentCIFAR10ModelResNet8(StudentNebulaModelV2):
 
     def __init__(
         self,
@@ -19,9 +47,6 @@ class StudentModelResNet8(CIFAR10ModelResNet8):
         metrics=None,
         confusion_matrix=None,
         seed=None,
-        depth=8,
-        num_filters=[16, 16, 32, 64],
-        block_name="BasicBlock",
         teacher_model=None,
         T=2,
         beta=1,
@@ -36,9 +61,6 @@ class StudentModelResNet8(CIFAR10ModelResNet8):
             metrics,
             confusion_matrix,
             seed,
-            depth,
-            num_filters,
-            block_name,
         )
         self.limit_beta = limit_beta
         self.decreasing_beta = decreasing_beta
@@ -52,6 +74,77 @@ class StudentModelResNet8(CIFAR10ModelResNet8):
         self.send_logic_counter = 0
         self.model_updated_flag1 = False
         self.model_updated_flag2 = False
+        self.criterion_div = DistillKL(self.T)
+        self.criterion_cls = torch.torch.nn.CrossEntropyLoss()
+
+        self.in_planes = 64
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(64)
+        self.relu = nn.ReLU(inplace=True)
+
+        # Construcción directa de ResNet-8
+        self.layer1 = self._make_layer(BasicBlock, 64, 2, stride=1)
+        self.layer2 = self._make_layer(BasicBlock, 128, 2, stride=2)
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        self.fc = nn.Linear(128 * BasicBlock.expansion, num_classes)
+
+    def _make_layer(self, block, planes, blocks, stride=1):
+        downsample = None
+        if stride != 1 or self.in_planes != planes * block.expansion:
+            downsample = nn.Sequential(
+                nn.Conv2d(self.in_planes, planes * block.expansion, kernel_size=1, stride=stride, bias=False),
+                nn.BatchNorm2d(planes * block.expansion),
+            )
+
+        layers = []
+        layers.append(block(self.in_planes, planes, stride, downsample))
+        self.in_planes = planes * block.expansion
+        for _ in range(1, blocks):
+            layers.append(block(self.in_planes, planes))
+
+        return nn.Sequential(*layers)
+
+    def configure_optimizers(self):
+        """Configure the optimizer for training."""
+        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        return optimizer
+
+    def forward(self, x, is_feat=False):
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)
+
+        x1 = self.layer1(x)
+        x2 = self.layer2(x1)
+
+        x = self.avgpool(x2)
+        x = torch.flatten(x, 1)
+        logits = self.fc(x)
+
+        if is_feat:
+            return logits, [x1, x2]
+
+        return logits
+
+    def step(self, batch, batch_idx, phase):
+        if phase == "Train":
+            self.model_updated_flag2 = True
+        images, labels = batch
+        student_logits = self(images)
+        loss_ce = self.criterion_cls(student_logits, labels)
+        # If the beta is greater than the limit, apply knowledge distillation
+        if self.beta > self.limit_beta and self.teacher_model is not None:
+            with torch.no_grad():
+                teacher_logits = self.teacher_model(images)
+            # Compute the KD loss
+            loss_kd = self.criterion_div(student_logits, teacher_logits)
+            # Combine the losses
+            loss = loss_ce + self.beta * loss_kd
+        else:
+            loss = loss_ce
+
+        self.process_metrics(phase, student_logits, labels, loss)
+        return loss
 
     def load_state_dict(self, state_dict, strict=True):
         """
@@ -142,85 +235,3 @@ class StudentModelResNet8(CIFAR10ModelResNet8):
                 return "linear_layers"
             return "model"
         return "unknown"
-
-
-class StudentCIFAR10ModelResNet8(StudentModelResNet8):
-    """
-    LightningModule for CIFAR10.
-    """
-
-    def __init__(
-        self,
-        input_channels=3,
-        num_classes=10,
-        learning_rate=1e-3,
-        metrics=None,
-        confusion_matrix=None,
-        seed=None,
-        depth=8,
-        num_filters=[16, 16, 32, 64],
-        block_name="BasicBlock",
-        teacher_model=None,
-        T=2,
-        beta=1,
-        decreasing_beta=False,
-        limit_beta=0.1,
-        mutual_distilation="KD",
-        teacher_beta=100,
-        send_logic=None,
-    ):
-        if teacher_model is None:
-            if mutual_distilation is not None and mutual_distilation == "MD":
-                teacher_model = MDTeacherCIFAR10ModelResNet14(beta=teacher_beta)
-            elif mutual_distilation is not None and mutual_distilation == "KD":
-                teacher_model = TeacherCIFAR10ModelResNet14()
-
-        super().__init__(
-            input_channels,
-            num_classes,
-            learning_rate,
-            metrics,
-            confusion_matrix,
-            seed,
-            depth,
-            num_filters,
-            block_name,
-            teacher_model,
-            T,
-            beta,
-            decreasing_beta,
-            limit_beta,
-            send_logic,
-        )
-        self.teacher_model = teacher_model
-        self.T = T
-        self.mutual_distilation = mutual_distilation
-        self.beta = beta
-        self.example_input_array = torch.rand(1, 3, 32, 32)
-        self.criterion_cls = torch.nn.CrossEntropyLoss()
-        self.criterion_div = DistillKL(self.T)
-
-    def configure_optimizers(self):
-        """Configure the optimizer for training."""
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
-        return optimizer
-
-    def step(self, batch, batch_idx, phase):
-        if phase == "Train":
-            self.model_updated_flag2 = True
-        images, labels = batch
-        student_logits = self(images)
-        loss_ce = self.criterion_cls(student_logits, labels)
-        # If the beta is greater than the limit, apply knowledge distillation
-        if self.beta > self.limit_beta and self.teacher_model is not None:
-            with torch.no_grad():
-                teacher_logits = self.teacher_model(images)
-            # Compute the KD loss
-            loss_kd = self.criterion_div(student_logits, teacher_logits)
-            # Combine the losses
-            loss = loss_ce + self.beta * loss_kd
-        else:
-            loss = loss_ce
-
-        self.process_metrics(phase, student_logits, labels, loss)
-        return loss

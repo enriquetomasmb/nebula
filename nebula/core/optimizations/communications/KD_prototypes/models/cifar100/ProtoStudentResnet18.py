@@ -3,18 +3,53 @@ from torch import nn
 import torch.nn.functional as F
 
 from nebula.core.optimizations.communications.KD.utils.KD import DistillKL
-from nebula.core.optimizations.communications.KD_prototypes.models.mnist.ProtoTeacherCNN import MDProtoTeacherMNISTModelCNN, ProtoTeacherMNISTModelCNN
+from nebula.core.optimizations.communications.KD_prototypes.models.cifar100.ProtoTeacherResnet32 import (
+    ProtoTeacherCIFAR100ModelResNet32,
+    MDProtoTeacherCIFAR100ModelResNet32,
+)
+
 from nebula.core.optimizations.communications.KD_prototypes.models.protostudentnebulamodel import ProtoStudentNebulaModel
 
 
-class ProtoStudentMNISTModelCNN(ProtoStudentNebulaModel):
+class BasicBlock(nn.Module):
+    expansion = 1
+
+    def __init__(self, in_planes, planes, stride=1, downsample=None):
+        super(BasicBlock, self).__init__()
+        self.conv1 = nn.Conv2d(in_planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
+        self.bn1 = nn.BatchNorm2d(planes)
+        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=1, padding=1, bias=False)
+        self.bn2 = nn.BatchNorm2d(planes)
+        self.downsample = downsample
+        self.stride = stride
+
+    def forward(self, x):
+        identity = x
+
+        out = self.conv1(x)
+        out = self.bn1(out)
+        out = F.relu(out)
+
+        out = self.conv2(out)
+        out = self.bn2(out)
+
+        if self.downsample is not None:
+            identity = self.downsample(x)
+
+        out += identity
+        out = F.relu(out)
+
+        return out
+
+
+class ProtoStudentCIFAR100ModelResnet18(ProtoStudentNebulaModel):
     """
-    LightningModule for MNIST.
+    LightningModule for CIFAR100.
     """
 
     def __init__(
         self,
-        input_channels=1,
+        input_channels=3,
         num_classes=10,
         learning_rate=1e-3,
         metrics=None,
@@ -32,9 +67,9 @@ class ProtoStudentMNISTModelCNN(ProtoStudentNebulaModel):
     ):
         if teacher_model is None:
             if mutual_distilation is not None and mutual_distilation == "MD":
-                teacher_model = MDProtoTeacherMNISTModelCNN(beta=teacher_beta)
+                teacher_model = MDProtoTeacherCIFAR100ModelResNet32(beta=teacher_beta)
             elif mutual_distilation is not None and mutual_distilation == "KD":
-                teacher_model = ProtoTeacherMNISTModelCNN()
+                teacher_model = ProtoTeacherCIFAR100ModelResNet32()
 
         super().__init__(
             input_channels,
@@ -52,53 +87,77 @@ class ProtoStudentMNISTModelCNN(ProtoStudentNebulaModel):
             mutual_distilation,
             send_logic,
         )
-
-        self.example_input_array = torch.zeros(1, 1, 28, 28)
+        self.embedding_dim = 512
+        self.example_input_array = torch.rand(1, 3, 32, 32)
+        self.beta_proto = beta_proto
+        self.beta_kd = beta_kd
         self.criterion_nll = nn.NLLLoss()
         self.criterion_mse = torch.nn.MSELoss()
         self.criterion_cls = torch.nn.CrossEntropyLoss()
         self.criterion_div = DistillKL(self.T)
 
-        self.conv1 = torch.nn.Conv2d(
-            in_channels=input_channels,
-            out_channels=32,
-            kernel_size=(5, 5),
-            padding="same",
-        )
-        self.relu = torch.nn.ReLU()
-        self.pool1 = torch.nn.MaxPool2d(kernel_size=(2, 2), stride=2)
-        self.conv2 = torch.nn.Conv2d(in_channels=32, out_channels=64, kernel_size=(5, 5), padding="same")
-        self.pool2 = torch.nn.MaxPool2d(kernel_size=(2, 2), stride=2)
-        self.l1 = torch.nn.Linear(7 * 7 * 64, 2048)
-        self.l2 = torch.nn.Linear(2048, num_classes)
+        self.in_planes = 64
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=7, stride=2, padding=3, bias=False)
+        self.bn1 = nn.BatchNorm2d(64)
+        self.relu = nn.ReLU(inplace=True)
+        self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
+
+        # Construcción directa de ResNet-18
+        self.layer1 = self._make_layer(BasicBlock, 64, 2, stride=1)
+        self.layer2 = self._make_layer(BasicBlock, 128, 2, stride=2)
+        self.layer3 = self._make_layer(BasicBlock, 256, 2, stride=2)
+        self.layer4 = self._make_layer(BasicBlock, 512, 2, stride=2)
+        self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
+        self.fc_dense = nn.Linear(512 * BasicBlock.expansion, self.embedding_dim)
+        self.fc = nn.Linear(self.embedding_dim, num_classes)
+
+    def _make_layer(self, block, planes, blocks, stride=1):
+        downsample = None
+        if stride != 1 or self.in_planes != planes * block.expansion:
+            downsample = nn.Sequential(
+                nn.Conv2d(self.in_planes, planes * block.expansion, kernel_size=1, stride=stride, bias=False),
+                nn.BatchNorm2d(planes * block.expansion),
+            )
+
+        layers = []
+        layers.append(block(self.in_planes, planes, stride, downsample))
+        self.in_planes = planes * block.expansion
+        for _ in range(1, blocks):
+            layers.append(block(self.in_planes, planes))
+
+        return nn.Sequential(*layers)
 
     def forward_train(self, x, softmax=True, is_feat=False):
         """Forward pass only for train the model.
         is_feat: bool, if True return the features of the model.
         softmax: bool, if True apply softmax to the logits.
         """
-        # Reshape the input tensor
-        input_layer = x.view(-1, 1, 28, 28)
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)  # 32x32
+        conv1 = x
 
-        # First convolutional layer
-        conv1 = self.relu(self.conv1(input_layer))
-        pool1 = self.pool1(conv1)
-
-        # Second convolutional layer
-        conv2 = self.relu(self.conv2(pool1))
-        pool2 = self.pool2(conv2)
-
-        # Flatten the tensor
-        pool2_flat = pool2.reshape(-1, 7 * 7 * 64)
-
-        # Fully connected layers
-        dense = self.relu(self.l1(pool2_flat))
-        logits = self.l2(dense)
+        x = self.layer1(x)  # 32x32
+        conv2 = x
+        x = self.layer2(x)  # 16x16
+        conv3 = x
+        x = self.layer3(x)  # 8x8
+        conv4 = x
+        x = self.layer4(x)
+        conv5 = x
+        x = self.avgpool(x)
+        x = x.view(x.size(0), -1)
+        dense = self.fc_dense(x)
+        logits = self.fc(dense)
 
         if is_feat:
             if softmax:
-                return F.log_softmax(logits, dim=1), dense, [conv1, conv2]
-            return logits, dense, [conv1, conv2]
+                return (
+                    F.log_softmax(logits, dim=1),
+                    dense,
+                    [conv1, conv2, conv3, conv4, conv5],
+                )
+            return logits, dense, [conv1, conv2, conv3, conv4, conv5]
 
         if softmax:
             return F.log_softmax(logits, dim=1), dense
@@ -110,22 +169,17 @@ class ProtoStudentMNISTModelCNN(ProtoStudentNebulaModel):
             logits, _ = self.forward_train(x)
             return logits
 
-        # Reshape the input tensor
-        input_layer = x.view(-1, 1, 28, 28)
+        x = self.conv1(x)
+        x = self.bn1(x)
+        x = self.relu(x)  # 32x32
 
-        # First convolutional layer
-        conv1 = self.relu(self.conv1(input_layer))
-        pool1 = self.pool1(conv1)
-
-        # Second convolutional layer
-        conv2 = self.relu(self.conv2(pool1))
-        pool2 = self.pool2(conv2)
-
-        # Flatten the tensor
-        pool2_flat = pool2.reshape(-1, 7 * 7 * 64)
-
-        # Fully connected layers
-        dense = self.relu(self.l1(pool2_flat))
+        x = self.layer1(x)  # 32x32
+        x = self.layer2(x)  # 16x16
+        x = self.layer3(x)  # 8x8
+        x = self.layer4(x)
+        x = self.avgpool(x)
+        x = x.view(x.size(0), -1)
+        dense = self.fc_dense(x)
 
         # Calculate distances
         distances = []
@@ -140,7 +194,7 @@ class ProtoStudentMNISTModelCNN(ProtoStudentNebulaModel):
         return distances.argmin(dim=1)
 
     def configure_optimizers(self):
-        """Configure the optimizer for training."""
+        """ """
         optimizer = torch.optim.Adam(
             self.parameters(),
             lr=self.learning_rate,
