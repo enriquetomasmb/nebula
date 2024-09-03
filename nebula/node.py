@@ -5,6 +5,7 @@ import random
 import asyncio
 import warnings
 import numpy as np
+
 # Ignore CryptographyDeprecationWarning (datatime issues with cryptography library)
 from cryptography.utils import CryptographyDeprecationWarning
 
@@ -33,24 +34,30 @@ from nebula.core.models.militarysar.cnn import MilitarySARModelCNN
 from nebula.core.models.syscall.svm import SyscallModelSGDOneClassSVM
 from nebula.core.engine import MaliciousNode, AggregatorNode, TrainerNode, ServerNode, IdleNode
 from nebula.core.role import Role
-from nebula.core.optimizations.communications.prototypes.models.cifar10.ProtoCNN import ProtoCIFAR10ModelCNN
-from nebula.core.optimizations.communications.prototypes.models.cifar10.ProtoResnet import ProtoCIFAR10ModelResNet8
-from nebula.core.optimizations.communications.prototypes.training.protolightning import ProtoLightning
 from nebula.core.optimizations.communications.KD.models.cifar10.StudentCNN import StudentCIFAR10ModelCNN
-from nebula.core.optimizations.communications.KD.models.cifar10.StudentResnet import StudentCIFAR10ModelResNet8
+from nebula.core.optimizations.communications.KD.models.cifar10.StudentResnet8 import StudentCIFAR10ModelResNet8
 from nebula.core.optimizations.communications.KD_prototypes.models.cifar10.ProtoStudentCNN import ProtoStudentCIFAR10ModelCNN
 from nebula.core.optimizations.communications.KD_prototypes.models.cifar10.ProtoStudentResnet8 import ProtoStudentCIFAR10ModelResnet8
 from nebula.core.optimizations.communications.KD.models.fashionmnist.StudentCNN import StudentFashionMNISTModelCNN
-from nebula.core.optimizations.communications.KD_prototypes.models.fashionmnist.ProtoStudentCNN import \
-    ProtoStudentFashionMNISTModelCNN
-from nebula.core.optimizations.communications.prototypes.models.fashionmnist.ProtoCNN import ProtoFashionMNISTModelCNN
+from nebula.core.optimizations.communications.KD_prototypes.models.fashionmnist.ProtoStudentCNN import ProtoStudentFashionMNISTModelCNN
 from nebula.core.optimizations.communications.KD.training.kdlightning import KDLightning
 from nebula.core.optimizations.communications.KD_prototypes.training.protokdquantizationlightning import ProtoKDQuantizationLightning
 from nebula.core.optimizations.communications.KD.models.mnist.StudentCNN import StudentMNISTModelCNN
 from nebula.core.optimizations.communications.KD_prototypes.models.mnist.ProtoStudentCNN import ProtoStudentMNISTModelCNN
-from nebula.core.optimizations.communications.prototypes.models.mnist.ProtoCNN import ProtoMNISTModelCNN
-
-
+from nebula.core.research.FedGPD.models.cifar10.FedGPDCNN import FedGPDCIFAR10ModelCNN
+from nebula.core.research.FedGPD.models.fashionmnist.FedGPDCNN import FedGPDFashionMNISTModelCNN
+from nebula.core.research.FedGPD.models.mnist.FedGPDCNN import FedGPDMNISTModelCNN
+from nebula.core.research.FedProto.models.cifar10.FedProtoCNN import FedProtoCIFAR10ModelCNN
+from nebula.core.research.FedProto.models.cifar10.FedProtoResnet8 import FedProtoCIFAR10ModelResNet8
+from nebula.core.research.FedProto.models.fashionmnist.FedProtoCNN import FedProtoFashionMNISTModelCNN
+from nebula.core.research.FedProto.models.mnist.FedProtoCNN import FedProtoMNISTModelCNN
+from nebula.core.research.FedProto.training.protolightning import ProtoLightning
+from nebula.core.datasets.cifar100.cifar100 import CIFAR100Dataset
+from nebula.core.optimizations.communications.KD.models.cifar100.StudentResnet18 import StudentCIFAR100ModelResNet18
+from nebula.core.optimizations.communications.KD_prototypes.models.cifar100.ProtoStudentResnet18 import ProtoStudentCIFAR100ModelResnet18
+from nebula.core.research.FedGPD.models.cifar10.FedGPDResnet8 import FedGPDCIFAR10ModelResNet8
+from nebula.core.research.FedGPD.models.cifar100.FedGPDResnet18 import FedGPDCIFAR100ModelResNet18
+from nebula.core.research.FedProto.models.cifar100.FedProtoResnet18 import FedProtoCIFAR100ModelResNet18
 
 # os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 # os.environ["TORCH_LOGS"] = "+dynamo"
@@ -115,103 +122,156 @@ async def main():
     model = None
     learner = None
     if dataset_str == "MNIST":
-        dataset = MNISTDataset(num_classes=10, partition_id=idx, partitions_number=n_nodes, iid=iid, partition=partition_selection, partition_parameter=partition_parameter, seed=42, config=config)
+        dataset = MNISTDataset(
+            num_classes=10,
+            partition_id=idx,
+            partitions_number=n_nodes,
+            iid=iid,
+            partition=partition_selection,
+            partition_parameter=partition_parameter,
+            seed=42,
+            config=config,
+        )
         if model_name == "MLP":
             model = MNISTModelMLP()
         elif model_name == "CNN":
             model = MNISTModelCNN()
-        elif model_name == "CNN Quant KD":
+        elif model_name == "CNN KD":
             model = StudentMNISTModelCNN()
             learner = KDLightning
-        elif model_name == "CNN Quant KD Decreasing":
+        elif model_name == "CNN KD-D":
             model = StudentMNISTModelCNN(decreasing_beta=True)
             learner = KDLightning
-        elif model_name == "CNN Quant KD send logic":
+        elif model_name == "CNN KD-S":
             model = StudentMNISTModelCNN(send_logic="mixed_2rounds")
             learner = KDLightning
-        elif model_name == "CNN Quant KD Decreasing send logic":
+        elif model_name == "CNN KD-DS":
             model = StudentMNISTModelCNN(decreasing_beta=True, send_logic="mixed_2rounds")
             learner = KDLightning
-        elif model_name == "CNN Quant MD":
+        elif model_name == "CNN MD":
             model = StudentMNISTModelCNN(mutual_distilation="MD")
             learner = KDLightning
-        elif model_name == "CNN Quant MD Decreasing":
+        elif model_name == "CNN MD-D":
             model = StudentMNISTModelCNN(mutual_distilation="MD", decreasing_beta=True)
             learner = KDLightning
-        elif model_name == "CNN Quant MD send logic":
+        elif model_name == "CNN MD-S":
             model = StudentMNISTModelCNN(mutual_distilation="MD", send_logic="mixed_2rounds")
             learner = KDLightning
-        elif model_name == "CNN Quant MD Decreasing send logic":
-            model = StudentMNISTModelCNN(mutual_distilation="MD", decreasing_beta=True,
-                                                send_logic="mixed_2rounds")
+        elif model_name == "CNN MD-DS":
+            model = StudentMNISTModelCNN(mutual_distilation="MD", decreasing_beta=True, send_logic="mixed_2rounds")
             learner = KDLightning
-        elif model_name == "CNN Proto":
-            model = ProtoMNISTModelCNN()
+        elif model_name == "CNN FedProto":
+            model = FedProtoMNISTModelCNN()
             learner = ProtoLightning
-        elif model_name == "CNN Proto Quant KD":
+        elif model_name == "CNN FedGPD":
+            model = FedGPDMNISTModelCNN()
+        elif model_name == "CNN PKD":
             model = ProtoStudentMNISTModelCNN()
             learner = ProtoKDQuantizationLightning
-        elif model_name == "CNN Proto Quant KD send logic":
+        elif model_name == "CNN PKD-S":
             model = ProtoStudentMNISTModelCNN(send_logic="mixed_2rounds")
             learner = ProtoKDQuantizationLightning
-        elif model_name == "CNN Proto Quant MD":
+        elif model_name == "CNN PKD-D":
+            model = ProtoStudentMNISTModelCNN(decreasing_beta=True)
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "CNN PKD-DS":
+            model = ProtoStudentMNISTModelCNN(send_logic="mixed_2rounds", decreasing_beta=True)
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "CNN PMD":
             model = ProtoStudentMNISTModelCNN(mutual_distilation=True)
             learner = ProtoKDQuantizationLightning
-        elif model_name == "CNN Proto Quant MD send logic":
+        elif model_name == "CNN PMD-S":
             model = ProtoStudentMNISTModelCNN(mutual_distilation=True, send_logic="mixed_2rounds")
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "CNN PMD-D":
+            model = ProtoStudentMNISTModelCNN(mutual_distilation=True, decreasing_beta=True)
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "CNN PMD-DS":
+            model = ProtoStudentMNISTModelCNN(mutual_distilation=True, send_logic="mixed_2rounds", decreasing_beta=True)
             learner = ProtoKDQuantizationLightning
         else:
             raise ValueError(f"Model {model} not supported")
     elif dataset_str == "FashionMNIST":
-        dataset = FashionMNISTDataset(num_classes=10, partition_id=idx, partitions_number=n_nodes, iid=iid, partition=partition_selection, partition_parameter=partition_parameter, seed=42, config=config)
+        dataset = FashionMNISTDataset(
+            num_classes=10,
+            partition_id=idx,
+            partitions_number=n_nodes,
+            iid=iid,
+            partition=partition_selection,
+            partition_parameter=partition_parameter,
+            seed=42,
+            config=config,
+        )
         if model_name == "MLP":
             model = FashionMNISTModelMLP()
         elif model_name == "CNN":
             model = FashionMNISTModelCNN()
-        elif model_name == "CNN Quant KD":
+        elif model_name == "CNN KD":
             model = StudentFashionMNISTModelCNN()
             learner = KDLightning
-        elif model_name == "CNN Quant KD Decreasing":
+        elif model_name == "CNN KD-D":
             model = StudentFashionMNISTModelCNN(decreasing_beta=True)
             learner = KDLightning
-        elif model_name == "CNN Quant KD send logic":
+        elif model_name == "CNN KD-S":
             model = StudentFashionMNISTModelCNN(send_logic="mixed_2rounds")
             learner = KDLightning
-        elif model_name == "CNN Quant KD Decreasing send logic":
+        elif model_name == "CNN KD-DS":
             model = StudentFashionMNISTModelCNN(decreasing_beta=True, send_logic="mixed_2rounds")
             learner = KDLightning
-        elif model_name == "CNN Quant MD":
+        elif model_name == "CNN MD":
             model = StudentFashionMNISTModelCNN(mutual_distilation="MD")
             learner = KDLightning
-        elif model_name == "CNN Quant MD Decreasing":
+        elif model_name == "CNN MD-D":
             model = StudentFashionMNISTModelCNN(mutual_distilation="MD", decreasing_beta=True)
             learner = KDLightning
-        elif model_name == "CNN Quant MD send logic":
+        elif model_name == "CNN MD-S":
             model = StudentFashionMNISTModelCNN(mutual_distilation="MD", send_logic="mixed_2rounds")
             learner = KDLightning
-        elif model_name == "CNN Quant MD Decreasing send logic":
-            model = StudentFashionMNISTModelCNN(mutual_distilation="MD", decreasing_beta=True,
-                                                send_logic="mixed_2rounds")
+        elif model_name == "CNN MD-DS":
+            model = StudentFashionMNISTModelCNN(mutual_distilation="MD", decreasing_beta=True, send_logic="mixed_2rounds")
             learner = KDLightning
-        elif model_name == "CNN Proto":
-            model = ProtoFashionMNISTModelCNN()
+        elif model_name == "CNN FedProto":
+            model = FedProtoFashionMNISTModelCNN()
             learner = ProtoLightning
-        elif model_name == "CNN Proto Quant KD":
+        elif model_name == "CNN FedGPD":
+            model = FedGPDFashionMNISTModelCNN()
+        elif model_name == "CNN PKD":
             model = ProtoStudentFashionMNISTModelCNN()
             learner = ProtoKDQuantizationLightning
-        elif model_name == "CNN Proto Quant KD send logic":
+        elif model_name == "CNN PKD-D":
+            model = ProtoStudentFashionMNISTModelCNN(decreasing_beta=True)
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "CNN PKD-S":
             model = ProtoStudentFashionMNISTModelCNN(send_logic="mixed_2rounds")
             learner = ProtoKDQuantizationLightning
-        elif model_name == "CNN Proto Quant MD":
+        elif model_name == "CNN PKD-DS":
+            model = ProtoStudentFashionMNISTModelCNN(decreasing_beta=True, send_logic="mixed_2rounds")
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "CNN PMD":
             model = ProtoStudentFashionMNISTModelCNN(mutual_distilation=True)
             learner = ProtoKDQuantizationLightning
-        elif model_name == "CNN Proto Quant MD send logic":
+        elif model_name == "CNN PMD-D":
+            model = ProtoStudentFashionMNISTModelCNN(mutual_distilation=True, decreasing_beta=True)
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "CNN PMD-S":
             model = ProtoStudentFashionMNISTModelCNN(mutual_distilation=True, send_logic="mixed_2rounds")
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "CNN PMD-DS":
+            model = ProtoStudentFashionMNISTModelCNN(mutual_distilation=True, decreasing_beta=True, send_logic="mixed_2rounds")
             learner = ProtoKDQuantizationLightning
         else:
             raise ValueError(f"Model {model} not supported")
     elif dataset_str == "SYSCALL":
-        dataset = SYSCALLDataset(num_classes=10, partition_id=idx, partitions_number=n_nodes, iid=iid, partition=partition_selection, partition_parameter=partition_parameter, seed=42, config=config)
+        dataset = SYSCALLDataset(
+            num_classes=10,
+            partition_id=idx,
+            partitions_number=n_nodes,
+            iid=iid,
+            partition=partition_selection,
+            partition_parameter=partition_parameter,
+            seed=42,
+            config=config,
+        )
         if model_name == "MLP":
             model = SyscallModelMLP()
         elif model_name == "SVM":
@@ -221,98 +281,214 @@ async def main():
         else:
             raise ValueError(f"Model {model} not supported for dataset {dataset_str}")
     elif dataset_str == "CIFAR10":
-        dataset = CIFAR10Dataset(num_classes=10, partition_id=idx, partitions_number=n_nodes, iid=iid, partition=partition_selection, partition_parameter=partition_parameter, seed=42, config=config)
+        dataset = CIFAR10Dataset(
+            num_classes=10,
+            partition_id=idx,
+            partitions_number=n_nodes,
+            iid=iid,
+            partition=partition_selection,
+            partition_parameter=partition_parameter,
+            seed=42,
+            config=config,
+        )
         if model_name == "CNN":
             model = StudentCIFAR10ModelCNN(mutual_distilation=None)
             learner = KDLightning
-        elif model_name == "CNN Quant KD":
+        elif model_name == "CNN KD":
             model = StudentCIFAR10ModelCNN()
             learner = KDLightning
-        elif model_name == "CNN Quant KD Decreasing":
+        elif model_name == "CNN KD-D":
             model = StudentCIFAR10ModelCNN(decreasing_beta=True)
             learner = KDLightning
-        elif model_name == "CNN Quant KD send logic":
+        elif model_name == "CNN KD-S":
             model = StudentCIFAR10ModelCNN(send_logic="mixed_2rounds")
             learner = KDLightning
-        elif model_name == "CNN Quant KD Decreasing send logic":
+        elif model_name == "CNN KD-DS":
             model = StudentCIFAR10ModelCNN(decreasing_beta=True, send_logic="mixed_2rounds")
             learner = KDLightning
-        elif model_name == "CNN Quant MD":
+        elif model_name == "CNN MD":
             model = StudentCIFAR10ModelCNN(mutual_distilation="MD")
             learner = KDLightning
-        elif model_name == "CNN Quant MD Decreasing":
+        elif model_name == "CNN MD-D":
             model = StudentCIFAR10ModelCNN(mutual_distilation="MD", decreasing_beta=True)
             learner = KDLightning
-        elif model_name == "CNN Quant MD send logic":
+        elif model_name == "CNN MD-S":
             model = StudentCIFAR10ModelCNN(mutual_distilation="MD", send_logic="mixed_2rounds")
             learner = KDLightning
-        elif model_name == "CNN Quant MD Decreasing send logic":
-            model = StudentCIFAR10ModelCNN(mutual_distilation="MD", decreasing_beta=True,
-                                           send_logic="mixed_2rounds")
+        elif model_name == "CNN MD-DS":
+            model = StudentCIFAR10ModelCNN(mutual_distilation="MD", decreasing_beta=True, send_logic="mixed_2rounds")
             learner = KDLightning
-        elif model_name == "CNN Proto":
-            model = ProtoCIFAR10ModelCNN()
+        elif model_name == "CNN FedProto":
+            model = FedProtoCIFAR10ModelCNN()
             learner = ProtoLightning
-        elif model_name == "CNN Proto Quant KD":
+        elif model_name == "CNN FedGPD":
+            model = FedGPDCIFAR10ModelCNN()
+        elif model_name == "CNN PKD":
             model = ProtoStudentCIFAR10ModelCNN()
             learner = ProtoKDQuantizationLightning
-        elif model_name == "CNN Proto Quant KD send logic":
+        elif model_name == "CNN PKD-D":
+            model = ProtoStudentCIFAR10ModelCNN(decreasing_beta=True)
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "CNN PKD-S":
             model = ProtoStudentCIFAR10ModelCNN(send_logic="mixed_2rounds")
             learner = ProtoKDQuantizationLightning
-        elif model_name == "CNN Proto Quant MD":
+        elif model_name == "CNN PKD-DS":
+            model = ProtoStudentCIFAR10ModelCNN(decreasing_beta=True, send_logic="mixed_2rounds")
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "CNN PMD":
             model = ProtoStudentCIFAR10ModelCNN(mutual_distilation="MD")
             learner = ProtoKDQuantizationLightning
-        elif model_name == "CNN Proto Quant MD send logic":
+        elif model_name == "CNN PMD-D":
+            model = ProtoStudentCIFAR10ModelCNN(mutual_distilation="MD", decreasing_beta=True)
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "CNN PMD-S":
             model = ProtoStudentCIFAR10ModelCNN(mutual_distilation="MD", send_logic="mixed_2rounds")
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "CNN PMD-DS":
+            model = ProtoStudentCIFAR10ModelCNN(mutual_distilation="MD", decreasing_beta=True, send_logic="mixed_2rounds")
             learner = ProtoKDQuantizationLightning
         elif model_name == "Resnet8":
             model = StudentCIFAR10ModelResNet8(mutual_distilation=None)
             learner = KDLightning
-        elif model_name == "Resnet8 Quant KD":
+        elif model_name == "Resnet8 KD":
             model = StudentCIFAR10ModelResNet8()
             learner = KDLightning
-        elif model_name == "Resnet8 Quant KD Decreasing":
+        elif model_name == "Resnet8 KD-D":
             model = StudentCIFAR10ModelResNet8(decreasing_beta=True)
             learner = KDLightning
-        elif model_name == "Resnet8 Quant KD send logic":
+        elif model_name == "Resnet8 KD-S":
             model = StudentCIFAR10ModelResNet8(send_logic="mixed_2rounds")
             learner = KDLightning
-        elif model_name == "Resnet8 Quant KD Decreasing send logic":
+        elif model_name == "Resnet8 KD-DS":
             model = StudentCIFAR10ModelResNet8(decreasing_beta=True, send_logic="mixed_2rounds")
             learner = KDLightning
-        elif model_name == "Resnet8 Quant MD":
+        elif model_name == "Resnet8 MD":
             model = StudentCIFAR10ModelResNet8(mutual_distilation="MD")
             learner = KDLightning
-        elif model_name == "Resnet8 Quant MD Decreasing":
+        elif model_name == "Resnet8 MD-D":
             model = StudentCIFAR10ModelResNet8(mutual_distilation="MD", decreasing_beta=True)
             learner = KDLightning
-        elif model_name == "Resnet8 Quant MD send logic":
+        elif model_name == "Resnet8 MD-S":
             model = StudentCIFAR10ModelResNet8(mutual_distilation="MD", send_logic="mixed_2rounds")
             learner = KDLightning
-        elif model_name == "Resnet8 Quant MD Decreasing send logic":
-            model = StudentCIFAR10ModelResNet8(mutual_distilation="MD", decreasing_beta=True,
-                                               send_logic="mixed_2rounds")
+        elif model_name == "Resnet8 MD-DS":
+            model = StudentCIFAR10ModelResNet8(mutual_distilation="MD", decreasing_beta=True, send_logic="mixed_2rounds")
             learner = KDLightning
-        elif model_name == "Resnet8 Proto":
-            model = ProtoCIFAR10ModelResNet8()
+        elif model_name == "Resnet8 FedProto":
+            model = FedProtoCIFAR10ModelResNet8()
             learner = ProtoLightning
-        elif model_name == "Resnet8 Proto Quant KD":
+        elif model_name == "Resnet8 FedGPD":
+            model = FedGPDCIFAR10ModelResNet8()
+        elif model_name == "Resnet8 PKD":
             model = ProtoStudentCIFAR10ModelResnet8()
             learner = ProtoKDQuantizationLightning
-        elif model_name == "Resnet8 Proto Quant KD send logic":
+        elif model_name == "Resnet8 PKD-D":
+            model = ProtoStudentCIFAR10ModelResnet8(decreasing_beta=True)
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "Resnet8 PKD-S":
             model = ProtoStudentCIFAR10ModelResnet8(send_logic="mixed_2rounds")
             learner = ProtoKDQuantizationLightning
-        elif model_name == "Resnet8 Proto Quant MD":
+        elif model_name == "Resnet8 PKD-DS":
+            model = ProtoStudentCIFAR10ModelResnet8(decreasing_beta=True, send_logic="mixed_2rounds")
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "Resnet8 PMD":
             model = ProtoStudentCIFAR10ModelResnet8(mutual_distilation="MD")
             learner = ProtoKDQuantizationLightning
-        elif model_name == "Resnet8 Proto Quant MD send logic":
+        elif model_name == "Resnet8 PMD-D":
+            model = ProtoStudentCIFAR10ModelResnet8(mutual_distilation="MD", decreasing_beta=True)
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "Resnet8 PMD-S":
             model = ProtoStudentCIFAR10ModelResnet8(mutual_distilation="MD", send_logic="mixed_2rounds")
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "Resnet8 PMD-DS":
+            model = ProtoStudentCIFAR10ModelResnet8(mutual_distilation="MD", decreasing_beta=True, send_logic="mixed_2rounds")
             learner = ProtoKDQuantizationLightning
         else:
             raise ValueError(f"Model {model} not supported")
+
     elif dataset_str == "MilitarySAR":
-        dataset = MilitarySARDataset(num_classes=10, partition_id=idx, partitions_number=n_nodes, iid=iid, partition=partition_selection, partition_parameter=partition_parameter, seed=42, config=config)
+        dataset = MilitarySARDataset(
+            num_classes=10,
+            partition_id=idx,
+            partitions_number=n_nodes,
+            iid=iid,
+            partition=partition_selection,
+            partition_parameter=partition_parameter,
+            seed=42,
+            config=config,
+        )
         model = MilitarySARModelCNN()
+
+    elif dataset_str == "CIFAR100":
+        dataset = CIFAR100Dataset(
+            num_classes=100,
+            partition_id=idx,
+            partitions_number=n_nodes,
+            iid=iid,
+            partition=partition_selection,
+            partition_parameter=partition_parameter,
+            seed=42,
+            config=config,
+        )
+        if model_name == "Resnet18":
+            model = StudentCIFAR100ModelResNet18(mutual_distilation=None)
+            learner = KDLightning
+        elif model_name == "Resnet18 KD":
+            model = StudentCIFAR100ModelResNet18()
+            learner = KDLightning
+        elif model_name == "Resnet18 KD-D":
+            model = StudentCIFAR100ModelResNet18(decreasing_beta=True)
+            learner = KDLightning
+        elif model_name == "Resnet18 KD-S":
+            model = StudentCIFAR100ModelResNet18(send_logic="mixed_2rounds")
+            learner = KDLightning
+        elif model_name == "Resnet18 KD-DS":
+            model = StudentCIFAR100ModelResNet18(decreasing_beta=True, send_logic="mixed_2rounds")
+            learner = KDLightning
+        elif model_name == "Resnet18 MD":
+            model = StudentCIFAR100ModelResNet18(mutual_distilation="MD")
+            learner = KDLightning
+        elif model_name == "Resnet18 MD-D":
+            model = StudentCIFAR100ModelResNet18(mutual_distilation="MD", decreasing_beta=True)
+            learner = KDLightning
+        elif model_name == "Resnet18 MD-S":
+            model = StudentCIFAR100ModelResNet18(mutual_distilation="MD", send_logic="mixed_2rounds")
+            learner = KDLightning
+        elif model_name == "Resnet18 MD-DS":
+            model = StudentCIFAR100ModelResNet18(mutual_distilation="MD", decreasing_beta=True, send_logic="mixed_2rounds")
+            learner = KDLightning
+        elif model_name == "Resnet18 FedProto":
+            model = FedProtoCIFAR100ModelResNet18()
+            learner = ProtoLightning
+        elif model_name == "Resnet18 FedGPD":
+            model = FedGPDCIFAR100ModelResNet18()
+        elif model_name == "Resnet18 PKD":
+            model = ProtoStudentCIFAR100ModelResnet18()
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "Resnet18 PKD-D":
+            model = ProtoStudentCIFAR100ModelResnet18(decreasing_beta=True)
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "Resnet18 PKD-S":
+            model = ProtoStudentCIFAR100ModelResnet18(send_logic="mixed_2rounds")
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "Resnet18 PKD-DS":
+            model = ProtoStudentCIFAR100ModelResnet18(decreasing_beta=True, send_logic="mixed_2rounds")
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "Resnet18 PMD":
+            model = ProtoStudentCIFAR100ModelResnet18(mutual_distilation="MD")
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "Resnet18 PMD-D":
+            model = ProtoStudentCIFAR100ModelResnet18(mutual_distilation="MD", decreasing_beta=True)
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "Resnet8 PMD-S":
+            model = ProtoStudentCIFAR100ModelResnet18(mutual_distilation="MD", send_logic="mixed_2rounds")
+            learner = ProtoKDQuantizationLightning
+        elif model_name == "Resnet18 PMD-DS":
+            model = ProtoStudentCIFAR100ModelResnet18(mutual_distilation="MD", decreasing_beta=True, send_logic="mixed_2rounds")
+            learner = ProtoKDQuantizationLightning
+        else:
+            raise ValueError(f"Model {model} not supported")
+
     else:
         raise ValueError(f"Dataset {dataset_str} not supported")
 
@@ -398,7 +574,16 @@ async def main():
 
     logging.info(f"Starting node {idx} with model {model_name}, trainer {trainer.__name__}, and as {node_cls.__name__}")
 
-    node = node_cls(model=model, dataset=dataset, config=config, trainer=trainer, security=False, model_poisoning=model_poisoning, poisoned_ratio=poisoned_ratio, noise_type=noise_type)
+    node = node_cls(
+        model=model,
+        dataset=dataset,
+        config=config,
+        trainer=trainer,
+        security=False,
+        model_poisoning=model_poisoning,
+        poisoned_ratio=poisoned_ratio,
+        noise_type=noise_type,
+    )
     await node.start_communications()
     await node.deploy_federation()
 
