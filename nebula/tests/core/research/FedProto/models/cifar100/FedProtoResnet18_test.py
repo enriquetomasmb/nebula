@@ -1,7 +1,7 @@
 from unittest.mock import patch
 import torch
 from torch import nn
-from nebula.core.research.FedProto.models.cifar100.FedProtoResnet18 import FedProtoCIFAR100ModelResNet
+from nebula.core.research.FedProto.models.cifar100.FedProtoResnet18 import FedProtoCIFAR100ModelResNet18
 
 
 def create_random_prototypes(model, num_classes, feature_dim):
@@ -12,7 +12,7 @@ def create_random_prototypes(model, num_classes, feature_dim):
 
 
 def test_model_initialization():
-    model = FedProtoCIFAR100ModelResNet()
+    model = FedProtoCIFAR100ModelResNet18()
     assert model.input_channels == 3, "Incorrect number of input channels"
     assert model.num_classes == 100, "Incorrect number of classes"
     assert isinstance(model.criterion_nll, nn.NLLLoss), "Incorrect NLL loss function"
@@ -21,14 +21,14 @@ def test_model_initialization():
 
 
 def test_forward_train_functionality():
-    model = FedProtoCIFAR100ModelResNet()
+    model = FedProtoCIFAR100ModelResNet18()
     input_tensor = torch.rand(32, 3, 32, 32)
     output, _, _ = model.forward_train(input_tensor, softmax=True, is_feat=True)
     assert output.shape == (32, 100), "Output tensor has incorrect shape"
 
 
 def test_optimizer_configuration():
-    model = FedProtoCIFAR100ModelResNet()
+    model = FedProtoCIFAR100ModelResNet18()
     optimizer = model.configure_optimizers()
     assert isinstance(optimizer, torch.optim.Adam), "Optimizer type is incorrect"
     # Assuming beta1 and beta2 are set correctly in model's config dictionary
@@ -36,7 +36,7 @@ def test_optimizer_configuration():
 
 
 def test_forward_pass_inference_with_prototypes():
-    model = FedProtoCIFAR100ModelResNet()
+    model = FedProtoCIFAR100ModelResNet18()
     create_random_prototypes(model, 100, model.embedding_dim)  # Assuming embedding_dim is defined in the model
     input_tensor = torch.rand(32, 3, 32, 32)
     output = model(input_tensor)
@@ -44,7 +44,7 @@ def test_forward_pass_inference_with_prototypes():
 
 
 def test_loss_combination_with_prototypes():
-    model = FedProtoCIFAR100ModelResNet()
+    model = FedProtoCIFAR100ModelResNet18()
     create_random_prototypes(model, 100, model.embedding_dim)
     input_tensor = torch.randn(5, 3, 32, 32)  # Simulate a batch of 5 images
     labels = torch.randint(0, 10, (5,))  # Simulate random labels for the batch

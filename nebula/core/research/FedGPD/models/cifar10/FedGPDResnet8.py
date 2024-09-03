@@ -37,7 +37,7 @@ class BasicBlock(nn.Module):
         return out
 
 
-class FedGPDCIFAR100ModelResNet8(FedGPDNebulaModel):
+class FedGPDCIFAR10ModelResNet8(FedGPDNebulaModel):
     """
     LightningModule para CIFAR-10 usando una implementación personalizada de ResNet-8.
     """
@@ -67,17 +67,18 @@ class FedGPDCIFAR100ModelResNet8(FedGPDNebulaModel):
         self.criterion_cls = nn.CrossEntropyLoss()
         self.lambd = lambd
         self.criterion_gpd = GlobalPrototypeDistillationLoss(temperature=self.T)
-
+        self.embedding_dim = 512
         self.in_planes = 64
         self.conv1 = nn.Conv2d(3, 64, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
         self.relu = nn.ReLU(inplace=True)
-
+        self.embedding_dim = 128
         # Construcción directa de ResNet-8
         self.layer1 = self._make_layer(BasicBlock, 64, 2, stride=1)
         self.layer2 = self._make_layer(BasicBlock, 128, 2, stride=2)
         self.avgpool = nn.AdaptiveAvgPool2d((1, 1))
-        self.fc = nn.Linear(128 * BasicBlock.expansion, num_classes)
+        self.fc_dense = nn.Linear(128 * BasicBlock.expansion, self.embedding_dim)
+        self.fc = nn.Linear(self.embedding_dim, num_classes)
 
     def _make_layer(self, block, planes, blocks, stride=1):
         downsample = None
@@ -105,16 +106,17 @@ class FedGPDCIFAR100ModelResNet8(FedGPDNebulaModel):
 
         x = self.avgpool(x2)
         x = torch.flatten(x, 1)
-        logits = self.fc(x)
+        dense = self.fc_dense(x)
+        logits = self.fc(dense)
 
         if is_feat:
             if softmax:
-                return F.log_softmax(logits, dim=1), logits, [x1, x2]
-            return logits, logits, [x1, x2]
+                return F.log_softmax(logits, dim=1), dense, [x1, x2]
+            return logits, dense, [x1, x2]
 
         if softmax:
-            return F.log_softmax(logits, dim=1), logits
-        return logits, logits
+            return F.log_softmax(logits, dim=1), dense
+        return logits, dense
 
     def forward(self, x):
         """Forward pass para la inferencia del modelo."""
@@ -123,14 +125,13 @@ class FedGPDCIFAR100ModelResNet8(FedGPDNebulaModel):
             return logits
 
         # Obtener las características intermedias
-        logits, features = self.forward_train(x, is_feat=True)
-        features_flat = torch.flatten(features[-1], 1)
+        logits, dense, features = self.forward_train(x, is_feat=True)
 
         # Calcular distancias a los prototipos globales
         distances = []
         for key, proto in self.global_protos.items():
-            proto = proto.to(features_flat.device)
-            dist = torch.norm(features_flat - proto, dim=1)
+            proto = proto.to(dense.device)
+            dist = torch.norm(dense - proto, dim=1)
             distances.append(dist.unsqueeze(1))
         distances = torch.cat(distances, dim=1)
 

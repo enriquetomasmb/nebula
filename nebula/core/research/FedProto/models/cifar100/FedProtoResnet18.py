@@ -36,7 +36,7 @@ class BasicBlock(nn.Module):
         return out
 
 
-class FedProtoCIFAR100ModelResNet(NebulaModel):
+class FedProtoCIFAR100ModelResNet18(NebulaModel):
     """
     LightningModule para CIFAR-100 usando ResNet-18.
     """
