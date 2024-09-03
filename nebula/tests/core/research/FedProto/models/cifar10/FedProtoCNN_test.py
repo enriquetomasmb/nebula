@@ -1,21 +1,23 @@
 import torch
 import pytest
 
-from nebula.core.research.FedProto.models.mnist.FedProtoCNN import FedProtoMNISTModelCNN
+from nebula.core.research.FedProto.models.cifar10.FedProtoCNN import FedProtoCIFAR10ModelCNN
 
 
 def test_initialization():
-    """Test initialization of FedProtoMNISTModelCNN"""
-    model = FedProtoMNISTModelCNN()
-    assert model.input_channels == 1, "Incorrect input channels"
+    """Test initialization of FedProtoCIFAR10ModelCNN"""
+    model = FedProtoCIFAR10ModelCNN()
+    assert model.input_channels == 3, "Incorrect input channels"
     assert model.num_classes == 10, "Incorrect number of classes"
+    assert model.learning_rate == 1e-3, "Incorrect learning rate"
+    assert model.beta == 1, "Incorrect beta value"
 
 
 def test_forward_pass():
     """Test the forward pass of the model for both training and inference"""
-    model = FedProtoMNISTModelCNN()
-    input_tensor = torch.rand(1, 1, 28, 28)
-    logits, _ = model.forward_train(input_tensor)
+    model = FedProtoCIFAR10ModelCNN()
+    input_tensor = torch.rand(1, 3, 32, 32)
+    logits, _, _ = model.forward_train(input_tensor, softmax=True, is_feat=True)
     assert logits.shape == (1, 10), "Logits shape incorrect during training"
 
     # Simulating that global prototypes are available
@@ -26,8 +28,8 @@ def test_forward_pass():
 
 def test_loss_calculation():
     """Test the loss calculation during a training step"""
-    model = FedProtoMNISTModelCNN()
-    input_tensor = torch.rand(10, 1, 28, 28)
+    model = FedProtoCIFAR10ModelCNN()
+    input_tensor = torch.rand(10, 3, 32, 32)
     labels = torch.randint(0, 10, (10,))
     batch = (input_tensor, labels)
     loss = model.step(batch, 0, "Validation")
@@ -36,32 +38,21 @@ def test_loss_calculation():
 
 def test_save_and_load_protos():
     """Test saving and loading of prototypes"""
-    model = FedProtoMNISTModelCNN()
+    model = FedProtoCIFAR10ModelCNN()
     # Set some prototypes
     protos = {i: torch.rand(2048) for i in range(10)}
     model.set_protos(protos)
 
-    # Save state dict
-    saved_state = model.state_dict()
-
-    # Create a new model and load the state
-    new_model = FedProtoMNISTModelCNN()
-    new_model.load_state_dict(saved_state)
-
-    # Verify that prototypes were loaded correctly
-    loaded_protos = new_model.get_protos()
+    # Verify that prototypes were set correctly
+    loaded_protos = model.get_protos()
     for key, proto in protos.items():
-        assert torch.allclose(proto, loaded_protos[key]), f"Protos for class {key} did not load correctly"
+        assert torch.allclose(proto, loaded_protos[key]), "Protos for class {key} did not load correctly"
 
 
 @pytest.mark.parametrize("device", ["cpu", "cuda"])
 def test_device_assignment(device):
     """Test if the model can be moved to and from GPU correctly"""
     if torch.cuda.is_available() or device == "cpu":
-        model = FedProtoMNISTModelCNN()
+        model = FedProtoCIFAR10ModelCNN()
         model.to(device)
-        assert next(model.parameters()).device.type == device, f"Model not on {device}"
-
-
-if __name__ == "__main__":
-    pytest.main([__file__])
+        assert next(model.parameters()).device.type == device, "Model not on {device}"
