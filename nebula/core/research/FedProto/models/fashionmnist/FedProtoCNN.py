@@ -1,4 +1,4 @@
-from typing import Any, Mapping
+import logging
 
 import torch
 from torch import nn
@@ -7,7 +7,7 @@ import torch.nn.functional as F
 from nebula.core.models.nebulamodel import NebulaModel
 
 
-class FedProtoMNISTModelCNN(NebulaModel):
+class FedProtoFashionMNISTModelCNN(NebulaModel):
     """
     LightningModule for MNIST.
     """
@@ -152,9 +152,7 @@ class FedProtoMNISTModelCNN(NebulaModel):
     def get_protos(self):
 
         if len(self.agg_protos_label) == 0:
-            proto = {k: v.cpu() for k, v in self.global_protos.items()}
-
-            return proto
+            return {k: v.cpu() for k, v in self.global_protos.items()}
 
         proto = {}
         for label, proto_info in self.agg_protos_label.items():
@@ -164,14 +162,9 @@ class FedProtoMNISTModelCNN(NebulaModel):
             else:
                 proto[label] = proto_info["sum"].to("cpu")
 
+        logging.info(f"[ProtoFashionMNISTModelCNN.get_protos] Protos: {proto}")
         return proto
 
     def set_protos(self, protos):
         self.agg_protos_label = {}
         self.global_protos = {k: v.to(self.device) for k, v in protos.items()}
-
-    def state_dict(self, *args, destination=None, prefix="", keep_vars=False):
-        return {"protos": self.get_protos()}
-
-    def load_state_dict(self, state_dict: Mapping[str, Any], strict: bool = True, assign: bool = False):
-        self.set_protos(state_dict["protos"])

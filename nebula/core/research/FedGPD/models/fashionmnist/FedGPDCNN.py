@@ -1,13 +1,13 @@
-from typing import Any, Mapping
-
 import torch
-from torch import nn
 import torch.nn.functional as F
 
-from nebula.core.models.nebulamodel import NebulaModel
+from nebula.core.research.FedGPD.models.FedGPDnebulamodel import FedGPDNebulaModel
+from nebula.core.research.FedGPD.models.utils.GlobalPrototypeDistillationLoss import (
+    GlobalPrototypeDistillationLoss,
+)
 
 
-class FedProtoMNISTModelCNN(NebulaModel):
+class FedGPDFashionMNISTModelCNN(FedGPDNebulaModel):
     """
     LightningModule for MNIST.
     """
@@ -20,17 +20,24 @@ class FedProtoMNISTModelCNN(NebulaModel):
         metrics=None,
         confusion_matrix=None,
         seed=None,
-        beta=1,
+        T=2,
+        lambd=0.05,
     ):
-        super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed)
-        self.config = {"beta1": 0.851436, "beta2": 0.999689, "amsgrad": True}
+
+        super().__init__(
+            input_channels,
+            num_classes,
+            learning_rate,
+            metrics,
+            confusion_matrix,
+            seed,
+            T,
+        )
+
         self.example_input_array = torch.zeros(1, 1, 28, 28)
-        self.learning_rate = learning_rate
-        self.beta = beta
-        self.global_protos = {}
-        self.agg_protos_label = {}
-        self.criterion_nll = nn.NLLLoss()
-        self.loss_mse = torch.nn.MSELoss()
+        self.criterion_cls = torch.nn.CrossEntropyLoss()
+        self.criterion_gpd = GlobalPrototypeDistillationLoss(temperature=T)
+        self.lambd = lambd
 
         self.conv1 = torch.nn.Conv2d(
             in_channels=input_channels,
@@ -45,8 +52,11 @@ class FedProtoMNISTModelCNN(NebulaModel):
         self.l1 = torch.nn.Linear(7 * 7 * 64, 2048)
         self.l2 = torch.nn.Linear(2048, num_classes)
 
-    def forward_train(self, x):
-        """Forward pass only for train the model."""
+    def forward_train(self, x, softmax=True, is_feat=False):
+        """Forward pass only for train the model.
+        is_feat: bool, if True return the features of the model.
+        softmax: bool, if True apply softmax to the logits.
+        """
         # Reshape the input tensor
         input_layer = x.view(-1, 1, 28, 28)
 
@@ -65,7 +75,14 @@ class FedProtoMNISTModelCNN(NebulaModel):
         dense = self.relu(self.l1(pool2_flat))
         logits = self.l2(dense)
 
-        return F.log_softmax(logits, dim=1), dense
+        if is_feat:
+            if softmax:
+                return F.log_softmax(logits, dim=1), dense, [conv1, conv2]
+            return logits, dense, [conv1, conv2]
+
+        if softmax:
+            return F.log_softmax(logits, dim=1), dense
+        return logits, dense
 
     def forward(self, x):
         """Forward pass for inference the model, if model have prototypes"""
@@ -94,7 +111,6 @@ class FedProtoMNISTModelCNN(NebulaModel):
         distances = []
         for key, proto in self.global_protos.items():
             # Calculate Euclidean distance
-            # send protos and dense to the same device
             proto = proto.to(dense.device)
             dist = torch.norm(dense - proto, dim=1)
             distances.append(dist.unsqueeze(1))
@@ -105,73 +121,35 @@ class FedProtoMNISTModelCNN(NebulaModel):
 
     def configure_optimizers(self):
         """Configure the optimizer for training."""
-        optimizer = torch.optim.Adam(
-            self.parameters(),
-            lr=self.learning_rate,
-            betas=(self.config["beta1"], self.config["beta2"]),
-            amsgrad=self.config["amsgrad"],
-        )
+        optimizer = torch.optim.SGD(self.parameters(), lr=self.learning_rate, momentum=0.9, weight_decay=0.00001)
         return optimizer
 
     def step(self, batch, batch_idx, phase):
 
         images, labels_g = batch
         images, labels = images.to(self.device), labels_g.to(self.device)
-        logits, protos = self.forward_train(images)
+        logits, features = self.forward_train(images, softmax=False)
 
-        # Compute loss with the logits and the labels nll
-        loss1 = self.criterion_nll(logits, labels)
+        features_copy = features.clone().detach()
+
+        # Compute loss ce
+        loss_ce = self.criterion_cls(logits, labels)
 
         # Compute loss 2
-        if len(self.global_protos) == 0:
-            loss2 = 0 * loss1
-        else:
-            proto_new = protos.clone()
-            i = 0
-            for label in labels:
-                if label.item() in self.global_protos.keys():
-                    proto_new[i, :] = self.global_protos[label.item()].data
-                i += 1
-            # Compute the loss with the global protos
-            loss2 = self.loss_mse(proto_new, protos)
-        # Compute the final loss
-        loss = loss1 + self.beta * loss2
+        loss_gpd = self.criterion_gpd(self.global_protos, features_copy, labels)
+
+        # Combine the losses
+        loss = loss_ce + self.lambd * loss_gpd
+
         self.process_metrics(phase, logits, labels, loss)
 
         if phase == "Train":
-            # Aggregate the protos
+            # Update the prototypes
             for i in range(len(labels_g)):
                 label = labels_g[i].item()
                 if label not in self.agg_protos_label:
-                    self.agg_protos_label[label] = dict(sum=torch.zeros_like(protos[i, :]), count=0)
-                self.agg_protos_label[label]["sum"] += protos[i, :].detach().clone()
+                    self.agg_protos_label[label] = dict(sum=torch.zeros_like(features[i, :]), count=0)
+                self.agg_protos_label[label]["sum"] += features[i, :].detach().clone()
                 self.agg_protos_label[label]["count"] += 1
 
         return loss
-
-    def get_protos(self):
-
-        if len(self.agg_protos_label) == 0:
-            proto = {k: v.cpu() for k, v in self.global_protos.items()}
-
-            return proto
-
-        proto = {}
-        for label, proto_info in self.agg_protos_label.items():
-
-            if proto_info["count"] > 1:
-                proto[label] = (proto_info["sum"] / proto_info["count"]).to("cpu")
-            else:
-                proto[label] = proto_info["sum"].to("cpu")
-
-        return proto
-
-    def set_protos(self, protos):
-        self.agg_protos_label = {}
-        self.global_protos = {k: v.to(self.device) for k, v in protos.items()}
-
-    def state_dict(self, *args, destination=None, prefix="", keep_vars=False):
-        return {"protos": self.get_protos()}
-
-    def load_state_dict(self, state_dict: Mapping[str, Any], strict: bool = True, assign: bool = False):
-        self.set_protos(state_dict["protos"])

@@ -1,106 +1,96 @@
 import logging
-
 import torch
 from torch import nn
-import torch.nn.functional as F
-
+from torch.nn import functional as F
+from torchvision.models.resnet import BasicBlock
 from nebula.core.models.nebulamodel import NebulaModel
 
 
-class ProtoFashionMNISTModelCNN(NebulaModel):
+class FedProtoCIFAR10ModelResNet8(NebulaModel):
     """
-    LightningModule for MNIST.
+    LightningModule para CIFAR-100 usando ResNet-18.
     """
 
     def __init__(
         self,
-        input_channels=1,
-        num_classes=10,
-        learning_rate=1e-3,
+        input_channels=3,
+        num_classes=100,
+        learning_rate=0.01,
         metrics=None,
         confusion_matrix=None,
         seed=None,
-        beta=1,
+        beta=0.05,
     ):
-        super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed)
-        self.config = {"beta1": 0.851436, "beta2": 0.999689, "amsgrad": True}
-        self.example_input_array = torch.zeros(1, 1, 28, 28)
-        self.learning_rate = learning_rate
+
+        super().__init__(
+            input_channels,
+            num_classes,
+            learning_rate,
+            metrics,
+            confusion_matrix,
+            seed,
+        )
+
+        self.example_input_array = torch.zeros(1, 3, 32, 32)
         self.beta = beta
         self.global_protos = {}
         self.agg_protos_label = {}
         self.criterion_nll = nn.NLLLoss()
         self.loss_mse = torch.nn.MSELoss()
 
-        self.conv1 = torch.nn.Conv2d(
-            in_channels=input_channels,
-            out_channels=32,
-            kernel_size=(5, 5),
-            padding="same",
+        # Simplified ResNet-8 architecture
+        self.features = nn.Sequential(
+            nn.Conv2d(input_channels, 64, kernel_size=3, stride=1, padding=1, bias=False),
+            nn.BatchNorm2d(64),
+            nn.ReLU(inplace=True),
+            BasicBlock(64, 64),
+            BasicBlock(64, 64),
+            nn.Conv2d(64, 128, kernel_size=3, stride=2, padding=1, bias=False),
+            nn.BatchNorm2d(128),
+            nn.ReLU(inplace=True),
+            BasicBlock(128, 128),
+            BasicBlock(128, 128),
+            nn.AdaptiveAvgPool2d((1, 1)),
         )
-        self.relu = torch.nn.ReLU()
-        self.pool1 = torch.nn.MaxPool2d(kernel_size=(2, 2), stride=2)
-        self.conv2 = torch.nn.Conv2d(in_channels=32, out_channels=64, kernel_size=(5, 5), padding="same")
-        self.pool2 = torch.nn.MaxPool2d(kernel_size=(2, 2), stride=2)
-        self.l1 = torch.nn.Linear(7 * 7 * 64, 2048)
-        self.l2 = torch.nn.Linear(2048, num_classes)
 
-    def forward_train(self, x):
-        """Forward pass only for train the model."""
-        # Reshape the input tensor
-        input_layer = x.view(-1, 1, 28, 28)
+        self.fc = nn.Linear(128, 2048)  # Intermediate layer before classifier
+        self.classifier = nn.Linear(2048, num_classes)
 
-        # First convolutional layer
-        conv1 = self.relu(self.conv1(input_layer))
-        pool1 = self.pool1(conv1)
+    def forward_train(self, x, softmax=True, is_feat=False):
+        # Extraer las características intermedias usando ResNet-18
+        features = self.features(x)
+        features_flat = torch.flatten(features, 1)  # Aplanar para la capa fully connected
+        dense = self.fc(features_flat)
+        logits = self.classifier(dense)
 
-        # Second convolutional layer
-        conv2 = self.relu(self.conv2(pool1))
-        pool2 = self.pool2(conv2)
+        if is_feat:
+            if softmax:
+                return F.log_softmax(logits, dim=1), dense, features
+            return logits, dense, features
 
-        # Flatten the tensor
-        pool2_flat = pool2.reshape(-1, 7 * 7 * 64)
-
-        # Fully connected layers
-        dense = self.relu(self.l1(pool2_flat))
-        logits = self.l2(dense)
-
-        return F.log_softmax(logits, dim=1), dense
+        if softmax:
+            return F.log_softmax(logits, dim=1), dense
+        return logits, dense
 
     def forward(self, x):
-        """Forward pass for inference the model, if model have prototypes"""
+        """Forward pass para la inferencia del modelo."""
         if len(self.global_protos) == 0:
             logits, _ = self.forward_train(x)
             return logits
 
-        # Reshape the input tensor
-        input_layer = x.view(-1, 1, 28, 28)
+        # Obtener las características intermedias
+        features = self.features(x)
+        features_flat = torch.flatten(features, 1)
+        dense = self.fc(features_flat)
 
-        # First convolutional layer
-        conv1 = self.relu(self.conv1(input_layer))
-        pool1 = self.pool1(conv1)
-
-        # Second convolutional layer
-        conv2 = self.relu(self.conv2(pool1))
-        pool2 = self.pool2(conv2)
-
-        # Flatten the tensor
-        pool2_flat = pool2.reshape(-1, 7 * 7 * 64)
-
-        # Fully connected layers
-        dense = self.relu(self.l1(pool2_flat))
-
-        # Calculate distances
+        # Calcular distancias a los prototipos globales
         distances = []
         for key, proto in self.global_protos.items():
-            # Calculate Euclidean distance
-            # send protos and dense to the same device
             proto = proto.to(dense.device)
             dist = torch.norm(dense - proto, dim=1)
             distances.append(dist.unsqueeze(1))
         distances = torch.cat(distances, dim=1)
 
-        # Return the predicted class based on the closest prototype
         return distances.argmin(dim=1)
 
     def configure_optimizers(self):

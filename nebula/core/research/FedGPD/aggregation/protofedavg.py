@@ -1,6 +1,9 @@
 """
 This module implements the ProtoFedAvg aggregator for federated learning, combining both prototype model aggregation
 and traditional FedAvg.
+
+FedGPD [https://doi.org/10.1038/s41598-024-62908-0]
+
 """
 
 import torch
@@ -41,7 +44,7 @@ def _agregate_prototypes(prototypes):
 class ProtoFedAvg(Aggregator):
     """
     Mix Prototype Model Aggregation. Prototype Model Aggregation and Normal FedAvg are implemented
-
+    FedGPD [https://doi.org/10.1038/s41598-024-62908-0]
     """
 
     def __init__(self, config=None, **kwargs):
