@@ -40,4 +40,7 @@ web3==6.20.0
 tabulate==0.9.0
 retry==0.9.2
 docker==7.1.0
+uvicorn==0.29.0
+watchdog==5.0.2
+lz4==4.3.3
 # aim==3.22.0

@@ -83,7 +83,7 @@ class Engine:
         self.role = config.participant["device_args"]["role"]
         self.name = config.participant["device_args"]["name"]
         self.docker_id = config.participant["device_args"]["docker_id"]
-        self.client = docker.from_env()
+        # self.client = docker.from_env()
 
         print_banner()
 
@@ -149,6 +149,7 @@ class Engine:
         print_msg_box(msg=msg, indent=2, title="Defense information")
 
         self.learning_cycle_lock = Locker(name="learning_cycle_lock", async_lock=True)
+        self.federation_setup_lock = Locker(name="federation_setup_lock", async_lock=True)
         self.federation_ready_lock = Locker(name="federation_ready_lock", async_lock=True)
         self.round_lock = Locker(name="round_lock", async_lock=True)
 
@@ -164,6 +165,7 @@ class Engine:
                 self._control_alive_callback,
                 self._connection_connect_callback,
                 self._connection_disconnect_callback,
+                self._federation_ready_callback,
                 self._start_federation_callback,
                 self._federation_models_included_callback,
             ]
@@ -217,6 +219,9 @@ class Engine:
     def get_federation_ready_lock(self):
         return self.federation_ready_lock
 
+    def get_federation_setup_lock(self):
+        return self.federation_setup_lock
+
     def get_round_lock(self):
         return self.round_lock
 
@@ -259,6 +264,13 @@ class Engine:
     async def _connection_disconnect_callback(self, source, message):
         logging.info(f"🔗  handle_connection_message | Trigger | Received disconnection message from {source}")
         await self.cm.disconnect(source, mutual_disconnection=False)
+
+    @event_handler(nebula_pb2.FederationMessage, nebula_pb2.FederationMessage.Action.FEDERATION_READY)
+    async def _federation_ready_callback(self, source, message):
+        logging.info(f"📝  handle_federation_message | Trigger | Received ready federation message from {source}")
+        if self.config.participant["device_args"]["start"]:
+            logging.info(f"📝  handle_federation_message | Trigger | Adding ready connection {source}")
+            await self.cm.add_ready_connection(source)
 
     @event_handler(nebula_pb2.FederationMessage, nebula_pb2.FederationMessage.Action.FEDERATION_START)
     async def _start_federation_callback(self, source, message):
@@ -321,6 +333,8 @@ class Engine:
             logging.info(f"💤  Waiting for {self.config.participant['misc_args']['grace_time_start_federation']} seconds to start the federation")
             await asyncio.sleep(self.config.participant["misc_args"]["grace_time_start_federation"])
             if self.round is None:
+                while not await self.cm.check_federation_ready():
+                    await asyncio.sleep(1)
                 logging.info(f"Sending FEDERATION_START to neighbors...")
                 message = self.cm.mm.generate_federation_message(nebula_pb2.FederationMessage.Action.FEDERATION_START)
                 await self.cm.send_message_to_neighbors(message)
@@ -330,6 +344,9 @@ class Engine:
                 logging.info(f"Federation already started")
 
         else:
+            logging.info(f"Sending FEDERATION_READY to neighbors...")
+            message = self.cm.mm.generate_federation_message(nebula_pb2.FederationMessage.Action.FEDERATION_READY)
+            await self.cm.send_message_to_neighbors(message)
             logging.info(f"💤  Waiting until receiving the start signal from the start node")
 
     async def _start_learning(self):
@@ -454,17 +471,17 @@ class Engine:
                 pass
             else:
                 logging.error(f"Error reporting scenario finished")
-        
-        # Check if all my connections reached the total rounds
+
+        logging.info(f"Checking if all my connections reached the total rounds...")
         while not self.cm.check_finished_experiment():
             await asyncio.sleep(1)
-        
+
         # Kill itself
         try:
             self.client.containers.get(self.docker_id).stop()
         except Exception as e:
             print(f"Error stopping Docker container with ID {self.docker_id}: {e}")
-    
+
     async def _extended_learning_cycle(self):
         """
         This method is called in each round of the learning cycle. It is used to extend the learning cycle with additional

@@ -2,9 +2,10 @@ import os
 import sys
 import time
 import random
-import asyncio
+import uvloop
 import warnings
 import numpy as np
+
 # Ignore CryptographyDeprecationWarning (datatime issues with cryptography library)
 from cryptography.utils import CryptographyDeprecationWarning
 
@@ -256,6 +257,4 @@ async def main():
 
 if __name__ == "__main__":
     os.system("clear")
-    loop = asyncio.new_event_loop()
-    # loop.set_debug(True)
-    loop.run_until_complete(main())
+    uvloop.run(main(), debug=False)

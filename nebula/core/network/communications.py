@@ -56,6 +56,7 @@ class CommunicationsManager:
         self.pending_connections = set()
         self.incoming_connections = {}
         self.outgoing_connections = {}
+        self.ready_connections = set()
 
         self._mm = MessagesManager(addr=self.addr, config=self.config, cm=self)
         self.received_messages_hashes = collections.deque(maxlen=self.config.participant["message_args"]["max_local_messages"])
@@ -105,6 +106,15 @@ class CommunicationsManager:
     @property
     def mobility(self):
         return self._mobility
+
+    async def check_federation_ready(self):
+        # Check if all my connections are in ready_connections
+        logging.info(f"🔗  check_federation_ready | Ready connections: {self.ready_connections} | Connections: {self.connections.keys()}")
+        if set(self.connections.keys()) == self.ready_connections:
+            return True
+
+    async def add_ready_connection(self, addr):
+        self.ready_connections.add(addr)
 
     async def handle_incoming_message(self, data, addr_from):
         try:
@@ -822,7 +832,7 @@ class CommunicationsManager:
 
     def get_ready_connections(self):
         return {addr for addr, conn in self.connections.items() if conn.get_ready()}
-    
+
     def check_finished_experiment(self):
         return all(conn.get_federated_round() == self.config.participant["scenario_args"]["rounds"] - 1 for conn in self.connections.values())
 

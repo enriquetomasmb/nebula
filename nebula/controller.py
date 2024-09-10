@@ -7,6 +7,8 @@ import sys
 import textwrap
 import time
 from dotenv import load_dotenv
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
 
 from nebula.addons.env import check_environment
 from nebula.config.config import Config
@@ -47,6 +49,73 @@ def signal_handler(sig, frame):
 
 
 signal.signal(signal.SIGINT, signal_handler)
+
+
+class NebulaEventHandler(FileSystemEventHandler):
+    """
+    NebulaEventHandler handles file system events for .sh scripts.
+
+    This class monitors the creation, modification, and deletion of .sh scripts
+    in a specified directory.
+    """
+
+    def __init__(self):
+        self.last_run_time = 0
+        self.creation_time = {}
+        self.run_interval = 5
+        self.creation_threshold = 2
+
+    def on_modified(self, event):
+        if event.src_path.endswith(".sh"):
+            current_time = time.time()
+
+            if event.src_path in self.creation_time:
+                if current_time - self.creation_time[event.src_path] < self.creation_threshold:
+                    return
+
+            if current_time - self.last_run_time >= self.run_interval:
+                logging.info("File modified: %s" % event.src_path)
+                self.run_script(event.src_path)
+                self.last_run_time = current_time
+
+    def on_created(self, event):
+        if event.src_path.endswith(".sh"):
+            logging.info("File created: %s" % event.src_path)
+            self.creation_time[event.src_path] = time.time()
+            self.run_script(event.src_path)
+            self.last_run_time = time.time()
+
+    def on_deleted(self, event):
+        if event.src_path.endswith(".sh"):
+            if event.src_path not in self.creation_time:
+                return
+            logging.info("File deleted: %s" % event.src_path)
+            # Extract same directory as the script
+            directory_script = os.path.dirname(event.src_path)
+            pids_file = os.path.join(directory_script, "current_scenario_pids.txt")
+            logging.info(f"Killing processes from {pids_file}")
+            self.kill_script_processes(pids_file)
+            os.remove(pids_file)
+
+    def run_script(self, script):
+        try:
+            logging.info("Running script: {}".format(script))
+            result = subprocess.run([script], check=True, text=True, capture_output=True)
+            logging.info("Script output:\n{}".format(result.stdout))
+        except Exception as e:
+            logging.error("Error while running script: {}".format(e))
+
+    def kill_script_processes(self, pids_file):
+        try:
+            with open(pids_file, "r") as f:
+                pids = f.readlines()
+                for pid in pids:
+                    try:
+                        os.kill(int(pid), signal.SIGKILL)
+                    except Exception as e:
+                        logging.error(f"Error while killing process {pid}: {e}")
+        except Exception as e:
+            logging.error(f"Error while reading pids file: {e}")
 
 
 class Controller:
@@ -113,11 +182,20 @@ class Controller:
 
         if self.production:
             self.run_waf()
+            logging.info("NEBULA WAF is running at port {}".format(self.waf_port))
+            logging.info("Grafana Dashboard is running at port {}".format(self.grafana_port))
 
         if self.test:
             self.run_test()
         else:
             self.run_frontend()
+            logging.info("NEBULA Frontend is running at port {}".format(self.frontend_port))
+
+        # Watchdog for running additional scripts in the host machine (i.e. during the execution of a federation)
+        event_handler = NebulaEventHandler()
+        observer = Observer()
+        observer.schedule(event_handler, path=self.config_dir, recursive=False)
+        observer.start()
 
         if self.mender:
             logging.info("[Mender.module] Mender module initialized")
@@ -140,15 +218,16 @@ class Controller:
                 time.sleep(5)
             sys.exit(0)
 
-        if not self.test:
-            logging.info("NEBULA Frontend is running at port {}".format(self.frontend_port))
-        if self.production:
-            logging.info("NEBULA WAF is running at port {}".format(self.waf_port))
-            logging.info("Grafana Dashboard is running at port {}".format(self.grafana_port))
-
         logging.info("Press Ctrl+C for exit from NEBULA (global exit)")
-        while True:
-            time.sleep(1)
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            logging.info("Closing NEBULA (exiting from components)... Please wait")
+            observer.stop()
+            self.stop()
+
+        observer.join()
 
     def run_waf(self):
         docker_compose_template = textwrap.dedent(
@@ -379,7 +458,7 @@ class Controller:
                     external: true
         """
         )
-        
+
         try:
             subprocess.check_call(["nvidia-smi"])
             self.gpu_available = True
@@ -424,7 +503,7 @@ class Controller:
 
     def run_test(self):
         deploy_tests.start()
-        
+
     @staticmethod
     def stop_frontend():
         if sys.platform == "win32":
