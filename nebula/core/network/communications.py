@@ -589,7 +589,7 @@ class CommunicationsManager:
                 return
             logging.info(f"Sending model to {dest_addr} with round {round}: weight={weight} | size={sys.getsizeof(serialized_model) / (1024 ** 2) if serialized_model is not None else 0} MB")
             message = self.mm.generate_model_message(round, serialized_model, weight)
-            await conn.send(data=message)
+            await conn.send(data=message, is_compressed=True)
             logging.info(f"Model sent to {dest_addr} with round {round}")
         except Exception as e:
             logging.error(f"❗️  Cannot send model to {dest_addr}: {str(e)}")

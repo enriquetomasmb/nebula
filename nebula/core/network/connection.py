@@ -154,17 +154,17 @@ class Connection:
             self.writer.close()
             await self.writer.wait_closed()
 
-    async def send(self, data: Any, pb: bool = True, encoding_type: str = "utf-8", compression: str = "none") -> None:
+    async def send(self, data: Any, pb: bool = True, encoding_type: str = "utf-8", is_compressed: bool = False) -> None:
         if self.writer is None:
             logging.error("Cannot send data, writer is None")
             return
-
+        
         try:
             message_id = uuid.uuid4().bytes
             data_prefix, encoded_data = self._prepare_data(data, pb, encoding_type)
 
-            if compression != "none":
-                encoded_data = await self._compress(encoded_data, compression)
+            if is_compressed:
+                encoded_data = await asyncio.to_thread(self._compress, encoded_data, self.compression)
                 if encoded_data is None:
                     return
                 data_to_send = data_prefix + encoded_data + self.COMPRESSION_CHAR
@@ -188,7 +188,7 @@ class Connection:
         else:
             raise ValueError(f"Unknown data type to send: {type(data)}")
 
-    async def _compress(self, data: bytes, compression: str) -> Optional[bytes]:
+    def _compress(self, data: bytes, compression: str) -> Optional[bytes]:
         if compression == "lz4":
             return lz4.frame.compress(data)
         elif compression == "zlib":
@@ -301,13 +301,25 @@ class Connection:
         message_content = complete_message[4:]
 
         if message_content.endswith(self.COMPRESSION_CHAR):
-            message_content = await self._decompress(message_content[: -len(self.COMPRESSION_CHAR)])
+            message_content = await asyncio.to_thread(self._decompress, message_content[: -len(self.COMPRESSION_CHAR)], self.compression)
+            if message_content is None:
+                return
 
         await self.pending_messages_queue.put((data_type_prefix, message_content))
         logging.debug(f"Processed complete message {message_id.hex()} | total size: {len(complete_message)} bytes")
 
-    async def _decompress(self, data: bytes) -> bytes:
-        return lz4.frame.decompress(data)
+    def _decompress(self, data: bytes, compression: str) -> Optional[bytes]:
+        if compression == "zlib":
+            return zlib.decompress(data)
+        elif compression == "bz2":
+            return bz2.decompress(data)
+        elif compression == "lzma":
+            return lzma.decompress(data)
+        elif compression == "lz4":
+            return lz4.frame.decompress(data)
+        else:
+            logging.error(f"Unsupported compression method: {compression}")
+            return None
 
     async def process_message_queue(self) -> None:
         while True:
