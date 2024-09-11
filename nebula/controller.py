@@ -7,6 +7,7 @@ import sys
 import textwrap
 import time
 from dotenv import load_dotenv
+import psutil
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -48,6 +49,7 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 
+signal.signal(signal.SIGTERM, signal_handler)
 signal.signal(signal.SIGINT, signal_handler)
 
 
@@ -94,8 +96,11 @@ class NebulaEventHandler(FileSystemEventHandler):
             directory_script = os.path.dirname(event.src_path)
             pids_file = os.path.join(directory_script, "current_scenario_pids.txt")
             logging.info(f"Killing processes from {pids_file}")
-            self.kill_script_processes(pids_file)
-            os.remove(pids_file)
+            try:
+                self.kill_script_processes(pids_file)
+                os.remove(pids_file)
+            except Exception as e:
+                logging.error(f"Error while killing processes: {e}")
 
     def run_script(self, script):
         try:
@@ -111,11 +116,36 @@ class NebulaEventHandler(FileSystemEventHandler):
                 pids = f.readlines()
                 for pid in pids:
                     try:
-                        os.kill(int(pid), signal.SIGKILL)
+                        pid = int(pid.strip())
+                        if psutil.pid_exists(pid):
+                            process = psutil.Process(pid)
+                            children = process.children(recursive=True)
+                            logging.info(f"Forcibly killing process {pid} and {len(children)} child processes...")
+                            for child in children:
+                                try:
+                                    logging.info(f"Forcibly killing child process {child.pid}")
+                                    child.kill()
+                                except psutil.NoSuchProcess:
+                                    logging.warning(f"Child process {child.pid} already terminated.")
+                                except Exception as e:
+                                    logging.error(f"Error while forcibly killing child process {child.pid}: {e}")
+                            try:
+                                logging.info(f"Forcibly killing main process {pid}")
+                                process.kill()
+                            except psutil.NoSuchProcess:
+                                logging.warning(f"Process {pid} already terminated.")
+                            except Exception as e:
+                                logging.error(f"Error while forcibly killing main process {pid}: {e}")
+                        else:
+                            logging.warning(f"PID {pid} does not exist.")
+                    except ValueError:
+                        logging.error(f"Invalid PID value in file: {pid}")
                     except Exception as e:
-                        logging.error(f"Error while killing process {pid}: {e}")
+                        logging.error(f"Error while forcibly killing process {pid}: {e}")
+        except FileNotFoundError:
+            logging.error(f"PID file not found: {pids_file}")
         except Exception as e:
-            logging.error(f"Error while reading pids file: {e}")
+            logging.error(f"Error while reading PIDs from file: {e}")
 
 
 class Controller:
