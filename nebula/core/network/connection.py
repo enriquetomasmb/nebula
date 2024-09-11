@@ -83,6 +83,11 @@ class Connection:
 
     def get_federated_round(self):
         return self.federated_round
+    
+    def get_tunnel_status(self):
+        if self.reader is None or self.writer is None:
+            return False
+        return True
 
     def update_round(self, federated_round):
         self.federated_round = federated_round
@@ -158,7 +163,7 @@ class Connection:
         for attempt in range(max_retries):
             try:
                 logging.info(f"Attempting to reconnect to {self.addr} (attempt {attempt + 1}/{max_retries})")
-                self.reader, self.writer = await asyncio.open_connection(self.host, self.port)
+                await self.cm.connect(self.addr)                
                 self.read_task = asyncio.create_task(self.handle_incoming_message(), name=f"Connection {self.addr} reader")
                 self.process_task = asyncio.create_task(self.process_message_queue(), name=f"Connection {self.addr} processor")
                 logging.info(f"Reconnected to {self.addr}")

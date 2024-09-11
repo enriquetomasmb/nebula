@@ -23,6 +23,17 @@ class Reporter:
         self.data_queue = asyncio.Queue()
         self.url = f'http://{self.config.participant["scenario_args"]["controller"]}/nebula/dashboard/{self.config.participant["scenario_args"]["name"]}/node/update'
         self.counter = 0
+        
+        self.first_net_metrics = True
+        self.prev_bytes_sent = 0
+        self.prev_bytes_recv = 0
+        self.prev_packets_sent = 0
+        self.prev_packets_recv = 0
+        
+        self.acc_bytes_sent = 0
+        self.acc_bytes_recv = 0
+        self.acc_packets_sent = 0
+        self.acc_packets_recv = 0
 
     async def enqueue_data(self, name, value):
         await self.data_queue.put((name, value))
@@ -87,6 +98,9 @@ class Reporter:
                         logging.debug(text)
         except aiohttp.ClientError as e:
             logging.error(f"Error connecting to the controller at {self.url}: {e}")
+        except Exception as e:
+            logging.error(f"Error sending status to controller, will try again in a few seconds: {e}")
+            await asyncio.sleep(5)
 
     async def __report_resources(self):
         cpu_percent = psutil.cpu_percent()
@@ -115,6 +129,28 @@ class Reporter:
         bytes_recv = net_io_counters.bytes_recv
         packets_sent = net_io_counters.packets_sent
         packets_recv = net_io_counters.packets_recv
+        
+        if self.first_net_metrics:
+            bytes_sent_diff = 0
+            bytes_recv_diff = 0
+            packets_sent_diff = 0
+            packets_recv_diff = 0
+            self.first_net_metrics = False
+        else:
+            bytes_sent_diff = bytes_sent - self.prev_bytes_sent
+            bytes_recv_diff = bytes_recv - self.prev_bytes_recv
+            packets_sent_diff = packets_sent - self.prev_packets_sent
+            packets_recv_diff = packets_recv - self.prev_packets_recv
+
+        self.prev_bytes_sent = bytes_sent
+        self.prev_bytes_recv = bytes_recv
+        self.prev_packets_sent = packets_sent
+        self.prev_packets_recv = packets_recv
+        
+        self.acc_bytes_sent += bytes_sent_diff
+        self.acc_bytes_recv += bytes_recv_diff
+        self.acc_packets_sent += packets_sent_diff
+        self.acc_packets_recv += packets_recv_diff
 
         current_connections = await self.cm.get_addrs_current_connections(only_direct=True)
 
@@ -127,10 +163,10 @@ class Reporter:
             "RAM/RAM process (%)": memory_percent_process,
             "RAM/RAM process (MB)": memory_process,
             "Disk/Disk (%)": disk_percent,
-            "Network/Network (bytes sent)": bytes_sent,
-            "Network/Network (bytes received)": bytes_recv,
-            "Network/Network (packets sent)": packets_sent,
-            "Network/Network (packets received)": packets_recv,
+            "Network/Network (bytes sent)": round(self.acc_bytes_sent / (1024 ** 2), 3),
+            "Network/Network (bytes received)": round(self.acc_bytes_recv / (1024 ** 2), 3),
+            "Network/Network (packets sent)": self.acc_packets_sent,
+            "Network/Network (packets received)": self.acc_packets_recv,
             "Network/Connections": len(current_connections),
         }
         self.trainer.logger.log_data(resources)

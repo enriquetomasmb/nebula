@@ -121,6 +121,7 @@ class CommunicationsManager:
             message_wrapper = nebula_pb2.Wrapper()
             message_wrapper.ParseFromString(data)
             source = message_wrapper.source
+            logging.debug(f"📥  handle_incoming_message | Received message from {addr_from} with source {source}")
             if source == self.addr:
                 return
             if message_wrapper.HasField("discovery_message"):

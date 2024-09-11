@@ -1,7 +1,8 @@
 import gc
 import logging
 from collections import OrderedDict
-import random
+import asyncio
+from concurrent.futures import ProcessPoolExecutor
 import traceback
 import hashlib
 import io
@@ -143,23 +144,33 @@ class Lightning:
         else:
             return self.model.state_dict()
 
-    def train(self):
+    async def train(self):
         try:
             self.create_trainer()
-            self.__trainer.fit(self.model, self.data)
+            with ProcessPoolExecutor() as pool:
+                self.model, self.data = await asyncio.get_running_loop().run_in_executor(pool, self._train_sync)
             self.__trainer = None
         except Exception as e:
             logging.error(f"Error training model: {e}")
             logging.error(traceback.format_exc())
+    
+    def _train_sync(self):
+        self.__trainer.fit(self.model, self.data)
+        return self.model, self.data
 
-    def test(self):
+    async def test(self):
         try:
             self.create_trainer()
-            self.__trainer.test(self.model, self.data, verbose=True)
+            with ProcessPoolExecutor() as pool:
+                self.model, self.data = await asyncio.get_running_loop().run_in_executor(pool, self._test_sync)
             self.__trainer = None
         except Exception as e:
             logging.error(f"Error testing model: {e}")
             logging.error(traceback.format_exc())
+    
+    def _test_sync(self):
+        self.__trainer.test(self.model, self.data, verbose=True)
+        return self.model, self.data
 
     def get_model_weight(self):
         return len(self.data.train_dataloader().dataset)
