@@ -154,6 +154,21 @@ class Connection:
             self.writer.close()
             await self.writer.wait_closed()
 
+    async def reconnect(self, max_retries: int = 5, delay: int = 5) -> None:
+        for attempt in range(max_retries):
+            try:
+                logging.info(f"Attempting to reconnect to {self.addr} (attempt {attempt + 1}/{max_retries})")
+                self.reader, self.writer = await asyncio.open_connection(self.host, self.port)
+                self.read_task = asyncio.create_task(self.handle_incoming_message(), name=f"Connection {self.addr} reader")
+                self.process_task = asyncio.create_task(self.process_message_queue(), name=f"Connection {self.addr} processor")
+                logging.info(f"Reconnected to {self.addr}")
+                return
+            except Exception as e:
+                logging.error(f"Reconnection attempt {attempt + 1} failed: {e}")
+                await asyncio.sleep(delay)
+        logging.error(f"Failed to reconnect to {self.addr} after {max_retries} attempts")
+        await self.stop()
+
     async def send(self, data: Any, pb: bool = True, encoding_type: str = "utf-8", is_compressed: bool = False) -> None:
         if self.writer is None:
             logging.error("Cannot send data, writer is None")
@@ -242,6 +257,9 @@ class Connection:
                     await self._process_complete_message(message_id)
         except asyncio.CancelledError:
             logging.info("Message handling cancelled")
+        except ConnectionError as e:
+            logging.error(f"Connection closed while reading: {e}")
+            await self.reconnect()
         except Exception as e:
             logging.error(f"Error handling incoming message: {e}")
         finally:

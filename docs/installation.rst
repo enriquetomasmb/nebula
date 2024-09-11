@@ -95,12 +95,14 @@ by listing the version of the NEBULA with the following command line::
     python app/main.py --version
 
 
-Building the nebula participant
+Building the nebula node
 ====================================
+There are two ways to deploy the node in the federation: using Docker containers or isolated processes.
+You can choose the one that best fits your needs in the frontend.
 
-Docker image
--------------------------
-You can build the docker image using the following command line in the root directory::
+1. Using Docker containers
+--------------------------------
+You need to build the docker image using the following command line in the root directory::
 
     docker build -t nebula-core .
 
@@ -108,11 +110,16 @@ In case of using GPU in the docker, you have to follow the instructions in the f
 
 https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html
 
-Checking the docker images
-==========================
 You can check the docker images using the following command line::
 
         docker images
+
+2. Using isolated processes
+------------------------------------
+You need to install the requirements of the node (core) using the following command line in the root directory::
+
+    pip3 install -r nebula/requirements.txt
+
 
 Running NEBULA
 ==================
@@ -152,7 +159,7 @@ To stop NEBULA, you can use the following command line::
 
     python app/main.py --stop
 
-Be careful, this command will stop all the containers related to NEBULA: frontend, controller, and participants.
+Be careful, this command will stop all the containers related to NEBULA: frontend, controller, and nodes.
 
 
 Possible issues during the installation or execution
