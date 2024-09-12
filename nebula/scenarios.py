@@ -864,7 +864,7 @@ class ScenarioManagement:
                     commands += f'Write-Host "Running node {node["device_args"]["idx"]}..."\n'
                     
                     # Usar Start-Process para ejecutar Python en segundo plano y capturar el PID
-                    commands += f'''$process = Start-Process -FilePath "python" -ArgumentList "{self.root_path}\\nebula\\node.py {self.root_path}\\app\\config\\{self.scenario_name}\\participant_{node["device_args"]["idx"]}.json" -PassThru -NoNewWindow -RedirectStandardOutput "NUL" -RedirectStandardError "NUL"
+                    commands += f'''$process = Start-Process -FilePath "python" -ArgumentList "{self.root_path}\\nebula\\node.py {self.root_path}\\app\\config\\{self.scenario_name}\\participant_{node["device_args"]["idx"]}.json" -PassThru -NoNewWindow -RedirectStandardOutput "NUL"
                 Add-Content -Path $PID_FILE -Value $process.Id
                 '''
 

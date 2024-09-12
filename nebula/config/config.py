@@ -66,16 +66,16 @@ class Config:
         console_handler.setLevel(logging.INFO if self.participant["device_args"]["logging"] else logging.CRITICAL)
         console_handler.setFormatter(Formatter(log_console_format))
 
-        file_handler = FileHandler("{}.log".format(log_filename), mode="w")
+        file_handler = FileHandler("{}.log".format(log_filename), mode="w", encoding="utf-8")
         file_handler.setLevel(logging.INFO if self.participant["device_args"]["logging"] else logging.CRITICAL)
         file_handler.setFormatter(Formatter(info_file_format))
 
-        file_handler_only_debug = FileHandler("{}_debug.log".format(log_filename), mode="w")
+        file_handler_only_debug = FileHandler("{}_debug.log".format(log_filename), mode="w", encoding="utf-8")
         file_handler_only_debug.setLevel(logging.DEBUG if self.participant["device_args"]["logging"] else logging.CRITICAL)
         file_handler_only_debug.addFilter(lambda record: record.levelno == logging.DEBUG)
         file_handler_only_debug.setFormatter(Formatter(debug_file_format))
 
-        exp_errors_file_handler = FileHandler("{}_error.log".format(log_filename), mode="w")
+        exp_errors_file_handler = FileHandler("{}_error.log".format(log_filename), mode="w", encoding="utf-8")
         exp_errors_file_handler.setLevel(logging.WARNING if self.participant["device_args"]["logging"] else logging.CRITICAL)
         exp_errors_file_handler.setFormatter(Formatter(debug_file_format))
 
