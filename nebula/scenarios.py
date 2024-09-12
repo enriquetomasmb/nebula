@@ -284,11 +284,18 @@ class ScenarioManagement:
         os.makedirs(self.config_dir, exist_ok=True)
         os.makedirs(os.path.join(self.log_dir, self.scenario_name), exist_ok=True)
         os.makedirs(self.cert_dir, exist_ok=True)
+        
+        # Give permissions to the directories
+        os.chmod(self.config_dir, 0o777)
+        os.chmod(os.path.join(self.log_dir, self.scenario_name), 0o777)
+        os.chmod(self.cert_dir, 0o777)
 
         # Save the scenario configuration
         scenario_file = os.path.join(self.config_dir, "scenario.json")
         with open(scenario_file, "w") as f:
             json.dump(scenario, f, sort_keys=False, indent=2)
+            
+        os.chmod(scenario_file, 0o777)
 
         # Save management settings
         settings = {
@@ -304,6 +311,8 @@ class ScenarioManagement:
         settings_file = os.path.join(self.config_dir, "settings.json")
         with open(settings_file, "w") as f:
             json.dump(settings, f, sort_keys=False, indent=2)
+        
+        os.chmod(settings_file, 0o777)
 
         self.scenario.nodes = self.scenario.attack_node_assign(
             self.scenario.nodes,
@@ -329,6 +338,7 @@ class ScenarioManagement:
                 os.path.join(os.path.dirname(__file__), "./frontend/config/participant.json.example"),
                 participant_file,
             )
+            os.chmod(participant_file, 0o777)
             with open(participant_file) as f:
                 participant_config = json.load(f)
 
@@ -387,8 +397,18 @@ class ScenarioManagement:
     @staticmethod
     def stop_participants():
         # When stopping the nodes, we need to remove the current_scenario_commands.sh file -> it will cause the nodes to stop using PIDs
-        if os.path.exists(os.path.join(os.environ.get("NEBULA_CONFIG_DIR"), "current_scenario_commands.sh")):
-            os.remove(os.path.join(os.environ.get("NEBULA_CONFIG_DIR"), "current_scenario_commands.sh"))
+        nebula_config_dir = os.environ.get("NEBULA_CONFIG_DIR")
+        if not nebula_config_dir:
+            current_dir = os.path.dirname(__file__)
+            nebula_base_dir = os.path.abspath(os.path.join(current_dir, ".."))
+            nebula_config_dir = os.path.join(nebula_base_dir, "app", "config")
+            logging.info(f"NEBULA_CONFIG_DIR not found. Using default path: {nebula_config_dir}")
+        scenario_commands_file = os.path.join(nebula_config_dir, "current_scenario_commands.sh")
+        if os.path.exists(scenario_commands_file):
+            os.remove(scenario_commands_file)
+        else:
+            logging.info("File current_scenario_commands.sh not found in NEBULA_CONFIG_DIR. Cannot remove it.")
+            
         if sys.platform == "win32":
             try:
                 # kill all the docker containers which contain the word "nebula-core"
@@ -864,6 +884,10 @@ class ScenarioManagement:
             os.makedirs(
                 os.path.join(os.environ["NEBULA_ROOT"], "app", "tmp", scenario_name),
                 exist_ok=True,
+            )
+            os.chmod(
+                os.path.join(os.environ["NEBULA_ROOT"], "app", "tmp", scenario_name),
+                0o777,
             )
             shutil.move(
                 os.path.join(os.environ["NEBULA_LOGS_DIR"], scenario_name),
