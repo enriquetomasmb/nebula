@@ -5,6 +5,8 @@ import random
 import uvloop
 import warnings
 import numpy as np
+import torch
+torch.multiprocessing.set_start_method("spawn", force=True)
 
 # Ignore CryptographyDeprecationWarning (datatime issues with cryptography library)
 from cryptography.utils import CryptographyDeprecationWarning

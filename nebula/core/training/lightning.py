@@ -148,28 +148,44 @@ class Lightning:
         try:
             self.create_trainer()
             with ProcessPoolExecutor() as pool:
-                self.model, self.data = await asyncio.get_running_loop().run_in_executor(pool, self._train_sync)
+                future = asyncio.get_running_loop().run_in_executor(pool, self._train_sync)
+                result = await asyncio.wait_for(future, timeout=3600)
+                if isinstance(result, Exception):
+                    raise result
+                self.model, self.data = result
             self.__trainer = None
         except Exception as e:
             logging.error(f"Error training model: {e}")
             logging.error(traceback.format_exc())
     
     def _train_sync(self):
-        self.__trainer.fit(self.model, self.data)
+        try:
+            self.__trainer.fit(self.model, self.data)
+        except Exception as e:
+            logging.error(f"Error in _train_sync: {e}")
+            return e
         return self.model, self.data
 
     async def test(self):
         try:
             self.create_trainer()
             with ProcessPoolExecutor() as pool:
-                self.model, self.data = await asyncio.get_running_loop().run_in_executor(pool, self._test_sync)
+                future = asyncio.get_running_loop().run_in_executor(pool, self._test_sync)
+                result = await asyncio.wait_for(future, timeout=3600)
+                if isinstance(result, Exception):
+                    raise result
+                self.model, self.data = result
             self.__trainer = None
         except Exception as e:
             logging.error(f"Error testing model: {e}")
             logging.error(traceback.format_exc())
     
     def _test_sync(self):
-        self.__trainer.test(self.model, self.data, verbose=True)
+        try:
+            self.__trainer.test(self.model, self.data, verbose=True)
+        except Exception as e:
+            logging.error(f"Error in _test_sync: {e}")
+            return e
         return self.model, self.data
 
     def get_model_weight(self):
