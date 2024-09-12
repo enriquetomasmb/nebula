@@ -262,4 +262,4 @@ if __name__ == "__main__":
         uvloop.run(main(), debug=False)
     except ImportError:
         import asyncio
-        asyncio.run(main())
+        asyncio.run(main(), debug=False)
