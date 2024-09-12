@@ -849,22 +849,30 @@ class ScenarioManagement:
 
         try:
             if self.host_platform == "windows":
-                commands = f'@echo off\n\nset PID_FILE=%~dp0\\current_scenario_pids.txt\n\ntype nul > %PID_FILE%\n\n'
+                commands = f'''
+                $PID_FILE = "$PSScriptRoot\\current_scenario_pids.txt"
+                New-Item -Path $PID_FILE -Force -ItemType File
+
+                '''
                 sorted_participants = sorted(self.config.participants, key=lambda node: node["device_args"]["idx"], reverse=True)
                 for node in sorted_participants:
                     if node["device_args"]["start"]:
-                        commands += f"timeout /T 10 /NOBREAK\n"
+                        commands += f"Start-Sleep -Seconds 10\n"
                     else:
-                        commands += f"timeout /T 2 /NOBREAK\n"
-                    commands += f"echo Running node {node['device_args']['idx']}...\n"
-                    commands += f"start /B python {self.root_path}\\nebula\\node.py {self.root_path}\\app\\config\\{self.scenario_name}\\participant_{node['device_args']['idx']}.json > nul 2>&1\n"
-                    commands += f"echo %! >> %PID_FILE%\n\n"
+                        commands += f"Start-Sleep -Seconds 2\n"
+                    
+                    commands += f'Write-Host "Running node {node["device_args"]["idx"]}..."\n'
+                    
+                    # Usar Start-Process para ejecutar Python en segundo plano y capturar el PID
+                    commands += f'''$process = Start-Process -FilePath "python" -ArgumentList "{self.root_path}\\nebula\\node.py {self.root_path}\\app\\config\\{self.scenario_name}\\participant_{node["device_args"]["idx"]}.json" -PassThru -NoNewWindow
+                Add-Content -Path $PID_FILE -Value $process.Id
+                '''
 
-                commands += 'echo All nodes started. PIDs stored in %PID_FILE%\n'
+                commands += 'Write-Host "All nodes started. PIDs stored in $PID_FILE"\n'
 
-                with open(f"/nebula/app/config/current_scenario_commands.bat", "w") as f:
+                with open(f"/nebula/app/config/current_scenario_commands.ps1", "w") as f:
                     f.write(commands)
-                os.chmod(f"/nebula/app/config/current_scenario_commands.bat", 0o755)
+                os.chmod(f"/nebula/app/config/current_scenario_commands.ps1", 0o755)
             else:
                 commands = f'#!/bin/bash\n\nPID_FILE="$(dirname "$0")/current_scenario_pids.txt"\n\n> $PID_FILE\n\n'
                 sorted_participants = sorted(self.config.participants, key=lambda node: node["device_args"]["idx"], reverse=True)

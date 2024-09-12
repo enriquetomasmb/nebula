@@ -2,7 +2,6 @@ import os
 import sys
 import time
 import random
-import uvloop
 import warnings
 import numpy as np
 import torch
@@ -258,5 +257,9 @@ async def main():
 
 
 if __name__ == "__main__":
-    os.system("clear")
-    uvloop.run(main(), debug=False)
+    try:
+        import uvloop 
+        uvloop.run(main(), debug=False)
+    except ImportError:
+        import asyncio
+        asyncio.run(main())

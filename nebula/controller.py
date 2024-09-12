@@ -68,7 +68,7 @@ class NebulaEventHandler(FileSystemEventHandler):
         self.creation_threshold = 2
 
     def on_modified(self, event):
-        if event.src_path.endswith(".sh") or event.src_path.endswith(".bat"):
+        if event.src_path.endswith(".sh") or event.src_path.endswith(".ps1"):
             current_time = time.time()
 
             if event.src_path in self.creation_time:
@@ -81,14 +81,14 @@ class NebulaEventHandler(FileSystemEventHandler):
                 self.last_run_time = current_time
 
     def on_created(self, event):
-        if event.src_path.endswith(".sh") or event.src_path.endswith(".bat"):
+        if event.src_path.endswith(".sh") or event.src_path.endswith(".ps1"):
             logging.info("File created: %s" % event.src_path)
             self.creation_time[event.src_path] = time.time()
             self.run_script(event.src_path)
             self.last_run_time = time.time()
 
     def on_deleted(self, event):
-        if event.src_path.endswith(".sh") or event.src_path.endswith(".bat"):
+        if event.src_path.endswith(".sh") or event.src_path.endswith(".ps1"):
             if event.src_path not in self.creation_time:
                 return
             logging.info("File deleted: %s" % event.src_path)
@@ -105,7 +105,10 @@ class NebulaEventHandler(FileSystemEventHandler):
     def run_script(self, script):
         try:
             logging.info("Running script: {}".format(script))
-            result = subprocess.run([script], check=True, text=True, capture_output=True)
+            if script.endswith(".sh"):
+                result = subprocess.run(["bash", script], check=True, text=True, capture_output=True)
+            elif script.endswith(".ps1"):
+                result = subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-File", script], check=True, text=True, capture_output=True)
             logging.info("Script output:\n{}".format(result.stdout))
         except Exception as e:
             logging.error("Error while running script: {}".format(e))
