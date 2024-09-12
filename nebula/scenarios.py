@@ -270,6 +270,7 @@ class ScenarioManagement:
         self.start_date_scenario = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         self.scenario_name = f'nebula_{self.scenario.federation}_{datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}'
         self.root_path = os.environ.get("NEBULA_ROOT_HOST")
+        self.host_platform = os.environ.get("NEBULA_HOST_PLATFORM")
         self.config_dir = os.path.join(os.environ.get("NEBULA_CONFIG_DIR"), self.scenario_name)
         self.log_dir = os.environ.get("NEBULA_LOGS_DIR")
         self.cert_dir = os.environ.get("NEBULA_CERTS_DIR")
@@ -847,22 +848,41 @@ class ScenarioManagement:
                 json.dump(node, f, indent=4)
 
         try:
-            commands = f'#!/bin/bash\n\nPID_FILE="$(dirname "$0")/current_scenario_pids.txt"\n\n> $PID_FILE\n\n'
-            sorted_participants = sorted(self.config.participants, key=lambda node: node["device_args"]["idx"], reverse=True)
-            for node in sorted_participants:
-                if node["device_args"]["start"]:
-                    commands += f"sleep 10\n"
-                else:
-                    commands += f"sleep 2\n"
-                commands += f"echo \"Running node {node['device_args']['idx']}...\"\n"
-                commands += f"python3.11 {self.root_path}/nebula/node.py {self.root_path}/app/config/{self.scenario_name}/participant_{node['device_args']['idx']}.json > /dev/null 2>&1 &\n"
-                commands += f"echo $! >> $PID_FILE\n\n"
+            if self.host_platform == "windows":
+                commands = f'@echo off\n\nset PID_FILE=%~dp0\\current_scenario_pids.txt\n\ntype nul > %PID_FILE%\n\n'
+                sorted_participants = sorted(self.config.participants, key=lambda node: node["device_args"]["idx"], reverse=True)
+                for node in sorted_participants:
+                    if node["device_args"]["start"]:
+                        commands += f"timeout /T 10 /NOBREAK\n"
+                    else:
+                        commands += f"timeout /T 2 /NOBREAK\n"
+                    commands += f"echo Running node {node['device_args']['idx']}...\n"
+                    commands += f"start /B python {self.root_path}\\nebula\\node.py {self.root_path}\\app\\config\\{self.scenario_name}\\participant_{node['device_args']['idx']}.json > nul 2>&1\n"
+                    commands += f"echo %! >> %PID_FILE%\n\n"
 
-            commands += 'echo "All nodes started. PIDs stored in $PID_FILE"\n'
+                commands += 'echo All nodes started. PIDs stored in %PID_FILE%\n'
 
-            with open(f"/nebula/app/config/current_scenario_commands.sh", "w") as f:
-                f.write(commands)
-            os.chmod(f"/nebula/app/config/current_scenario_commands.sh", 0o755)
+                with open(f"/nebula/app/config/current_scenario_commands.bat", "w") as f:
+                    f.write(commands)
+                os.chmod(f"/nebula/app/config/current_scenario_commands.bat", 0o755)
+            else:
+                commands = f'#!/bin/bash\n\nPID_FILE="$(dirname "$0")/current_scenario_pids.txt"\n\n> $PID_FILE\n\n'
+                sorted_participants = sorted(self.config.participants, key=lambda node: node["device_args"]["idx"], reverse=True)
+                for node in sorted_participants:
+                    if node["device_args"]["start"]:
+                        commands += f"sleep 10\n"
+                    else:
+                        commands += f"sleep 2\n"
+                    commands += f"echo \"Running node {node['device_args']['idx']}...\"\n"
+                    commands += f"python3.11 {self.root_path}/nebula/node.py {self.root_path}/app/config/{self.scenario_name}/participant_{node['device_args']['idx']}.json > /dev/null 2>&1 &\n"
+                    commands += f"echo $! >> $PID_FILE\n\n"
+
+                commands += 'echo "All nodes started. PIDs stored in $PID_FILE"\n'
+
+                with open(f"/nebula/app/config/current_scenario_commands.sh", "w") as f:
+                    f.write(commands)
+                os.chmod(f"/nebula/app/config/current_scenario_commands.sh", 0o755)
+                
         except Exception as e:
             raise Exception("Error starting nodes as processes: {}".format(e))
 

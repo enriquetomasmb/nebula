@@ -68,7 +68,7 @@ class NebulaEventHandler(FileSystemEventHandler):
         self.creation_threshold = 2
 
     def on_modified(self, event):
-        if event.src_path.endswith(".sh"):
+        if event.src_path.endswith(".sh") or event.src_path.endswith(".bat"):
             current_time = time.time()
 
             if event.src_path in self.creation_time:
@@ -81,14 +81,14 @@ class NebulaEventHandler(FileSystemEventHandler):
                 self.last_run_time = current_time
 
     def on_created(self, event):
-        if event.src_path.endswith(".sh"):
+        if event.src_path.endswith(".sh") or event.src_path.endswith(".bat"):
             logging.info("File created: %s" % event.src_path)
             self.creation_time[event.src_path] = time.time()
             self.run_script(event.src_path)
             self.last_run_time = time.time()
 
     def on_deleted(self, event):
-        if event.src_path.endswith(".sh"):
+        if event.src_path.endswith(".sh") or event.src_path.endswith(".bat"):
             if event.src_path not in self.creation_time:
                 return
             logging.info("File deleted: %s" % event.src_path)
@@ -169,6 +169,7 @@ class Controller:
         self.advanced_analytics = args.advanced_analytics if hasattr(args, "advanced_analytics") else False
         self.matrix = args.matrix if hasattr(args, "matrix") else None
         self.root_path = args.root_path if hasattr(args, "root_path") else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.host_platform = "windows" if sys.platform == "win32" else "unix"
 
         # Network configuration (nodes deployment in a network)
         self.network_subnet = args.network_subnet if hasattr(args, "network_subnet") else None
@@ -209,7 +210,8 @@ class Controller:
         os.environ["NEBULA_CERTS_DIR"] = self.cert_dir
         os.environ["NEBULA_STATISTICS_PORT"] = str(self.statistics_port)
         os.environ["NEBULA_ROOT_HOST"] = self.root_path
-
+        os.environ["NEBULA_HOST_PLATFORM"] = self.host_platform
+        
         if self.production:
             self.run_waf()
             logging.info("NEBULA WAF is running at port {}".format(self.waf_port))
@@ -452,6 +454,7 @@ class Controller:
                     - NEBULA_CERTS_DIR=/nebula/app/certs/
                     - NEBULA_ENV_PATH=/nebula/app/.env
                     - NEBULA_ROOT_HOST={path}
+                    - NEBULA_HOST_PLATFORM={platform}
                     - NEBULA_DEFAULT_USER=admin
                     - NEBULA_DEFAULT_PASSWORD=admin
                 extra_hosts:
@@ -497,7 +500,7 @@ class Controller:
 
         # Generate the Docker Compose file dynamically
         services = ""
-        services += frontend_template.format(production=self.production, gpu_available=self.gpu_available, advanced_analytics=self.advanced_analytics, path=self.root_path, gw="192.168.10.1", ip="192.168.10.100", frontend_port=self.frontend_port, statistics_port=self.statistics_port)
+        services += frontend_template.format(production=self.production, gpu_available=self.gpu_available, advanced_analytics=self.advanced_analytics, path=self.root_path, platform=self.host_platform, gw="192.168.10.1", ip="192.168.10.100", frontend_port=self.frontend_port, statistics_port=self.statistics_port)
         docker_compose_file = docker_compose_template.format(services)
 
         if self.production:

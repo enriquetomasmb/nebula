@@ -59,6 +59,7 @@ class Settings:
     production: bool = os.environ.get("NEBULA_PRODUCTION", "False") == "True"
     gpu_available: bool = os.environ.get("NEBULA_GPU_AVAILABLE", "False") == "True"
     advanced_analytics: bool = os.environ.get("NEBULA_ADVANCED_ANALYTICS", "False") == "True"
+    host_platform: str = os.environ.get("NEBULA_HOST_PLATFORM", "unix")
     log_dir: str = os.environ.get("NEBULA_LOGS_DIR")
     config_dir: str = os.environ.get("NEBULA_CONFIG_DIR")
     cert_dir: str = os.environ.get("NEBULA_CERTS_DIR")
