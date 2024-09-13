@@ -151,8 +151,12 @@ class Lightning:
                 future = asyncio.get_running_loop().run_in_executor(pool, self._train_sync)
                 result = await asyncio.wait_for(future, timeout=3600)
                 if isinstance(result, Exception):
+                    logging.error(f"Error in training: {result}")
                     raise result
-                self.model, self.data = result
+                elif isinstance(result, tuple):
+                    self.model, self.data = result
+                else:
+                    raise Exception("Unknown error during training")
             self.__trainer = None
         except Exception as e:
             logging.error(f"Error training model: {e}")
@@ -173,8 +177,12 @@ class Lightning:
                 future = asyncio.get_running_loop().run_in_executor(pool, self._test_sync)
                 result = await asyncio.wait_for(future, timeout=3600)
                 if isinstance(result, Exception):
+                    logging.error(f"Error in testing: {result}")
                     raise result
-                self.model, self.data = result
+                elif isinstance(result, tuple):
+                    self.model, self.data = result
+                else:
+                    raise Exception("Unknown error during testing")
             self.__trainer = None
         except Exception as e:
             logging.error(f"Error testing model: {e}")
