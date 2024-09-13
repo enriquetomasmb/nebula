@@ -9,7 +9,7 @@ import time
 from dotenv import load_dotenv
 import psutil
 from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler
+from watchdog.events import PatternMatchingEventHandler
 
 from nebula.addons.env import check_environment
 from nebula.config.config import Config
@@ -53,7 +53,7 @@ signal.signal(signal.SIGTERM, signal_handler)
 signal.signal(signal.SIGINT, signal_handler)
 
 
-class NebulaEventHandler(FileSystemEventHandler):
+class NebulaEventHandler(PatternMatchingEventHandler):
     """
     NebulaEventHandler handles file system events for .sh scripts.
 
@@ -61,55 +61,62 @@ class NebulaEventHandler(FileSystemEventHandler):
     in a specified directory.
     """
 
+    patterns = ["*.sh", "*.ps1"]
+
     def __init__(self):
-        self.last_run_time = 0
-        self.creation_time = {}
-        self.run_interval = 5
-        self.creation_threshold = 2
-
-    def on_modified(self, event):
-        if event.src_path.endswith(".sh") or event.src_path.endswith(".ps1"):
-            current_time = time.time()
-
-            if event.src_path in self.creation_time:
-                if current_time - self.creation_time[event.src_path] < self.creation_threshold:
-                    return
-
-            if current_time - self.last_run_time >= self.run_interval:
-                logging.info("File modified: %s" % event.src_path)
-                self.run_script(event.src_path)
-                self.last_run_time = current_time
+        super(NebulaEventHandler, self).__init__()
+        self.last_processed = {}
+        self.timeout = 5
 
     def on_created(self, event):
-        if event.src_path.endswith(".sh") or event.src_path.endswith(".ps1"):
-            logging.info("File created: %s" % event.src_path)
-            self.creation_time[event.src_path] = time.time()
-            self.run_script(event.src_path)
-            self.last_run_time = time.time()
+        if event.is_directory:
+            return
+        src_path = event.src_path
+
+        # Obtener el tiempo actual
+        current_time = time.time()
+        last_time = self.last_processed.get(src_path, 0)
+
+        if current_time - last_time < self.timeout:
+            return
+
+        self.last_processed[src_path] = current_time
+
+        logging.info("File created: %s" % src_path)
+        self.run_script(src_path)
 
     def on_deleted(self, event):
-        if event.src_path.endswith(".sh") or event.src_path.endswith(".ps1"):
-            if event.src_path not in self.creation_time:
-                return
-            logging.info("File deleted: %s" % event.src_path)
-            # Extract same directory as the script
-            directory_script = os.path.dirname(event.src_path)
-            pids_file = os.path.join(directory_script, "current_scenario_pids.txt")
-            logging.info(f"Killing processes from {pids_file}")
-            try:
-                self.kill_script_processes(pids_file)
-                os.remove(pids_file)
-            except Exception as e:
-                logging.error(f"Error while killing processes: {e}")
+        if event.is_directory:
+            return
+        src_path = event.src_path
+
+        # Obtener el tiempo actual
+        current_time = time.time()
+        last_time = self.last_processed.get(src_path, 0)
+
+        if current_time - last_time < self.timeout:
+            return
+
+        # Actualizar el tiempo del último evento procesado
+        self.last_processed[src_path] = current_time
+
+        logging.info("File deleted: %s" % src_path)
+        directory_script = os.path.dirname(src_path)
+        pids_file = os.path.join(directory_script, "current_scenario_pids.txt")
+        logging.info(f"Killing processes from {pids_file}")
+        try:
+            self.kill_script_processes(pids_file)
+            os.remove(pids_file)
+        except Exception as e:
+            logging.error(f"Error while killing processes: {e}")
 
     def run_script(self, script):
         try:
             logging.info("Running script: {}".format(script))
             if script.endswith(".sh"):
-                result = subprocess.run(["bash", script], check=True, text=True, capture_output=True)
+                subprocess.Popen(["bash", script], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
             elif script.endswith(".ps1"):
-                result = subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-File", script], check=True, text=True, capture_output=True)
-            logging.info("Script output:\n{}".format(result.stdout))
+                subprocess.Popen(["powershell", "-ExecutionPolicy", "Bypass", "-File", script], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
         except Exception as e:
             logging.error("Error while running script: {}".format(e))
 

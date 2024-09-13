@@ -408,7 +408,7 @@ class ScenarioManagement:
         if os.path.exists(scenario_commands_file):
             os.remove(scenario_commands_file)
         else:
-            logging.info("File current_scenario_commands.sh not found in NEBULA_CONFIG_DIR. Cannot remove it.")
+            logging.info(f"File current_scenario_commands.sh not found in NEBULA_CONFIG_DIR {nebula_config_dir}")
             
         if sys.platform == "win32":
             try:
