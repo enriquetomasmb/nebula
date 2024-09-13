@@ -242,6 +242,10 @@ class Controller:
 
         # Load the environment variables
         load_dotenv(self.env_path)
+        
+        # Save controller pid
+        with open(os.path.join(os.path.dirname(__file__), "controller.pid"), "w") as f:
+            f.write(str(os.getpid()))
 
         # Check information about the environment
         check_environment()
@@ -679,4 +683,12 @@ class Controller:
         Controller.stop_frontend()
         Controller.stop_waf()
         Controller.stop_network()
+        controller_pid_file = os.path.join(os.path.dirname(__file__), "controller.pid")
+        try:
+            with open(controller_pid_file, "r") as f:
+                pid = int(f.read())
+                os.kill(pid, signal.SIGKILL)
+                os.remove(controller_pid_file)
+        except Exception as e:
+            logging.error(f"Error while killing controller process: {e}")
         sys.exit(0)
