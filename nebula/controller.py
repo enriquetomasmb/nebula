@@ -5,6 +5,7 @@ import signal
 import subprocess
 import sys
 import textwrap
+import threading
 import time
 from dotenv import load_dotenv
 import psutil
@@ -66,40 +67,63 @@ class NebulaEventHandler(PatternMatchingEventHandler):
     def __init__(self):
         super(NebulaEventHandler, self).__init__()
         self.last_processed = {}
-        self.timeout = 10
+        self.timeout_ns = 10 * 1e9
+        self.processing_files = set()
+        self.lock = threading.Lock()
+        
+    def _should_process_event(self, src_path: str) -> bool:
+        current_time_ns = time.time_ns()
+        logging.info(f"Current time (ns): {current_time_ns}")
+        with self.lock:
+            if src_path in self.last_processed:
+                logging.info(f"Last processed time for {src_path}: {self.last_processed[src_path]}")
+                last_time = self.last_processed[src_path]
+                if current_time_ns - last_time < self.timeout_ns:
+                    return False
+            self.last_processed[src_path] = current_time_ns
+        return True
+    
+    def _is_being_processed(self, src_path: str) -> bool:
+        with self.lock:
+            if src_path in self.processing_files:
+                logging.info(f"Skipping {src_path} as it is already being processed.")
+                return True
+            self.processing_files.add(src_path)
+        return False
+    
+    def _processing_done(self, src_path: str):
+        with self.lock:
+            if src_path in self.processing_files:
+                self.processing_files.remove(src_path)
 
     def on_created(self, event):
+        """
+        Handles the event when a file is created.
+        """
         if event.is_directory:
             return
         src_path = event.src_path
-
-        # Obtener el tiempo actual
-        current_time = time.time()
-        last_time = self.last_processed.get(src_path, 0)
-
-        if current_time - last_time < self.timeout:
+        if not self._should_process_event(src_path):
             return
-
-        self.last_processed[src_path] = current_time
-
+        if self._is_being_processed(src_path):
+            return
         logging.info("File created: %s" % src_path)
-        self.run_script(src_path)
+        try:
+            self.run_script(src_path)
+        finally:
+            self._processing_done(src_path)
 
     def on_deleted(self, event):
+        """
+        Handles the event when a file is deleted.
+        """
         if event.is_directory:
             return
         src_path = event.src_path
-
-        # Obtener el tiempo actual
-        current_time = time.time()
-        last_time = self.last_processed.get(src_path, 0)
-
-        if current_time - last_time < self.timeout:
+        if not self._should_process_event(src_path):
             return
-
-        # Actualizar el tiempo del último evento procesado
-        self.last_processed[src_path] = current_time
-
+        if self._is_being_processed(src_path):
+            return
         logging.info("File deleted: %s" % src_path)
         directory_script = os.path.dirname(src_path)
         pids_file = os.path.join(directory_script, "current_scenario_pids.txt")
@@ -107,16 +131,26 @@ class NebulaEventHandler(PatternMatchingEventHandler):
         try:
             self.kill_script_processes(pids_file)
             os.remove(pids_file)
+        except FileNotFoundError:
+            logging.warning(f"{pids_file} not found.")
         except Exception as e:
             logging.error(f"Error while killing processes: {e}")
+        finally:
+            self._processing_done(src_path)
 
     def run_script(self, script):
         try:
             logging.info("Running script: {}".format(script))
             if script.endswith(".sh"):
-                subprocess.Popen(["bash", script], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                result = subprocess.run(["bash", script], capture_output=True, text=True)
             elif script.endswith(".ps1"):
-                subprocess.Popen(["powershell", "-ExecutionPolicy", "Bypass", "-File", script], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                result = subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-File", script], capture_output=True, text=True)
+            else:
+                logging.error("Unsupported script format.")
+                return
+            logging.info("Script output:\n{}".format(result.stdout))
+            if result.stderr:
+                logging.error("Script error:\n{}".format(result.stderr))
         except Exception as e:
             logging.error("Error while running script: {}".format(e))
 

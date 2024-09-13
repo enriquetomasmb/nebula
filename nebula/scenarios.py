@@ -398,17 +398,20 @@ class ScenarioManagement:
     @staticmethod
     def stop_participants():
         # When stopping the nodes, we need to remove the current_scenario_commands.sh file -> it will cause the nodes to stop using PIDs
-        nebula_config_dir = os.environ.get("NEBULA_CONFIG_DIR")
-        if not nebula_config_dir:
-            current_dir = os.path.dirname(__file__)
-            nebula_base_dir = os.path.abspath(os.path.join(current_dir, ".."))
-            nebula_config_dir = os.path.join(nebula_base_dir, "app", "config")
-            logging.info(f"NEBULA_CONFIG_DIR not found. Using default path: {nebula_config_dir}")
-        scenario_commands_file = os.path.join(nebula_config_dir, "current_scenario_commands.sh")
-        if os.path.exists(scenario_commands_file):
-            os.remove(scenario_commands_file)
-        else:
-            logging.info(f"File current_scenario_commands.sh not found in NEBULA_CONFIG_DIR {nebula_config_dir}")
+        try:
+            nebula_config_dir = os.environ.get("NEBULA_CONFIG_DIR")
+            if not nebula_config_dir:
+                current_dir = os.path.dirname(__file__)
+                nebula_base_dir = os.path.abspath(os.path.join(current_dir, ".."))
+                nebula_config_dir = os.path.join(nebula_base_dir, "app", "config")
+                logging.info(f"NEBULA_CONFIG_DIR not found. Using default path: {nebula_config_dir}")
+            scenario_commands_file = os.path.join(nebula_config_dir, "current_scenario_commands.sh")
+            if os.path.exists(scenario_commands_file):
+                os.remove(scenario_commands_file)
+            else:
+                logging.info(f"File current_scenario_commands.sh not found in NEBULA_CONFIG_DIR {nebula_config_dir}")
+        except Exception as e:
+            logging.error(f"Error while removing current_scenario_commands.sh file: {e}")
             
         if sys.platform == "win32":
             try:
