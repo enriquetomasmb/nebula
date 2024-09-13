@@ -66,7 +66,7 @@ class NebulaEventHandler(PatternMatchingEventHandler):
     def __init__(self):
         super(NebulaEventHandler, self).__init__()
         self.last_processed = {}
-        self.timeout = 5
+        self.timeout = 10
 
     def on_created(self, event):
         if event.is_directory:
