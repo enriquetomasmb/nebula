@@ -5,19 +5,19 @@ from nebula.core.optimizations.communications.KD_prototypes.models.fashionmnist.
 
 
 def test_md_proto_teacher_mnist_model_cnn_initialization():
-    model = MDProtoTeacherFashionMNISTModelCNN(input_channels=1, num_classes=10, beta_md=1000)
-    assert model.beta_md == 1000, "Beta for mutual distillation should be initialized correctly"
+    model = MDProtoTeacherFashionMNISTModelCNN(input_channels=1, num_classes=10, beta_feat=1000)
+    assert model.weighting.get_beta() == 1000, "Beta for mutual distillation should be initialized correctly"
 
 
 def test_md_proto_teacher_mnist_model_cnn_forward_train():
-    model = MDProtoTeacherFashionMNISTModelCNN(input_channels=1, num_classes=10, beta_md=1000)
+    model = MDProtoTeacherFashionMNISTModelCNN(input_channels=1, num_classes=10, beta_feat=1000)
     input_tensor = torch.randn(5, 1, 28, 28)
     logits, _, _ = model.forward_train(input_tensor, softmax=True, is_feat=True)
     assert logits.shape == (5, 10), "Output from forward_train should match the number of classes"
 
 
 def test_md_proto_teacher_mnist_model_cnn_step():
-    model = MDProtoTeacherFashionMNISTModelCNN(input_channels=1, num_classes=10, beta_md=1000)
+    model = MDProtoTeacherFashionMNISTModelCNN(input_channels=1, num_classes=10, beta_feat=1000)
     model.set_student_model(ProtoStudentFashionMNISTModelCNN(input_channels=1, num_classes=10))  # Setup with a dummy student model
     inputs = torch.randn(5, 1, 28, 28)
     labels = torch.randint(0, 10, (5,))

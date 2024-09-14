@@ -11,7 +11,7 @@ def create_random_prototypes(model, num_classes, feature_dim):
 
 def test_md_proto_teacher_cifar10_initialization():
     model = MDProtoTeacherCIFAR10ModelCNN(input_channels=3, num_classes=10)
-    assert model.beta_md == 1000, "Mutual distillation beta should be initialized correctly"
+    assert model.weighting.get_beta() == 1000, "Mutual distillation beta should be initialized correctly"
 
 
 def test_md_proto_teacher_cifar10_forward_pass():

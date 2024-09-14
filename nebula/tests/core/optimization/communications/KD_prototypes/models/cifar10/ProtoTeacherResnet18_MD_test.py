@@ -11,10 +11,10 @@ def create_random_prototypes(model, num_classes, feature_dim):
 
 
 def test_model_initialization():
-    model = MDProtoTeacherCIFAR10ModelResnet18(input_channels=3, num_classes=10, learning_rate=1e-3, beta=1, p=2, beta_md=1000)
+    model = MDProtoTeacherCIFAR10ModelResnet18(input_channels=3, num_classes=10, learning_rate=1e-3)
     assert isinstance(model.fc, torch.nn.Linear), "Final FC layer is not initialized correctly."
     assert model.fc.out_features == 10, "Incorrect number of output features."
-    assert model.beta_md == 1000, "Incorrect beta_md initialization."
+    assert model.weighting.get_beta() == 1000, "Incorrect beta_md initialization."
 
 
 def test_model_initialization_with_prototypes():

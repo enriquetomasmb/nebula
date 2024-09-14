@@ -18,9 +18,10 @@ class TeacherNebulaModel(NebulaModel, ABC):
         metrics=None,
         confusion_matrix=None,
         seed=None,
+        T=2,
     ):
         super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed)
-
+        self.T = T
         self.config = {"beta1": 0.851436, "beta2": 0.999689, "amsgrad": True}
 
     def process_metrics(self, phase, y_pred, y, loss=None):

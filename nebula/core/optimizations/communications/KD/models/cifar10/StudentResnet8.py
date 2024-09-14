@@ -2,6 +2,8 @@ import torch
 import torch.multiprocessing
 from torch import nn
 import torch.nn.functional as F
+
+from nebula.core.optimizations.communications.KD.models.cifar10.TeacherResnet18 import MDTeacherCIFAR10ModelResNet18, TeacherCIFAR10ModelResNet18
 from nebula.core.optimizations.communications.KD.models.studentnebulamodelV2 import StudentNebulaModelV2
 from nebula.core.optimizations.communications.KD.utils.KD import DistillKL
 
@@ -49,11 +51,20 @@ class StudentCIFAR10ModelResNet8(StudentNebulaModelV2):
         seed=None,
         teacher_model=None,
         T=2,
-        beta=1,
+        beta_kd=1,
         decreasing_beta=False,
         limit_beta=0.1,
+        mutual_distilation="KD",
+        teacher_beta=100,
         send_logic=None,
     ):
+
+        if teacher_model is None:
+            if mutual_distilation is not None and mutual_distilation == "MD":
+                teacher_model = MDTeacherCIFAR10ModelResNet18(beta=teacher_beta)
+            elif mutual_distilation is not None and mutual_distilation == "KD":
+                teacher_model = TeacherCIFAR10ModelResNet18()
+
         super().__init__(
             input_channels,
             num_classes,
@@ -61,10 +72,16 @@ class StudentCIFAR10ModelResNet8(StudentNebulaModelV2):
             metrics,
             confusion_matrix,
             seed,
+            teacher_model,
+            T,
+            beta_kd,
+            decreasing_beta,
+            limit_beta,
+            send_logic,
         )
         self.limit_beta = limit_beta
         self.decreasing_beta = decreasing_beta
-        self.beta = beta
+        self.beta_kd = beta_kd
         self.teacher_model = teacher_model
         self.T = T
         if send_logic is not None:
@@ -133,13 +150,13 @@ class StudentCIFAR10ModelResNet8(StudentNebulaModelV2):
         student_logits = self(images)
         loss_ce = self.criterion_cls(student_logits, labels)
         # If the beta is greater than the limit, apply knowledge distillation
-        if self.beta > self.limit_beta and self.teacher_model is not None:
+        if self.beta_kd > self.limit_beta and self.teacher_model is not None:
             with torch.no_grad():
                 teacher_logits = self.teacher_model(images)
             # Compute the KD loss
             loss_kd = self.criterion_div(student_logits, teacher_logits)
             # Combine the losses
-            loss = loss_ce + self.beta * loss_kd
+            loss = loss_ce + self.beta_kd * loss_kd
         else:
             loss = loss_ce
 
@@ -223,9 +240,9 @@ class StudentCIFAR10ModelResNet8(StudentNebulaModelV2):
         """
         self.send_logic_counter += 1
         if self.decreasing_beta:
-            self.beta = self.beta / 2
-            if self.beta < self.limit_beta:
-                self.beta = 0
+            self.beta_kd = self.beta_kd / 2
+            if self.beta_kd < self.limit_beta:
+                self.beta_kd = 0
 
         if self.send_logic_method is None:
             return "model"

@@ -12,12 +12,12 @@ def create_random_prototypes(model, num_classes, feature_dim):
 
 
 def test_md_proto_teacher_mnist_model_cnn_initialization():
-    model = MDProtoTeacherMNISTModelCNN(input_channels=1, num_classes=10, beta_md=1000)
-    assert model.beta_md == 1000, "Beta for mutual distillation should be initialized correctly"
+    model = MDProtoTeacherMNISTModelCNN(input_channels=1, num_classes=10, beta_feat=1000)
+    assert model.weighting.get_beta() == 1000, "Beta for mutual distillation should be initialized correctly"
 
 
 def test_md_proto_teacher_mnist_model_cnn_forward_train():
-    model = MDProtoTeacherMNISTModelCNN(input_channels=1, num_classes=10, beta_md=1000)
+    model = MDProtoTeacherMNISTModelCNN(input_channels=1, num_classes=10, beta_feat=1000)
     create_random_prototypes(model, 10, 2048)
     input_tensor = torch.randn(5, 1, 28, 28)
     logits, _, _ = model.forward_train(input_tensor, is_feat=True, softmax=True)
@@ -25,7 +25,7 @@ def test_md_proto_teacher_mnist_model_cnn_forward_train():
 
 
 def test_md_proto_teacher_mnist_model_cnn_step():
-    model = MDProtoTeacherMNISTModelCNN(input_channels=1, num_classes=10, beta_md=1000)
+    model = MDProtoTeacherMNISTModelCNN(input_channels=1, num_classes=10, beta_feat=1000)
     create_random_prototypes(model, 10, 2048)
     model.set_student_model(ProtoStudentMNISTModelCNN(input_channels=1, num_classes=10))  # Setup with a dummy student model
     create_random_prototypes(model.student_model, 10, 2048)

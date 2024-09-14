@@ -13,7 +13,6 @@ def test_proto_student_cifar10_initialization():
     model = ProtoStudentCIFAR10ModelCNN(input_channels=3, num_classes=10)
     assert model.input_channels == 3, "Input channels should be set to 3"
     assert model.num_classes == 10, "Number of classes should be 10"
-    assert isinstance(model.criterion_nll, torch.nn.NLLLoss), "NLL Loss should be correctly initialized"
 
 
 def test_proto_student_cifar10_forward_pass():

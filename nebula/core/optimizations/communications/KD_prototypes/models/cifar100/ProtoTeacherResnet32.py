@@ -2,6 +2,8 @@ import copy
 import torch
 from torch import nn
 import torch.nn.functional as F
+
+from nebula.core.optimizations.communications.KD.utils.KD import DistillKL
 from nebula.core.optimizations.communications.KD_prototypes.models.prototeachernebulamodel import ProtoTeacherNebulaModel
 from nebula.core.optimizations.communications.KD.utils.AT import Attention
 
@@ -38,13 +40,33 @@ class BasicBlock(nn.Module):
 
 
 class ProtoTeacherCIFAR100ModelResNet32(ProtoTeacherNebulaModel):
-    def __init__(self, input_channels=3, num_classes=100, learning_rate=1e-3, metrics=None, confusion_matrix=None, seed=None, beta=1):
+    def __init__(
+        self,
+        input_channels=3,
+        num_classes=100,
+        learning_rate=1e-3,
+        metrics=None,
+        confusion_matrix=None,
+        seed=None,
+        alpha_kd=1,
+        beta_feat=1,
+        lambda_proto=1,
+        weighting=None,
+    ):
         super().__init__(
-            input_channels=input_channels, num_classes=num_classes, learning_rate=learning_rate, metrics=metrics, confusion_matrix=confusion_matrix, seed=seed
+            input_channels,
+            num_classes,
+            learning_rate,
+            metrics,
+            confusion_matrix,
+            seed,
+            alpha_kd,
+            beta_feat,
+            lambda_proto,
+            weighting,
         )
         self.embedding_dim = 512
-        self.beta = beta
-        self.criterion_nll = nn.NLLLoss()
+        self.criterion_cls = nn.CrossEntropyLoss()
         self.criterion_mse = torch.nn.MSELoss()
         self.in_planes = 64
         self.conv1 = nn.Conv2d(input_channels, 64, kernel_size=3, stride=1, padding=1, bias=False)
@@ -142,14 +164,14 @@ class ProtoTeacherCIFAR100ModelResNet32(ProtoTeacherNebulaModel):
 
         images, labels_g = batch
         images, labels = images.to(self.device), labels_g.to(self.device)
-        logits, protos = self.forward_train(images)
+        logits, protos = self.forward_train(images, softmax=False)
 
         # Compute loss cross entropy loss
-        loss1 = self.criterion_nll(logits, labels)
+        loss_cls = self.criterion_cls(logits, labels)
 
         # Compute loss 2
         if len(self.global_protos) == 0:
-            loss2 = 0 * loss1
+            loss_protos = 0 * loss_cls
         else:
             proto_new = protos.clone()
             i = 0
@@ -158,10 +180,10 @@ class ProtoTeacherCIFAR100ModelResNet32(ProtoTeacherNebulaModel):
                     proto_new[i, :] = self.global_protos[label.item()].data
                 i += 1
             # Compute the loss for the prototypes
-            loss2 = self.criterion_mse(proto_new, protos)
+            loss_protos = self.criterion_mse(proto_new, protos)
 
         # Combine the losses
-        loss = loss1 + self.beta * loss2
+        loss = loss_cls + self.weighting.get_beta(loss_cls) * loss_protos
         self.process_metrics(phase, logits, labels, loss)
 
         if phase == "Train":
@@ -194,20 +216,31 @@ class MDProtoTeacherCIFAR100ModelResNet32(ProtoTeacherNebulaModel):
         metrics=None,
         confusion_matrix=None,
         seed=None,
-        beta=1,
-        p=2,
-        beta_md=1000,
+        T=2,
+        alpha_kd=1,
+        beta_feat=100,
+        lambda_proto=1,
+        weighting=None,
     ):
         super().__init__(
-            input_channels=input_channels, num_classes=num_classes, learning_rate=learning_rate, metrics=metrics, confusion_matrix=confusion_matrix, seed=seed
+            input_channels,
+            num_classes,
+            learning_rate,
+            metrics,
+            confusion_matrix,
+            seed,
+            T,
+            alpha_kd,
+            beta_feat,
+            lambda_proto,
+            weighting,
         )
         self.embedding_dim = 512
-        self.p = p
-        self.beta_md = beta_md
-        self.criterion_nll = nn.NLLLoss()
+        self.p = 2
+        self.criterion_cls = nn.CrossEntropyLoss()
         self.criterion_mse = torch.nn.MSELoss()
-        self.criterion_kd = Attention(self.p)
-        self.beta = beta
+        self.criterion_feat = Attention(self.p)
+        self.criterion_kd = DistillKL(self.T)
         self.in_planes = 64
         self.conv1 = nn.Conv2d(input_channels, 64, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
@@ -304,14 +337,14 @@ class MDProtoTeacherCIFAR100ModelResNet32(ProtoTeacherNebulaModel):
     def step(self, batch, batch_idx, phase):
         images, labels_g = batch
         images, labels = images.to(self.device), labels_g.to(self.device)
-        logits, protos, feat_t = self.forward_train(images, is_feat=True)
+        logits, protos, feat_t = self.forward_train(images, is_feat=True, softmax=False)
 
         # Compute loss cross entropy loss
-        loss_nll = self.criterion_nll(logits, labels)
+        loss_cls = self.criterion_cls(logits, labels)
 
         # Compute loss 2
         if len(self.global_protos) == 0:
-            loss_mse = 0 * loss_nll
+            loss_protos = 0 * loss_cls
         else:
             proto_new = protos.clone()
             i = 0
@@ -321,7 +354,7 @@ class MDProtoTeacherCIFAR100ModelResNet32(ProtoTeacherNebulaModel):
                 i += 1
 
             # Compute the loss for the prototypes
-            loss_mse = self.criterion_mse(proto_new, protos)
+            loss_protos = self.criterion_mse(proto_new, protos)
 
         if self.student_model is not None:
             with torch.no_grad():
@@ -330,13 +363,20 @@ class MDProtoTeacherCIFAR100ModelResNet32(ProtoTeacherNebulaModel):
             g_s = feat_s[1:-1]
             g_t = feat_t[1:-1]
             # Compute the mutual distillation loss
-            loss_group = self.criterion_kd(g_t, g_s)
-            loss_kd = sum(loss_group)
+            loss_kd = self.criterion_kd(student_logits, logits)
+            loss_group = self.criterion_feat(g_t, g_s)
+            loss_feat = sum(loss_group)
         else:
-            loss_kd = 0 * loss_nll
+            loss_feat = 0 * loss_cls
+            loss_kd = 0 * loss_cls
 
         # Combine the losses
-        loss = loss_nll + self.beta * loss_mse + self.beta_md * loss_kd
+        loss = (
+            loss_cls
+            + self.weighting.get_alpha(loss_cls) * loss_kd
+            + self.weighting.get_beta(loss_cls, loss_kd) * loss_feat
+            + self.weighting.get_lambda(loss_cls, loss_kd, loss_feat) * loss_protos
+        )
         self.process_metrics(phase, logits, labels, loss)
 
         if phase == "Train":

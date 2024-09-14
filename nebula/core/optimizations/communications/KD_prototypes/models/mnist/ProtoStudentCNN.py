@@ -1,5 +1,4 @@
 import torch
-from torch import nn
 import torch.nn.functional as F
 
 from nebula.core.optimizations.communications.KD.utils.KD import DistillKL
@@ -22,19 +21,18 @@ class ProtoStudentMNISTModelCNN(ProtoStudentNebulaModel):
         seed=None,
         teacher_model=None,
         T=2,
-        beta_kd=1,
-        beta_proto=1,
-        decreasing_beta=False,
-        limit_beta=0.1,
-        mutual_distilation="KD",
-        teacher_beta=100,
+        alpha_kd=1,
+        beta_feat=1,
+        lambda_proto=1,
+        knowledge_distilation="KD",
         send_logic=None,
+        weighting=None,
     ):
         if teacher_model is None:
-            if mutual_distilation is not None and mutual_distilation == "MD":
-                teacher_model = MDProtoTeacherMNISTModelCNN(beta=teacher_beta)
-            elif mutual_distilation is not None and mutual_distilation == "KD":
-                teacher_model = ProtoTeacherMNISTModelCNN()
+            if knowledge_distilation is not None and knowledge_distilation == "MD":
+                teacher_model = MDProtoTeacherMNISTModelCNN(weighting=weighting)
+            elif knowledge_distilation is not None and knowledge_distilation == "KD":
+                teacher_model = ProtoTeacherMNISTModelCNN(weighting=weighting)
 
         super().__init__(
             input_channels,
@@ -45,19 +43,18 @@ class ProtoStudentMNISTModelCNN(ProtoStudentNebulaModel):
             seed,
             teacher_model,
             T,
-            beta_kd,
-            beta_proto,
-            decreasing_beta,
-            limit_beta,
-            mutual_distilation,
+            alpha_kd,
+            beta_feat,
+            lambda_proto,
+            knowledge_distilation,
             send_logic,
+            weighting,
         )
-
+        self.embedding_dim = 2048
         self.example_input_array = torch.zeros(1, 1, 28, 28)
-        self.criterion_nll = nn.NLLLoss()
         self.criterion_mse = torch.nn.MSELoss()
         self.criterion_cls = torch.nn.CrossEntropyLoss()
-        self.criterion_div = DistillKL(self.T)
+        self.criterion_kd = DistillKL(self.T)
 
         self.conv1 = torch.nn.Conv2d(
             in_channels=input_channels,
@@ -69,8 +66,8 @@ class ProtoStudentMNISTModelCNN(ProtoStudentNebulaModel):
         self.pool1 = torch.nn.MaxPool2d(kernel_size=(2, 2), stride=2)
         self.conv2 = torch.nn.Conv2d(in_channels=32, out_channels=64, kernel_size=(5, 5), padding="same")
         self.pool2 = torch.nn.MaxPool2d(kernel_size=(2, 2), stride=2)
-        self.l1 = torch.nn.Linear(7 * 7 * 64, 2048)
-        self.l2 = torch.nn.Linear(2048, num_classes)
+        self.l1 = torch.nn.Linear(7 * 7 * 64, self.embedding_dim)
+        self.l2 = torch.nn.Linear(self.embedding_dim, num_classes)
 
     def forward_train(self, x, softmax=True, is_feat=False):
         """Forward pass only for train the model.
@@ -155,17 +152,16 @@ class ProtoStudentMNISTModelCNN(ProtoStudentNebulaModel):
         images, labels = images.to(self.device), labels_g.to(self.device)
         logits, protos = self.forward_train(images, softmax=False)
 
-        logits_softmax = F.log_softmax(logits, dim=1)
         protos_copy = protos.clone()
         with torch.no_grad():
             teacher_logits, teacher_protos = self.teacher_model.forward_train(images, softmax=False)
 
         # Compute loss 1
-        loss1 = self.criterion_nll(logits_softmax, labels)
+        loss_ce = self.criterion_cls(logits, labels)
 
         # Compute loss 2
         if len(self.global_protos) == 0:
-            loss2 = 0 * loss1
+            loss_protos = 0 * loss_ce
         else:
             proto_new = protos.clone()
             i = 0
@@ -174,16 +170,18 @@ class ProtoStudentMNISTModelCNN(ProtoStudentNebulaModel):
                     proto_new[i, :] = self.global_protos[label.item()].data
                 i += 1
             # Compute the loss for the prototypes
-            loss2 = self.criterion_mse(proto_new, protos)
+            loss_protos = self.criterion_mse(proto_new, protos)
 
         # Compute loss knowledge distillation
-        loss3 = self.criterion_div(logits, teacher_logits)
+        loss_kd = self.criterion_kd(logits, teacher_logits)
 
         # Compute loss knowledge distillation for the prototypes
-        loss4 = self.criterion_mse(protos_copy, teacher_protos)
+        loss_protos_teacher = self.criterion_mse(protos_copy, teacher_protos)
 
         # Combine the losses
-        loss = loss1 + self.beta_proto * loss2 + self.beta_kd * (0.5 * loss3 + 0.5 * loss4)
+        loss = (
+            loss_ce + self.weighting.get_alpha(loss_ce) * loss_kd + self.weighting.get_beta(loss_ce, loss_kd) * (0.8 * loss_protos + 0.2 * loss_protos_teacher)
+        )
 
         self.process_metrics(phase, logits, labels, loss)
 

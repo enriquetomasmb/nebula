@@ -1,7 +1,8 @@
 import logging
 from abc import ABC
-
+from nebula.core.optimizations.adaptative_weighted.weighting import Weighting
 from nebula.core.optimizations.communications.KD.models.teachernebulamodel import TeacherNebulaModel
+from nebula.core.optimizations.adaptative_weighted.adaptativeweighting import AdaptiveWeighting
 
 
 class ProtoTeacherNebulaModel(TeacherNebulaModel, ABC):
@@ -14,12 +15,20 @@ class ProtoTeacherNebulaModel(TeacherNebulaModel, ABC):
         metrics=None,
         confusion_matrix=None,
         seed=None,
+        T=2,
+        alpha_kd=1,
+        beta_feat=1,
+        lambda_proto=1,
+        weighting=None,
     ):
 
-        super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed)
+        super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed, T)
 
         self.config = {"beta1": 0.851436, "beta2": 0.999689, "amsgrad": True}
-
+        if weighting == "adaptative":
+            self.weighting = AdaptiveWeighting(min_val=1, max_val=10)
+        else:
+            self.weighting = Weighting(alpha_value=alpha_kd, beta_value=beta_feat, lambda_value=lambda_proto)
         self.global_protos = dict()
         self.agg_protos_label = dict()
 
