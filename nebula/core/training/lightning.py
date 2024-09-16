@@ -150,9 +150,11 @@ class Lightning:
             with ProcessPoolExecutor() as pool:
                 future = asyncio.get_running_loop().run_in_executor(pool, self._train_sync)
                 result = await asyncio.wait_for(future, timeout=3600)
-                if isinstance(result, Exception):
-                    logging.error(f"Error in training: {result}")
-                    raise result
+                if isinstance(result, tuple) and isinstance(result[0], Exception):
+                    exception, traceback = result
+                    logging.error(f"Error in training: {exception}")
+                    logging.error(f"Traceback: {traceback}")
+                    raise exception
                 elif isinstance(result, tuple):
                     self.model, self.data = result
                 else:
@@ -167,7 +169,8 @@ class Lightning:
             self.__trainer.fit(self.model, self.data)
         except Exception as e:
             logging.error(f"Error in _train_sync: {e}")
-            return e
+            tb = traceback.format_exc()
+            return e, tb
         return self.model, self.data
 
     async def test(self):
@@ -176,9 +179,11 @@ class Lightning:
             with ProcessPoolExecutor() as pool:
                 future = asyncio.get_running_loop().run_in_executor(pool, self._test_sync)
                 result = await asyncio.wait_for(future, timeout=3600)
-                if isinstance(result, Exception):
-                    logging.error(f"Error in testing: {result}")
-                    raise result
+                if isinstance(result, tuple) and isinstance(result[0], Exception):
+                    exception, traceback = result
+                    logging.error(f"Error in testing: {exception}")
+                    logging.error(f"Traceback: {traceback}")
+                    raise exception
                 elif isinstance(result, tuple):
                     self.model, self.data = result
                 else:
@@ -193,7 +198,8 @@ class Lightning:
             self.__trainer.test(self.model, self.data, verbose=True)
         except Exception as e:
             logging.error(f"Error in _test_sync: {e}")
-            return e
+            tb = traceback.format_exc()
+            return e, tb
         return self.model, self.data
 
     def get_model_weight(self):
