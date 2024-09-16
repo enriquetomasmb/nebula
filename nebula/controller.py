@@ -143,14 +143,14 @@ class NebulaEventHandler(PatternMatchingEventHandler):
             logging.info("Running script: {}".format(script))
             if script.endswith(".sh"):
                 result = subprocess.run(["bash", script], capture_output=True, text=True)
+                logging.info("Script output:\n{}".format(result.stdout))
+                if result.stderr:
+                    logging.error("Script error:\n{}".format(result.stderr))
             elif script.endswith(".ps1"):
-                result = subprocess.run(["powershell", "-ExecutionPolicy", "Bypass", "-File", script], capture_output=True, text=True)
+                subprocess.Popen(["powershell", "-ExecutionPolicy", "Bypass", "-File", script], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=False)
             else:
                 logging.error("Unsupported script format.")
                 return
-            logging.info("Script output:\n{}".format(result.stdout))
-            if result.stderr:
-                logging.error("Script error:\n{}".format(result.stderr))
         except Exception as e:
             logging.error("Error while running script: {}".format(e))
 

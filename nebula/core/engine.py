@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import os
-import docker
 from nebula.addons.functions import print_msg_box
 from nebula.addons.attacks.attacks import create_attack
 from nebula.addons.reporter import Reporter
@@ -477,10 +476,49 @@ class Engine:
             await asyncio.sleep(1)
 
         # Kill itself
-        try:
-            self.client.containers.get(self.docker_id).stop()
-        except Exception as e:
-            print(f"Error stopping Docker container with ID {self.docker_id}: {e}")
+        if self.config.participant["scenario_args"]["deployment"] == "process":
+            try:
+                pid = None
+                self_pid_file = os.path.join(self.log_dir, f"participant_{self.idx}_pid.txt")
+                with open(self_pid_file, "r") as f:
+                    pid = f.read().strip()
+                    
+                os.remove(self_pid_file)
+                
+                pids_file = os.path.join(os.environ.get("NEBULA_CONFIG_DIR"), "current_scenario_pids.txt")
+                logging.info(f"[FER] reading pid {pid} in {pids_file}")
+                
+                with open(pids_file, "r") as f:
+                    lines = f.readlines()
+                    
+                updated_lines = []
+                for line in lines:
+                    if line.strip() == pid:
+                        updated_lines.append(f"{line.strip()} finished\n")
+                    else:
+                        updated_lines.append(line)
+                        
+                with open(pids_file, 'w') as f:
+                    f.writelines(updated_lines)
+                    
+                all_finished = all("finished" in line for line in updated_lines)
+                if all_finished:
+                    cleaned_lines = [line.replace(" finished", "") for line in updated_lines]
+                    with open(pids_file, 'w') as f:
+                        f.writelines(cleaned_lines)
+                    
+                    if sys.platform == "win32":
+                        commands_file = os.path.join(os.environ.get("NEBULA_CONFIG_DIR"), "current_scenario_commands.ps1")
+                    else:
+                        commands_file = os.path.join(os.environ.get("NEBULA_CONFIG_DIR"), "current_scenario_commands.sh")
+                    os.remove(commands_file)
+            except Exception as e:
+                logging.error(f"Error while killing processes {e}")
+        else:
+            try:
+                self.client.containers.get(self.docker_id).stop()
+            except Exception as e:
+                print(f"Error stopping Docker container with ID {self.docker_id}: {e}")   
 
     async def _extended_learning_cycle(self):
         """

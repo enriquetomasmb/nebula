@@ -405,11 +405,14 @@ class ScenarioManagement:
                 nebula_base_dir = os.path.abspath(os.path.join(current_dir, ".."))
                 nebula_config_dir = os.path.join(nebula_base_dir, "app", "config")
                 logging.info(f"NEBULA_CONFIG_DIR not found. Using default path: {nebula_config_dir}")
-            scenario_commands_file = os.path.join(nebula_config_dir, "current_scenario_commands.sh")
+            if os.environ.get("NEBULA_HOST_PLATFORM") == "windows":
+                scenario_commands_file = os.path.join(nebula_config_dir, "current_scenario_commands.ps1")
+            else:
+                scenario_commands_file = os.path.join(nebula_config_dir, "current_scenario_commands.sh")
             if os.path.exists(scenario_commands_file):
                 os.remove(scenario_commands_file)
             else:
-                logging.info(f"File current_scenario_commands.sh not found in NEBULA_CONFIG_DIR {nebula_config_dir}")
+                logging.info(f"File {scenario_commands_file} not found in NEBULA_CONFIG_DIR {nebula_config_dir}")
         except Exception as e:
             logging.error(f"Error while removing current_scenario_commands.sh file: {e}")
             
@@ -853,6 +856,7 @@ class ScenarioManagement:
         try:
             if self.host_platform == "windows":
                 commands = f'''
+                $ParentDir = Split-Path -Parent $PSScriptRoot
                 $PID_FILE = "$PSScriptRoot\\current_scenario_pids.txt"
                 New-Item -Path $PID_FILE -Force -ItemType File
 
@@ -866,9 +870,12 @@ class ScenarioManagement:
                     
                     commands += f'Write-Host "Running node {node["device_args"]["idx"]}..."\n'
                     
-                    # Usar Start-Process para ejecutar Python en segundo plano y capturar el PID
+                    # Use Start-Process for executing Python in background and capture PID
+                    participant_pid_file = f"$ParentDir\\logs\\{self.scenario_name}\\participant_{node['device_args']['idx']}_pid.txt"
                     commands += f'''$process = Start-Process -FilePath "python" -ArgumentList "{self.root_path}\\nebula\\node.py {self.root_path}\\app\\config\\{self.scenario_name}\\participant_{node["device_args"]["idx"]}.json" -PassThru -NoNewWindow -RedirectStandardOutput "NUL"
                 Add-Content -Path $PID_FILE -Value $process.Id
+                New-Item -Path {participant_pid_file} -Force -ItemType File
+                Add-Content -Path {participant_pid_file} -Value $process.Id
                 '''
 
                 commands += 'Write-Host "All nodes started. PIDs stored in $PID_FILE"\n'

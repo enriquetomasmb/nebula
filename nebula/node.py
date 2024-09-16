@@ -257,9 +257,9 @@ async def main():
 
 
 if __name__ == "__main__":
-    try:
-        import uvloop 
-        uvloop.run(main(), debug=False)
-    except ImportError:
+    if sys.platform == "win32":
         import asyncio
         asyncio.run(main(), debug=False)
+    else:
+        import uvloop 
+        uvloop.run(main(), debug=False)
