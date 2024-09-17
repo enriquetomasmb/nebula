@@ -38,67 +38,46 @@ class Config:
 
     def get_participant_config(self):
         return json.dumps(self.participant, indent=2)
-    
-    def get_logging_config(self):
+
+    def get_train_logging_config(self):
         CYAN = "\x1b[0;36m"
         RESET = "\x1b[0m"
         info_file_format = f"%(asctime)s - {self.participant['device_args']['name']} - [%(filename)s:%(lineno)d] %(message)s"
-        debug_file_format = f"%(asctime)s - {self.participant['device_args']['name']} - [%(filename)s:%(lineno)d] %(message)s\n[in %(pathname)s:%(lineno)d]"
         log_console_format = f"{CYAN}%(asctime)s - {self.participant['device_args']['name']} - [%(filename)s:%(lineno)d]{RESET}\n%(message)s"
 
         return {
-            'version': 1,
-            'formatters': {
-                'default': {
-                    'format': '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            "version": 1,
+            "formatters": {
+                "default": {
+                    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
                 },
-                'info_file': {
-                    'format': info_file_format,
+                "info_file": {
+                    "format": info_file_format,
                 },
-                'debug_file': {
-                    'format': debug_file_format,
-                },
-                'console': {
-                    'format': log_console_format,
+                "console": {
+                    "format": log_console_format,
                 },
             },
-            'handlers': {
-                'console': {
-                    'class': 'logging.StreamHandler',
-                    'level': 'INFO' if self.participant["device_args"]["logging"] else 'CRITICAL',
-                    'formatter': 'console',
+            "handlers": {
+                "console": {
+                    "class": "logging.StreamHandler",
+                    "level": "INFO" if self.participant["device_args"]["logging"] else "CRITICAL",
+                    "formatter": "console",
                 },
-                'file': {
-                    'class': 'logging.FileHandler',
-                    'filename': f"{self.log_filename}.log",
-                    'mode': 'a',
-                    'encoding': 'utf-8',
-                    'level': 'INFO' if self.participant["device_args"]["logging"] else 'CRITICAL',
-                    'formatter': 'info_file',
-                },
-                'file_debug': {
-                    'class': 'logging.FileHandler',
-                    'filename': f"{self.log_filename}_debug.log",
-                    'mode': 'a',
-                    'encoding': 'utf-8',
-                    'level': 'DEBUG' if self.participant["device_args"]["logging"] else 'CRITICAL',
-                    'formatter': 'debug_file',
-                },
-                'file_error': {
-                    'class': 'logging.FileHandler',
-                    'filename': f"{self.log_filename}_error.log",
-                    'mode': 'a',
-                    'encoding': 'utf-8',
-                    'level': 'WARNING' if self.participant["device_args"]["logging"] else 'CRITICAL',
-                    'formatter': 'debug_file',
+                "file": {
+                    "class": "logging.FileHandler",
+                    "filename": f"{self.log_filename}_training.log",
+                    "mode": "a",
+                    "encoding": "utf-8",
+                    "level": "INFO" if self.participant["device_args"]["logging"] else "CRITICAL",
+                    "formatter": "info_file",
                 },
             },
-            'root': {
-                'level': 'DEBUG' if self.participant["device_args"]["logging"] else 'CRITICAL',
-                'handlers': ['console', 'file', 'file_debug', 'file_error'],
+            "root": {
+                "level": "DEBUG" if self.participant["device_args"]["logging"] else "CRITICAL",
+                "handlers": ["console", "file"],
             },
         }
-            
 
     def __default_config(self):
         self.participant["device_args"]["name"] = f"participant_{self.participant['device_args']['idx']}_{self.participant['network_args']['ip']}_{self.participant['network_args']['port']}"

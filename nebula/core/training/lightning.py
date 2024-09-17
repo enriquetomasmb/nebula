@@ -148,13 +148,12 @@ class Lightning:
         try:
             self.create_trainer()
             with ProcessPoolExecutor() as pool:
-                future = asyncio.get_running_loop().run_in_executor(pool, self._train_sync, self.config.get_logging_config())
+                future = asyncio.get_running_loop().run_in_executor(pool, self._train_sync, self.config.get_train_logging_config())
                 result = await asyncio.wait_for(future, timeout=3600)
                 if isinstance(result, tuple) and isinstance(result[0], Exception):
                     exception, tb = result
                     logging.error(f"Error in training: {exception}")
                     logging.error(f"Traceback: {tb}")
-                    raise exception
                 elif isinstance(result, tuple):
                     self.model, self.data = result
                 else:
@@ -179,13 +178,12 @@ class Lightning:
         try:
             self.create_trainer()
             with ProcessPoolExecutor() as pool:
-                future = asyncio.get_running_loop().run_in_executor(pool, self._test_sync, self.config.get_logging_config())
+                future = asyncio.get_running_loop().run_in_executor(pool, self._test_sync, self.config.get_train_logging_config())
                 result = await asyncio.wait_for(future, timeout=3600)
                 if isinstance(result, tuple) and isinstance(result[0], Exception):
                     exception, tb = result
                     logging.error(f"Error in testing: {exception}")
                     logging.error(f"Traceback: {tb}")
-                    raise exception
                 elif isinstance(result, tuple):
                     self.model, self.data = result
                 else:
