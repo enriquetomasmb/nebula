@@ -148,7 +148,7 @@ class Lightning:
         try:
             self.create_trainer()
             with ProcessPoolExecutor() as pool:
-                future = asyncio.get_running_loop().run_in_executor(pool, self._train_sync)
+                future = asyncio.get_running_loop().run_in_executor(pool, self._train_sync, self.config.get_logging_config())
                 result = await asyncio.wait_for(future, timeout=3600)
                 if isinstance(result, tuple) and isinstance(result[0], Exception):
                     exception, tb = result
@@ -164,7 +164,9 @@ class Lightning:
             logging.error(f"Error training model: {e}")
             logging.error(traceback.format_exc())
     
-    def _train_sync(self):
+    def _train_sync(self, logging_config=None):
+        if logging_config:
+            logging.config.dictConfig(logging_config)
         try:
             self.__trainer.fit(self.model, self.data)
         except Exception as e:
@@ -177,7 +179,7 @@ class Lightning:
         try:
             self.create_trainer()
             with ProcessPoolExecutor() as pool:
-                future = asyncio.get_running_loop().run_in_executor(pool, self._test_sync)
+                future = asyncio.get_running_loop().run_in_executor(pool, self._test_sync, self.config.get_logging_config())
                 result = await asyncio.wait_for(future, timeout=3600)
                 if isinstance(result, tuple) and isinstance(result[0], Exception):
                     exception, tb = result
@@ -193,7 +195,9 @@ class Lightning:
             logging.error(f"Error testing model: {e}")
             logging.error(traceback.format_exc())
     
-    def _test_sync(self):
+    def _test_sync(self, logging_config=None):
+        if logging_config:
+            logging.config.dictConfig(logging_config)
         try:
             self.__trainer.test(self.model, self.data, verbose=True)
         except Exception as e:
