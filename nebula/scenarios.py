@@ -869,10 +869,11 @@ class ScenarioManagement:
                         commands += f"Start-Sleep -Seconds 2\n"
                     
                     commands += f'Write-Host "Running node {node["device_args"]["idx"]}..."\n'
+                    commands += f'$OUT_FILE = "{self.root_path}\\app\\logs\\{self.scenario_name}\\participant_{node["device_args"]["idx"]}.out"'
                     
                     # Use Start-Process for executing Python in background and capture PID
                     participant_pid_file = f"$ParentDir\\logs\\{self.scenario_name}\\participant_{node['device_args']['idx']}_pid.txt"
-                    commands += f'''$process = Start-Process -FilePath "python" -ArgumentList "{self.root_path}\\nebula\\node.py {self.root_path}\\app\\config\\{self.scenario_name}\\participant_{node["device_args"]["idx"]}.json" -PassThru -NoNewWindow -RedirectStandardOutput "NUL"
+                    commands += f'''$process = Start-Process -FilePath "python" -ArgumentList "{self.root_path}\\nebula\\node.py {self.root_path}\\app\\config\\{self.scenario_name}\\participant_{node["device_args"]["idx"]}.json" -PassThru -NoNewWindow -RedirectStandardOutput $OUT_FILE
                 Add-Content -Path $PID_FILE -Value $process.Id
                 New-Item -Path {participant_pid_file} -Force -ItemType File
                 Add-Content -Path {participant_pid_file} -Value $process.Id
@@ -892,7 +893,8 @@ class ScenarioManagement:
                     else:
                         commands += f"sleep 2\n"
                     commands += f"echo \"Running node {node['device_args']['idx']}...\"\n"
-                    commands += f"python3.11 {self.root_path}/nebula/node.py {self.root_path}/app/config/{self.scenario_name}/participant_{node['device_args']['idx']}.json > /dev/null 2>&1 &\n"
+                    commands += f"OUT_FILE={self.root_path}/app/logs/{self.scenario_name}/participant_{node['device_args']['idx']}.out\n"
+                    commands += f"python3.11 {self.root_path}/nebula/node.py {self.root_path}/app/config/{self.scenario_name}/participant_{node['device_args']['idx']}.json > $OUT_FILE 2>&1 &\n"
                     commands += f"echo $! >> $PID_FILE\n\n"
 
                 commands += 'echo "All nodes started. PIDs stored in $PID_FILE"\n'
