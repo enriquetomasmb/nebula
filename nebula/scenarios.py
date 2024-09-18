@@ -285,7 +285,7 @@ class ScenarioManagement:
         os.makedirs(self.config_dir, exist_ok=True)
         os.makedirs(os.path.join(self.log_dir, self.scenario_name), exist_ok=True)
         os.makedirs(self.cert_dir, exist_ok=True)
-        
+
         # Give permissions to the directories
         os.chmod(self.config_dir, 0o777)
         os.chmod(os.path.join(self.log_dir, self.scenario_name), 0o777)
@@ -295,7 +295,7 @@ class ScenarioManagement:
         scenario_file = os.path.join(self.config_dir, "scenario.json")
         with open(scenario_file, "w") as f:
             json.dump(scenario, f, sort_keys=False, indent=2)
-            
+
         os.chmod(scenario_file, 0o777)
 
         # Save management settings
@@ -312,7 +312,7 @@ class ScenarioManagement:
         settings_file = os.path.join(self.config_dir, "settings.json")
         with open(settings_file, "w") as f:
             json.dump(settings, f, sort_keys=False, indent=2)
-        
+
         os.chmod(settings_file, 0o777)
 
         self.scenario.nodes = self.scenario.attack_node_assign(
@@ -411,11 +411,9 @@ class ScenarioManagement:
                 scenario_commands_file = os.path.join(nebula_config_dir, "current_scenario_commands.sh")
             if os.path.exists(scenario_commands_file):
                 os.remove(scenario_commands_file)
-            else:
-                logging.info(f"File {scenario_commands_file} not found in NEBULA_CONFIG_DIR {nebula_config_dir}")
         except Exception as e:
             logging.error(f"Error while removing current_scenario_commands.sh file: {e}")
-            
+
         if sys.platform == "win32":
             try:
                 # kill all the docker containers which contain the word "nebula-core"
@@ -855,29 +853,29 @@ class ScenarioManagement:
 
         try:
             if self.host_platform == "windows":
-                commands = f'''
+                commands = f"""
                 $ParentDir = Split-Path -Parent $PSScriptRoot
                 $PID_FILE = "$PSScriptRoot\\current_scenario_pids.txt"
                 New-Item -Path $PID_FILE -Force -ItemType File
 
-                '''
+                """
                 sorted_participants = sorted(self.config.participants, key=lambda node: node["device_args"]["idx"], reverse=True)
                 for node in sorted_participants:
                     if node["device_args"]["start"]:
                         commands += f"Start-Sleep -Seconds 10\n"
                     else:
                         commands += f"Start-Sleep -Seconds 2\n"
-                    
+
                     commands += f'Write-Host "Running node {node["device_args"]["idx"]}..."\n'
                     commands += f'$OUT_FILE = "{self.root_path}\\app\\logs\\{self.scenario_name}\\participant_{node["device_args"]["idx"]}.out"'
-                    
+
                     # Use Start-Process for executing Python in background and capture PID
                     participant_pid_file = f"$ParentDir\\logs\\{self.scenario_name}\\participant_{node['device_args']['idx']}_pid.txt"
-                    commands += f'''$process = Start-Process -FilePath "python" -ArgumentList "{self.root_path}\\nebula\\node.py {self.root_path}\\app\\config\\{self.scenario_name}\\participant_{node["device_args"]["idx"]}.json" -PassThru -NoNewWindow -RedirectStandardOutput $OUT_FILE
+                    commands += f"""$process = Start-Process -FilePath "python" -ArgumentList "{self.root_path}\\nebula\\node.py {self.root_path}\\app\\config\\{self.scenario_name}\\participant_{node["device_args"]["idx"]}.json" -PassThru -NoNewWindow -RedirectStandardOutput $OUT_FILE
                 Add-Content -Path $PID_FILE -Value $process.Id
                 New-Item -Path {participant_pid_file} -Force -ItemType File
                 Add-Content -Path {participant_pid_file} -Value $process.Id
-                '''
+                """
 
                 commands += 'Write-Host "All nodes started. PIDs stored in $PID_FILE"\n'
 
@@ -902,7 +900,7 @@ class ScenarioManagement:
                 with open(f"/nebula/app/config/current_scenario_commands.sh", "w") as f:
                     f.write(commands)
                 os.chmod(f"/nebula/app/config/current_scenario_commands.sh", 0o755)
-                
+
         except Exception as e:
             raise Exception("Error starting nodes as processes: {}".format(e))
 
