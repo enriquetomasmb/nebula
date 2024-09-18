@@ -171,6 +171,7 @@ class Lightning:
         except Exception as e:
             logging.error(f"Error in _train_sync: {e}")
             tb = traceback.format_exc()
+            logging.error(f"Traceback: {tb}")
             return e, tb
         return self.model, self.data
 
@@ -201,6 +202,7 @@ class Lightning:
         except Exception as e:
             logging.error(f"Error in _test_sync: {e}")
             tb = traceback.format_exc()
+            logging.error(f"Traceback: {tb}")
             return e, tb
         return self.model, self.data
 
