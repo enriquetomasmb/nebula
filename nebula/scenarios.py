@@ -867,7 +867,7 @@ class ScenarioManagement:
                         commands += f"Start-Sleep -Seconds 2\n"
 
                     commands += f'Write-Host "Running node {node["device_args"]["idx"]}..."\n'
-                    commands += f'$OUT_FILE = "{self.root_path}\\app\\logs\\{self.scenario_name}\\participant_{node["device_args"]["idx"]}.out"'
+                    commands += f'$OUT_FILE = "{self.root_path}\\app\\logs\\{self.scenario_name}\\participant_{node["device_args"]["idx"]}.out"\n'
 
                     # Use Start-Process for executing Python in background and capture PID
                     participant_pid_file = f"$ParentDir\\logs\\{self.scenario_name}\\participant_{node['device_args']['idx']}_pid.txt"
