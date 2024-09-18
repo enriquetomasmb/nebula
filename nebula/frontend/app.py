@@ -56,6 +56,7 @@ from typing import Any, Dict
 
 
 class Settings:
+    port: int = os.environ.get("NEBULA_FRONTEND_PORT", 6060)
     production: bool = os.environ.get("NEBULA_PRODUCTION", "False") == "True"
     gpu_available: bool = os.environ.get("NEBULA_GPU_AVAILABLE", "False") == "True"
     advanced_analytics: bool = os.environ.get("NEBULA_ADVANCED_ANALYTICS", "False") == "True"
@@ -1051,7 +1052,7 @@ async def run_scenario(scenario_data, role):
     import subprocess
 
     # Manager for the actual scenario
-    scenarioManagement = ScenarioManagement(scenario_data, "nebula-frontend")
+    scenarioManagement = ScenarioManagement(scenario_data)
 
     scenario_update_record(
         scenario_name=scenarioManagement.scenario_name,

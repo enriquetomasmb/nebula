@@ -462,7 +462,7 @@ class Engine:
         # Enable loggin info
         logging.getLogger().disabled = True
         # Report
-        if self.config.participant["scenario_args"]["controller"] == "nebula-frontend":
+        if self.config.participant["scenario_args"]["controller"] != "nebula-test":
             result = await self.reporter.report_scenario_finished()
             if result:
                 pass

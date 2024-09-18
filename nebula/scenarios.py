@@ -263,7 +263,7 @@ class Scenario:
 
 # Class to manage the current scenario
 class ScenarioManagement:
-    def __init__(self, scenario, controller):
+    def __init__(self, scenario):
         # Current scenario
         self.scenario = Scenario.from_dict(scenario)
         # Scenario management settings
@@ -276,7 +276,13 @@ class ScenarioManagement:
         self.cert_dir = os.environ.get("NEBULA_CERTS_DIR")
         self.advanced_analytics = os.environ.get("NEBULA_ADVANCED_ANALYTICS", "False") == "True"
         self.config = Config(entity="scenarioManagement")
-        self.controller = controller
+        
+        # Assign the controller endpoint
+        if self.scenario.deployment == "docker":
+            self.controller = "nebula-frontend"
+        else:
+            self.controller = f"127.0.0.1:{os.environ.get('NEBULA_FRONTEND_PORT')}"
+            
         self.topologymanager = None
         self.env_path = None
         self.use_blockchain = self.scenario.agg_algorithm == "BlockchainReputation"
@@ -842,7 +848,7 @@ class ScenarioManagement:
         for idx, node in enumerate(self.config.participants):
             node["tracking_args"]["log_dir"] = os.path.join(self.root_path, "app", "logs")
             node["tracking_args"]["config_dir"] = os.path.join(self.root_path, "app", "config", self.scenario_name)
-            node["scenario_args"]["controller"] = "127.0.0.1:6060"
+            node["scenario_args"]["controller"] = self.controller
             node["security_args"]["certfile"] = os.path.join(self.root_path, "app", "certs", f"participant_{node['device_args']['idx']}_cert.pem")
             node["security_args"]["keyfile"] = os.path.join(self.root_path, "app", "certs", f"participant_{node['device_args']['idx']}_key.pem")
             node["security_args"]["cafile"] = os.path.join(self.root_path, "app", "certs", "ca_cert.pem")

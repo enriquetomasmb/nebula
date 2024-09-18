@@ -505,6 +505,7 @@ class Controller:
                     - NEBULA_HOST_PLATFORM={platform}
                     - NEBULA_DEFAULT_USER=admin
                     - NEBULA_DEFAULT_PASSWORD=admin
+                    - NEBULA_FRONTEND_PORT={frontend_port}
                 extra_hosts:
                     - "host.docker.internal:host-gateway"
                 ipc: host
