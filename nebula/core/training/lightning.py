@@ -4,16 +4,88 @@ import logging.config
 from collections import OrderedDict
 import asyncio
 from concurrent.futures import ProcessPoolExecutor
+import logging.config
 import traceback
 import hashlib
 import io
 import gzip
 import torch
 from lightning import Trainer
-from lightning.pytorch.callbacks import LearningRateMonitor, RichModelSummary
+from lightning.pytorch.callbacks import LearningRateMonitor, ProgressBar, ModelSummary
 import copy
 from torch.nn import functional as F
 from nebula.core.utils.deterministic import enable_deterministic
+
+
+class NebulaProgressBar(ProgressBar):
+    """Nebula progress bar for training.
+    Logs the percentage of completion of the training process using logging.
+    """
+
+    def __init__(self):
+        super().__init__()
+        self.enable = True
+
+    def disable(self):
+        """Disable the progress bar logging."""
+        self.enable = False
+
+    def on_train_epoch_start(self, trainer, pl_module):
+        """Called when the training epoch starts."""
+        super().on_train_epoch_start(trainer, pl_module)
+        if self.enable:
+            logging.info(f"Starting Epoch {trainer.current_epoch}")
+
+    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
+        """Called at the end of each training batch."""
+        super().on_train_batch_end(trainer, pl_module, outputs, batch, batch_idx)
+        if self.enable:
+            # Calculate percentage complete for the current epoch
+            percent = ((batch_idx + 1) / self.total_train_batches) * 100  # +1 to count current batch
+            logging.info(f"Epoch {trainer.current_epoch} - {percent:.01f}% complete")
+
+    def on_train_epoch_end(self, trainer, pl_module):
+        """Called at the end of the training epoch."""
+        super().on_train_epoch_end(trainer, pl_module)
+        if self.enable:
+            logging.info(f"Epoch {trainer.current_epoch} finished")
+
+    def on_validation_epoch_start(self, trainer, pl_module):
+        super().on_validation_epoch_start(trainer, pl_module)
+        if self.enable:
+            logging.info(f"Starting validation for Epoch {trainer.current_epoch}")
+
+    def on_validation_epoch_end(self, trainer, pl_module):
+        super().on_validation_epoch_end(trainer, pl_module)
+        if self.enable:
+            logging.info(f"Validation for Epoch {trainer.current_epoch} finished")
+
+    def on_test_batch_start(self, trainer, pl_module, batch, batch_idx, dataloader_idx):
+        super().on_test_batch_start(trainer, pl_module, batch, batch_idx, dataloader_idx)
+        if not self.has_dataloader_changed(dataloader_idx):
+            return
+
+    def on_test_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
+        """Called at the end of each test batch."""
+        super().on_test_batch_end(trainer, pl_module, outputs, batch, batch_idx, dataloader_idx)
+        if self.enable:
+            total_batches = self.total_test_batches_current_dataloader
+            if total_batches == 0:
+                logging.warning(f"Total test batches is 0 for dataloader {dataloader_idx}, cannot compute progress.")
+                return
+
+            percent = ((batch_idx + 1) / total_batches) * 100  # +1 to count the current batch
+            logging.info(f"Test Epoch {trainer.current_epoch}, Dataloader {dataloader_idx} - {percent:.01f}% complete")
+
+    def on_test_epoch_start(self, trainer, pl_module):
+        super().on_test_epoch_start(trainer, pl_module)
+        if self.enable:
+            logging.info(f"Starting testing for Epoch {trainer.current_epoch}")
+
+    def on_test_epoch_end(self, trainer, pl_module):
+        super().on_test_epoch_end(trainer, pl_module)
+        if self.enable:
+            logging.info(f"Testing for Epoch {trainer.current_epoch} finished")
 
 
 class Lightning:
@@ -51,7 +123,7 @@ class Lightning:
             gpu_index = self.config.participant["device_args"]["idx"] % num_gpus
             logging.info("Creating trainer with accelerator GPU ({})".format(gpu_index))
             self.__trainer = Trainer(
-                callbacks=[RichModelSummary(max_depth=1), LearningRateMonitor(logging_interval="epoch")],
+                callbacks=[ModelSummary(max_depth=1), LearningRateMonitor(logging_interval="epoch"), NebulaProgressBar()],
                 max_epochs=self.epochs,
                 accelerator=self.config.participant["device_args"]["accelerator"],
                 devices=[gpu_index],
@@ -63,7 +135,7 @@ class Lightning:
         else:
             logging.info("Creating trainer with accelerator CPU")
             self.__trainer = Trainer(
-                callbacks=[RichModelSummary(max_depth=1), LearningRateMonitor(logging_interval="epoch")],
+                callbacks=[ModelSummary(max_depth=1), LearningRateMonitor(logging_interval="epoch"), NebulaProgressBar()],
                 max_epochs=self.epochs,
                 accelerator=self.config.participant["device_args"]["accelerator"],
                 devices="auto",
@@ -148,6 +220,7 @@ class Lightning:
     async def train(self):
         try:
             self.create_trainer()
+            logging.info(f"{'='*10} [Training] Started (check training logs for progress) {'='*10}")
             with ProcessPoolExecutor() as pool:
                 future = asyncio.get_running_loop().run_in_executor(pool, self._train_sync, self.config.get_train_logging_config())
                 result = await asyncio.wait_for(future, timeout=3600)
@@ -163,7 +236,7 @@ class Lightning:
         except Exception as e:
             logging.error(f"Error training model: {e}")
             logging.error(traceback.format_exc())
-    
+
     def _train_sync(self, logging_config=None):
         if logging_config:
             logging.config.dictConfig(logging_config)
@@ -179,6 +252,7 @@ class Lightning:
     async def test(self):
         try:
             self.create_trainer()
+            logging.info(f"{'='*10} [Testing] Started (check training logs for progress) {'='*10}")
             with ProcessPoolExecutor() as pool:
                 future = asyncio.get_running_loop().run_in_executor(pool, self._test_sync, self.config.get_train_logging_config())
                 result = await asyncio.wait_for(future, timeout=3600)
@@ -194,7 +268,7 @@ class Lightning:
         except Exception as e:
             logging.error(f"Error testing model: {e}")
             logging.error(traceback.format_exc())
-    
+
     def _test_sync(self, logging_config=None):
         if logging_config:
             logging.config.dictConfig(logging_config)

@@ -61,7 +61,7 @@ class Config:
             "handlers": {
                 "console": {
                     "class": "logging.StreamHandler",
-                    "level": "INFO" if self.participant["device_args"]["logging"] else "CRITICAL",
+                    "level": "CRITICAL",
                     "formatter": "console",
                 },
                 "file": {
@@ -103,7 +103,7 @@ class Config:
         log_console_format = f"{CYAN}%(asctime)s - {self.participant['device_args']['name']} - [%(filename)s:%(lineno)d]{RESET}\n%(message)s"
 
         console_handler = logging.StreamHandler()
-        console_handler.setLevel(logging.INFO if self.participant["device_args"]["logging"] else logging.CRITICAL)
+        console_handler.setLevel(logging.CRITICAL)
         console_handler.setFormatter(Formatter(log_console_format))
 
         file_handler = FileHandler("{}.log".format(log_filename), mode="w", encoding="utf-8")
