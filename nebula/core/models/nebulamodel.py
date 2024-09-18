@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import logging
 import torch
 from nebula.addons.functions import print_msg_box
 import lightning as pl
@@ -181,8 +182,12 @@ class NebulaModel(pl.LightningModule, ABC):
         Returns:
         """
         return self.step(batch, batch_idx=batch_idx, phase="Train")
+    
+    def on_train_start(self):
+        logging.info(f"{'='*10} [Training] Started {'='*10}")
 
     def on_train_end(self):
+        logging.info(f"{'='*10} [Training] Done {'='*10}")
         self.global_number["Train"] += 1
 
     def on_train_epoch_end(self):
@@ -220,8 +225,12 @@ class NebulaModel(pl.LightningModule, ABC):
             return self.step(batch, batch_idx=batch_idx, phase="Test (Local)")
         else:
             return self.step(batch, batch_idx=batch_idx, phase="Test (Global)")
+        
+    def on_test_start(self):
+        logging.info(f"{'='*10} [Testing] Started {'='*10}")
 
     def on_test_end(self):
+        logging.info(f"{'='*10} [Testing] Done {'='*10}")
         self.global_number["Test (Local)"] += 1
         self.global_number["Test (Global)"] += 1
 

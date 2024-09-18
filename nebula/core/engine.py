@@ -455,9 +455,7 @@ class Engine:
 
         # End of the learning cycle
         self.trainer.on_learning_cycle_end()
-        logging.info(f"[Testing] Starting final testing...")
         await self.trainer.test()
-        logging.info(f"[Testing] Finishing final testing...")
         self.round = None
         self.total_rounds = None
         print_msg_box(msg=f"Federated Learning process has been completed.", indent=2, title="End of the experiment")
@@ -601,13 +599,8 @@ class AggregatorNode(Engine):
 
     async def _extended_learning_cycle(self):
         # Define the functionality of the aggregator node
-        logging.info(f"[Testing] Starting...")
         await self.trainer.test()
-        logging.info(f"[Testing] Finishing...")
-
-        logging.info(f"[Training] Starting...")
         await self.trainer.train()
-        logging.info(f"[Training] Finishing...")
 
         await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.get_model_weight(), source=self.addr, round=self.round)
 
@@ -621,9 +614,7 @@ class ServerNode(Engine):
 
     async def _extended_learning_cycle(self):
         # Define the functionality of the server node
-        logging.info(f"[Testing] Starting...")
         await self.trainer.test()
-        logging.info(f"[Testing] Finishing...")
 
         # In the first round, the server node doest take into account the initial model parameters for the aggregation
         await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.BYPASS_MODEL_WEIGHT, source=self.addr, round=self.round)
@@ -640,13 +631,8 @@ class TrainerNode(Engine):
         logging.info(f"Waiting global update | Assign _waiting_global_update = True")
         self.aggregator.set_waiting_global_update()
 
-        logging.info(f"[Testing] Starting...")
         await self.trainer.test()
-        logging.info(f"[Testing] Finishing...")
-
-        logging.info(f"[Training] Starting...")
         await self.trainer.train()
-        logging.info(f"[Training] Finishing...")
 
         await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.get_model_weight(), source=self.addr, round=self.round, local=True)
 
