@@ -2,6 +2,7 @@ import os
 import csv
 import logging
 import json
+from datetime import datetime, timedelta
 
 def save_data(scenario, type_data, source_ip, addr, round=None, time=None, data_contribution=None):
     """
@@ -39,6 +40,11 @@ def save_data(scenario, type_data, source_ip, addr, round=None, time=None, data_
                 "data_contribution": data_contribution,
                 "round": round,
             }
+        elif type_data == 'last_activity':
+            combined_data["last_activity"] = {
+                "time": time,
+                "round": round,
+            }
 
         script_dir = os.path.dirname(os.path.abspath(__file__))
         file_name = f"{addr}_storing_{source_ip}_info.json"
@@ -67,12 +73,14 @@ class Reputation:
     """
     Class to define the reputation of a participant.
     """
+    reputation_history = {}
+    neighbor_reputation_history = {}
 
     def __init__(self):
         pass
 
     @staticmethod
-    def calculate_reputation(scenario, log_dir, id_node, addr, nei=None, current_round=None):
+    def calculate_reputation(scenario, log_dir, id_node, addr, nei, current_round=None):
         """
         Calculate the reputation of each participant based on the data stored.
 
@@ -87,11 +95,13 @@ class Reputation:
         array_aggregated_models = []
         count_node_participation = 0
         array_data_contribution = []
+        last_activity_times = []
 
         communication_time_normalized = 0
         aggregated_models_time_normalized = 0
         data_contribution_normalized = 0
         node_participation_normalized = 0
+        avg_last_activity = 0
 
         try:
             script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -119,6 +129,13 @@ class Reputation:
                             round = metric["data_contribution"]["round"]
                             if round == current_round:
                                 array_data_contribution.append(metric["data_contribution"]["data_contribution"])
+                        if "last_activity" in metric:
+                            round = metric["last_activity"]["round"]
+                            if round == current_round:
+                                last_activity_time = metric["last_activity"]["time"]
+                                if isinstance(last_activity_time, float):
+                                    last_activity_time = datetime.fromtimestamp(last_activity_time).strftime("%Y-%m-%d %H:%M:%S")
+                                last_activity_times.append(last_activity_time)
 
                     # Data similitude
                     similarity_file = os.path.join(log_dir, f"participant_{id_node}_similarity.csv")
@@ -142,25 +159,88 @@ class Reputation:
                         data_contribution_normalized = Reputation.callback_normalized_value(array_data_contribution)
                         logging.info(f"Data contribution normalized: {data_contribution_normalized}")
                     
+                    # Calculate average last_activity
+                    if len(last_activity_times) > 0:
+                        last_activity_datetimes = [datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S") for time_str in last_activity_times]
+
+                        avg_last_activity_datetime = sum([(dt - datetime(1970, 1, 1)).total_seconds() for dt in last_activity_datetimes]) / len(last_activity_datetimes)
+                        avg_last_activity = datetime(1970, 1, 1) + timedelta(seconds=avg_last_activity_datetime)
+
+                        current_time = datetime.now()
+                        time_diff = (current_time - avg_last_activity).total_seconds()
+
+                        intervals = [
+                            (10, 1),
+                            (15, 0.9),
+                            (20, 0.8),
+                            (30, 0.7),
+                            (40, 0.6),
+                            (50, 0.5),
+                            (60, 0.4),
+                            (70, 0.3),
+                            (80, 0.2),
+                            (90, 0.1),
+                        ]
+                        avg_last_activity_normalized = next((score for threshold, score in intervals if time_diff <= threshold), 0.1)
+                        logging.info(f"Avg last activity times: {avg_last_activity_normalized}")
+
+                    else:
+                        avg_last_activity_normalized = 0 # No last activity
+
                     # Weights for each metric
                     weight_to_communication = 0.1
-                    weight_to_aggregated_models = 0.2
+                    weight_to_aggregated_models = 0.1
                     weight_to_data_contribution = 0.1
-                    weight_to_similarity = 0.4
+                    weight_to_similarity = 0.3
                     weight_to_node_participation = 0.2
+                    weight_to_last_activity = 0.2
 
                     # Reputation calculation
                     reputation = ( weight_to_communication * communication_time_normalized 
                                 + weight_to_aggregated_models * aggregated_models_time_normalized
                                 + weight_to_data_contribution * data_contribution_normalized
                                 + weight_to_node_participation * node_participation_normalized
-                                + weight_to_similarity * similarity_reputation )
+                                + weight_to_similarity * similarity_reputation 
+                                + weight_to_last_activity * avg_last_activity_normalized)
                     
-                    logging.info(f"Reputation finally to node {nei}: {reputation}")
-                    return reputation
+                    # Save history reputation
+                    average_reputation = Reputation.save_reputation_history_in_memory(addr, nei, reputation, current_round)
+                    
+                    logging.info(f"Average reputation to node {nei}: {average_reputation}")
+                    return average_reputation
         except Exception as e:
                 logging.error(f"Error calculating reputation: {e}")
 
+    @staticmethod
+    def save_reputation_history_in_memory(addr, nei, reputation, current_round):
+        """
+        Save the reputation history of a participant (addr) regarding its neighbor (nei) in memory 
+        and calculate the average reputation.
+
+        Args:
+            addr (str): The identifier of the node whose reputation is being saved.
+            nei (str): The neighboring node involved.
+            reputation (float): The reputation value to be saved.
+            current_round (int): The current round number.
+
+        Returns:
+            float: The cumulative reputation including the current round.
+        """
+
+        key = (addr, nei, current_round) 
+
+        if key not in Reputation.reputation_history:
+            Reputation.reputation_history[key] = []
+
+        Reputation.reputation_history[key].append(reputation)
+
+        total_reputation = sum(Reputation.reputation_history[key])
+        #logging.info(f"Total reputation: {total_reputation}")
+        average_reputation = total_reputation / len(Reputation.reputation_history[key])
+
+        #logging.info(f"Reputation for node {addr} with neighbor {nei} in round {current_round} saved successfully.")
+        return average_reputation
+        
     @staticmethod
     def read_similarity_file(file_path, nei):
         """
@@ -242,3 +322,85 @@ class Reputation:
         normalized_value = (value - min_value) / (max_value - min_value)
 
         return normalized_value
+    
+    # METHODS TO BE USED IN THE FUTURE
+    """
+            @staticmethod
+    def get_existing_reputation(current, nei, round):
+        
+        Get the existing reputation for a node with respect to a specific neighbor for a specific round.
+
+        Args:
+            addr (str): The identifier of the node whose reputation is being retrieved.
+            nei (str): The identifier of the neighbor.
+            round (int): Round number.
+
+        Returns:
+            float: Existing reputation score, or None if not found.
+        
+        key = (current, nei, round)
+        
+        # Comprobar si la clave existe en el historial de reputación
+        if key in Reputation.reputation_history:
+            logging.info(f"History key: {key}, reputation: {Reputation.reputation_history[key]}")
+            history_list = Reputation.reputation_history[key]
+
+            # Si la estructura es una lista simple, devolvemos el último valor
+            return history_list[-1] if history_list else None
+
+        return None
+
+    def combine_reputation_with_neighbour(self, current_node, source, node_ip, score, round):
+        
+        Combine the reputation of a node with its neighbour.
+
+        Args:
+            current_node (str): The current node's IP address.
+            source (str): Source IP address (the node sending the reputation).
+            node_ip (str): The node being evaluated.
+            score (float): Reputation score from neighbour.
+            round (int): Round number.
+
+        Returns:
+            float: Combined reputation score or None if the calculation has already been done for this round.
+        
+
+        current_node = current_node.split(":")[0].strip()
+        source = source.split(":")[0].strip()
+        node_ip = node_ip.split(":")[0].strip()
+        logging.info(f"Combining reputation - Current node: {current_node}, Source: {source}, Neighbour: {node_ip}, Score: {score}, Round: {round}")
+
+        if current_node == node_ip:
+            logging.info(f"Node {current_node} ignoring score about itself ({node_ip}).")
+            return None
+
+        # Definir la clave con current_node, node_ip y round
+        key = (current_node, node_ip, round)
+
+        # Proceder con el cálculo de reputación si no existe previamente
+        if key not in Reputation.neighbor_reputation_history:
+            Reputation.neighbor_reputation_history[key] = []
+
+        # Guardar la nueva puntuación enviada por el vecino
+        Reputation.neighbor_reputation_history[key].append(score)
+
+        # Calcular la reputación promedio del vecino
+        total_reputation = sum(Reputation.neighbor_reputation_history[key])
+        average_reputation = total_reputation / len(Reputation.neighbor_reputation_history[key])
+
+        # Obtener la reputación existente del historial
+        existing_reputation = Reputation.get_existing_reputation(current_node, node_ip, round)
+        if existing_reputation is None:
+            logging.warning(f"No existing reputation found for node {current_node} with neighbor {node_ip} in round {round}.")
+            return None
+
+        # Definir los pesos para combinar reputaciones
+        weight_existing = 0.5
+        weight_new = 0.5
+
+        # Combinar la reputación existente con la nueva reputación del vecino
+        combined_reputation = (weight_existing * existing_reputation) + (weight_new * average_reputation)
+        logging.info(f"Combined reputation for node {current_node} with neighbor {source}: {combined_reputation}")
+
+        return combined_reputation
+    """

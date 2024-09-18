@@ -3,6 +3,7 @@ import logging
 import os
 import time
 import docker
+import numpy as np
 from nebula.addons.functions import print_msg_box
 from nebula.addons.attacks.attacks import create_attack
 from nebula.addons.reporter import Reporter
@@ -30,7 +31,7 @@ import threading
 from nebula.config.config import Config
 from nebula.core.training.lightning import Lightning
 from nebula.core.utils.helper import cosine_metric
-from nebula.core.reputation import Reputation
+from nebula.core.reputation.Reputation import Reputation
 import sys
 import pdb
 
@@ -104,6 +105,8 @@ class Engine:
         self.model_poisoning = model_poisoning
         self.poisoned_ratio = poisoned_ratio
         self.noise_type = noise_type
+        self.rejected_nodes = set()
+        self.change_weight_nodes = set()
 
         # Reputation
         reputation_file = f'nebula/core/reputation/reputation.txt'
@@ -114,6 +117,10 @@ class Engine:
         if self.reputation_file == 'True':
             self.reputation_instance = Reputation()
             self.reputation = {} # Reputation of the node
+            self.reputation_with_feedback = {} # Reputation of the node with feedback
+        
+        self.stop_message_reputation = threading.Event()
+
         if self.config.participant["tracking_args"]["local_tracking"] == "csv":
             nebulalogger = CSVLogger(f"{self.log_dir}", name="metrics", version=f"participant_{self.idx}")
         elif self.config.participant["tracking_args"]["local_tracking"] == "basic":
@@ -453,20 +460,104 @@ class Engine:
             self.aggregator.update_federation_nodes(self.federation_nodes)
             await self._extended_learning_cycle()
 
+            logging.info(f"rejected nodes at round {self.round}: {self.rejected_nodes}")
+            if self.rejected_nodes is not None:
+                self.rejected_nodes.clear()
+            logging.info(f"rejected nodes after clear at round {self.round}: {self.rejected_nodes}")
+
+            logging.info(f"change weight nodes at round {self.round}: {self.change_weight_nodes}")
+            if self.change_weight_nodes is not None:
+                self.change_weight_nodes.clear()
+            logging.info(f"change weight nodes after clear at round {self.round}: {self.change_weight_nodes}")
+
             if self.reputation_file == 'True':
                 neighbors = set(self.cm.get_all_addrs_current_connections(only_direct=True))
+                
                 for nei in neighbors:
-                    self.reputation[nei] = self.reputation_instance.calculate_reputation(self.config.participant["scenario_args"]["name"], self.log_dir, self.idx, self.addr, nei, self.round)
+                    avg_reputation = self.reputation_instance.calculate_reputation(
+                        self.config.participant["scenario_args"]["name"], 
+                        self.log_dir, 
+                        self.idx, 
+                        self.addr, 
+                        nei, 
+                        self.round
+                    )
 
-                if self.reputation is not None: 
-                    reputation_dict = {f"Reputation/{self.addr}": {k: float(v) for k, v in self.reputation.items()}}
-                    logging.info(f"Reputation dict: {reputation_dict}")
-                    self.trainer._logger.log_data(reputation_dict, step=self.round)
+                    self.reputation[nei] = {"reputation": avg_reputation, "round": self.round}
 
+                    if self.reputation[nei]["reputation"] is not None:
+                        logging.info(f"Initial reputation of node {nei}: {self.reputation[nei]['reputation']}")
+                        if self.reputation[nei]["reputation"] <= 0.6:
+                            logging.info(f"Rejected node: {nei}")
+                            self.rejected_nodes.add(nei)
+                        elif 0.6 < self.reputation[nei]["reputation"] < 0.8:
+                            logging.info(f"Change weight node: {nei}")
+                            self.change_weight_nodes.add(nei)
+
+                if self.reputation is not None:
+                    reputation_dict_with_values = {
+                        f"Reputation/{self.addr}": {
+                            node_id: float(data["reputation"]) for node_id, data in self.reputation.items() if data["reputation"] is not None
+                        }
+                    }
+
+                    logging.info(f"Reputation dict: {reputation_dict_with_values}")
+
+                    self.trainer._logger.log_data(reputation_dict_with_values, step=self.round)
+
+                    for nei, data in self.reputation.items():
+                        if data["reputation"] is not None:
+                            message_data = self.cm.mm.generate_reputation_message(
+                                node_id=nei, 
+                                score=data["reputation"], 
+                                round=data["round"]
+                            )
+                            await self.cm.send_message_to_neighbors(message_data)
+
+                # Esperar las respuestas de reputación
+                self._wait_for_reputation_responses(timeout=90)
+                
             self.get_round_lock().acquire()
             print_msg_box(msg=f"Round {self.round} of {self.total_rounds} finished.", indent=2, title="Round information")
             self.aggregator.reset()
             self.trainer.on_round_end()
+
+            logging.info(f"reputation with feedback {self._cm.reputation_with_all_feedback}")
+            if self._cm.reputation_with_all_feedback:
+                current_round = self.round
+                for(current_node, node_ip, round_num), scores in self._cm.reputation_with_all_feedback.items():
+                    if round_num == current_round:
+                        if scores:
+                            avg_feedback = sum(scores) / len(scores)
+                            logging.info(f"Receive feedback to node {node_ip}")
+
+                        logging.info(f"self.reputation: {self.reputation}")
+                        for ip, data in self.reputation.items():
+                            ip = ip.split(":")[0]
+                            if ip == node_ip:
+                                logging.info(f"IP: {ip}")
+                                current_reputation = data["reputation"]
+                                logging.info(f"Current reputation {current_reputation}")
+                            else: 
+                                current_reputation = None
+
+                            if current_reputation is not None:
+                                logging.info(f"Current reputation for node {node_ip} in round {round_num}: {current_reputation}")
+                                combined_reputation = (current_reputation + avg_feedback) / 2
+                                logging.info(f"Combined reputation for node {node_ip} in round {round_num}: {combined_reputation}")
+
+                                self.reputation_with_feedback[node_ip] = combined_reputation
+                                logging.info(f"Self.reputation_with_feedback: {self.reputation_with_feedback}")
+
+                if self.reputation_with_feedback is not None:
+                    reputation_with_feedback_dict_with_values = {
+                        f"Reputation_with_feedback/{self.addr}": {
+                            node_id: float(data) for node_id, data in self.reputation_with_feedback.items() if data is not None
+                        }
+                    }
+
+                self.trainer._logger.log_data(reputation_with_feedback_dict_with_values, step=self.round)
+
             self.round = self.round + 1
             self.config.participant["federation_args"]["round"] = self.round  # Set current round in config (send to the controller)
             self.get_round_lock().release()
@@ -491,6 +582,27 @@ class Engine:
             print(f"Docker container with ID {self.docker_id} stopped successfully.")
         except Exception as e:
             print(f"Error stopping Docker container with ID {self.docker_id}: {e}")
+
+    def _wait_for_reputation_responses(self, timeout=10):
+        wait_thread = threading.Thread(target=self._wait_for_responses_thread, args=(timeout,))
+        wait_thread.start()
+        wait_thread.join()
+
+    def _wait_for_responses_thread(self, timeout):
+        logging.info(f"Waiting for responses thread for {timeout} seconds")
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            if self.stop_message_reputation.is_set():
+                logging.info(f"Stop waiting responses. Exiting before timeout.")
+                return
+            time.sleep(1)
+            elapsed_time = time.time() - start_time
+            logging.info(f"Elapsed time: {elapsed_time} seconds")
+        logging.info(f"Timeout of {timeout}. Exiting waiting for responses.")
+
+    def stop_waiting_reputation(self):
+        logging.info(f"Stop waiting responses")
+        self.stop_message_reputation.set()
 
     async def _extended_learning_cycle(self):
         """

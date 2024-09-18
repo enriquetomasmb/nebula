@@ -72,9 +72,21 @@ class MessagesManager:
         data = message_wrapper.SerializeToString()
         return data
 
-    def generate_reputation_message(self, reputation):
+    """def generate_reputation_message(self, reputation):
         message = nebula_pb2.ReputationMessage(
             reputation=reputation,
+        )
+        message_wrapper = nebula_pb2.Wrapper()
+        message_wrapper.source = self.addr
+        message_wrapper.reputation_message.CopyFrom(message)
+        data = message_wrapper.SerializeToString()
+        return data"""
+    
+    def generate_reputation_message(self, node_id, score, round):
+        message = nebula_pb2.ReputationMessage(
+            node_id=node_id,
+            score=score,
+            round=round,
         )
         message_wrapper = nebula_pb2.Wrapper()
         message_wrapper.source = self.addr

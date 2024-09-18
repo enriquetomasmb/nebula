@@ -119,7 +119,8 @@ class Propagator:
         strategy = self.strategies[strategy_id]
         logging.info(f"Starting model propagation with strategy: {strategy_id}")
 
-        eligible_neighbors = [neighbor_addr for neighbor_addr in self.cm.get_addrs_current_connections(only_direct=True) if strategy.is_node_eligible(neighbor_addr)]
+        eligible_neighbors = [neighbor_addr for neighbor_addr in self.cm.get_addrs_current_connections(only_direct=True) 
+                              if strategy.is_node_eligible(neighbor_addr)]
         logging.info(f"Eligible neighbors for model propagation: {eligible_neighbors}")
         if not eligible_neighbors:
             logging.info("Propagation complete: No eligible neighbors.")
@@ -143,10 +144,11 @@ class Propagator:
         if strategy_id == "initialization":
             return False
         
-        total_nodes = len(self.aggregator._federation_nodes) - len(self.aggregator.rejected_nodes)
+        logging.info(f"self.aggregator.get_nodes_pending_models_to_aggregate(): {self.aggregator.get_nodes_pending_models_to_aggregate()}")
+        total_nodes = len(self.aggregator._federation_nodes) - len(self.engine.rejected_nodes)
         if len(self.aggregator.get_nodes_pending_models_to_aggregate()) >= total_nodes:
-            logging.info(f"Aggregating models from {len(self.aggregator.get_nodes_pending_models_to_aggregate())} nodes")
             return False
+
         await asyncio.sleep(self.interval)
         return True
 

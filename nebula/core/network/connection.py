@@ -8,6 +8,10 @@ import json
 import zlib, bz2, lzma, base64
 
 from typing import TYPE_CHECKING
+from nebula.core.reputation.Reputation import (
+    Reputation,
+    save_data,
+)
 
 if TYPE_CHECKING:
     from nebula.core.network.communications import CommunicationsManager
@@ -113,6 +117,12 @@ class Connection:
     def set_active(self, active):
         self.active = active
         self.last_active = time.time()
+        addr_node = self.config.participant["network_args"]["addr"]
+        current_round = self.cm.get_round()
+        # Save activity time to reputation
+        if self.active:
+            save_data(self.config.participant['scenario_args']['name'], 'last_activity', self.addr, addr_node, round=current_round, time=self.last_active)
+        logging.info(f"Connection [active]: {self.addr} (id: {self.id}) (active: {self.active}) (last_active: {self.last_active})")
 
     def is_active(self):
         return self.active

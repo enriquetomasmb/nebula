@@ -88,6 +88,8 @@ class CommunicationsManager:
 
         if self.reputation_file == 'True':
             self.reputation_instance = Reputation()
+            self.reputation_with_all_feedback = {}
+            self.total_messages_reputation_received = 0
 
     @property
     def engine(self):
@@ -120,6 +122,9 @@ class CommunicationsManager:
     @property
     def mobility(self):
         return self._mobility
+    
+    def get_round(self):
+        return self.engine.get_round()
 
     async def handle_incoming_message(self, data, addr_from):
         try:
@@ -146,6 +151,11 @@ class CommunicationsManager:
                     if self.config.participant["device_args"]["proxy"] or message_wrapper.model_message.round == -1:
                         self.forwarder.forward(data, addr_from=addr_from)
                     await self.handle_model_message(source, message_wrapper.model_message)
+            elif message_wrapper.HasField("reputation_message"):
+                if self.reputation_file == 'True':
+                    if self.include_received_message_hash(hashlib.md5(data).hexdigest()):
+                        self.forwarder.forward(data, addr_from=addr_from)
+                        await self.handle_reputation_message(source, message_wrapper.reputation_message)
             elif message_wrapper.HasField("connection_message"):
                 await self.handle_connection_message(source, message_wrapper.connection_message)
             else:
@@ -223,18 +233,26 @@ class CommunicationsManager:
                                 f.write("timestamp,source_ip,round,current_round,cosine,euclidean,minkowski,manhattan,pearson_correlation,jaccard\n")
                             f.write(f"{datetime.now()}, {source}, {message.round}, {current_round}, {cosine_value}, {euclidean_value}, {minkowski_value}, {manhattan_value}, {pearson_correlation_value}, {jaccard_value}\n")
 
-                        start_time_models_aggregated = time.time()
-                        models_added = await self.engine.aggregator.include_model_in_buffer(
-                            decoded_model,
-                            message.weight,
-                            source=source,
-                            round=message.round,
-                        )
-                        if models_added is not None:
-                            end_time_models_aggregated = time.time()
-                            latency = end_time_models_aggregated - start_time_models_aggregated
-                            logging.info(f"🤖  handle_model_message | Model aggregated in {latency} seconds")
-                            save_data(self.config.participant['scenario_args']['name'], 'aggregated_models', source, self.addr, message.round, time=latency)
+                        if cosine_value < 0.5:
+                            logging.info(f"🤖  handle_model_message | Model similarity is below 0.5 {cosine_value} with source {source}")
+                            if source not in self.engine.rejected_nodes:
+                                self.engine.rejected_nodes.add(source) 
+                            if self.engine.get_federation_ready_lock().locked():
+                                self.engine.get_federation_ready_lock().release()
+                        else:
+                            logging.info(f"🤖  handle_model_message | Model similarity is above 0.5 {cosine_value} with source {source}")
+                            start_time_models_aggregated = time.time()
+                            models_added = await self.engine.aggregator.include_model_in_buffer(
+                                decoded_model,
+                                message.weight,
+                                source=source,
+                                round=message.round,
+                            )
+                            if models_added is not None:
+                                end_time_models_aggregated = time.time()
+                                latency = end_time_models_aggregated - start_time_models_aggregated
+                                logging.info(f"🤖  handle_model_message | Model aggregated in {latency} seconds")
+                                save_data(self.config.participant['scenario_args']['name'], 'aggregated_models', source, self.addr, message.round, time=latency)
                 else:
                     if message.round != -1:
                         # Be sure that the model message is from the initialization round (round = -1)
@@ -267,6 +285,53 @@ class CommunicationsManager:
         except Exception as e:
             logging.error(f"🔗  handle_connection_message | Error while processing: {message.action} | {e}")
 
+    async def handle_reputation_message(self, source, message):
+        try:
+            logging.info(f"handle_reputation_message | Reputation message received from {source} | Node: {message.node_id} | Score: {message.score} | Round: {message.round}")
+            self.total_messages_reputation_received += 1
+            current_node = self.addr.split(":")[0].strip()
+            source = source.split(":")[0].strip()
+            node_ip = message.node_id.split(":")[0].strip()
+
+            if current_node != node_ip:
+                if message.round == self.get_round():
+                    key = (current_node, node_ip, message.round)
+
+                    if key not in self.reputation_with_all_feedback:
+                        self.reputation_with_all_feedback[key] = []
+
+                    self.reputation_with_all_feedback[key].append(message.score)
+
+                    # Total expected = number of federation nodes + number of direct connections - 1 (current node)
+                    total_expected_reputation = len(self.engine.get_federation_nodes()) + len(self.get_all_addrs_current_connections(only_direct=True)) - 1
+                    logging.info(f"handle_reputation_message | Expected reputation: {total_expected_reputation}")
+                    logging.info(f"handle_reputation_message | self.total_messages_reputation_received: {self.total_messages_reputation_received}")
+                    # Para la espera cuando se recibe la reputación de todos los vecinos
+                    if total_expected_reputation == self.total_messages_reputation_received:
+                        logging.info(f"handle_reputation_message | Stop")
+                        self.engine.stop_waiting_reputation()
+        except Exception as e:
+            logging.error(f"Error handling reputation message: {e}")
+
+        """if self.engine.reputation is not None:
+            if source in self.engine.reputation:
+                if self.engine.reputation[source]['round'] == message.round:
+                    logging.info(f"Reputation to engine {self.engine.reputation}")
+                    reputation = self.reputation_instance.combine_reputation_with_neighbour(current_node, source, message.node_id, message.score, message.round)
+                    logging.info(f"Reputation updated with feedback: {reputation}")
+                    if reputation is not None:
+                        reputation_dict_with_feedback = {
+                            f"Reputation_with_peer_feedback/{self.addr}": {
+                                f"{message.node_id}": float(reputation) if reputation is not None else None
+                            }
+                        }
+                        logging.info(f"Reputation dict with neighbor: {reputation_dict_with_feedback}")
+
+                        self.engine.trainer._logger.log_data(reputation_dict_with_feedback, step=message.round)
+
+                        # Receive feedback from the neighbor
+                        """
+    
     def get_connections_lock(self):
         return self.connections_lock
 
