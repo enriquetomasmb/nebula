@@ -224,6 +224,7 @@ class Lightning:
                 future = asyncio.get_running_loop().run_in_executor(pool, self._train_sync)
                 await asyncio.wait_for(future, timeout=3600)
             self.__trainer = None
+            logging.info(f"{'='*10} [Training] Finished (check training logs for progress) {'='*10}")
         except Exception as e:
             logging_training.error(f"Error training model: {e}")
             logging_training.error(traceback.format_exc())
@@ -245,6 +246,7 @@ class Lightning:
                 future = asyncio.get_running_loop().run_in_executor(pool, self._test_sync)
                 await asyncio.wait_for(future, timeout=3600)
             self.__trainer = None
+            logging.info(f"{'='*10} [Testing] Finished (check training logs for progress) {'='*10}")
         except Exception as e:
             logging_training.error(f"Error testing model: {e}")
             logging_training.error(traceback.format_exc())
