@@ -1,6 +1,8 @@
 import asyncio
 import logging
 import os
+
+import docker
 from nebula.addons.functions import print_msg_box
 from nebula.addons.attacks.attacks import create_attack
 from nebula.addons.reporter import Reporter
@@ -82,7 +84,7 @@ class Engine:
         self.role = config.participant["device_args"]["role"]
         self.name = config.participant["device_args"]["name"]
         self.docker_id = config.participant["device_args"]["docker_id"]
-        # self.client = docker.from_env()
+        self.client = docker.from_env()
 
         print_banner()
 
@@ -459,8 +461,6 @@ class Engine:
         self.round = None
         self.total_rounds = None
         print_msg_box(msg=f"Federated Learning process has been completed.", indent=2, title="End of the experiment")
-        # Enable loggin info
-        logging.getLogger().disabled = True
         # Report
         if self.config.participant["scenario_args"]["controller"] != "nebula-test":
             result = await self.reporter.report_scenario_finished()
@@ -472,6 +472,9 @@ class Engine:
         logging.info(f"Checking if all my connections reached the total rounds...")
         while not self.cm.check_finished_experiment():
             await asyncio.sleep(1)
+            
+        # Enable loggin info
+        logging.getLogger().disabled = True
 
         # Kill itself
         if self.config.participant["scenario_args"]["deployment"] == "process":
