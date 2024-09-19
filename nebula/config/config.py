@@ -96,7 +96,7 @@ class Config:
         level = logging.DEBUG if self.participant["device_args"]["logging"] else logging.CRITICAL
 
         console_handler = logging.StreamHandler()
-        console_handler.setLevel(level)
+        console_handler.setLevel(logging.CRITICAL)
         console_handler.setFormatter(Formatter(log_console_format))
         
         file_handler = FileHandler("{}.log".format(training_log_filename), mode="w", encoding="utf-8")
