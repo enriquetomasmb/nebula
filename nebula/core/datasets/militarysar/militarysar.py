@@ -7,6 +7,9 @@ import torch
 from nebula.core.datasets.nebuladataset import NebulaDataset
 from torchvision import transforms
 from torch.utils.data import Dataset
+from nebula.config.config import TRAINING_LOGGER
+
+logging_training = logging.getLogger(TRAINING_LOGGER)
 
 
 class RandomCrop(object):
@@ -113,12 +116,12 @@ class MilitarySAR(Dataset):
 
     def get_targets(self):
         if not self.targets:
-            logging.info(f"Loading Metadata for {self.__class__.__name__}")
+            logging_training.info(f"Loading Metadata for {self.__class__.__name__}")
             self._load_metadata()
         return self.targets
 
     # def _load_data(self, path):
-    #     logging.info(f'Loading {self.__class__.__name__} dataset: {self.name} | is_train: {self.is_train} | from {self.path_to_data}')
+    #     logging_training.info(f'Loading {self.__class__.__name__} dataset: {self.name} | is_train: {self.is_train} | from {self.path_to_data}')
     #     mode = 'train' if self.is_train else 'test'
 
     #     image_list = glob.glob(os.path.join(self.path_to_data, f'{self.name}/{mode}/*/*.npy'))
@@ -179,14 +182,14 @@ class MilitarySARDataset(NebulaDataset):
 
         # Depending on the iid flag, generate a non-iid or iid map of the train set
         if self.iid:
-            logging.info("Generating IID partition - Train")
+            logging_training.info("Generating IID partition - Train")
             self.train_indices_map = self.generate_iid_map(self.train_set, self.partition, self.partition_parameter)
-            logging.info("Generating IID partition - Test")
+            logging_training.info("Generating IID partition - Test")
             self.local_test_indices_map = self.generate_iid_map(self.test_set, self.partition, self.partition_parameter)
         else:
-            logging.info("Generating Non-IID partition - Train")
+            logging_training.info("Generating Non-IID partition - Train")
             self.train_indices_map = self.generate_non_iid_map(self.train_set, self.partition, self.partition_parameter)
-            logging.info("Generating Non-IID partition - Test")
+            logging_training.info("Generating Non-IID partition - Test")
             self.local_test_indices_map = self.generate_non_iid_map(self.test_set, self.partition, self.partition_parameter)
 
         print(f"Length of train indices map: {len(self.train_indices_map)}")

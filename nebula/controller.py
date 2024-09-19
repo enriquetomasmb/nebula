@@ -168,6 +168,11 @@ class NebulaEventHandler(PatternMatchingEventHandler):
                             for child in children:
                                 try:
                                     logging.info(f"Forcibly killing child process {child.pid}")
+                                    for fd in child.open_files():
+                                        try:
+                                            fd.close()
+                                        except Exception as e:
+                                            logging.error(f"Error closing file descriptor {fd.fd} for child process {child.pid}: {e}")
                                     child.kill()
                                 except psutil.NoSuchProcess:
                                     logging.warning(f"Child process {child.pid} already terminated.")
@@ -175,6 +180,11 @@ class NebulaEventHandler(PatternMatchingEventHandler):
                                     logging.error(f"Error while forcibly killing child process {child.pid}: {e}")
                             try:
                                 logging.info(f"Forcibly killing main process {pid}")
+                                for fd in process.open_files():
+                                    try:
+                                        fd.close()
+                                    except Exception as e:
+                                        logging.error(f"Error closing file descriptor {fd.fd} for main process {pid}: {e}")
                                 process.kill()
                             except psutil.NoSuchProcess:
                                 logging.warning(f"Process {pid} already terminated.")

@@ -3,6 +3,11 @@ import logging
 import os
 from logging import Formatter, FileHandler
 
+CYAN = "\x1b[0;36m"
+RESET = "\x1b[0m"
+
+TRAINING_LOGGER = "nebula.training"
+
 
 class Config:
     topology = {}
@@ -23,6 +28,7 @@ class Config:
         if self.participant != {}:
             self.__default_config()
             self.__set_default_logging()
+            self.__set_training_logging()
 
     def __getstate__(self):
         # Return the attributes of the class that should be serialized
@@ -40,44 +46,8 @@ class Config:
         return json.dumps(self.participant, indent=2)
 
     def get_train_logging_config(self):
-        CYAN = "\x1b[0;36m"
-        RESET = "\x1b[0m"
-        info_file_format = f"%(asctime)s - {self.participant['device_args']['name']} - [%(filename)s:%(lineno)d] %(message)s"
-        log_console_format = f"{CYAN}%(asctime)s - {self.participant['device_args']['name']} - [%(filename)s:%(lineno)d]{RESET}\n%(message)s"
-
-        return {
-            "version": 1,
-            "formatters": {
-                "default": {
-                    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-                },
-                "info_file": {
-                    "format": info_file_format,
-                },
-                "console": {
-                    "format": log_console_format,
-                },
-            },
-            "handlers": {
-                "console": {
-                    "class": "logging.StreamHandler",
-                    "level": "CRITICAL",
-                    "formatter": "console",
-                },
-                "file": {
-                    "class": "logging.FileHandler",
-                    "filename": f"{self.log_filename}_training.log",
-                    "mode": "a",
-                    "encoding": "utf-8",
-                    "level": "INFO" if self.participant["device_args"]["logging"] else "CRITICAL",
-                    "formatter": "info_file",
-                },
-            },
-            "root": {
-                "level": "DEBUG" if self.participant["device_args"]["logging"] else "CRITICAL",
-                "handlers": ["console", "file"],
-            },
-        }
+        # TBD
+        pass
 
     def __default_config(self):
         self.participant["device_args"]["name"] = f"participant_{self.participant['device_args']['idx']}_{self.participant['network_args']['ip']}_{self.participant['network_args']['port']}"
@@ -96,8 +66,6 @@ class Config:
         logging.basicConfig(level=level, handlers=[console_handler, file_handler, file_handler_only_debug, exp_errors_file_handler])
 
     def __setup_logging(self, log_filename):
-        CYAN = "\x1b[0;36m"
-        RESET = "\x1b[0m"
         info_file_format = f"%(asctime)s - {self.participant['device_args']['name']} - [%(filename)s:%(lineno)d] %(message)s"
         debug_file_format = f"%(asctime)s - {self.participant['device_args']['name']} - [%(filename)s:%(lineno)d] %(message)s\n[in %(pathname)s:%(lineno)d]"
         log_console_format = f"{CYAN}%(asctime)s - {self.participant['device_args']['name']} - [%(filename)s:%(lineno)d]{RESET}\n%(message)s"
@@ -120,6 +88,33 @@ class Config:
         exp_errors_file_handler.setFormatter(Formatter(debug_file_format))
 
         return console_handler, file_handler, file_handler_only_debug, exp_errors_file_handler
+
+    def __set_training_logging(self):
+        training_log_filename = f"{self.log_filename}_training"
+        info_file_format = f"%(asctime)s - {self.participant['device_args']['name']} - [%(filename)s:%(lineno)d] %(message)s"
+        log_console_format = f"{CYAN}%(asctime)s - {self.participant['device_args']['name']} - [%(filename)s:%(lineno)d]{RESET}\n%(message)s"
+        level = logging.DEBUG if self.participant["device_args"]["logging"] else logging.CRITICAL
+
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(level)
+        console_handler.setFormatter(Formatter(log_console_format))
+        
+        file_handler = FileHandler("{}.log".format(training_log_filename), mode="w", encoding="utf-8")
+        file_handler.setLevel(level)
+        file_handler.setFormatter(Formatter(info_file_format))
+        
+        logger = logging.getLogger(TRAINING_LOGGER)
+        logger.setLevel(level)
+        logger.addHandler(console_handler)
+        logger.addHandler(file_handler)
+        logger.propagate = False
+
+        pl_logger = logging.getLogger("lightning.pytorch")
+        pl_logger.setLevel(logging.INFO)
+        pl_logger.handlers = []
+        pl_logger.propagate = False
+        pl_logger.addHandler(console_handler)
+        pl_logger.addHandler(file_handler)
 
     def to_json(self):
         # Return participant configuration as a json string

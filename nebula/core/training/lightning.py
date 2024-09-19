@@ -1,10 +1,8 @@
 import gc
 import logging
-import logging.config
 from collections import OrderedDict
 import asyncio
-from concurrent.futures import ProcessPoolExecutor
-import logging.config
+from concurrent.futures import ThreadPoolExecutor
 import traceback
 import hashlib
 import io
@@ -15,7 +13,9 @@ from lightning.pytorch.callbacks import LearningRateMonitor, ProgressBar, ModelS
 import copy
 from torch.nn import functional as F
 from nebula.core.utils.deterministic import enable_deterministic
+from nebula.config.config import TRAINING_LOGGER
 
+logging_training = logging.getLogger(TRAINING_LOGGER)
 
 class NebulaProgressBar(ProgressBar):
     """Nebula progress bar for training.
@@ -34,7 +34,7 @@ class NebulaProgressBar(ProgressBar):
         """Called when the training epoch starts."""
         super().on_train_epoch_start(trainer, pl_module)
         if self.enable:
-            logging.info(f"Starting Epoch {trainer.current_epoch}")
+            logging_training.info(f"Starting Epoch {trainer.current_epoch}")
 
     def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
         """Called at the end of each training batch."""
@@ -42,23 +42,23 @@ class NebulaProgressBar(ProgressBar):
         if self.enable:
             # Calculate percentage complete for the current epoch
             percent = ((batch_idx + 1) / self.total_train_batches) * 100  # +1 to count current batch
-            logging.info(f"Epoch {trainer.current_epoch} - {percent:.01f}% complete")
+            logging_training.info(f"Epoch {trainer.current_epoch} - {percent:.01f}% complete")
 
     def on_train_epoch_end(self, trainer, pl_module):
         """Called at the end of the training epoch."""
         super().on_train_epoch_end(trainer, pl_module)
         if self.enable:
-            logging.info(f"Epoch {trainer.current_epoch} finished")
+            logging_training.info(f"Epoch {trainer.current_epoch} finished")
 
     def on_validation_epoch_start(self, trainer, pl_module):
         super().on_validation_epoch_start(trainer, pl_module)
         if self.enable:
-            logging.info(f"Starting validation for Epoch {trainer.current_epoch}")
+            logging_training.info(f"Starting validation for Epoch {trainer.current_epoch}")
 
     def on_validation_epoch_end(self, trainer, pl_module):
         super().on_validation_epoch_end(trainer, pl_module)
         if self.enable:
-            logging.info(f"Validation for Epoch {trainer.current_epoch} finished")
+            logging_training.info(f"Validation for Epoch {trainer.current_epoch} finished")
 
     def on_test_batch_start(self, trainer, pl_module, batch, batch_idx, dataloader_idx):
         super().on_test_batch_start(trainer, pl_module, batch, batch_idx, dataloader_idx)
@@ -71,21 +71,21 @@ class NebulaProgressBar(ProgressBar):
         if self.enable:
             total_batches = self.total_test_batches_current_dataloader
             if total_batches == 0:
-                logging.warning(f"Total test batches is 0 for dataloader {dataloader_idx}, cannot compute progress.")
+                logging_training.warning(f"Total test batches is 0 for dataloader {dataloader_idx}, cannot compute progress.")
                 return
 
             percent = ((batch_idx + 1) / total_batches) * 100  # +1 to count the current batch
-            logging.info(f"Test Epoch {trainer.current_epoch}, Dataloader {dataloader_idx} - {percent:.01f}% complete")
+            logging_training.info(f"Test Epoch {trainer.current_epoch}, Dataloader {dataloader_idx} - {percent:.01f}% complete")
 
     def on_test_epoch_start(self, trainer, pl_module):
         super().on_test_epoch_start(trainer, pl_module)
         if self.enable:
-            logging.info(f"Starting testing for Epoch {trainer.current_epoch}")
+            logging_training.info(f"Starting testing for Epoch {trainer.current_epoch}")
 
     def on_test_epoch_end(self, trainer, pl_module):
         super().on_test_epoch_end(trainer, pl_module)
         if self.enable:
-            logging.info(f"Testing for Epoch {trainer.current_epoch} finished")
+            logging_training.info(f"Testing for Epoch {trainer.current_epoch} finished")
 
 
 class Lightning:
@@ -100,7 +100,6 @@ class Lightning:
         self._logger = logger
         self.__trainer = None
         self.epochs = 1
-        logging.getLogger("lightning.pytorch").setLevel(logging.ERROR)
         self.round = 0
         enable_deterministic(self.config)
 
@@ -121,7 +120,7 @@ class Lightning:
         num_gpus = torch.cuda.device_count()
         if self.config.participant["device_args"]["accelerator"] == "gpu" and num_gpus > 0:
             gpu_index = self.config.participant["device_args"]["idx"] % num_gpus
-            logging.info("Creating trainer with accelerator GPU ({})".format(gpu_index))
+            logging_training.info("Creating trainer with accelerator GPU ({})".format(gpu_index))
             self.__trainer = Trainer(
                 callbacks=[ModelSummary(max_depth=1), LearningRateMonitor(logging_interval="epoch"), NebulaProgressBar()],
                 max_epochs=self.epochs,
@@ -133,7 +132,7 @@ class Lightning:
                 # deterministic=True
             )
         else:
-            logging.info("Creating trainer with accelerator CPU")
+            logging_training.info("Creating trainer with accelerator CPU")
             self.__trainer = Trainer(
                 callbacks=[ModelSummary(max_depth=1), LearningRateMonitor(logging_interval="epoch"), NebulaProgressBar()],
                 max_epochs=self.epochs,
@@ -144,7 +143,7 @@ class Lightning:
                 enable_model_summary=False,
                 # deterministic=True
             )
-        logging.info(f"Trainer strategy: {self.__trainer.strategy}")
+        logging_training.info(f"Trainer strategy: {self.__trainer.strategy}")
 
     def validate_neighbour_model(self, neighbour_model_param):
         avg_loss = 0
@@ -172,7 +171,7 @@ class Lightning:
                 num_samples += inputs.size(0)
 
         avg_loss = running_loss / len(bootstrap_dataloader)
-        logging.info("Computed neighbor loss over {} data samples".format(num_samples))
+        logging_training.info("Computed neighbor loss over {} data samples".format(num_samples))
         return avg_loss
 
     def get_hash_model(self):
@@ -221,65 +220,43 @@ class Lightning:
         try:
             self.create_trainer()
             logging.info(f"{'='*10} [Training] Started (check training logs for progress) {'='*10}")
-            with ProcessPoolExecutor() as pool:
-                future = asyncio.get_running_loop().run_in_executor(pool, self._train_sync, self.config.get_train_logging_config())
-                result = await asyncio.wait_for(future, timeout=3600)
-                if isinstance(result, tuple) and isinstance(result[0], Exception):
-                    exception, tb = result
-                    logging.error(f"Error in training: {exception}")
-                    logging.error(f"Traceback: {tb}")
-                elif isinstance(result, tuple):
-                    self.model, self.data = result
-                else:
-                    raise Exception("Unknown error during training")
+            with ThreadPoolExecutor() as pool:
+                future = asyncio.get_running_loop().run_in_executor(pool, self._train_sync)
+                await asyncio.wait_for(future, timeout=3600)
             self.__trainer = None
         except Exception as e:
-            logging.error(f"Error training model: {e}")
-            logging.error(traceback.format_exc())
+            logging_training.error(f"Error training model: {e}")
+            logging_training.error(traceback.format_exc())
 
-    def _train_sync(self, logging_config=None):
-        if logging_config:
-            logging.config.dictConfig(logging_config)
+    def _train_sync(self):
         try:
             self.__trainer.fit(self.model, self.data)
         except Exception as e:
-            logging.error(f"Error in _train_sync: {e}")
+            logging_training.error(f"Error in _train_sync: {e}")
             tb = traceback.format_exc()
-            logging.error(f"Traceback: {tb}")
-            return e, tb
-        return self.model, self.data
+            logging_training.error(f"Traceback: {tb}")
+            # If "raise", the exception will be managed by the main thread
 
     async def test(self):
         try:
             self.create_trainer()
             logging.info(f"{'='*10} [Testing] Started (check training logs for progress) {'='*10}")
-            with ProcessPoolExecutor() as pool:
-                future = asyncio.get_running_loop().run_in_executor(pool, self._test_sync, self.config.get_train_logging_config())
-                result = await asyncio.wait_for(future, timeout=3600)
-                if isinstance(result, tuple) and isinstance(result[0], Exception):
-                    exception, tb = result
-                    logging.error(f"Error in testing: {exception}")
-                    logging.error(f"Traceback: {tb}")
-                elif isinstance(result, tuple):
-                    self.model, self.data = result
-                else:
-                    raise Exception("Unknown error during testing")
+            with ThreadPoolExecutor() as pool:
+                future = asyncio.get_running_loop().run_in_executor(pool, self._test_sync)
+                await asyncio.wait_for(future, timeout=3600)
             self.__trainer = None
         except Exception as e:
-            logging.error(f"Error testing model: {e}")
-            logging.error(traceback.format_exc())
+            logging_training.error(f"Error testing model: {e}")
+            logging_training.error(traceback.format_exc())
 
-    def _test_sync(self, logging_config=None):
-        if logging_config:
-            logging.config.dictConfig(logging_config)
+    def _test_sync(self):
         try:
             self.__trainer.test(self.model, self.data, verbose=True)
         except Exception as e:
-            logging.error(f"Error in _test_sync: {e}")
+            logging_training.error(f"Error in _test_sync: {e}")
             tb = traceback.format_exc()
-            logging.error(f"Traceback: {tb}")
-            return e, tb
-        return self.model, self.data
+            logging_training.error(f"Traceback: {tb}")
+            # If "raise", the exception will be managed by the main thread
 
     def get_model_weight(self):
         return len(self.data.train_dataloader().dataset)

@@ -13,6 +13,9 @@ from torchmetrics.classification import (
 from torchmetrics import MetricCollection
 import seaborn as sns
 import matplotlib.pyplot as plt
+from nebula.config.config import TRAINING_LOGGER
+
+logging_training = logging.getLogger(TRAINING_LOGGER)
 
 
 class NebulaModel(pl.LightningModule, ABC):
@@ -75,7 +78,7 @@ class NebulaModel(pl.LightningModule, ABC):
         metrics_str = ""
         for key, value in output.items():
             metrics_str += f"{key}: {value:.4f}\n"
-        print_msg_box(metrics_str, indent=2, title=f"{phase} Metrics | Step: {self.global_number[phase]}")
+        print_msg_box(metrics_str, indent=2, title=f"{phase} Metrics | Step: {self.global_number[phase]}", logger_name=TRAINING_LOGGER)
 
     def generate_confusion_matrix(self, phase, print_cm=False, plot_cm=False):
         """
@@ -98,7 +101,7 @@ class NebulaModel(pl.LightningModule, ABC):
             raise NotImplementedError
 
         if print_cm:
-            logging.info(f"{phase} / Confusion Matrix:\n{cm}")
+            logging_training.info(f"{phase} / Confusion Matrix:\n{cm}")
 
         if plot_cm:
             # TODO: Improve with strings for class names
@@ -186,10 +189,10 @@ class NebulaModel(pl.LightningModule, ABC):
         return self.step(batch, batch_idx=batch_idx, phase="Train")
 
     def on_train_start(self):
-        logging.info(f"{'='*10} [Training] Started {'='*10}")
+        logging_training.info(f"{'='*10} [Training] Started {'='*10}")
 
     def on_train_end(self):
-        logging.info(f"{'='*10} [Training] Done {'='*10}")
+        logging_training.info(f"{'='*10} [Training] Done {'='*10}")
         self.global_number["Train"] += 1
 
     def on_train_epoch_end(self):
@@ -229,10 +232,10 @@ class NebulaModel(pl.LightningModule, ABC):
             return self.step(batch, batch_idx=batch_idx, phase="Test (Global)")
 
     def on_test_start(self):
-        logging.info(f"{'='*10} [Testing] Started {'='*10}")
+        logging_training.info(f"{'='*10} [Testing] Started {'='*10}")
 
     def on_test_end(self):
-        logging.info(f"{'='*10} [Testing] Done {'='*10}")
+        logging_training.info(f"{'='*10} [Testing] Done {'='*10}")
         self.global_number["Test (Local)"] += 1
         self.global_number["Test (Global)"] += 1
 
