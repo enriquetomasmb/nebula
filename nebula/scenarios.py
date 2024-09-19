@@ -876,11 +876,8 @@ class ScenarioManagement:
                     commands += f'$OUT_FILE = "{self.root_path}\\app\\logs\\{self.scenario_name}\\participant_{node["device_args"]["idx"]}.out"\n'
 
                     # Use Start-Process for executing Python in background and capture PID
-                    participant_pid_file = f"$ParentDir\\logs\\{self.scenario_name}\\participant_{node['device_args']['idx']}_pid.txt"
                     commands += f"""$process = Start-Process -FilePath "python" -ArgumentList "{self.root_path}\\nebula\\node.py {self.root_path}\\app\\config\\{self.scenario_name}\\participant_{node["device_args"]["idx"]}.json" -PassThru -NoNewWindow -RedirectStandardOutput $OUT_FILE
                 Add-Content -Path $PID_FILE -Value $process.Id
-                New-Item -Path {participant_pid_file} -Force -ItemType File
-                Add-Content -Path {participant_pid_file} -Value $process.Id
                 """
 
                 commands += 'Write-Host "All nodes started. PIDs stored in $PID_FILE"\n'

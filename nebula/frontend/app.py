@@ -1029,12 +1029,12 @@ nodes_finished = []
 async def node_stopped(scenario_name: str, request: Request):
     if request.headers.get("content-type") == "application/json":
         data = await request.json()
-        nodes_finished.append(data["ip"])
+        nodes_finished.append(data["idx"])
         nodes_list = list_nodes_by_scenario_name(scenario_name)
         finished = True
         # Check if all the nodes of the scenario have finished the experiment
         for node in nodes_list:
-            if node[2] not in nodes_finished:
+            if str(node[1]) not in map(str, nodes_finished):
                 finished = False
 
         if finished:

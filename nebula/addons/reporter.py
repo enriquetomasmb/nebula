@@ -56,7 +56,7 @@ class Reporter:
 
     async def report_scenario_finished(self):
         url = f'http://{self.config.participant["scenario_args"]["controller"]}/nebula/dashboard/{self.config.participant["scenario_args"]["name"]}/node/done'
-        data = json.dumps({"ip": self.config.participant["network_args"]["ip"], "port": self.config.participant["network_args"]["port"]})
+        data = json.dumps({"idx": self.config.participant["device_args"]["idx"]})
         headers = {
             "Content-Type": "application/json",
             "User-Agent": f'NEBULA Participant {self.config.participant["device_args"]["idx"]}',
