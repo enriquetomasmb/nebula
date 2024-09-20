@@ -157,6 +157,12 @@ class Aggregator(ABC):
             await self._add_model_lock.release_async()
             return
 
+        if round == -1:
+            # Be sure that the model message is not from the initialization round (round = -1)
+            logging.info(f"🔄  include_model_in_buffer | Ignoring model with round -1")
+            await self._add_model_lock.release_async()
+            return
+
         if self._waiting_global_update and not local:
             await self._handle_global_update(model, source)
             return
