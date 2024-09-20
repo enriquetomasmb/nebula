@@ -4,6 +4,10 @@ import numpy as np
 from sklearn.manifold import TSNE
 from torch.utils.data import Dataset
 from nebula.core.utils.deterministic import enable_deterministic
+import logging
+from nebula.config.config import TRAINING_LOGGER
+
+logging_training = logging.getLogger(TRAINING_LOGGER)
 
 
 class NebulaDataset(Dataset, ABC):
@@ -217,7 +221,6 @@ class NebulaDataset(Dataset, ABC):
             # This creates federated data subsets with varying class distributions based on
             # a Dirichlet distribution with alpha = 0.5.
         """
-        np.random.seed(self.seed)
         if isinstance(dataset.targets, np.ndarray):
             y_train = dataset.targets
         elif hasattr(dataset.targets, "numpy"):
@@ -234,9 +237,11 @@ class NebulaDataset(Dataset, ABC):
             idx_batch = [[] for _ in range(n_nets)]
             for k in K:
                 idx_k = np.where(y_train == k)[0]
+                np.random.seed(self.seed)
                 np.random.shuffle(idx_k)
 
                 if len(idx_k) > 0:
+                    np.random.seed(self.seed)
                     proportions = np.random.dirichlet(np.repeat(alpha, n_nets))
                     proportions = np.array([p * (len(idx_j) < N / n_nets) for p, idx_j in zip(proportions, idx_batch)])
                     proportions = proportions / proportions.sum()
@@ -245,6 +250,7 @@ class NebulaDataset(Dataset, ABC):
             min_size = min([len(idx_j) for idx_j in idx_batch])
 
         for j in range(n_nets):
+            np.random.seed(self.seed)
             np.random.shuffle(idx_batch[j])
             net_dataidx_map[j] = idx_batch[j]
 
@@ -288,10 +294,10 @@ class NebulaDataset(Dataset, ABC):
             federated_data = homo_partition(my_dataset)
             # This creates federated data subsets with homogeneous distribution.
         """
-        np.random.seed(self.seed)
         n_nets = self.partitions_number
 
         n_train = len(dataset.targets)
+        np.random.seed(self.seed)
         idxs = np.random.permutation(n_train)
         batch_idxs = np.array_split(idxs, n_nets)
         net_dataidx_map = {i: batch_idxs[i] for i in range(n_nets)}
@@ -336,7 +342,6 @@ class NebulaDataset(Dataset, ABC):
             federated_data = balanced_iid_partition(my_dataset)
             # This creates federated data subsets with equal class distributions.
         """
-        np.random.seed(self.seed)
         num_clients = self.partitions_number
         clients_data = {i: [] for i in range(num_clients)}
 
@@ -355,6 +360,7 @@ class NebulaDataset(Dataset, ABC):
         for label in range(self.num_classes):
             # Get the indices of the same label samples
             label_indices = np.where(labels == label)[0]
+            np.random.seed(self.seed)
             np.random.shuffle(label_indices)
 
             # Split the data based on their labels
@@ -398,7 +404,6 @@ class NebulaDataset(Dataset, ABC):
             # This creates federated data subsets with varying number of samples based on
             # an imbalance factor of 2.
         """
-        np.random.seed(self.seed)
         num_clients = self.partitions_number
         clients_data = {i: [] for i in range(num_clients)}
 
@@ -420,6 +425,7 @@ class NebulaDataset(Dataset, ABC):
         for label in range(self.num_classes):
             # Get the indices of the same label samples
             label_indices = np.where(labels == label)[0]
+            np.random.seed(self.seed)
             np.random.shuffle(label_indices)
 
             # Split the data based on their labels
@@ -463,7 +469,6 @@ class NebulaDataset(Dataset, ABC):
             # This creates federated data subsets with varying class distributions based on
             # a percentage of 20.
         """
-        np.random.seed(self.seed)
         if isinstance(dataset.targets, np.ndarray):
             y_train = dataset.targets
         elif hasattr(dataset.targets, "numpy"):  # Check if it's a tensor with .numpy() method
@@ -488,6 +493,7 @@ class NebulaDataset(Dataset, ABC):
 
         subset_indices = [[] for _ in range(num_subsets)]
         class_list = list(range(num_classes))
+        np.random.seed(self.seed)
         np.random.shuffle(class_list)
 
         for i in range(num_subsets):
@@ -495,6 +501,7 @@ class NebulaDataset(Dataset, ABC):
                 # Use modulo operation to cycle through the class_list
                 class_idx = class_list[(i * classes_per_subset + j) % num_classes]
                 indices = class_indices[class_idx]
+                np.random.seed(self.seed)
                 np.random.shuffle(indices)
                 # Select approximately 50% of the indices
                 subset_indices[i].extend(indices[: min_count // 2])
