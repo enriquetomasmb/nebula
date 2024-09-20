@@ -232,6 +232,7 @@ class Lightning:
     def _train_sync(self):
         try:
             self.__trainer.fit(self.model, self.data)
+            self.__trainer = None
         except Exception as e:
             logging_training.error(f"Error in _train_sync: {e}")
             tb = traceback.format_exc()
@@ -254,6 +255,12 @@ class Lightning:
     def _test_sync(self):
         try:
             self.__trainer.test(self.model, self.data, verbose=True)
+            
+            metrics = self.__trainer.callback_metrics
+            self.__trainer = None
+            loss = metrics.get('val_loss/dataloader_idx_0', None).item()
+            accuracy = metrics.get('val_accuracy/dataloader_idx_0', None).item()
+            return loss, accuracy
         except Exception as e:
             logging_training.error(f"Error in _test_sync: {e}")
             tb = traceback.format_exc()

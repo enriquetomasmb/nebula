@@ -237,7 +237,15 @@
     "round_frequency": "1",
     "mobile_participants_percent": "100",
     "additional_participants": [],
-    "schema_additional_participants": "random"
+    "schema_additional_participants": "random",
+    "with_trustworthiness": false,
+    "robustness_importance_percent": "20",
+    "privacy_importance_percent": "15",
+    "fairness_importance_percent": "15",
+    "explainability_importance_percent": "15",
+    "accountability_importance_percent": "10",
+    "architectural_soundness_importance_percent": "10",
+    "sustainability_importance_percent": "15"
   },
   {
     "scenario_title": "Krum_Fully_nodes5_MNIST_No Attack",
@@ -477,7 +485,15 @@
     "round_frequency": "1",
     "mobile_participants_percent": "100",
     "additional_participants": [],
-    "schema_additional_participants": "random"
+    "schema_additional_participants": "random",
+    "with_trustworthiness": false,
+    "robustness_importance_percent": "20",
+    "privacy_importance_percent": "15",
+    "fairness_importance_percent": "15",
+    "explainability_importance_percent": "15",
+    "accountability_importance_percent": "10",
+    "architectural_soundness_importance_percent": "10",
+    "sustainability_importance_percent": "15"
   },
   {
     "scenario_title": "TrimmedMean_Fully_nodes5_MNIST_No Attack",
@@ -717,7 +733,15 @@
     "round_frequency": "1",
     "mobile_participants_percent": "100",
     "additional_participants": [],
-    "schema_additional_participants": "random"
+    "schema_additional_participants": "random",
+    "with_trustworthiness": false,
+    "robustness_importance_percent": "20",
+    "privacy_importance_percent": "15",
+    "fairness_importance_percent": "15",
+    "explainability_importance_percent": "15",
+    "accountability_importance_percent": "10",
+    "architectural_soundness_importance_percent": "10",
+    "sustainability_importance_percent": "15"
   },
   {
     "scenario_title": "Median_Fully_nodes5_MNIST_No Attack",
@@ -1322,6 +1346,14 @@
     "round_frequency": "1",
     "mobile_participants_percent": "100",
     "additional_participants": [],
-    "schema_additional_participants": "random"
+    "schema_additional_participants": "random",
+    "with_trustworthiness": false,
+    "robustness_importance_percent": "20",
+    "privacy_importance_percent": "15",
+    "fairness_importance_percent": "15",
+    "explainability_importance_percent": "15",
+    "accountability_importance_percent": "10",
+    "architectural_soundness_importance_percent": "10",
+    "sustainability_importance_percent": "15"
   }
 ]

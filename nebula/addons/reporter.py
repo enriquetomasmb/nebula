@@ -49,6 +49,7 @@ class Reporter:
             await self.__report_data_queue()
             await self.__report_resources()
             self.counter += 1
+            
             if self.counter % 50 == 0:
                 logging.info(f"Reloading config file...")
                 self.cm.engine.config.reload_config_file()
@@ -130,6 +131,7 @@ class Reporter:
         packets_sent = net_io_counters.packets_sent
         packets_recv = net_io_counters.packets_recv
         
+
         if self.first_net_metrics:
             bytes_sent_diff = 0
             bytes_recv_diff = 0
@@ -151,6 +153,20 @@ class Reporter:
         self.acc_bytes_recv += bytes_recv_diff
         self.acc_packets_sent += packets_sent_diff
         self.acc_packets_recv += packets_recv_diff
+        
+        #Trust_metrics
+        if self.config.participant["trust_args"]["with_trustworthiness"]:
+            scenario_name = self.config.participant["scenario_args"]["name"]
+            idx = self.config.participant["device_args"]["idx"]
+            file_bytes_sent = f"app/logs/{scenario_name}/trustworthiness/bytes_sent_participant_{idx}.txt"
+            file_bytes_recv = f"app/logs/{scenario_name}/trustworthiness/bytes_recv_participant_{idx}.txt"
+
+            # Save the bytes sent in a file
+            with open(file_bytes_sent, 'w') as file:
+                file.write(str(bytes_sent))
+            # Save the bytes recv in a file
+            with open(file_bytes_recv, 'w') as file:
+                file.write(str(bytes_recv))
 
         current_connections = await self.cm.get_addrs_current_connections(only_direct=True)
 

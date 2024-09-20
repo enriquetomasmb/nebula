@@ -1,4 +1,6 @@
 import asyncio
+import base64
+import gc
 import logging
 import time
 from geopy import distance
@@ -231,14 +233,24 @@ class Connection:
             chunk = data[start:end]
             is_last_chunk = chunk_index == num_chunks - 1
 
+            # TODO [FER] check wich feature is better
+
+            # feature/processes
             header = message_id + chunk_index.to_bytes(4, "big") + (b"\x01" if is_last_chunk else b"\x00")
             chunk_size_bytes = len(chunk).to_bytes(4, "big")
             chunk_with_header = header + chunk_size_bytes + chunk + self.EOT_CHAR
+            
+            # feature/trustworthiness
+            #chunk_size = 100 * 1024 * 1024 # 100 MB
+            #total_size = len(data_to_send)
 
             self.writer.write(chunk_with_header)
             await self.writer.drain()
 
             logging.debug(f"Sent message {message_id.hex()} | chunk {chunk_index+1}/{num_chunks} | size: {len(chunk)} bytes")
+
+
+    # feature/processes
 
     def _calculate_chunk_size(self, data_size: int) -> int:
         if data_size <= 1024:  # 1 KB
@@ -248,8 +260,42 @@ class Connection:
         else:
             return 1024 * 1024  # 1 MB
 
+    # feature/trustworthiness TODO [FER] delete?
+    # async def retrieve_message(self, message):
+    #     try:
+    #         data_type_prefix = message[0:4]
+    #         message = message[4:]
+    #         if message[-len(self.COMPRESSION_CHAR) :] == self.COMPRESSION_CHAR:
+    #             message = await self.decompress(message[: -len(self.COMPRESSION_CHAR)])
+    #             if message is None:
+    #                 return None
+    #         if data_type_prefix == self.DATA_TYPE_PREFIXES["pb"]:
+    #             logging.debug(f"Received a successful message (protobuf)")
+    #             asyncio.create_task(self.cm.handle_incoming_message(message, self.addr), name=f"Connection {self.addr} message handler")
+    #         elif data_type_prefix == self.DATA_TYPE_PREFIXES["string"]:
+    #             logging.debug(f"Received message (string): {message.decode('utf-8')}")
+    #         elif data_type_prefix == self.DATA_TYPE_PREFIXES["json"]:
+    #             logging.debug(f"Received message (json): {json.loads(message.decode('utf-8'))}")
+    #         elif data_type_prefix == self.DATA_TYPE_PREFIXES["bytes"]:
+    #             logging.debug(f"Received message (bytes): {message}")
+    #             return message
+    #         else:
+    #             logging.error(f"❗️  Unknown data type prefix: {data_type_prefix}")
+    #             return None
+    #     except Exception as e:
+    #         logging.error(f"❗️  Error retrieving message: {e}")
+    #         return None
+    #     finally:
+    #         del message
+    #         gc.collect()
+
+
     async def handle_incoming_message(self) -> None:
         try:
+            # feature/trustworthiness TODO [FER] delete? 
+            # buffer = bytearray()
+            # chunk_size = 100 * 1024 * 1024 # 100 MB
+            # max_buffer_size = 1024 * 1024 * 1024 # 1 GB
             while True:
                 header = await self._read_exactly(self.HEADER_SIZE)
                 message_id, chunk_index, is_last_chunk = self._parse_header(header)

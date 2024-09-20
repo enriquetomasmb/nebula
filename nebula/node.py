@@ -171,6 +171,9 @@ async def main():
         target_label=target_label,
         target_changed_label=target_changed_label,
         noise_type=noise_type,
+        trust = config.participant["trust_args"]["with_trustworthiness"],
+        scenario_name = config.participant["scenario_args"]["name"],
+        idx = config.participant["device_args"]["idx"]
     )
 
     # - Import MNISTDatasetScikit (not torch component)

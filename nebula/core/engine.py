@@ -1,11 +1,14 @@
 import asyncio
 import logging
 import os
+import pickle
 
 import docker
+from codecarbon import EmissionsTracker
 from nebula.addons.functions import print_msg_box
 from nebula.addons.attacks.attacks import create_attack
 from nebula.addons.reporter import Reporter
+from nebula.addons.trustworthiness.calculation import stop_emissions_tracking_and_save
 from nebula.core.aggregation.aggregator import create_aggregator, create_malicious_aggregator, create_target_aggregator
 from nebula.core.eventmanager import EventManager, event_handler
 from nebula.core.network.communications import CommunicationsManager
@@ -102,6 +105,15 @@ class Engine:
         self.model_poisoning = model_poisoning
         self.poisoned_ratio = poisoned_ratio
         self.noise_type = noise_type
+
+        #Trust
+        if self.config.participant["trust_args"]["with_trustworthiness"]:
+            self.trust_dir_files = f"app/logs/{self.experiment_name}/trustworthiness"
+            self.emissions_file = 'emissions.csv'
+            
+            # Start EmissionsTracker from codecarbon to measure the emissions during the aggregation step in the server
+            self.tracker = EmissionsTracker(tracking_mode='process', log_level='error', save_to_file=False)
+            self.tracker.start()
 
         if self.config.participant["tracking_args"]["local_tracking"] == "csv":
             nebulalogger = CSVLogger(f"{self.log_dir}", name="metrics", version=f"participant_{self.idx}")
@@ -585,7 +597,20 @@ class ServerNode(Engine):
         await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.BYPASS_MODEL_WEIGHT, source=self.addr, round=self.round)
         await self._waiting_model_updates()
         await self.cm.propagator.propagate("stable")
+        
+        if self.config.participant["trust_args"]["with_trustworthiness"]:
+            scenario_name = self.config.participant["scenario_args"]["name"]
+            model_file = f"app/logs/{scenario_name}/trustworthiness/participant_{self.idx}_final_model.pk"
+            
+            # Save model in trustworthy dir
+            with open(model_file, 'wb') as f:
+                pickle.dump(self.trainer.model, f)
 
+            role = 'server'
+            workload = 'aggregation'
+            sample_size = 0
+            
+            stop_emissions_tracking_and_save(self.tracker, self.trust_dir_files, self.emissions_file, role, workload, sample_size) 
 
 class TrainerNode(Engine):
     def __init__(self, model, dataset, config=Config, trainer=Lightning, security=False, model_poisoning=False, poisoned_ratio=0, noise_type="gaussian"):
@@ -596,14 +621,65 @@ class TrainerNode(Engine):
         logging.info(f"Waiting global update | Assign _waiting_global_update = True")
         self.aggregator.set_waiting_global_update()
 
-        await self.trainer.test()
-        await self.trainer.train()
+
+        # feature/processes
+        #await self.trainer.test()
+        #await self.trainer.train()
+      
+        # feature/trustworthiness
+        logging.info(f"[Testing] Starting...")
+    
+        # TODO [FER] await as in processes? 
+        results = self.trainer.test()
+        
+        #Trust
+        if self.config.participant["trust_args"]["with_trustworthiness"]:
+            loss = f'{self.trust_dir_files}/loss_node_{self.idx}.txt'
+            accuracy = f'{self.trust_dir_files}/accuracy_node_{self.idx}.txt'
+            
+            with open(loss, 'w') as file:
+                file.write(str(results[0]))
+            with open(accuracy, 'w') as file:
+                file.write(str(results[1]))
+        
+        logging.info(f"[Testing] Finishing...")
+
+        logging.info(f"[Training] Starting...")
+        
+        # TODO [FER] await as in processes? [FER]
+        self.trainer.train()
+        
+        #Trust
+        if self.config.participant["trust_args"]["with_trustworthiness"]:
+            scenario_name = self.config.participant["scenario_args"]["name"]
+            train_model = f"app/logs/{scenario_name}/trustworthiness/participant_{self.idx}_train_model.pk"
+            # Save the train model in trustworthy dir
+            with open(train_model, 'wb') as f:
+                pickle.dump(self.trainer.model, f)
+                
+        logging.info(f"[Training] Finishing...")
 
         await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.get_model_weight(), source=self.addr, round=self.round, local=True)
 
         await self.cm.propagator.propagate("stable")
         await self._waiting_model_updates()
-
+        
+        if self.config.participant["trust_args"]["with_trustworthiness"]:
+            model_file = f"app/logs/{scenario_name}/trustworthiness/participant_{self.idx}_final_model.pk"
+            
+            # Save model in trustworthy dir
+            with open(model_file, 'wb') as f:
+                pickle.dump(self.trainer.model, f)
+                
+            role = 'client'
+            workload = 'training'
+            train_loader_file = f'{self.trust_dir_files}/participant_{self.idx}_train_loader.pk'
+            with open(train_loader_file, 'rb') as file:
+                train_loader = pickle.load(file)
+            sample_size = len(train_loader)
+            
+            stop_emissions_tracking_and_save(self.tracker, self.trust_dir_files, self.emissions_file, role, workload, sample_size) 
+        
 
 class IdleNode(Engine):
     def __init__(self, model, dataset, config=Config, trainer=Lightning, security=False, model_poisoning=False, poisoned_ratio=0, noise_type="gaussian"):

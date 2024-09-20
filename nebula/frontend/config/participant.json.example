@@ -111,6 +111,16 @@
     "config_dir": "/Users/enrique/Documents/nebula/app/config",
     "run_hash": ""
   },
+  "trust_args": {
+    "with_trustworthiness": false,
+    "robustness_importance_percent": "20",
+    "privacy_importance_percent": "15",
+    "fairness_importance_percent": "15",
+    "explainability_importance_percent": "15",
+    "accountability_importance_percent": "10",
+    "architectural_soundness_importance_percent": "10",
+    "sustainability_importance_percent": "15"
+  },
   "mender_args": {
     "id": "",
     "mac": "",

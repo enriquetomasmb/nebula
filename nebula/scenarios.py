@@ -15,6 +15,7 @@ import docker
 
 from nebula.addons.blockchain.blockchain_deployer import BlockchainDeployer
 from nebula.addons.topologymanager import TopologyManager
+from nebula.addons.trustworthiness.factsheet import Factsheet
 from nebula.config.config import Config
 from nebula.core.utils.certificate import generate_ca_certificate, generate_certificate
 
@@ -149,6 +150,14 @@ class Scenario:
         mobile_participants_percent,
         additional_participants,
         schema_additional_participants,
+        with_trustworthiness,
+        robustness_importance_percent,
+        privacy_importance_percent,
+        fairness_importance_percent,
+        explainability_importance_percent,
+        accountability_importance_percent,
+        architectural_soundness_importance_percent,
+        sustainability_importance_percent,
     ):
         self.scenario_title = scenario_title
         self.scenario_description = scenario_description
@@ -190,6 +199,14 @@ class Scenario:
         self.mobile_participants_percent = mobile_participants_percent
         self.additional_participants = additional_participants
         self.schema_additional_participants = schema_additional_participants
+        self.with_trustworthiness = with_trustworthiness
+        self.robustness_importance_percent = robustness_importance_percent
+        self.privacy_importance_percent = privacy_importance_percent
+        self.fairness_importance_percent = fairness_importance_percent
+        self.explainability_importance_percent = explainability_importance_percent
+        self.accountability_importance_percent = accountability_importance_percent
+        self.architectural_soundness_importance_percent = architectural_soundness_importance_percent
+        self.sustainability_importance_percent = sustainability_importance_percent
 
     def attack_node_assign(
         self,
@@ -286,6 +303,24 @@ class ScenarioManagement:
         self.topologymanager = None
         self.env_path = None
         self.use_blockchain = self.scenario.agg_algorithm == "BlockchainReputation"
+        
+        #Trustworthiness
+        trustworthiness = self.scenario.with_trustworthiness
+        
+        trust_dir = f'{self.log_dir}/{self.scenario_name}/trustworthiness'
+        
+        # Create a directory to save files to calcutate trust
+        os.makedirs(trust_dir, exist_ok=True)
+        os.chmod(trust_dir, 0o777)
+            
+        if trustworthiness is True:
+            data_filename = f"{trust_dir}/data.json"
+            # Save data in a json file
+            with open(data_filename, 'w') as data_file:
+                json.dump(scenario, data_file, indent=4)
+                
+            factsheet = Factsheet()
+            factsheet.populate_factsheet_pre_train(scenario, self.scenario_name)
 
         # Create Scenario management dirs
         os.makedirs(self.config_dir, exist_ok=True)
@@ -381,6 +416,14 @@ class ScenarioManagement:
             participant_config["mobility_args"]["radius_federation"] = self.scenario.radius_federation
             participant_config["mobility_args"]["scheme_mobility"] = self.scenario.scheme_mobility
             participant_config["mobility_args"]["round_frequency"] = self.scenario.round_frequency
+            participant_config["trust_args"]["with_trustworthiness"] = self.scenario.with_trustworthiness
+            participant_config["trust_args"]["robustness_importance_percent"] = self.scenario.robustness_importance_percent
+            participant_config["trust_args"]["privacy_importance_percent"] = self.scenario.privacy_importance_percent
+            participant_config["trust_args"]["fairness_importance_percent"] = self.scenario.fairness_importance_percent
+            participant_config["trust_args"]["explainability_importance_percent"] = self.scenario.explainability_importance_percent
+            participant_config["trust_args"]["accountability_importance_percent"] = self.scenario.accountability_importance_percent
+            participant_config["trust_args"]["architectural_soundness_importance_percent"] = self.scenario.architectural_soundness_importance_percent
+            participant_config["trust_args"]["sustainability_importance_percent"] = self.scenario.sustainability_importance_percent
 
             with open(participant_file, "w") as f:
                 json.dump(participant_config, f, sort_keys=False, indent=2)
@@ -784,6 +827,19 @@ class ScenarioManagement:
         # Write the Docker Compose file in config directory
         with open(f"{self.config_dir}/docker-compose.yml", "w") as f:
             f.write(docker_compose_file)
+            
+        # Include additional config to the participants
+        for idx, node in enumerate(self.config.participants):
+            node["tracking_args"]["log_dir"] = "/nebula/app/logs"
+            node["tracking_args"]["config_dir"] = f"/nebula/app/config/{self.scenario_name}"
+            node["scenario_args"]["controller"] = self.controller
+            node["security_args"]["certfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_cert.pem"
+            node["security_args"]["keyfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_key.pem"
+            node["security_args"]["cafile"] = f"/nebula/app/certs/ca_cert.pem"
+            
+             # Write the config file in config directory
+            with open(f"{self.config_dir}/participant_{node['device_args']['idx']}.json", "w") as f:
+                json.dump(node, f, indent=4)
 
         # Include additional config to the participants
         for idx, node in enumerate(self.config.participants):
@@ -934,6 +990,21 @@ class ScenarioManagement:
                 os.path.join(os.environ["NEBULA_LOGS_DIR"], scenario_name),
                 os.path.join(os.environ["NEBULA_ROOT"], "app", "tmp", scenario_name),
             )
+        except FileNotFoundError:
+            logging.warning("Files not found, nothing to remove")
+        except Exception as e:
+            logging.error("Unknown error while removing files")
+            logging.error(e)
+            raise e
+    
+    @classmethod
+    def remove_trustworthiness_files(cls, scenario_name):
+        trustworthiness_files_path = f'{os.environ.get("NEBULA_LOGS_DIR")}/{scenario_name}/trustworthiness'
+        try:
+            shutil.rmtree(trustworthiness_files_path) 
+        except PermissionError:
+            # Avoid error if the user does not have enough permissions to remove the files
+            logging.warning("Not enough permissions to remove the files, moving them to tmp folder")
         except FileNotFoundError:
             logging.warning("Files not found, nothing to remove")
         except Exception as e:

@@ -695,7 +695,63 @@
                         </div>
                     </div>
                 </div>
-            </div>
+                <!-- Trustworthiness -->
+                <div class="form-group row container-shadow tiny grey">
+                    <h5 class="step-number">Trustworthiness <i class="fa fa-handshake-o"></i>
+                        <input type="checkbox" id="trustworthiness-lock" onchange="lock('without-trustworthiness-btn', 'with-trustworthiness-btn',
+                        'robustness-importance-percent', 'privacy-importance-percent', 'fairness-importance-percent', 'explainability-importance-percent',
+                        'accountability-importance-percent', 'architectural_soundness-importance-percent', 'sustainability-importance-percent',
+                        checked)" style="display: none;">
+                        <label for="trustworthiness-lock" class="icon-container" style="float: right;">
+                            <i class="fa fa-lock"></i> 
+                        </label>
+                    </h5>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="trustworthiness" id="without-trustworthiness-btn" checked>
+                        <label class="form-check-label" for="without-trustworthiness-btn">Without Trustworthiness</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="trustworthiness" id="with-trustworthiness-btn">
+                        <label class="form-check-label" for="with-trustworthiness-btn">With Trustworthiness</label>
+                    </div>
+                    <div id="trustworthiness-options" style="display: none; margin-left: 10px">
+                        <h5 class="step-title">Importance of the robustness pillar</h5>
+                        <input type="number" class="form-control" id="robustness-importance-percent"
+                            placeholder="Importance of the robustness pillar" min="5" value="20"
+                            style="display: inline; width: 20%">
+                        <small class="form-text text-muted">%</small>
+                        <h5 class="step-title">Importance of the privacy pillar</h5>
+                        <input type="number" class="form-control" id="privacy-importance-percent"
+                            placeholder="Importance of the privacy pillar" min="5" value="15"
+                            style="display: inline; width: 20%">
+                        <small class="form-text text-muted">%</small>
+                        <h5 class="step-title">Importance of the fairness pillar</h5>
+                        <input type="number" class="form-control" id="fairness-importance-percent"
+                            placeholder="Importance of the fairness pillar" min="5" value="15"
+                            style="display: inline; width: 20%">
+                        <small class="form-text text-muted">%</small>
+                        <h5 class="step-title">Importance of the explainability pillar</h5>
+                        <input type="number" class="form-control" id="explainability-importance-percent"
+                            placeholder="Importance of the explainability pillar" min="5" value="15"
+                            style="display: inline; width: 20%">
+                        <small class="form-text text-muted">%</small>
+                        <h5 class="step-title">Importance of the accountability pillar</h5>
+                        <input type="number" class="form-control" id="accountability-importance-percent"
+                            placeholder="Importance of the accountability pillar" min="5" value="10"
+                            style="display: inline; width: 20%">
+                        <small class="form-text text-muted">%</small>
+                        <h5 class="step-title">Importance of the architectural soundness pillar</h5>
+                        <input type="number" class="form-control" id="architectural_soundness-importance-percent"
+                            placeholder="Importance of the architectural soundness pillar" min="5" value="10"
+                            style="display: inline; width: 20%">
+                        <small class="form-text text-muted">%</small>
+                        <h5 class="step-title">Importance of the sustainability pillar</h5>
+                        <input type="number" class="form-control" id="sustainability-importance-percent"
+                            placeholder="Importance of the sustainability pillar" min="5" value="15"
+                            style="display: inline; width: 20%">
+                        <small class="form-text text-muted">%</small>
+                    </div>
+                </div>
         </form>
     </div>
 
@@ -1051,6 +1107,15 @@
             data["mobile_participants_percent"] = document.getElementById("mobileParticipantsPercent").value
             data["additional_participants"] = aditional_participants
             data["schema_additional_participants"] = document.getElementById("schemaAdditionalParticipantsSelect").value
+            // Step 16
+            data["with_trustworthiness"] = document.getElementById("with-trustworthiness-btn").checked ? true : false
+            data["robustness_importance_percent"] = document.getElementById("robustness-importance-percent").value
+            data["privacy_importance_percent"] = document.getElementById("privacy-importance-percent").value
+            data["fairness_importance_percent"] = document.getElementById("fairness-importance-percent").value
+            data["explainability_importance_percent"] = document.getElementById("explainability-importance-percent").value
+            data["accountability_importance_percent"] = document.getElementById("accountability-importance-percent").value
+            data["architectural_soundness_importance_percent"] = document.getElementById("architectural_soundness-importance-percent").value
+            data["sustainability_importance_percent"] = document.getElementById("sustainability-importance-percent").value
             return data
         }
 
@@ -1145,6 +1210,18 @@
                 document.getElementById("roundFrequency").value = data["round_frequency"];
                 document.getElementById("mobileParticipantsPercent").value = data["mobile_participants_percent"];
                 document.getElementById("schemaAdditionalParticipantsSelect").value = data["schema_additional_participants"];
+                // Step 16
+                document.getElementById("with-trustworthiness-btn").checked = data["with_trustworthiness"]
+                if (data["with_trustworthiness"]) {
+                    document.getElementById("trustworthiness-options").style.display = "block";
+                }
+                document.getElementById("robustness-importance-percent").value = data["robustness_importance_percent"]
+                document.getElementById("privacy-importance-percent").value = data["privacy_importance_percent"]
+                document.getElementById("fairness-importance-percent").value = data["fairness_importance_percent"]
+                document.getElementById("explainability-importance-percent").value = data["explainability_importance_percent"]
+                document.getElementById("accountability-importance-percent").value = data["accountability_importance_percent"]
+                document.getElementById("architectural_soundness-importance-percent").value = data["architectural_soundness_importance_percent"]
+                document.getElementById("sustainability-importance-percent").value = data["sustainability_importance_percent"]
                 // Additional Participants
                 console.log(data["additional_participants"])
                 var additionalParticipants = document.getElementById("additionalParticipants");
@@ -1981,42 +2058,57 @@
                     '<br><br><p class="badge text-bg-danger">Warning: you will stop the running scenario and start a new one</p>');
                 document.getElementById("yes-button").disabled = false;
 
-                document.getElementById("yes-button").addEventListener("click", function () {
+                trust = document.getElementById("with-trustworthiness-btn").checked ? true : false
 
-                    var data = scenarioStorage.scenariosList;
+                var check_weights = true;
 
-                    // Hide the modal
-                    $('#confirm-modal').modal('hide');
-                    document.querySelector(".overlay").style.display = "block";
-                    document.getElementById("spinner").style.display = "block";
+                if (trust === true){
+                    check_weights = checkWights()
+                }
 
-                    fetch("/nebula/dashboard/deployment/run", {
-                        method: "POST",
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(data)
-                    })
-                    .then(response => {
-                        if (response.redirected) {
-                            window.location.href = response.url;
-                        } else {
+                if (checkWights){
+
+                    document.getElementById("yes-button").addEventListener("click", function () {
+
+                        var data = scenarioStorage.scenariosList;
+
+                        // Hide the modal
+                        $('#confirm-modal').modal('hide');
+                        document.querySelector(".overlay").style.display = "block";
+                        document.getElementById("spinner").style.display = "block";
+
+                        fetch("/nebula/dashboard/deployment/run", {
+                            method: "POST",
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify(data)
+                        })
+                        .then(response => {
+                            if (response.redirected) {
+                                window.location.href = response.url;
+                            } else {
+                                document.querySelector(".overlay").style.display = "none";
+                                document.getElementById("spinner").style.display = "none";
+                                // If the user is a demo, show a modal with a message
+                                $('#confirm-modal').on('hidden.bs.modal', function () {
+                                    $('#info-modal-body').html('You are not allowed to run a scenario. You have a limited functionality or a scenario is already running');
+                                    $('#info-modal').modal('show');
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
                             document.querySelector(".overlay").style.display = "none";
                             document.getElementById("spinner").style.display = "none";
-                            // If the user is a demo, show a modal with a message
-                            $('#confirm-modal').on('hidden.bs.modal', function () {
-                                $('#info-modal-body').html('You are not allowed to run a scenario. You have a limited functionality or a scenario is already running');
-                                $('#info-modal').modal('show');
-                            });
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        document.querySelector(".overlay").style.display = "none";
-                        document.getElementById("spinner").style.display = "none";
-                    });
+                        });
 
-                });
+                    });
+                } else {
+                    $('#confirm-modal-body').html('The sum of all pillar importances is not equal to 100.\n' +
+                    '<br><br><p style="color: #772953; font-weight: bold">To calculate the trustworthiness of the scenario, the importance of all the pillas must be equal to 100.</p>');
+                    document.getElementById("yes-button").disabled = false;
+                }
             }
         });
 
@@ -2228,6 +2320,40 @@
             }
         });
 
+    </script>
+
+    <script>
+        // Trustworthiness configuration
+        // When click on "with-trustworthiness-btn" display weights of the differents pillars configuration
+
+        trustworthinessOptionsDiv = document.getElementById("trustworthiness-options")
+        withoutTrustworthinessBtn = document.getElementById("without-trustworthiness-btn");
+        withoutTrustworthinessBtn.addEventListener("click", function () {
+            trustworthinessOptionsDiv.style.display = "none";
+        });
+
+        withTrustworthinessBtn = document.getElementById("with-trustworthiness-btn");
+        withTrustworthinessBtn.addEventListener("click", function () {
+            trustworthinessOptionsDiv.style.display = "block";
+        });
+
+        function checkWights() {
+            var robustness_percent = parseFloat(document.getElementById("robustness-importance-percent").value);
+            var privacy_percent = parseFloat(document.getElementById("privacy-importance-percent").value);
+            var fairness_percent = parseFloat(document.getElementById("fairness-importance-percent").value);
+            var explainability_percent = parseFloat(document.getElementById("explainability-importance-percent").value);
+            var accountability_percent = parseFloat(document.getElementById("accountability-importance-percent").value);
+            var architectural_soundness_percent = parseFloat(document.getElementById("architectural_soundness-importance-percent").value);
+            var sustainability_percent = parseFloat(document.getElementById("sustainability-importance-percent").value);
+
+            var total_percent = robustness_percent + privacy_percent + fairness_percent + explainability_percent + accountability_percent + architectural_soundness_percent + sustainability_percent;
+
+            if (total_percent === 100) {
+                return true;
+            }
+
+            return false;
+        }
     </script>
 
     <script>
