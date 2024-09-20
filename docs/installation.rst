@@ -212,4 +212,13 @@ If frontend is not working, restart docker daemon
 
 ===================================
 
-If the frontend is not working, check the logs in app/logs/server.log
+Error: Too many open files
+
+Solution: Increase the number of open files
+
+    ulimit -n 65536
+
+Also, you can add the following lines to the file /etc/security/limits.conf
+
+    * soft nofile 65536
+    * hard nofile 65536

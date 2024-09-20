@@ -204,11 +204,17 @@
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="deploymentRadioOptions" id="process-radio" value="process" checked>
                         <label class="form-check-label" for="process-radio">Processes</label>
+                        <small id="processHelp" class="form-text text-muted"></small>
+                            <i id="processHelpIcon" class="fa fa-info-circle" style="cursor: pointer;"></i>
+                        </small>
                     </div>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="deploymentRadioOptions" id="docker-radio"
                             value="docker">
                         <label class="form-check-label" for="docker-radio">Docker containers</label>
+                        <small id="dockerHelp" class="form-text text-muted"></small>
+                            <i id="dockerHelpIcon" class="fa fa-info-circle" style="cursor: pointer;"></i>
+                        </small>
                     </div>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="deploymentRadioOptions" id="physical-devices-radio"
@@ -232,7 +238,7 @@
                             <option>CFL</option>
                         </select>
                         <small id="architectureHelp" class="form-text text-muted">
-                            <i id="architectureHelpIcon" class="fa fa-info-circle"></i>
+                            <i id="architectureHelpIcon" class="fa fa-info-circle" style="cursor: pointer;"></i>
                         </small>
                     </div>
                 </div>
@@ -286,7 +292,7 @@
                             style="display: inline; width: 50%">
                         </select>
                         <small id="datasetHelp" class="form-text text-muted">
-                            <i id="datasetHelpIcon" class="fa fa-info-circle"></i>
+                            <i id="datasetHelpIcon" class="fa fa-info-circle" style="cursor: pointer;"></i>
                         </small>
                     </div>
                     <h5 class="step-title">Dataset type</h5>
@@ -296,7 +302,7 @@
                             <option value="false" selected>Non-IID</option>
                         </select>
                         <small id="iidHelp" class="form-text text-muted">
-                            <i id="iidHelpIcon" class="fa fa-info-circle"></i>
+                            <i id="iidHelpIcon" class="fa fa-info-circle" style="cursor: pointer;"></i>
                         </small>
                     </div>
                     <h5 class="step-title">Partition Methods</h5>
@@ -309,8 +315,8 @@
                             <option value="unbalancediid" disabled style="display: none;">Unbalanced IID</option>
                         </select>
                         <small id="partitionMethodsHelp" class="form-text text-muted">
-                            <i id="partitionMethodsHelpIcon" class="fa fa-info-circle"></i>
-                            <i id="methodtip" class="fa fa-image"></i>
+                            <i id="partitionMethodsHelpIcon" class="fa fa-info-circle" style="cursor: pointer;"></i>
+                            <i id="methodtip" class="fa fa-image" style="cursor: pointer;"></i>
                         </small>
                         <img id="methodtipImage" style="display: none; width: 200px; height: 200px;" alt="result">
                     </div>
@@ -319,7 +325,7 @@
                         <input type="number" step="0.1" class="form-control" id="partitionParameter" style="display: inline; width: 50%"
                             value="0.5">
                         <small id="parameterSettingHelp" class="form-text text-muted">
-                            <i id="parameterSettingHelpIcon" class="fa fa-info-circle"></i>
+                            <i id="parameterSettingHelpIcon" class="fa fa-info-circle" style="cursor: pointer;"></i>
                         </small>
                     </div>
                 </div>
@@ -335,7 +341,7 @@
                         <select class="form-control" id="modelSelect" name="model" style="display: inline; width: 50%">
                         </select>
                         <small id="modelHelp" class="form-text text-muted">
-                            <i id="modelHelpIcon" class="fa fa-info-circle"></i>
+                            <i id="modelHelpIcon" class="fa fa-info-circle" style="cursor: pointer;"></i>
                         </small>
                     </div>
                 </div>
@@ -1369,6 +1375,17 @@
             html: true,
             container: "body",
             delay: { show: 500, hide: 100 },
+        });
+
+        // When click processHelpIcon, redirect to the documentation page
+        var processIcon = document.getElementById("processHelpIcon");
+        processIcon.addEventListener("click", function () {
+            window.open("#", "_blank");
+        });
+
+        var dockerIcon = document.getElementById("dockerHelpIcon");
+        dockerIcon.addEventListener("click", function () {
+            window.open("#", "_blank");
         });
     </script>
 
