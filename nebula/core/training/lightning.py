@@ -155,9 +155,13 @@ class Lightning:
     def test(self):
         try:
             self.create_trainer()
-            results = self.__trainer.test(self.model, self.data, verbose=True)
+            self.__trainer.test(self.model, self.data, verbose=True)
+            
+            metrics = self.__trainer.callback_metrics
             self.__trainer = None
-            return results
+            loss = metrics.get('val_loss/dataloader_idx_0', None).item()
+            accuracy = metrics.get('val_accuracy/dataloader_idx_0', None).item()
+            return loss, accuracy
         except Exception as e:
             logging.error(f"Error testing model: {e}")
             logging.error(traceback.format_exc())

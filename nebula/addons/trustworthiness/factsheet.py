@@ -17,7 +17,6 @@ from nebula.core.models.syscall.mlp import SyscallModelMLP
 
 dirname = os.path.dirname(__file__)
 
-logger = logging.getLogger(__name__)
 
 
 class Factsheet:
@@ -51,7 +50,7 @@ class Factsheet:
                 factsheet = json.load(f)
 
                 if data is not None:
-                    logger.info("FactSheet: Populating factsheet with pre training metrics")
+                    logging.info("FactSheet: Populating factsheet with pre training metrics")
 
                     federation = data["federation"]
                     n_nodes = int(data["n_nodes"])
@@ -122,8 +121,8 @@ class Factsheet:
                     factsheet["configuration"]["local_update_steps"] = 1
 
             except JSONDecodeError as e:
-                logger.warning(f"{factsheet_file} is invalid")
-                logger.error(e)
+                logging.warning(f"{factsheet_file} is invalid")
+                logging.error(e)
 
             f.seek(0)
             f.truncate()
@@ -141,7 +140,7 @@ class Factsheet:
 
         factsheet_file = os.path.join(f"{os.environ.get('NEBULA_LOGS_DIR')}{scenario_name}/trustworthiness/{self.factsheet_file_nm}")
 
-        logger.info("FactSheet: Populating factsheet with post training metrics")
+        logging.info("FactSheet: Populating factsheet with post training metrics")
 
         with open(factsheet_file, "r+") as f:
             factsheet = {}
@@ -152,7 +151,7 @@ class Factsheet:
                 model = factsheet["configuration"]["training_model"]
 
                 files_dir = f"{os.environ.get('NEBULA_LOGS_DIR')}/{scenario_name}/trustworthiness"
-                data_dir = f"{os.environ.get('NEBULA_LOGS_DIR')}/{scenario_name}/trustworthiness/"
+                data_dir = "../addons/trustworthiness/benchmarks"
 
                 models_files = glob.glob(os.path.join(files_dir, "*final_model*"))
                 bytes_sent_files = glob.glob(os.path.join(files_dir, "*bytes_sent*"))
@@ -239,47 +238,46 @@ class Factsheet:
                 factsheet["performance"]["test_feature_importance_cv"] = 1 if feature_importance > 1 else feature_importance
 
                 # Set emissions metrics
-                # emissions = None if emissions_file is None else read_csv(emissions_file)
-                # if emissions is not None:
-                #     logger.info("FactSheet: Populating emissions")
-                #     cpu_spez_df = pd.read_csv(os.path.join(data_dir, "CPU_benchmarks_v4.csv"), header=0)
-                #     emissions["CPU_model"] = emissions["CPU_model"].astype(str).str.replace(r"\([^)]*\)", "", regex=True)
-                #     emissions["CPU_model"] = emissions["CPU_model"].astype(str).str.replace(r" CPU", "", regex=True)
-                #     emissions["GPU_model"] = emissions["GPU_model"].astype(str).str.replace(r"[0-9] x ", "", regex=True)
-                #     emissions = pd.merge(emissions, cpu_spez_df[["cpuName", "powerPerf"]], left_on="CPU_model", right_on="cpuName", how="left")
-                #     gpu_spez_df = pd.read_csv(os.path.join(data_dir, "GPU_benchmarks_v7.csv"), header=0)
-                #     emissions = pd.merge(emissions, gpu_spez_df[["gpuName", "powerPerformance"]], left_on="GPU_model", right_on="gpuName", how="left")
+                emissions = None if emissions_file is None else read_csv(emissions_file)
+                if emissions is not None:
+                    logging.info("FactSheet: Populating emissions")
+                    cpu_spez_df = pd.read_csv(os.path.join(data_dir, "CPU_benchmarks_v4.csv"), header=0)
+                    emissions["CPU_model"] = emissions["CPU_model"].astype(str).str.replace(r"\([^)]*\)", "", regex=True)
+                    emissions["CPU_model"] = emissions["CPU_model"].astype(str).str.replace(r" CPU", "", regex=True)
+                    emissions["GPU_model"] = emissions["GPU_model"].astype(str).str.replace(r"[0-9] x ", "", regex=True)
+                    emissions = pd.merge(emissions, cpu_spez_df[["cpuName", "powerPerf"]], left_on="CPU_model", right_on="cpuName", how="left")
+                    gpu_spez_df = pd.read_csv(os.path.join(data_dir, "GPU_benchmarks_v7.csv"), header=0)
+                    emissions = pd.merge(emissions, gpu_spez_df[["gpuName", "powerPerformance"]], left_on="GPU_model", right_on="gpuName", how="left")
 
-                #     emissions.drop("cpuName", axis=1, inplace=True)
-                #     emissions.drop("gpuName", axis=1, inplace=True)
-                #     emissions["powerPerf"] = emissions["powerPerf"].astype(float)
-                #     emissions["powerPerformance"] = emissions["powerPerformance"].astype(float)
-                #     client_emissions = emissions.loc[emissions["role"] == "client"]
-                #     client_avg_carbon_intensity = round(client_emissions["energy_grid"].mean(), 2)
-                #     factsheet["sustainability"]["avg_carbon_intensity_clients"] = check_field_filled(factsheet, ["sustainability", "avg_carbon_intensity_clients"], client_avg_carbon_intensity, "")
-                #     factsheet["sustainability"]["emissions_training"] = check_field_filled(factsheet, ["sustainability", "emissions_training"], client_emissions["emissions"].sum(), "")
-                #     factsheet["participants"]["avg_dataset_size"] = check_field_filled(factsheet, ["participants", "avg_dataset_size"], client_emissions["sample_size"].mean(), "")
+                    emissions.drop("cpuName", axis=1, inplace=True)
+                    emissions.drop("gpuName", axis=1, inplace=True)
+                    emissions["powerPerf"] = emissions["powerPerf"].astype(float)
+                    emissions["powerPerformance"] = emissions["powerPerformance"].astype(float)
+                    client_emissions = emissions.loc[emissions["role"] == "client"]
+                    client_avg_carbon_intensity = round(client_emissions["energy_grid"].mean(), 2)
+                    factsheet["sustainability"]["avg_carbon_intensity_clients"] = check_field_filled(factsheet, ["sustainability", "avg_carbon_intensity_clients"], client_avg_carbon_intensity, "")
+                    factsheet["sustainability"]["emissions_training"] = check_field_filled(factsheet, ["sustainability", "emissions_training"], client_emissions["emissions"].sum(), "")
+                    factsheet["participants"]["avg_dataset_size"] = check_field_filled(factsheet, ["participants", "avg_dataset_size"], client_emissions["sample_size"].mean(), "")
+                    GPU_powerperf = (client_emissions.loc[client_emissions["GPU_used"] == True])["powerPerformance"]
+                    CPU_powerperf = (client_emissions.loc[client_emissions["CPU_used"] == True])["powerPerf"]
+                    clients_power_performance = round(pd.concat([GPU_powerperf, CPU_powerperf]).mean(), 2)
+                    factsheet["sustainability"]["avg_power_performance_clients"] = check_field_filled(factsheet, ["sustainability", "avg_power_performance_clients"], clients_power_performance, "")
 
-                #     server_emissions = emissions.loc[emissions["role"] == "server"]
-                #     server_avg_carbon_intensity = round(server_emissions["energy_grid"].mean(), 2)
-                #     factsheet["sustainability"]["avg_carbon_intensity_server"] = check_field_filled(factsheet, ["sustainability", "avg_carbon_intensity_server"], server_avg_carbon_intensity, "")
-                #     factsheet["sustainability"]["emissions_aggregation"] = check_field_filled(factsheet, ["sustainability", "emissions_aggregation"], server_emissions["emissions"].sum(), "")
-                #     GPU_powerperf = (server_emissions.loc[server_emissions["GPU_used"] == True])["powerPerformance"]
-                #     CPU_powerperf = (server_emissions.loc[server_emissions["CPU_used"] == True])["powerPerf"]
-                #     server_power_performance = round(pd.concat([GPU_powerperf, CPU_powerperf]).mean(), 2)
-                #     factsheet["sustainability"]["avg_power_performance_server"] = check_field_filled(factsheet, ["sustainability", "avg_power_performance_server"], server_power_performance, "")
+                    server_emissions = emissions.loc[emissions["role"] == "server"]
+                    server_avg_carbon_intensity = round(server_emissions["energy_grid"].mean(), 2)
+                    factsheet["sustainability"]["avg_carbon_intensity_server"] = check_field_filled(factsheet, ["sustainability", "avg_carbon_intensity_server"], server_avg_carbon_intensity, "")
+                    factsheet["sustainability"]["emissions_aggregation"] = check_field_filled(factsheet, ["sustainability", "emissions_aggregation"], server_emissions["emissions"].sum(), "")
+                    GPU_powerperf = (server_emissions.loc[server_emissions["GPU_used"] == True])["powerPerformance"]
+                    CPU_powerperf = (server_emissions.loc[server_emissions["CPU_used"] == True])["powerPerf"]
+                    server_power_performance = round(pd.concat([GPU_powerperf, CPU_powerperf]).mean(), 2)
+                    factsheet["sustainability"]["avg_power_performance_server"] = check_field_filled(factsheet, ["sustainability", "avg_power_performance_server"], server_power_performance, "")
 
-                #     GPU_powerperf = (client_emissions.loc[client_emissions["GPU_used"] == True])["powerPerformance"]
-                #     CPU_powerperf = (client_emissions.loc[client_emissions["CPU_used"] == True])["powerPerf"]
-                #     clients_power_performance = round(pd.concat([GPU_powerperf, CPU_powerperf]).mean(), 2)
-                #     factsheet["sustainability"]["avg_power_performance_clients"] = clients_power_performance
-
-                #     factsheet["sustainability"]["emissions_communication_uplink"] = check_field_filled(factsheet, ["sustainability", "emissions_communication_uplink"], factsheet["system"]["total_upload_bytes"] * 2.24e-10 * factsheet["sustainability"]["avg_carbon_intensity_clients"], "")
-                #     factsheet["sustainability"]["emissions_communication_downlink"] = check_field_filled(factsheet, ["sustainability", "emissions_communication_downlink"], factsheet["system"]["total_download_bytes"] * 2.24e-10 * factsheet["sustainability"]["avg_carbon_intensity_server"], "")
+                    factsheet["sustainability"]["emissions_communication_uplink"] = check_field_filled(factsheet, ["sustainability", "emissions_communication_uplink"], factsheet["system"]["total_upload_bytes"] * 2.24e-10 * factsheet["sustainability"]["avg_carbon_intensity_clients"], "")
+                    factsheet["sustainability"]["emissions_communication_downlink"] = check_field_filled(factsheet, ["sustainability", "emissions_communication_downlink"], factsheet["system"]["total_download_bytes"] * 2.24e-10 * factsheet["sustainability"]["avg_carbon_intensity_server"], "")
 
             except JSONDecodeError as e:
-                logger.warning(f"{factsheet_file} is invalid")
-                logger.error(e)
+                logging.warning(f"{factsheet_file} is invalid")
+                logging.error(e)
 
             f.seek(0)
             f.truncate()

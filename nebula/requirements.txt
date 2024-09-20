@@ -45,4 +45,5 @@ shap==0.46.0
 dotmap == 1.3.30
 hashids == 1.3.1
 codecarbon == 2.5.0
+memray==1.13.4
 # aim==3.22.0

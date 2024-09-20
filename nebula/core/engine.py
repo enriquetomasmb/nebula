@@ -618,11 +618,10 @@ class TrainerNode(Engine):
             loss = f'{self.trust_dir_files}/loss_node_{self.idx}.txt'
             accuracy = f'{self.trust_dir_files}/accuracy_node_{self.idx}.txt'
             
-            #TODO TRUST obtain accuracy and loss
             with open(loss, 'w') as file:
-                file.write(str(0.26491987705230713))
+                file.write(str(results[0]))
             with open(accuracy, 'w') as file:
-                file.write(str(0.9136356711387634))
+                file.write(str(results[1]))
         
         logging.info(f"[Testing] Finishing...")
 

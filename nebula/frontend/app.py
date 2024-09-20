@@ -1108,7 +1108,6 @@ async def run_scenarios(data, role):
         from nebula.addons.trustworthiness.metric import TrustMetricManager
         
         if scenario_data['with_trustworthiness']:
-            logging.info("[FER] i'm in")
             # Calculate of post training metrics for trustworthiness
             # Get the start and the end time of the scenario to calculate the elapsed time
             
