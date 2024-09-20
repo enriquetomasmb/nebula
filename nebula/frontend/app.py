@@ -56,8 +56,11 @@ from typing import Any, Dict
 
 
 class Settings:
+    port: int = os.environ.get("NEBULA_FRONTEND_PORT", 6060)
     production: bool = os.environ.get("NEBULA_PRODUCTION", "False") == "True"
+    gpu_available: bool = os.environ.get("NEBULA_GPU_AVAILABLE", "False") == "True"
     advanced_analytics: bool = os.environ.get("NEBULA_ADVANCED_ANALYTICS", "False") == "True"
+    host_platform: str = os.environ.get("NEBULA_HOST_PLATFORM", "unix")
     log_dir: str = os.environ.get("NEBULA_LOGS_DIR")
     config_dir: str = os.environ.get("NEBULA_CONFIG_DIR")
     cert_dir: str = os.environ.get("NEBULA_CERTS_DIR")
@@ -934,7 +937,7 @@ async def nebula_dashboard_download_logs_metrics(scenario_name: str, request: Re
 @app.get("/nebula/dashboard/deployment/", response_class=HTMLResponse)
 async def nebula_dashboard_deployment(request: Request, session: Dict = Depends(get_session)):
     scenario_running = get_running_scenario()
-    return templates.TemplateResponse("deployment.html", {"request": request, "scenario_running": scenario_running, "user_logged_in": session.get("user")})
+    return templates.TemplateResponse("deployment.html", {"request": request, "scenario_running": scenario_running, "user_logged_in": session.get("user"), "gpu_available": settings.gpu_available})
 
 
 def attack_node_assign(
@@ -1027,12 +1030,12 @@ nodes_finished = []
 async def node_stopped(scenario_name: str, request: Request):
     if request.headers.get("content-type") == "application/json":
         data = await request.json()
-        nodes_finished.append(data["ip"])
+        nodes_finished.append(data["idx"])
         nodes_list = list_nodes_by_scenario_name(scenario_name)
         finished = True
         # Check if all the nodes of the scenario have finished the experiment
         for node in nodes_list:
-            if node[2] not in nodes_finished:
+            if str(node[1]) not in map(str, nodes_finished):
                 finished = False
 
         if finished:
@@ -1050,7 +1053,7 @@ async def run_scenario(scenario_data, role):
     import subprocess
 
     # Manager for the actual scenario
-    scenarioManagement = ScenarioManagement(scenario_data, "nebula-frontend")
+    scenarioManagement = ScenarioManagement(scenario_data)
 
     scenario_update_record(
         scenario_name=scenarioManagement.scenario_name,

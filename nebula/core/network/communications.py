@@ -56,6 +56,7 @@ class CommunicationsManager:
         self.pending_connections = set()
         self.incoming_connections = {}
         self.outgoing_connections = {}
+        self.ready_connections = set()
 
         self._mm = MessagesManager(addr=self.addr, config=self.config, cm=self)
         self.received_messages_hashes = collections.deque(maxlen=self.config.participant["message_args"]["max_local_messages"])
@@ -106,11 +107,21 @@ class CommunicationsManager:
     def mobility(self):
         return self._mobility
 
+    async def check_federation_ready(self):
+        # Check if all my connections are in ready_connections
+        logging.info(f"🔗  check_federation_ready | Ready connections: {self.ready_connections} | Connections: {self.connections.keys()}")
+        if set(self.connections.keys()) == self.ready_connections:
+            return True
+
+    async def add_ready_connection(self, addr):
+        self.ready_connections.add(addr)
+
     async def handle_incoming_message(self, data, addr_from):
         try:
             message_wrapper = nebula_pb2.Wrapper()
             message_wrapper.ParseFromString(data)
             source = message_wrapper.source
+            logging.debug(f"📥  handle_incoming_message | Received message from {addr_from} with source {source}")
             if source == self.addr:
                 return
             if message_wrapper.HasField("discovery_message"):
@@ -121,7 +132,8 @@ class CommunicationsManager:
                 await self.handle_control_message(source, message_wrapper.control_message)
             elif message_wrapper.HasField("federation_message"):
                 if await self.include_received_message_hash(hashlib.md5(data).hexdigest()):
-                    await self.forwarder.forward(data, addr_from=addr_from)
+                    if self.config.participant["device_args"]["proxy"] or message_wrapper.federation_message.action == nebula_pb2.FederationMessage.Action.Value("FEDERATION_START"):
+                        await self.forwarder.forward(data, addr_from=addr_from)
                     await self.handle_federation_message(source, message_wrapper.federation_message)
             elif message_wrapper.HasField("model_message"):
                 if await self.include_received_message_hash(hashlib.md5(data).hexdigest()):
@@ -239,6 +251,15 @@ class CommunicationsManager:
 
         else:
             logging.info(f"🤖  handle_model_message | Tried to add a model while learning is not running")
+            if message.round != -1:
+                # Be sure that the model message is from the initialization round (round = -1)
+                logging.info(f"🤖  handle_model_message | Saving model from {source} for future round {message.round}")
+                await self.engine.aggregator.include_next_model_in_buffer(
+                    message.parameters,
+                    message.weight,
+                    source=source,
+                    round=message.round,
+                )
         return
 
     async def handle_connection_message(self, source, message):
@@ -569,7 +590,7 @@ class CommunicationsManager:
                 return
             logging.info(f"Sending model to {dest_addr} with round {round}: weight={weight} | size={sys.getsizeof(serialized_model) / (1024 ** 2) if serialized_model is not None else 0} MB")
             message = self.mm.generate_model_message(round, serialized_model, weight)
-            await conn.send(data=message)
+            await conn.send(data=message, is_compressed=True)
             logging.info(f"Model sent to {dest_addr} with round {round}")
         except Exception as e:
             logging.error(f"❗️  Cannot send model to {dest_addr}: {str(e)}")
@@ -812,7 +833,7 @@ class CommunicationsManager:
 
     def get_ready_connections(self):
         return {addr for addr, conn in self.connections.items() if conn.get_ready()}
-    
+
     def check_finished_experiment(self):
         return all(conn.get_federated_round() == self.config.participant["scenario_args"]["rounds"] - 1 for conn in self.connections.values())
 

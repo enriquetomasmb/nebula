@@ -202,14 +202,18 @@
                     <h5 class="step-number">Deployment <i class="fa fa-cloud-upload"></i></h5>
                     <h5 class="step-title">Deployment type</h5>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="deploymentRadioOptions" id="simulation-radio"
-                            value="simulation" checked>
-                        <label class="form-check-label" for="simulation-radio">Virtual participants</label>
+                        <input class="form-check-input" type="radio" name="deploymentRadioOptions" id="process-radio" value="process" checked>
+                        <label class="form-check-label" for="process-radio">Processes</label>
                     </div>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="deploymentRadioOptions" id="real-radio"
-                            value="real" disabled>
-                        <label class="form-check-label" for="real-radio">Real devices</label>
+                        <input class="form-check-input" type="radio" name="deploymentRadioOptions" id="docker-radio"
+                            value="docker">
+                        <label class="form-check-label" for="docker-radio">Docker containers</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="deploymentRadioOptions" id="physical-devices-radio"
+                            value="physical" disabled>
+                        <label class="form-check-label" for="physical-devices-radio">Physical devices</label>
                     </div>
                 </div>
                 <div class="form-group row container-shadow tiny grey">
@@ -450,8 +454,12 @@
                     <div class="form-check">
                         <select class="form-control" id="resourceUsage" name="resources"
                             style="display: inline; width: 20%">
+                            {% if gpu_available %}
                             <option value="gpu" selected>GPU</option>
                             <option value="cpu">CPU</option>
+                            {% else %}
+                            <option value="cpu" selected>CPU</option>
+                            {% endif %}
                         </select>
                     </div>
                 </div>
@@ -1016,6 +1024,7 @@
 
     <script>
         function getScenarioData() {
+            document.getElementById("networkTopologyRandom").click();
             var nodes = {};
             var n_nodes = document.getElementById("info-participants-number").innerHTML;
             for (var i = 0; i < n_nodes; i++) {
@@ -1044,7 +1053,11 @@
             data["scenario_title"] = document.getElementById("scenario-title").value
             data["scenario_description"] = document.getElementById("scenario-description").value
             // Step 2
-            data["simulation"] = true
+            if (document.getElementById("process-radio").checked) {
+                data["deployment"] = "process"
+            } else {
+                data["deployment"] = "docker"
+            }
             // Step 3
             data["federation"] = document.getElementById("federationArchitecture").value
             // Step 4
@@ -1118,7 +1131,12 @@
                 document.getElementById("scenario-title").value = data["scenario_title"];
                 document.getElementById("scenario-description").value = data["scenario_description"];
                 // Step 2
-                document.getElementById("simulation-radio").checked = data["simulation"];
+                // Read deployment from data and set the specific radio button
+                if (data["deployment"] == "process") {
+                    document.getElementById("process-radio").checked = true;
+                } else {
+                    document.getElementById("process-radio").checked = false;
+                }
                 // Step 3
                 document.getElementById("federationArchitecture").value = data["federation"];
                 // Step 4
@@ -1655,7 +1673,7 @@
             document.getElementById("scenario-title").value = document.getElementById("scenario-title").defaultValue;
             document.getElementById("scenario-description").value = document.getElementById("scenario-description").value;
             // Step 2
-            document.getElementById("simulation-radio").checked = document.getElementById("simulation-radio").defaultValue;
+            document.getElementById("process-radio").checked = document.getElementById("process-radio").defaultValue;
             // Step 3
             if(!document.getElementById("fedarch-lock").checked){
                 document.getElementById("federationArchitecture").value = "DFL";
@@ -2711,7 +2729,15 @@
             ip_split = ip_split[0].split(".");
             var ip_last = parseInt(ip_split[3]);
             for (var i = 0; i < nodes.length; i++) {
-                nodes[i].ip = ip_split[0] + "." + ip_split[1] + "." + ip_split[2] + "." + (ip_last + i + 2);
+                // Each node has a different IP in docker network, but the same localhost is used for processes
+                // Depending on docker-radio and process-radio, the IP is different
+                if (document.getElementById("process-radio").checked) {
+                    nodes[i].ip = "127.0.0.1";
+                } else {
+                    nodes[i].ip = ip_split[0] + "." + ip_split[1] + "." + ip_split[2] + "." + (ip_last + i + 2);
+                }                
+                // Port starts from 45001 and increases by 1
+                nodes[i].port = (45001 + i).toString();
             }
             gData.nodes = nodes;
 
