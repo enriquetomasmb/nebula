@@ -449,7 +449,7 @@ class Engine:
 
             await self.get_round_lock().acquire_async()
             print_msg_box(msg=f"Round {self.round} of {self.total_rounds} finished.", indent=2, title="Round information")
-            self.aggregator.reset()
+            await self.aggregator.reset()
             self.trainer.on_round_end()
             self.round = self.round + 1
             self.config.participant["federation_args"]["round"] = self.round  # Set current round in config (send to the controller)
