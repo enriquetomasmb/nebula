@@ -52,6 +52,9 @@ class NebulaDataset(Dataset, ABC):
         self.test_set = None
         self.test_indices_map = None
 
+        # Classes of the participants to be sure that the same classes are used in training and testing
+        self.participants_classes = None
+
         enable_deterministic(config)
 
         if self.partition_id == 0:
@@ -63,7 +66,7 @@ class NebulaDataset(Dataset, ABC):
                     self.initialize_dataset()
                     break
                 except Exception as e:
-                    print(f"Error loading dataset: {e}. Retrying {i+1}/{max_tries} in 5 seconds...")
+                    logging_training.info(f"Error loading dataset: {e}. Retrying {i+1}/{max_tries} in 5 seconds...")
                     time.sleep(5)
 
     @abstractmethod
@@ -86,6 +89,30 @@ class NebulaDataset(Dataset, ABC):
         Create an iid map of the dataset.
         """
         pass
+
+    def get_train_labels(self):
+        """
+        Get the labels of the training set based on the indices map.
+        """
+        if self.train_indices_map is None:
+            return None
+        return [self.train_set.targets[idx] for idx in self.train_indices_map]
+
+    def get_test_labels(self):
+        """
+        Get the labels of the test set based on the indices map.
+        """
+        if self.test_indices_map is None:
+            return None
+        return [self.test_set.targets[idx] for idx in self.test_indices_map]
+
+    def get_local_test_labels(self):
+        """
+        Get the labels of the local test set based on the indices map.
+        """
+        if self.local_test_indices_map is None:
+            return None
+        return [self.test_set.targets[idx] for idx in self.local_test_indices_map]
 
     def plot_data_distribution(self, dataset, partitions_map):
         """
@@ -112,7 +139,7 @@ class NebulaDataset(Dataset, ABC):
             for idx in indices:
                 label = dataset.targets[idx]
                 class_counts[label] += 1
-            print(f"Participant {i+1} class distribution: {class_counts}")
+            logging_training.info(f"Participant {i+1} class distribution: {class_counts}")
             plt.figure()
             plt.bar(range(self.num_classes), class_counts)
             plt.xlabel("Class")
@@ -123,7 +150,7 @@ class NebulaDataset(Dataset, ABC):
             else:
                 plt.title(f"Participant {i+1} class distribution (Non-IID - {self.partition}) - {self.partition_parameter}")
             plt.tight_layout()
-            path_to_save = f"{self.config.participant['tracking_args']['log_dir']}/{self.config.participant['scenario_args']['name']}/participant_{i+1}_class_distribution_{'iid' if self.iid else 'non_iid'}{'_' + self.partition if not self.iid else ''}.png"
+            path_to_save = f"{self.config.participant['tracking_args']['log_dir']}/{self.config.participant['scenario_args']['name']}/participant_{i}_class_distribution_{'iid' if self.iid else 'non_iid'}{'_' + self.partition if not self.iid else ''}.png"
             plt.savefig(path_to_save, dpi=300, bbox_inches="tight")
             plt.close()
 
@@ -227,11 +254,14 @@ class NebulaDataset(Dataset, ABC):
             y_train = dataset.targets.numpy()
         else:
             y_train = np.asarray(dataset.targets)
+
+        logging_training.info(f"Labels unique: {np.unique(y_train)}")
         min_size = 0
         K = np.unique(y_train)
         N = y_train.shape[0]
         n_nets = self.partitions_number
         net_dataidx_map = {}
+        class_counts = {}
 
         while min_size < 10:
             idx_batch = [[] for _ in range(n_nets)]
@@ -243,6 +273,13 @@ class NebulaDataset(Dataset, ABC):
                 if len(idx_k) > 0:
                     np.random.seed(self.seed)
                     proportions = np.random.dirichlet(np.repeat(alpha, n_nets))
+                    if self.participants_classes is not None:
+                        # Skip the classes that are not in the participants_classes
+                        for participant_id in range(n_nets):
+                            if self.participants_classes[participant_id][k] == 0:
+                                proportions[participant_id] = 0
+                        proportions = proportions / proportions.sum()
+
                     proportions = np.array([p * (len(idx_j) < N / n_nets) for p, idx_j in zip(proportions, idx_batch)])
                     proportions = proportions / proportions.sum()
                     proportions = (np.cumsum(proportions) * len(idx_k)).astype(int)[:-1]
@@ -254,17 +291,12 @@ class NebulaDataset(Dataset, ABC):
             np.random.shuffle(idx_batch[j])
             net_dataidx_map[j] = idx_batch[j]
 
-        # partitioned_datasets = []
-        for i in range(self.partitions_number):
-            #    subset = torch.utils.data.Subset(dataset, net_dataidx_map[i])
-            #    partitioned_datasets.append(subset)
-
-            # Print class distribution in the current partition
-            class_counts = [0] * self.num_classes
-            for idx in net_dataidx_map[i]:
+            class_counts[j] = [0] * self.num_classes
+            for idx in net_dataidx_map[j]:
                 label = dataset.targets[idx]
-                class_counts[label] += 1
-            # print(f"Partition {i+1} class distribution: {class_counts}")
+                class_counts[j][label] += 1
+
+        self.participants_classes = class_counts
 
         return net_dataidx_map
 
@@ -312,7 +344,7 @@ class NebulaDataset(Dataset, ABC):
             for idx in net_dataidx_map[i]:
                 label = dataset.targets[idx]
                 class_counts[label] += 1
-            print(f"Partition {i+1} class distribution: {class_counts}")
+            logging_training.info(f"Partition {i+1} class distribution: {class_counts}")
 
         return net_dataidx_map
 
@@ -507,7 +539,7 @@ class NebulaDataset(Dataset, ABC):
                 subset_indices[i].extend(indices[: min_count // 2])
 
             class_counts = np.bincount(np.array([dataset.targets[idx] for idx in subset_indices[i]]))
-            print(f"Partition {i+1} class distribution: {class_counts.tolist()}")
+            logging_training.info(f"Partition {i+1} class distribution: {class_counts.tolist()}")
 
         partitioned_datasets = {i: subset_indices[i] for i in range(num_subsets)}
 
