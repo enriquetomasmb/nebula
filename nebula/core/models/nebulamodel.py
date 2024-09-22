@@ -39,7 +39,7 @@ class NebulaModel(pl.LightningModule, ABC):
         y_pred_classes = torch.argmax(y_pred, dim=1)
         if phase == "Train":
             # self.log(name=f"{phase}/Loss", value=loss, add_dataloader_idx=False)
-            self.logger.log_data({f"{phase}/Loss": loss.item()}, step=self.global_step)
+            self.logger.log_data({f"{phase}/Loss": loss.item()})
             self.train_metrics.update(y_pred_classes, y)
         elif phase == "Validation":
             self.val_metrics.update(y_pred_classes, y)
