@@ -3,6 +3,10 @@ import csv
 import logging
 import json
 from datetime import datetime, timedelta
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from nebula.core.engine import Engine
 
 def save_data(scenario, type_data, source_ip, addr, round=None, time=None, data_contribution=None):
     """
@@ -76,11 +80,14 @@ class Reputation:
     reputation_history = {}
     neighbor_reputation_history = {}
 
-    def __init__(self):
-        pass
+    def __init__(self, engine: "Engine"):
+        self._engine = engine
 
-    @staticmethod
-    def calculate_reputation(scenario, log_dir, id_node, addr, nei, current_round=None):
+    @property
+    def engine(self):
+        return self._engine
+
+    def calculate_reputation(self, scenario, log_dir, id_node, addr, nei, current_round=None):
         """
         Calculate the reputation of each participant based on the data stored.
 
@@ -202,7 +209,10 @@ class Reputation:
                                 + weight_to_node_participation * node_participation_normalized
                                 + weight_to_similarity * similarity_reputation 
                                 + weight_to_last_activity * avg_last_activity_normalized)
-                    
+
+                    # Create graphics to metrics
+                    self.create_graphics_to_metrics(communication_time_normalized, aggregated_models_time_normalized, data_contribution_normalized, node_participation_normalized, similarity_reputation, avg_last_activity_normalized, addr, nei, current_round, self.engine.total_rounds)
+
                     # Save history reputation
                     average_reputation = Reputation.save_reputation_history_in_memory(addr, nei, reputation, current_round)
                     
@@ -210,6 +220,62 @@ class Reputation:
                     return average_reputation
         except Exception as e:
                 logging.error(f"Error calculating reputation: {e}")
+
+    def create_graphics_to_metrics(self, com_time, agg_time, data_contribution, node_participation, similarity, last_activity, addr, nei, current_round, total_rounds):
+        if current_round is not None and current_round < total_rounds:
+            communication_time_dict = {
+                f"Reputation_communication_time/{addr}": {
+                    nei: com_time
+                }
+            }
+
+            aggregated_models_time_dict = {
+                f"Reputation_aggregated_models_time/{addr}": {
+                    nei: agg_time
+                }
+            }
+
+            data_contribution_dict = {
+                f"Reputation_data_contribution/{addr}": {
+                    nei: data_contribution
+                }
+            }
+
+            node_participation_dict = {
+                f"Reputation_node_participation/{addr}": {
+                    nei: node_participation
+                }
+            }
+
+            similarity_dict = {
+                f"Reputation_similarity/{addr}": {
+                    nei: similarity
+                }
+            }
+
+            last_activity_dict = {
+                f"Reputation_last_activity/{addr}": {
+                    nei: last_activity
+                }
+            }
+
+            if communication_time_dict is not None:
+                self.engine.trainer._logger.log_data(communication_time_dict, step=current_round)
+
+            if aggregated_models_time_dict is not None:
+                self.engine.trainer._logger.log_data(aggregated_models_time_dict, step=current_round)
+
+            if data_contribution_dict is not None:
+                self.engine.trainer._logger.log_data(data_contribution_dict, step=current_round)
+
+            if node_participation_dict is not None:
+                self.engine.trainer._logger.log_data(node_participation_dict, step=current_round)
+
+            if similarity_dict is not None:
+                self.engine.trainer._logger.log_data(similarity_dict, step=current_round)
+
+            if last_activity_dict is not None:
+                self.engine.trainer._logger.log_data(last_activity_dict, step=current_round)
 
     @staticmethod
     def save_reputation_history_in_memory(addr, nei, reputation, current_round):

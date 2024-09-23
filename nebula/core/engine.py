@@ -115,7 +115,7 @@ class Engine:
             self.reputation_file = f.read()
 
         if self.reputation_file == 'True':
-            self.reputation_instance = Reputation()
+            self.reputation_instance = Reputation(self)
             self.reputation = {} # Reputation of the node
             self.reputation_with_feedback = {} # Reputation of the node with feedback
         
@@ -513,9 +513,10 @@ class Engine:
                                 round=data["round"]
                             )
                             await self.cm.send_message_to_neighbors(message_data)
+                            #await self.cm.send_message_to_neighbors(message_data, [nei])
 
                 # Esperar las respuestas de reputación
-                self._wait_for_reputation_responses(timeout=90)
+                #self._wait_for_reputation_responses(timeout=20)
                 
             self.get_round_lock().acquire()
             print_msg_box(msg=f"Round {self.round} of {self.total_rounds} finished.", indent=2, title="Round information")
@@ -583,7 +584,8 @@ class Engine:
         except Exception as e:
             print(f"Error stopping Docker container with ID {self.docker_id}: {e}")
 
-    def _wait_for_reputation_responses(self, timeout=10):
+    """ 
+        def _wait_for_reputation_responses(self, timeout=10):
         wait_thread = threading.Thread(target=self._wait_for_responses_thread, args=(timeout,))
         wait_thread.start()
         wait_thread.join()
@@ -602,7 +604,7 @@ class Engine:
 
     def stop_waiting_reputation(self):
         logging.info(f"Stop waiting responses")
-        self.stop_message_reputation.set()
+        self.stop_message_reputation.set()"""
 
     async def _extended_learning_cycle(self):
         """

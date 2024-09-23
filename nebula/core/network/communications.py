@@ -87,7 +87,7 @@ class CommunicationsManager:
             self.reputation_file = f.read()
 
         if self.reputation_file == 'True':
-            self.reputation_instance = Reputation()
+            self.reputation_instance = Reputation(self.engine)
             self.reputation_with_all_feedback = {}
             self.total_messages_reputation_received = 0
 
@@ -288,7 +288,7 @@ class CommunicationsManager:
     async def handle_reputation_message(self, source, message):
         try:
             logging.info(f"handle_reputation_message | Reputation message received from {source} | Node: {message.node_id} | Score: {message.score} | Round: {message.round}")
-            self.total_messages_reputation_received += 1
+            #self.total_messages_reputation_received += 1
             current_node = self.addr.split(":")[0].strip()
             source = source.split(":")[0].strip()
             node_ip = message.node_id.split(":")[0].strip()
@@ -303,13 +303,13 @@ class CommunicationsManager:
                     self.reputation_with_all_feedback[key].append(message.score)
 
                     # Total expected = number of federation nodes + number of direct connections - 1 (current node)
-                    total_expected_reputation = len(self.engine.get_federation_nodes()) + len(self.get_all_addrs_current_connections(only_direct=True)) - 1
+                    """ total_expected_reputation = len(self.engine.get_federation_nodes()) + len(self.get_all_addrs_current_connections(only_direct=True)) - 1
                     logging.info(f"handle_reputation_message | Expected reputation: {total_expected_reputation}")
                     logging.info(f"handle_reputation_message | self.total_messages_reputation_received: {self.total_messages_reputation_received}")
                     # Para la espera cuando se recibe la reputación de todos los vecinos
                     if total_expected_reputation == self.total_messages_reputation_received:
                         logging.info(f"handle_reputation_message | Stop")
-                        self.engine.stop_waiting_reputation()
+                        self.engine.stop_waiting_reputation()"""
         except Exception as e:
             logging.error(f"Error handling reputation message: {e}")
 
@@ -629,8 +629,9 @@ class CommunicationsManager:
             logging.info(f"Sending message to neighbors: {neighbors}")
 
         for neighbor in set(neighbors):
-            self.start_time_communication[neighbor] = time.time()
-            logging.info(f"Sending message with start_time {self.start_time_communication[neighbor]} to neighbor {neighbor}")
+            if neighbor in self.get_all_addrs_current_connections(only_direct=True):
+                self.start_time_communication[neighbor] = time.time()
+                logging.info(f"Sending message with start_time {self.start_time_communication[neighbor]} to neighbor {neighbor}")
             await self.send_message(neighbor, message)
             await asyncio.sleep(interval)
 

@@ -340,6 +340,7 @@ class Controller:
                     - SERVER_LOG=/nebula/app/logs/server.log
                     - NEBULA_LOGS_DIR=/nebula/app/logs/
                     - NEBULA_CONFIG_DIR=/nebula/app/config/
+                    - NEBULA_CORE=/nebula/nebula/core/
                     - NEBULA_CERTS_DIR=/nebula/app/certs/
                     - NEBULA_ENV_PATH=/nebula/app/.env
                     - NEBULA_ROOT_HOST={path}

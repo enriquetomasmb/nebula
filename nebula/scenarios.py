@@ -731,6 +731,20 @@ class ScenarioManagement:
             logging.error("Unknown error while removing files")
             logging.error(e)
             raise e
+        
+        try:
+            nebula_reputation = os.path.join(os.environ["NEBULA_CORE"], "reputation", scenario_name)
+            if os.path.exists(nebula_reputation):
+                shutil.rmtree(nebula_reputation)
+                logging.info(f"Reputation folder {nebula_reputation} removed successfully")
+            else:
+                logging.info(f"Reputation folder {nebula_reputation} not found")
+        except FileNotFoundError:
+            logging.warning("Files not found in reputation folder, nothing to remove")
+        except Exception as e:
+            logging.error("Unknown error while removing files from reputation folder")
+            logging.error(e)
+            raise e
 
     def scenario_finished(self, timeout_seconds):
         client = docker.from_env()
