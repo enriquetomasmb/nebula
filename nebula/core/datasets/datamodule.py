@@ -49,9 +49,9 @@ class DataModule(LightningDataModule):
         self.target_changed_label = target_changed_label
         self.noise_type = noise_type
 
-        logging_training.debug(f"Train set indices: {train_set_indices}")
-        logging_training.debug(f"Test set indices: {test_set_indices}")
-        logging_training.debug(f"Local test set indices: {local_test_set_indices}")
+        # logging_training.debug(f"Train set indices: {train_set_indices}")
+        # logging_training.debug(f"Test set indices: {test_set_indices}")
+        # logging_training.debug(f"Local test set indices: {local_test_set_indices}")
 
         # Training / validation set
         # rows_by_sub = floor(len(train_set) / self.partitions_number)
@@ -124,7 +124,7 @@ class DataModule(LightningDataModule):
         )
         random_sampler = RandomSampler(data_source=data_val, replacement=False, num_samples=max(int(len(data_val) / 3), 300))
         self.bootstrap_loader = DataLoader(data_train, batch_size=self.batch_size, shuffle=False, sampler=random_sampler)
-        logging_training.info("Train: {} Val:{} Test:{} Global Test:{}".format(len(data_train), len(data_val), len(local_te_subset), len(global_te_subset)))
+        logging_training.info("Train samples: {} Val samples:{} Test samples :{} Global Test samples:{}".format(len(data_train), len(data_val), len(local_te_subset), len(global_te_subset)))
 
     def train_dataloader(self):
         return self.train_loader

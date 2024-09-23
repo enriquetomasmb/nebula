@@ -1005,8 +1005,10 @@
             // Step 2
             if (document.getElementById("process-radio").checked) {
                 data["deployment"] = "process"
-            } else {
+            } else if (document.getElementById("docker-radio").checked) {
                 data["deployment"] = "docker"
+            } else {
+                data["deployment"] = "process"
             }
             // Step 3
             data["federation"] = document.getElementById("federationArchitecture").value
@@ -1075,8 +1077,10 @@
                 // Read deployment from data and set the specific radio button
                 if (data["deployment"] == "process") {
                     document.getElementById("process-radio").checked = true;
+                } else if (data["deployment"] == "docker") {
+                    document.getElementById("docker-radio").checked = true;
                 } else {
-                    document.getElementById("process-radio").checked = false;
+                    document.getElementById("process-radio").checked = true;
                 }
                 // Step 3
                 document.getElementById("federationArchitecture").value = data["federation"];
@@ -1994,8 +1998,10 @@
                 $('#confirm-modal-body').html('Please select one "start" participant for the scenario');
                 document.getElementById("yes-button").disabled = true;
             } else {
+                var deploymentOption = document.querySelector('input[name="deploymentRadioOptions"]:checked');
                 $('#confirm-modal-body').html('Are you sure you want to run the scenario?\n' +
-                    '<br><br><p class="badge text-bg-danger">Warning: you will stop the running scenario and start a new one</p>');
+                    '<br><p class="badge text-bg-warning">The scenario will be deployed using the selected deployment option: ' + deploymentOption.value + '</p>' +
+                    '<br><p class="badge text-bg-danger">Warning: you will stop the running scenario and start a new one</p>');
                 document.getElementById("yes-button").disabled = false;
 
                 document.getElementById("yes-button").addEventListener("click", function () {
