@@ -378,9 +378,10 @@ class Engine:
 
                 await self._learning_cycle()
             else:
-                await self.learning_cycle_lock.release_async()
+                if await self.learning_cycle_lock.locked_async():  
+                    await self.learning_cycle_lock.release_async()
         finally:
-            if self.learning_cycle_lock.locked_async():
+            if await self.learning_cycle_lock.locked_async():
                 await self.learning_cycle_lock.release_async()
 
     async def _disrupt_connection_using_reputation(self, malicious_nodes):
