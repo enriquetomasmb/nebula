@@ -159,13 +159,14 @@ class Aggregator(ABC):
         self._add_model_lock.acquire()
         logging.info(f"🔄  include_model_in_buffer | source={source} | round={round} | weight={weight} |--| __models={self._pending_models_to_aggregate.keys()} | federation_nodes={self._federation_nodes} | pending_models_to_aggregate={self.get_nodes_pending_models_to_aggregate()}")
         if self.engine.get_reputation() is not None:
-            logging.info(f"🔄  include_model_in_buffer | Reputation: {self.engine.get_reputation().get(source)}")
+            logging.info(f"🔄  include_model_in_buffer | Reputation of node {source}: {self.engine.get_reputation().get(source)}")
         # Check the reputation of the source node
         if source in self.engine.rejected_nodes:
             logging.info(f"🔄  include_model_in_buffer | Ignoring model from rejected node {source}")
             if self._add_model_lock.locked():
                 self._add_model_lock.release()
             return None
+        
         if source in self.engine.change_weight_nodes:
             weight = 0.7 * weight
             logging.info(f"🔄  include_model_in_buffer | change weight from {source} with weight: {weight}")

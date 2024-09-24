@@ -486,7 +486,7 @@ class Engine:
                     self.reputation[nei] = {"reputation": avg_reputation, "round": self.round}
 
                     if self.reputation[nei]["reputation"] is not None:
-                        logging.info(f"Initial reputation of node {nei}: {self.reputation[nei]['reputation']}")
+                        logging.info(f"Reputation of node {nei}: {self.reputation[nei]['reputation']}")
                         if self.reputation[nei]["reputation"] <= 0.6:
                             logging.info(f"Rejected node: {nei}")
                             self.rejected_nodes.add(nei)
@@ -512,8 +512,8 @@ class Engine:
                                 score=data["reputation"], 
                                 round=data["round"]
                             )
-                            await self.cm.send_message_to_neighbors(message_data)
-                            #await self.cm.send_message_to_neighbors(message_data, [nei])
+                            await self.cm.send_message_to_neighbors(message_data, [nei])
+                            #await self.cm.send_message_to_neighbors(message_data)
 
                 # Esperar las respuestas de reputación
                 #self._wait_for_reputation_responses(timeout=20)
@@ -524,13 +524,13 @@ class Engine:
             self.trainer.on_round_end()
 
             logging.info(f"reputation with feedback {self._cm.reputation_with_all_feedback}")
-            if self._cm.reputation_with_all_feedback:
+            if self._cm.reputation_with_all_feedback is not None:
                 current_round = self.round
-                for(current_node, node_ip, round_num), scores in self._cm.reputation_with_all_feedback.items():
+                for(node_ip, round_num), scores in self._cm.reputation_with_all_feedback.items():
                     if round_num == current_round:
                         if scores:
                             avg_feedback = sum(scores) / len(scores)
-                            logging.info(f"Receive feedback to node {node_ip}")
+                            logging.info(f"Receive feedback to node {node_ip} with average score {avg_feedback}")
 
                         logging.info(f"self.reputation: {self.reputation}")
                         for ip, data in self.reputation.items():
@@ -557,7 +557,7 @@ class Engine:
                         }
                     }
 
-                self.trainer._logger.log_data(reputation_with_feedback_dict_with_values, step=self.round)
+                    self.trainer._logger.log_data(reputation_with_feedback_dict_with_values, step=self.round)
 
             self.round = self.round + 1
             self.config.participant["federation_args"]["round"] = self.round  # Set current round in config (send to the controller)

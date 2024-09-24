@@ -44,11 +44,11 @@ def save_data(scenario, type_data, source_ip, addr, round=None, time=None, data_
                 "data_contribution": data_contribution,
                 "round": round,
             }
-        elif type_data == 'last_activity':
+        """elif type_data == 'last_activity':
             combined_data["last_activity"] = {
                 "time": time,
                 "round": round,
-            }
+            }"""
 
         script_dir = os.path.dirname(os.path.abspath(__file__))
         file_name = f"{addr}_storing_{source_ip}_info.json"
@@ -102,13 +102,11 @@ class Reputation:
         array_aggregated_models = []
         count_node_participation = 0
         array_data_contribution = []
-        last_activity_times = []
 
         communication_time_normalized = 0
         aggregated_models_time_normalized = 0
         data_contribution_normalized = 0
-        node_participation_normalized = 0
-        avg_last_activity = 0
+        node_participation = 0
 
         try:
             script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -136,38 +134,48 @@ class Reputation:
                             round = metric["data_contribution"]["round"]
                             if round == current_round:
                                 array_data_contribution.append(metric["data_contribution"]["data_contribution"])
-                        if "last_activity" in metric:
+                                
+                        """if "last_activity" in metric:
                             round = metric["last_activity"]["round"]
                             if round == current_round:
                                 last_activity_time = metric["last_activity"]["time"]
                                 if isinstance(last_activity_time, float):
                                     last_activity_time = datetime.fromtimestamp(last_activity_time).strftime("%Y-%m-%d %H:%M:%S")
-                                last_activity_times.append(last_activity_time)
+                                last_activity_times.append(last_activity_time)"""
 
                     # Data similitude
                     similarity_file = os.path.join(log_dir, f"participant_{id_node}_similarity.csv")
                     similarity_reputation = Reputation.read_similarity_file(similarity_file, nei)
-                    logging.info(f"Similarity reputation: {similarity_reputation}")
+                    #logging.info(f"Similarity reputation: {similarity_reputation}")
 
                     if len(array_communication) > 0:
-                        #logging.info(f"Array communication: {array_communication}")
+                        logging.info(f"Array communication: {array_communication}")
                         communication_time_normalized = Reputation.callback_normalized_value(array_communication)
                         logging.info(f"Communication time normalized: {communication_time_normalized}")
+                    else: 
+                        communication_time_normalized = 0
+
                     if len(array_aggregated_models) > 0:
                         #logging.info(f"Array aggregated models: {array_aggregated_models}")
                         aggregated_models_time_normalized = Reputation.callback_normalized_value(array_aggregated_models)
-                        logging.info(f"Aggregated models time normalized: {aggregated_models_time_normalized}")
+                        #logging.info(f"Aggregated models time normalized: {aggregated_models_time_normalized}")
+                    else:
+                        aggregated_models_time_normalized = 0
+
                     if count_node_participation > 0:
-                        #logging.info(f"Array node participation: {count_node_participation}")
-                        node_participation_normalized = Reputation.callback_normalized_value([count_node_participation])
-                        logging.info(f"Node participation normalized: {node_participation_normalized}")
+                        node_participation = count_node_participation
+                    else: 
+                        node_participation = 0
+
                     if len(array_data_contribution) > 0:
                         #logging.info(f"Array data contribution: {array_data_contribution}")
                         data_contribution_normalized = Reputation.callback_normalized_value(array_data_contribution)
-                        logging.info(f"Data contribution normalized: {data_contribution_normalized}")
+                        #logging.info(f"Data contribution normalized: {data_contribution_normalized}")
+                    else: 
+                        data_contribution_normalized = 0
                     
                     # Calculate average last_activity
-                    if len(last_activity_times) > 0:
+                    """if len(last_activity_times) > 0:
                         last_activity_datetimes = [datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S") for time_str in last_activity_times]
 
                         avg_last_activity_datetime = sum([(dt - datetime(1970, 1, 1)).total_seconds() for dt in last_activity_datetimes]) / len(last_activity_datetimes)
@@ -192,26 +200,38 @@ class Reputation:
                         logging.info(f"Avg last activity times: {avg_last_activity_normalized}")
 
                     else:
-                        avg_last_activity_normalized = 0 # No last activity
+                        avg_last_activity_normalized = 0 # No last activity """
 
                     # Weights for each metric
-                    weight_to_communication = 0.1
-                    weight_to_aggregated_models = 0.1
+                    weight_to_communication = 0.2
+                    weight_to_aggregated_models = 0.2
                     weight_to_data_contribution = 0.1
-                    weight_to_similarity = 0.3
-                    weight_to_node_participation = 0.2
-                    weight_to_last_activity = 0.2
+                    weight_to_similarity = 0.4
+                    weight_to_node_participation = 0.1
+                    #weight_to_last_activity = 0.2
 
+                    logging.info(f"Before calculate reputation")
+                    logging.info(f"Communication: {communication_time_normalized}")
+                    logging.info(f"Aggregated models: {aggregated_models_time_normalized}")
+                    logging.info(f"Data contribution: {data_contribution_normalized}")
+                    logging.info(f"Node participation: {node_participation}")
+                    logging.info(f"Similarity: {similarity_reputation}")
+                    
+                    logging.info(f"Width weigh*metric")
+                    logging.info(f"Communication: {weight_to_communication * communication_time_normalized}")
+                    logging.info(f"Aggregated models: {weight_to_aggregated_models * aggregated_models_time_normalized}")
+                    logging.info(f"Data contribution: {weight_to_data_contribution * data_contribution_normalized}")
+                    logging.info(f"Node participation: {weight_to_node_participation * node_participation}")
+                    logging.info(f"Similarity: {weight_to_similarity * similarity_reputation}")
                     # Reputation calculation
                     reputation = ( weight_to_communication * communication_time_normalized 
                                 + weight_to_aggregated_models * aggregated_models_time_normalized
                                 + weight_to_data_contribution * data_contribution_normalized
-                                + weight_to_node_participation * node_participation_normalized
-                                + weight_to_similarity * similarity_reputation 
-                                + weight_to_last_activity * avg_last_activity_normalized)
+                                + weight_to_node_participation * node_participation
+                                + weight_to_similarity * similarity_reputation )
 
                     # Create graphics to metrics
-                    self.create_graphics_to_metrics(communication_time_normalized, aggregated_models_time_normalized, data_contribution_normalized, node_participation_normalized, similarity_reputation, avg_last_activity_normalized, addr, nei, current_round, self.engine.total_rounds)
+                    self.create_graphics_to_metrics(communication_time_normalized, aggregated_models_time_normalized, data_contribution_normalized, node_participation, similarity_reputation, addr, nei, current_round, self.engine.total_rounds)
 
                     # Save history reputation
                     average_reputation = Reputation.save_reputation_history_in_memory(addr, nei, reputation, current_round)
@@ -221,7 +241,7 @@ class Reputation:
         except Exception as e:
                 logging.error(f"Error calculating reputation: {e}")
 
-    def create_graphics_to_metrics(self, com_time, agg_time, data_contribution, node_participation, similarity, last_activity, addr, nei, current_round, total_rounds):
+    def create_graphics_to_metrics(self, com_time, agg_time, data_contribution, node_participation, similarity, addr, nei, current_round, total_rounds):
         if current_round is not None and current_round < total_rounds:
             communication_time_dict = {
                 f"Reputation_communication_time/{addr}": {
@@ -253,12 +273,6 @@ class Reputation:
                 }
             }
 
-            last_activity_dict = {
-                f"Reputation_last_activity/{addr}": {
-                    nei: last_activity
-                }
-            }
-
             if communication_time_dict is not None:
                 self.engine.trainer._logger.log_data(communication_time_dict, step=current_round)
 
@@ -273,9 +287,6 @@ class Reputation:
 
             if similarity_dict is not None:
                 self.engine.trainer._logger.log_data(similarity_dict, step=current_round)
-
-            if last_activity_dict is not None:
-                self.engine.trainer._logger.log_data(last_activity_dict, step=current_round)
 
     @staticmethod
     def save_reputation_history_in_memory(addr, nei, reputation, current_round):

@@ -4,7 +4,7 @@ import sys
 import os
 import traceback
 import collections
-from datetime import datetime
+from datetime import datetime, timedelta
 import requests
 import asyncio
 import subprocess
@@ -175,11 +175,18 @@ class CommunicationsManager:
         current_round = self.engine.get_round()
         if current_round is not None:
             logging.info(f"🔧 handle_control_message | Received message from {source} with round {current_round}")
-            if source in self.start_time_communication:
-                end_time = time.time()
-                latency = end_time - self.start_time_communication[source]
-                logging.info(f"🔧 handle_control_message | Received message from neighbor {source} with message {message} in {latency} seconds")
+            start_time = message.time  
+
+            if start_time:
+                end_time = datetime.now()
+                logging.info(f"🔧 handle_control_message | Start time {start_time} | End time {end_time}")
+                start_time_obj = datetime.strptime(start_time, '%H:%M:%S') 
+                latency = round((end_time - start_time_obj).total_seconds(), 2)
+                logging.info(f"🔧 handle_control_message | Latency {latency}")
+                logging.info(f"🔧 handle_control_message | Received message from neighbor {source} with message {message} after {latency} seconds")
                 save_data(self.config.participant['scenario_args']['name'], 'communication', source, self.addr, round=current_round, time=latency)
+            else:
+                logging.info(f"🔧 handle_control_message | No time received")
 
         logging.info(f"🔧  handle_control_message | Received [Action {message.action}] from {source} with log {message.log}")
         try:
@@ -251,7 +258,7 @@ class CommunicationsManager:
                             if models_added is not None:
                                 end_time_models_aggregated = time.time()
                                 latency = end_time_models_aggregated - start_time_models_aggregated
-                                logging.info(f"🤖  handle_model_message | Model aggregated in {latency} seconds")
+                                logging.info(f"🤖  handle_model_message | Model aggregated in {latency} seconds with node {source}")
                                 save_data(self.config.participant['scenario_args']['name'], 'aggregated_models', source, self.addr, message.round, time=latency)
                 else:
                     if message.round != -1:
@@ -629,9 +636,6 @@ class CommunicationsManager:
             logging.info(f"Sending message to neighbors: {neighbors}")
 
         for neighbor in set(neighbors):
-            if neighbor in self.get_all_addrs_current_connections(only_direct=True):
-                self.start_time_communication[neighbor] = time.time()
-                logging.info(f"Sending message with start_time {self.start_time_communication[neighbor]} to neighbor {neighbor}")
             await self.send_message(neighbor, message)
             await asyncio.sleep(interval)
 

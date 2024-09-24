@@ -1,5 +1,6 @@
 import logging
 from nebula.core.pb import nebula_pb2
+from datetime import datetime
 
 from typing import TYPE_CHECKING
 
@@ -25,10 +26,14 @@ class MessagesManager:
         data = message_wrapper.SerializeToString()
         return data
 
-    def generate_control_message(self, action, log="Control message"):
+    def generate_control_message(self, action, log="Control message", time=None):
+        if time is None:
+            time = datetime.now().strftime("%H:%M:%S")
+
         message = nebula_pb2.ControlMessage(
             action=action,
             log=log,
+            time=time,
         )
         message_wrapper = nebula_pb2.Wrapper()
         message_wrapper.source = self.addr
