@@ -104,7 +104,7 @@
                     <h5>Topology <i class="fa fa-sitemap"></i>
                         <input type="checkbox" id="mod-topology" style="margin-right: 10px; float: left;">
                     </h5>
-                    <div style="display: inline-block;">
+                    <div style="display: inline-block; white-space: nowrap;">
                         <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
                             <input type="checkbox" id="mod-fully" value='Fully' style="margin-right: 10px;" checked>Fully
                         </label>
@@ -114,7 +114,9 @@
                         <label style="display: inline-block; align-items: center; margin-bottom: 10px;">
                             <input type="checkbox" id="mod-star" value='Star' style="margin-right: 10px; margin-left: 10px;">Star
                         </label>
-                        <input type="number" id="mod-topology-nodes" placeholder="Nº nodes" min="0" value="3" style="display: inline; width: 40%; margin-left: 10px;">
+                        <input type="number" id="mod-topology-nodes" placeholder="Nodes" oninput="greaterthan0(this)" style="display: inline; width: 15%; margin-left: 10px;">
+                        <input type="number" id="mod-topology-increment" placeholder="Increment" oninput="greaterthan0(this)" style="display: inline; width: 21%; margin-left: 0px;">
+                        <input type="number" id="mod-topology-iterations" placeholder="Iterations" oninput="greaterthan0(this)" style="display: inline; width: 20%; margin-left: 0px;">
                     </div>
                     <hr>
                     <h5>Dataset <i class="fa fa-database"></i>
@@ -265,7 +267,7 @@
                             <option>Random</option>
                         </select>
                         <input type="number" class="form-control" id="predefined-topology-nodes"
-                            placeholder="Number of nodes" min="0" value="3" style="display: inline; width: 40%">
+                            placeholder="Number of nodes" min="1" value="3" oninput="greaterthan0(this)" style="display: inline; width: 40%">
                         <i id="networkTopologyRandom" class="fa fa-refresh"></i>
                     </div>
                 </div>
@@ -1063,8 +1065,12 @@
                 // Step 4
                 if (data["topology"] === "Custom") {
                     document.getElementById("custom-topology-btn").checked = true;
+                    document.getElementById("custom-topology-btn").click();
+                    document.getElementById("predefined-topology-select").value = "Fully";
+                    document.getElementById("predefined-topology-nodes").value = 3;
                 } else {
                     document.getElementById("predefined-topology-btn").checked = true;
+                    document.getElementById("predefined-topology-btn").click();
                     document.getElementById("predefined-topology-select").value = data["topology"];
                     document.getElementById("predefined-topology-nodes").value = data["n_nodes"];
                 }
@@ -1685,6 +1691,7 @@
             scenarioStorage.replaceScenario();
 
             clearFields();
+            updateModelOptions();
             updateScenariosPosition(true);
 
             document.getElementById("new-btn").style.display = "none";
@@ -1774,7 +1781,6 @@
             //Show next scenario
             scenarioStorage.actual_scenario = scenarioStorage.actual_scenario + 1;
             setScenarioData(scenarioStorage.scenariosList[scenarioStorage.actual_scenario]);
-            updateModelOptions();
             updateScenariosPosition();
 
             if(scenarioStorage.actual_scenario == scenarioStorage.scenariosList.length - 1){
@@ -1793,7 +1799,6 @@
             scenarioStorage.actual_scenario = scenarioStorage.actual_scenario - 1;            
             var actual_scenario = scenarioStorage.scenariosList[scenarioStorage.actual_scenario];
             setScenarioData(actual_scenario);
-            updateModelOptions();
             updateScenariosPosition();
 
             if(scenarioStorage.actual_scenario == 0){
@@ -1805,7 +1810,7 @@
     </script>
 
     <script>
-        //Scenario generataion
+        //User inputs
 
         function atLeastOneChecked(checkboxIds) {
             return checkboxIds.some(function(id) {
@@ -1820,6 +1825,17 @@
                 document.getElementById(checkboxIds[i]).checked = checked;
             }
         }
+
+        function greaterthan0(input){
+            value = parseInt(input.value)
+            if(value < 1 && !isNaN(value)){
+                input.value = 1;
+            }
+        }
+    </script>
+
+    <script>
+        //Scenario generataion
 
         // Show the modal
         document.getElementById("open-gen-modal-btn").addEventListener("click", function () {
@@ -1878,46 +1894,68 @@
                 return;
             }
 
+            var increment = parseInt(document.getElementById("mod-topology-increment").value);
+            var iterations= parseInt(document.getElementById("mod-topology-iterations").value);
+            var nodes = parseInt(document.getElementById("mod-topology-nodes").value);
+
+            //Default value for nodes
+            if(isNaN(nodes)){
+                nodes = 3;
+            }
+
+            //Default iterations value
+            if(isNaN(iterations)){
+                iterations = 1;
+                increment = 0;
+            }
+
             //Generate scenarios with all aggregation methods selected
-            for (var it1 = 0; it1 < aggregation_methods.length; it1++) {
-                var aggregation_checkbox = document.getElementById(aggregation_methods[it1]);
-                if (aggregation_checkbox.checked) {
-                    document.getElementById("aggregationSelect").value = aggregation_checkbox.value;
+            for (var it0 = 0; it0 < iterations; it0++) {
+                for (var it1 = 0; it1 < aggregation_methods.length; it1++) {
+                    var aggregation_checkbox = document.getElementById(aggregation_methods[it1]);
+                    if (aggregation_checkbox.checked) {
+                        document.getElementById("aggregationSelect").value = aggregation_checkbox.value;
 
-                    //Generate topologys
-                    //Selected topology
-                    for (var it2 = 0; it2 < topologys.length; it2++) {
-                        var topology_checkbox = document.getElementById(topologys[it2]);
-                        if (topology_checkbox.checked) {
-                            document.getElementById("predefined-topology-select").value = topology_checkbox.value;
-                            document.getElementById("predefined-topology-nodes").value = document.getElementById("mod-topology-nodes").value;
-                            document.getElementById("networkTopologyRandom").click();
+                        //Generate topologys
+                        //Selected topology
+                        for (var it2 = 0; it2 < topologys.length; it2++) {
+                            var topology_checkbox = document.getElementById(topologys[it2]);
+                            if (topology_checkbox.checked) {
+                                document.getElementById("predefined-topology-select").value = topology_checkbox.value;
 
-                            //Generate datasets
-                            //Selected dataset
-                            for (var it3 = 0; it3 < datasets.length; it3++){
-                                var dataset_checkbox = document.getElementById(datasets[it3]);
-                                if(dataset_checkbox.checked){
-                                    document.getElementById("datasetSelect").value = dataset_checkbox.value;
-                                    document.getElementById("modelSelect").value = updateModelOptions();
+                                // Node increment TODO number of times to increment
+                                if (it2!=0){
+                                }
 
-                                    //Generate attacks
-                                    //Selected attack
-                                    for (var it4 = 0; it4 < attacks.length; it4++){
-                                        var attacks_checkbox = document.getElementById(attacks[it4]);
-                                        if(attacks_checkbox.checked){
-                                            document.getElementById("poisoning-attack-select").value = attacks_checkbox.value;
+                                document.getElementById("predefined-topology-nodes").value = nodes;
+                                document.getElementById("networkTopologyRandom").click();
 
-                                            //Set scenario title
-                                            document.getElementById("scenario-title").value = document.getElementById("aggregationSelect").value + "_" + 
-                                            document.getElementById("predefined-topology-select").value + "_nodes" + 
-                                            document.getElementById("predefined-topology-nodes").value + "_" + 
-                                            document.getElementById("datasetSelect").value + "_" + document.getElementById("poisoning-attack-select").value;
+                                //Generate datasets
+                                //Selected dataset
+                                for (var it3 = 0; it3 < datasets.length; it3++){
+                                    var dataset_checkbox = document.getElementById(datasets[it3]);
+                                    if(dataset_checkbox.checked){
+                                        document.getElementById("datasetSelect").value = dataset_checkbox.value;
+                                        document.getElementById("modelSelect").value = updateModelOptions();
+
+                                        //Generate attacks
+                                        //Selected attack
+                                        for (var it4 = 0; it4 < attacks.length; it4++){
+                                            var attacks_checkbox = document.getElementById(attacks[it4]);
+                                            if(attacks_checkbox.checked){
+                                                document.getElementById("poisoning-attack-select").value = attacks_checkbox.value;
+
+                                                //Set scenario title
+                                                document.getElementById("scenario-title").value = document.getElementById("aggregationSelect").value + "_" + 
+                                                document.getElementById("predefined-topology-select").value + "_nodes" + 
+                                                document.getElementById("predefined-topology-nodes").value + "_" + 
+                                                document.getElementById("datasetSelect").value + "_" + document.getElementById("poisoning-attack-select").value;
 
 
-                                            //Save generated scenario
-                                            scenarioStorage.saveScenario();
-                                            scenarioStorage.actual_scenario = scenarioStorage.scenariosList.length - 1;
+                                                //Save generated scenario
+                                                scenarioStorage.saveScenario();
+                                                scenarioStorage.actual_scenario = scenarioStorage.scenariosList.length - 1;
+                                            }
                                         }
                                     }
                                 }
@@ -1925,6 +1963,8 @@
                         }
                     }
                 }
+                // Increment nodes
+                nodes = nodes + increment;
             }
 
             //Show buttons
