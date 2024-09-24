@@ -52,6 +52,12 @@ from nebula.core.research.FedProto.models.cifar10.FedProtoResnet8 import FedProt
 from nebula.core.research.FedProto.models.fashionmnist.FedProtoCNN import FedProtoFashionMNISTModelCNN
 from nebula.core.research.FedProto.models.mnist.FedProtoCNN import FedProtoMNISTModelCNN
 from nebula.core.research.FedProto.training.protolightning import ProtoLightning
+from nebula.core.research.FML.models.mnist.FMLCombinedModel import FMLMNISTCombinedModelCNN
+from nebula.core.research.FML.models.cifar10.FMLCombinedCNN import FMLCIFAR10CombinedModelCNN
+from nebula.core.research.FML.models.cifar10.FMLCombinedResnet8 import FMLCIFAR10CombinedModelResNet8
+from nebula.core.research.FML.models.cifar100.FMLCombinedResnet18 import FMLCIFAR100CombinedModelResNet18
+from nebula.core.research.FML.models.fashionmnist.FMLCombinedModel import FMLFashionMNISTCombinedModelCNN
+from nebula.core.research.FML.training.FMLlightning import FMLLightning
 from nebula.core.datasets.cifar100.cifar100 import CIFAR100Dataset
 from nebula.core.optimizations.communications.KD.models.cifar100.StudentResnet18 import StudentCIFAR100ModelResNet18
 from nebula.core.optimizations.communications.KD_prototypes.models.cifar100.ProtoStudentResnet18 import ProtoStudentCIFAR100ModelResnet18
@@ -165,6 +171,9 @@ async def main():
             learner = ProtoLightning
         elif model_name == "CNN FedGPD":
             model = FedGPDMNISTModelCNN()
+        elif model_name == "CNN FML":
+            model = FMLMNISTCombinedModelCNN()
+            learner = FMLLightning
         elif model_name == "CNN PKD":
             model = ProtoStudentMNISTModelCNN(knowledge_distilation="KD")
             learner = ProtoKDQuantizationLightning
@@ -247,6 +256,9 @@ async def main():
             learner = ProtoLightning
         elif model_name == "CNN FedGPD":
             model = FedGPDFashionMNISTModelCNN()
+        elif model_name == "CNN FML":
+            model = FMLFashionMNISTCombinedModelCNN()
+            learner = FMLLightning
         elif model_name == "CNN PKD":
             model = ProtoStudentFashionMNISTModelCNN(knowledge_distilation="KD")
             learner = ProtoKDQuantizationLightning
@@ -347,6 +359,9 @@ async def main():
             learner = ProtoLightning
         elif model_name == "CNN FedGPD":
             model = FedGPDCIFAR10ModelCNN()
+        elif model_name == "CNN FML":
+            model = FMLCIFAR10CombinedModelCNN()
+            learner = FMLLightning
         elif model_name == "CNN PKD":
             model = ProtoStudentCIFAR10ModelCNN(knowledge_distilation="KD")
             learner = ProtoKDQuantizationLightning
@@ -415,6 +430,9 @@ async def main():
             learner = ProtoLightning
         elif model_name == "Resnet8 FedGPD":
             model = FedGPDCIFAR10ModelResNet8()
+        elif model_name == "Resnet8 FML":
+            model = FMLCIFAR10CombinedModelResNet8()
+            learner = FMLLightning
         elif model_name == "Resnet8 PKD":
             model = ProtoStudentCIFAR10ModelResnet8(knowledge_distilation="KD")
             learner = ProtoKDQuantizationLightning
@@ -510,6 +528,9 @@ async def main():
             learner = ProtoLightning
         elif model_name == "Resnet18 FedGPD":
             model = FedGPDCIFAR100ModelResNet18()
+        elif model_name == "Resnet18 FML":
+            model = FMLCIFAR100CombinedModelResNet18()
+            learner = FMLLightning
         elif model_name == "Resnet18 PKD":
             model = ProtoStudentCIFAR100ModelResnet18()
             learner = ProtoKDQuantizationLightning

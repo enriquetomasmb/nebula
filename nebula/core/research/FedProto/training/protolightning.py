@@ -1,3 +1,5 @@
+import logging
+
 from nebula.core.training.lightning import Lightning
 
 
@@ -16,29 +18,30 @@ class ProtoLightning(Lightning):
 
     def set_model_parameters(self, params, initialize=False):
         if initialize:
-            self.model.load_state_dict(params)
-            if hasattr(self.model, "set_protos"):
-                self.model.set_protos(dict())
+            try:
+                self.model.load_state_dict(params)
+                if hasattr(self.model, "set_protos"):
+                    self.model.set_protos(dict())
+                return None
+            except Exception as e:
+                raise ParameterProtosSettingError("Error setting parameters") from e
+
+        if hasattr(self.model, "set_protos"):
+            self.model.set_protos(params)
         else:
-            if hasattr(self.model, "set_protos"):
-                self.model.set_protos(params)
-            else:
-                try:
-                    self.model.load_state_dict(params)
-                except Exception as e:
-                    raise ParameterProtosSettingError("Error setting parameters") from e
+            logging.error("[ProtoLightning] (set_model_parameters) Error setting parameters")
+        return None
 
     def get_model_parameters(self, bytes=False, initialize=False):
         if initialize:
             if bytes:
                 return self.serialize_model(self.model.state_dict())
-
             return self.model.state_dict()
 
         if hasattr(self.model, "get_protos"):
+            if bytes:
+                return self.serialize_model(self.model.get_protos())
             return self.model.get_protos()
 
-        if bytes:
-            return self.serialize_model(self.model.state_dict())
-
-        return self.model.state_dict()
+        logging.error("[ProtoLightning] (get_model_parameters) Error getting parameters")
+        return None

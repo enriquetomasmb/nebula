@@ -1,13 +1,11 @@
-import logging
-
 import torch
 from torch import nn
 import torch.nn.functional as F
 
-from nebula.core.models.nebulamodel import NebulaModel
+from nebula.core.research.FedProto.models.fedprotonebulamodel import FedProtoNebulaModel
 
 
-class FedProtoCIFAR10ModelCNN(NebulaModel):
+class FedProtoCIFAR10ModelCNN(FedProtoNebulaModel):
     """
     LightningModule for MNIST.
     """
@@ -22,15 +20,9 @@ class FedProtoCIFAR10ModelCNN(NebulaModel):
         seed=None,
         beta=1,
     ):
-        super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed)
-        self.config = {"beta1": 0.851436, "beta2": 0.999689, "amsgrad": True}
+        super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed, beta)
 
         self.example_input_array = torch.rand(1, 3, 32, 32)
-        self.beta = beta
-        self.global_protos = {}
-        self.agg_protos_label = {}
-        self.criterion_nll = nn.NLLLoss()
-        self.loss_mse = torch.nn.MSELoss()
 
         self.conv1 = nn.Conv2d(in_channels=input_channels, out_channels=32, kernel_size=(5, 5), padding="same")
         self.relu = nn.ReLU()
@@ -98,64 +90,3 @@ class FedProtoCIFAR10ModelCNN(NebulaModel):
 
         # Return the predicted class based on the closest prototype
         return distances.argmin(dim=1)
-
-    def configure_optimizers(self):
-        """ """
-        optimizer = torch.optim.Adam(
-            self.parameters(),
-            lr=self.learning_rate,
-            betas=(self.config["beta1"], self.config["beta2"]),
-            amsgrad=self.config["amsgrad"],
-        )
-        return optimizer
-
-    def step(self, batch, batch_idx, phase):
-        images, labels = batch
-        y_pred, protos = self.forward_train(images)
-        loss1 = self.criterion_nll(y_pred, labels)
-
-        # Compute loss 2 if the model has prototypes
-        if len(self.global_protos) == 0:
-            loss2 = 0 * loss1
-        else:
-            protos_new = protos.clone()
-            i = 0
-            for label in labels:
-                if label.item() in self.global_protos.keys():
-                    protos_new[i, :] = self.global_protos[label.item()].data
-                i += 1
-            # Compute the loss for the prototypes
-            loss2 = self.loss_mse(protos, protos_new)
-        loss = loss1 + self.beta * loss2
-        self.process_metrics(phase, y_pred, labels, loss)
-
-        if phase == "Train":
-            # Aggregating the prototypes
-            for i in range(len(labels)):
-                label = labels[i].item()
-                if label not in self.agg_protos_label:
-                    self.agg_protos_label[label] = dict(sum=torch.zeros_like(protos[i, :]), count=0)
-                self.agg_protos_label[label]["sum"] += protos[i, :].detach().clone()
-                self.agg_protos_label[label]["count"] += 1
-
-        return loss
-
-    def get_protos(self):
-
-        if len(self.agg_protos_label) == 0:
-            return {k: v.cpu() for k, v in self.global_protos.items()}
-
-        proto = {}
-        for label, proto_info in self.agg_protos_label.items():
-
-            if proto_info["count"] > 1:
-                proto[label] = (proto_info["sum"] / proto_info["count"]).to("cpu")
-            else:
-                proto[label] = proto_info["sum"].to("cpu")
-
-        logging.info(f"[ProtoCIFAR10ModelCNN.get_protos] Protos: {proto}")
-        return proto
-
-    def set_protos(self, protos):
-        self.agg_protos_label = {}
-        self.global_protos = {k: v.to(self.device) for k, v in protos.items()}
