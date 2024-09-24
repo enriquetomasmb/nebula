@@ -1187,8 +1187,12 @@
                 // Step 4
                 if (data["topology"] === "Custom") {
                     document.getElementById("custom-topology-btn").checked = true;
+                    document.getElementById("custom-topology-btn").click();
+                    document.getElementById("predefined-topology-select").value = "Fully";
+                    document.getElementById("predefined-topology-nodes").value = 3;
                 } else {
                     document.getElementById("predefined-topology-btn").checked = true;
+                    document.getElementById("predefined-topology-btn").click();
                     document.getElementById("predefined-topology-select").value = data["topology"];
                     document.getElementById("predefined-topology-nodes").value = data["n_nodes"];
                 }
@@ -1809,6 +1813,7 @@
             scenarioStorage.replaceScenario();
 
             clearFields();
+            updateModelOptions();
             updateScenariosPosition(true);
 
             document.getElementById("new-btn").style.display = "none";
@@ -1898,7 +1903,6 @@
             //Show next scenario
             scenarioStorage.actual_scenario = scenarioStorage.actual_scenario + 1;
             setScenarioData(scenarioStorage.scenariosList[scenarioStorage.actual_scenario]);
-            updateModelOptions();
             updateScenariosPosition();
 
             if(scenarioStorage.actual_scenario == scenarioStorage.scenariosList.length - 1){
@@ -1917,7 +1921,6 @@
             scenarioStorage.actual_scenario = scenarioStorage.actual_scenario - 1;            
             var actual_scenario = scenarioStorage.scenariosList[scenarioStorage.actual_scenario];
             setScenarioData(actual_scenario);
-            updateModelOptions();
             updateScenariosPosition();
 
             if(scenarioStorage.actual_scenario == 0){
