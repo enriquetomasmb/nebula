@@ -171,6 +171,11 @@ class NebulaEventHandler(PatternMatchingEventHandler):
                                     for fd in child.open_files():
                                         try:
                                             fd.close()
+                                        except AttributeError:
+                                            try:
+                                                os.close(fd.fd)
+                                            except Exception as e:
+                                                logging.error(f"Error closing file descriptor {fd.fd} for child process {child.pid}: {e}")
                                         except Exception as e:
                                             logging.error(f"Error closing file descriptor {fd.fd} for child process {child.pid}: {e}")
                                     child.kill()
@@ -183,6 +188,11 @@ class NebulaEventHandler(PatternMatchingEventHandler):
                                 for fd in process.open_files():
                                     try:
                                         fd.close()
+                                    except AttributeError:
+                                        try:
+                                            os.close(fd.fd)
+                                        except Exception as e:
+                                            logging.error(f"Error closing file descriptor {fd.fd} for main process {pid}: {e}")
                                     except Exception as e:
                                         logging.error(f"Error closing file descriptor {fd.fd} for main process {pid}: {e}")
                                 process.kill()
