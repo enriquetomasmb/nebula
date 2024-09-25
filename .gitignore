@@ -137,6 +137,7 @@ app/
 data/
 *.db*
 *.out
+*.pid
 
 .requirements.txt
 data-analysis/

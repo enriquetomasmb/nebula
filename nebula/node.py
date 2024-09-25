@@ -2,9 +2,10 @@ import os
 import sys
 import time
 import random
-import asyncio
 import warnings
 import numpy as np
+import torch
+torch.multiprocessing.set_start_method("spawn", force=True)
 
 # Ignore CryptographyDeprecationWarning (datatime issues with cryptography library)
 from cryptography.utils import CryptographyDeprecationWarning
@@ -211,7 +212,7 @@ async def main():
             model = ProtoStudentMNISTModelCNN(knowledge_distilation="MD", send_logic="mixed_2rounds", weighting="adaptative")
             learner = ProtoKDQuantizationLightning
         else:
-            raise ValueError(f"Model {model} not supported")
+            raise ValueError(f"Model {model} not supported for dataset {dataset_str}")
     elif dataset_str == "FashionMNIST":
         dataset = FashionMNISTDataset(
             num_classes=10,
@@ -296,7 +297,7 @@ async def main():
             model = ProtoStudentFashionMNISTModelCNN(knowledge_distilation="KD", weighting="adaptative", send_logic="mixed_2rounds")
             learner = ProtoKDQuantizationLightning
         else:
-            raise ValueError(f"Model {model} not supported")
+            raise ValueError(f"Model {model} not supported for dataset {dataset_str}")
     elif dataset_str == "SYSCALL":
         dataset = SYSCALLDataset(
             num_classes=10,
@@ -470,8 +471,7 @@ async def main():
             model = ProtoStudentCIFAR10ModelResnet8(knowledge_distilation="MD", weighting="adaptative", send_logic="mixed_2rounds")
             learner = ProtoKDQuantizationLightning
         else:
-            raise ValueError(f"Model {model} not supported")
-
+            raise ValueError(f"Model {model} not supported for dataset {dataset_str}")
     elif dataset_str == "MilitarySAR":
         dataset = MilitarySARDataset(
             num_classes=10,
@@ -687,7 +687,9 @@ async def main():
 
 
 if __name__ == "__main__":
-    os.system("clear")
-    loop = asyncio.new_event_loop()
-    # loop.set_debug(True)
-    loop.run_until_complete(main())
+    if sys.platform == "win32":
+        import asyncio
+        asyncio.run(main(), debug=False)
+    else:
+        import uvloop
+        uvloop.run(main(), debug=False)
