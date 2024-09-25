@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+import logging
 import torch
 from nebula.addons.functions import print_msg_box
 import lightning as pl
@@ -12,6 +13,9 @@ from torchmetrics.classification import (
 from torchmetrics import MetricCollection
 import seaborn as sns
 import matplotlib.pyplot as plt
+from nebula.config.config import TRAINING_LOGGER
+
+logging_training = logging.getLogger(TRAINING_LOGGER)
 
 
 class NebulaModel(pl.LightningModule, ABC):
@@ -35,7 +39,7 @@ class NebulaModel(pl.LightningModule, ABC):
         y_pred_classes = torch.argmax(y_pred, dim=1)
         if phase == "Train":
             # self.log(name=f"{phase}/Loss", value=loss, add_dataloader_idx=False)
-            self.logger.log_data({f"{phase}/Loss": loss.item()}, step=self.global_step)
+            self.logger.log_data({f"{phase}/Loss": loss.item()})
             self.train_metrics.update(y_pred_classes, y)
         elif phase == "Validation":
             self.val_metrics.update(y_pred_classes, y)
@@ -74,7 +78,7 @@ class NebulaModel(pl.LightningModule, ABC):
         metrics_str = ""
         for key, value in output.items():
             metrics_str += f"{key}: {value:.4f}\n"
-        print_msg_box(metrics_str, indent=2, title=f"{phase} Metrics | Step: {self.global_number[phase]}")
+        print_msg_box(metrics_str, indent=2, title=f"{phase} Metrics | Step: {self.global_number[phase]}", logger_name=TRAINING_LOGGER)
 
     def generate_confusion_matrix(self, phase, print_cm=False, plot_cm=False):
         """
@@ -96,7 +100,9 @@ class NebulaModel(pl.LightningModule, ABC):
         else:
             raise NotImplementedError
 
-        print(f"\n{phase}/ConfusionMatrix\n", cm) if print_cm else None
+        if print_cm:
+            logging_training.info(f"{phase} / Confusion Matrix:\n{cm}")
+
         if plot_cm:
             # TODO: Improve with strings for class names
             cm_numpy = cm.numpy()
@@ -182,7 +188,11 @@ class NebulaModel(pl.LightningModule, ABC):
         """
         return self.step(batch, batch_idx=batch_idx, phase="Train")
 
+    def on_train_start(self):
+        logging_training.info(f"{'='*10} [Training] Started {'='*10}")
+
     def on_train_end(self):
+        logging_training.info(f"{'='*10} [Training] Done {'='*10}")
         self.global_number["Train"] += 1
 
     def on_train_epoch_end(self):
@@ -221,7 +231,11 @@ class NebulaModel(pl.LightningModule, ABC):
         else:
             return self.step(batch, batch_idx=batch_idx, phase="Test (Global)")
 
+    def on_test_start(self):
+        logging_training.info(f"{'='*10} [Testing] Started {'='*10}")
+
     def on_test_end(self):
+        logging_training.info(f"{'='*10} [Testing] Done {'='*10}")
         self.global_number["Test (Local)"] += 1
         self.global_number["Test (Global)"] += 1
 
@@ -248,7 +262,7 @@ class NebulaModelStandalone(NebulaModel):
         # NebulaModel registers training rounds
         # NebulaModelStandalone register the global number of epochs instead of rounds
         self.global_number["Train"] += 1
-        
+
     def on_validation_end(self):
         pass
 
@@ -256,7 +270,7 @@ class NebulaModelStandalone(NebulaModel):
         self.log_metrics_end("Validation")
         self.global_number["Validation"] += 1
         self.val_metrics.reset()
-        
+
     def on_test_end(self):
         self.global_number["Test (Local)"] += 1
         self.global_number["Test (Global)"] += 1

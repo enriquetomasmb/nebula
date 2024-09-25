@@ -52,6 +52,14 @@ nebula.core.utils.nebulalogger\_tensorboard module
    :undoc-members:
    :show-inheritance:
 
+nebula.core.utils.tasks module
+------------------------------
+
+.. automodule:: nebula.core.utils.tasks
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

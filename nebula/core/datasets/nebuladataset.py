@@ -1,9 +1,14 @@
 from abc import ABC, abstractmethod
+from collections import defaultdict
 import time
 import numpy as np
 from sklearn.manifold import TSNE
 from torch.utils.data import Dataset
 from nebula.core.utils.deterministic import enable_deterministic
+import logging
+from nebula.config.config import TRAINING_LOGGER
+
+logging_training = logging.getLogger(TRAINING_LOGGER)
 
 
 class NebulaDataset(Dataset, ABC):
@@ -48,6 +53,9 @@ class NebulaDataset(Dataset, ABC):
         self.test_set = None
         self.test_indices_map = None
 
+        # Classes of the participants to be sure that the same classes are used in training and testing
+        self.class_distribution = None
+
         enable_deterministic(config)
 
         if self.partition_id == 0:
@@ -59,7 +67,7 @@ class NebulaDataset(Dataset, ABC):
                     self.initialize_dataset()
                     break
                 except Exception as e:
-                    print(f"Error loading dataset: {e}. Retrying {i+1}/{max_tries} in 5 seconds...")
+                    logging_training.info(f"Error loading dataset: {e}. Retrying {i+1}/{max_tries} in 5 seconds...")
                     time.sleep(5)
 
     @abstractmethod
@@ -70,18 +78,42 @@ class NebulaDataset(Dataset, ABC):
         pass
 
     @abstractmethod
-    def generate_non_iid_map(self, dataset, partition="dirichlet"):
+    def generate_non_iid_map(self, dataset, partition="dirichlet", plot=False):
         """
         Create a non-iid map of the dataset.
         """
         pass
 
     @abstractmethod
-    def generate_iid_map(self, dataset):
+    def generate_iid_map(self, dataset, plot=False):
         """
         Create an iid map of the dataset.
         """
         pass
+
+    def get_train_labels(self):
+        """
+        Get the labels of the training set based on the indices map.
+        """
+        if self.train_indices_map is None:
+            return None
+        return [self.train_set.targets[idx] for idx in self.train_indices_map]
+
+    def get_test_labels(self):
+        """
+        Get the labels of the test set based on the indices map.
+        """
+        if self.test_indices_map is None:
+            return None
+        return [self.test_set.targets[idx] for idx in self.test_indices_map]
+
+    def get_local_test_labels(self):
+        """
+        Get the labels of the local test set based on the indices map.
+        """
+        if self.local_test_indices_map is None:
+            return None
+        return [self.test_set.targets[idx] for idx in self.local_test_indices_map]
 
     def plot_data_distribution(self, dataset, partitions_map):
         """
@@ -108,7 +140,7 @@ class NebulaDataset(Dataset, ABC):
             for idx in indices:
                 label = dataset.targets[idx]
                 class_counts[label] += 1
-            print(f"Participant {i+1} class distribution: {class_counts}")
+            logging_training.info(f"Participant {i+1} class distribution: {class_counts}")
             plt.figure()
             plt.bar(range(self.num_classes), class_counts)
             plt.xlabel("Class")
@@ -119,7 +151,7 @@ class NebulaDataset(Dataset, ABC):
             else:
                 plt.title(f"Participant {i+1} class distribution (Non-IID - {self.partition}) - {self.partition_parameter}")
             plt.tight_layout()
-            path_to_save = f"{self.config.participant['tracking_args']['log_dir']}/{self.config.participant['scenario_args']['name']}/participant_{i+1}_class_distribution_{'iid' if self.iid else 'non_iid'}{'_' + self.partition if not self.iid else ''}.png"
+            path_to_save = f"{self.config.participant['tracking_args']['log_dir']}/{self.config.participant['scenario_args']['name']}/participant_{i}_class_distribution_{'iid' if self.iid else 'non_iid'}{'_' + self.partition if not self.iid else ''}.png"
             plt.savefig(path_to_save, dpi=300, bbox_inches="tight")
             plt.close()
 
@@ -187,80 +219,58 @@ class NebulaDataset(Dataset, ABC):
         plt.savefig(path_to_save_tsne, dpi=300, bbox_inches="tight")
         plt.close()
 
-    def dirichlet_partition(self, dataset, alpha=0.5):
-        """
-        Partition the dataset into multiple subsets using a Dirichlet distribution.
+    def dirichlet_partition(self, dataset, alpha=0.5, min_samples_per_class=10):
+        y_data = self._get_targets(dataset)
+        unique_labels = np.unique(y_data)
+        logging_training.info(f"Labels unique: {unique_labels}")
+        num_samples = len(y_data)
 
-        This function divides a dataset into a specified number of subsets (federated clients),
-        where each subset has a different class distribution. The class distribution in each
-        subset is determined by a Dirichlet distribution, making the partition suitable for
-        simulating non-IID (non-Independently and Identically Distributed) data scenarios in
-        federated learning.
+        indices_per_partition = [[] for _ in range(self.partitions_number)]
+        label_distribution = self.class_distribution if self.class_distribution is not None else None
 
-        Args:
-            dataset (torch.utils.data.Dataset): The dataset to partition. It should have
-                                                'data' and 'targets' attributes.
-            alpha (float): The concentration parameter of the Dirichlet distribution. A lower
-                        alpha value leads to more imbalanced partitions.
+        for label in unique_labels:
+            label_indices = np.where(y_data == label)[0]
+            np.random.shuffle(label_indices)
 
-        Returns:
-            dict: A dictionary where keys are subset indices (ranging from 0 to partitions_number-1)
-                and values are lists of indices corresponding to the samples in each subset.
+            if label_distribution is None:
+                proportions = np.random.dirichlet([alpha] * self.partitions_number)
+            else:
+                proportions = label_distribution[label]
 
-        The function ensures that each class is represented in each subset but with varying
-        proportions. The partitioning process involves iterating over each class, shuffling
-        the indices of that class, and then splitting them according to the Dirichlet
-        distribution. The function also prints the class distribution in each subset for reference.
+            proportions = self._adjust_proportions(proportions, indices_per_partition, num_samples)
+            split_points = (np.cumsum(proportions) * len(label_indices)).astype(int)[:-1]
 
-        Example usage:
-            federated_data = dirichlet_partition(my_dataset, alpha=0.5)
-            # This creates federated data subsets with varying class distributions based on
-            # a Dirichlet distribution with alpha = 0.5.
-        """
-        np.random.seed(self.seed)
+            for partition_idx, indices in enumerate(np.split(label_indices, split_points)):
+                if len(indices) < min_samples_per_class:
+                    indices_per_partition[partition_idx].extend([])
+                else:
+                    indices_per_partition[partition_idx].extend(indices)
+
+        if label_distribution is None:
+            self.class_distribution = self._calculate_class_distribution(indices_per_partition, y_data)
+
+        return {i: indices for i, indices in enumerate(indices_per_partition)}
+
+    def _adjust_proportions(self, proportions, indices_per_partition, num_samples):
+        adjusted = np.array([p * (len(indices) < num_samples / self.partitions_number) for p, indices in zip(proportions, indices_per_partition)])
+        return adjusted / adjusted.sum()
+
+    def _calculate_class_distribution(self, indices_per_partition, y_data):
+        distribution = defaultdict(lambda: np.zeros(self.partitions_number))
+        for partition_idx, indices in enumerate(indices_per_partition):
+            labels, counts = np.unique(y_data[indices], return_counts=True)
+            for label, count in zip(labels, counts):
+                distribution[label][partition_idx] = count
+        return {k: v / v.sum() for k, v in distribution.items()}
+
+    @staticmethod
+    def _get_targets(dataset) -> np.ndarray:
         if isinstance(dataset.targets, np.ndarray):
-            y_train = dataset.targets
+            return dataset.targets
         elif hasattr(dataset.targets, "numpy"):
-            y_train = dataset.targets.numpy()
+            return dataset.targets.numpy()
         else:
-            y_train = np.asarray(dataset.targets)
-        min_size = 0
-        K = np.unique(y_train)
-        N = y_train.shape[0]
-        n_nets = self.partitions_number
-        net_dataidx_map = {}
-
-        while min_size < 10:
-            idx_batch = [[] for _ in range(n_nets)]
-            for k in K:
-                idx_k = np.where(y_train == k)[0]
-                np.random.shuffle(idx_k)
-
-                if len(idx_k) > 0:
-                    proportions = np.random.dirichlet(np.repeat(alpha, n_nets))
-                    proportions = np.array([p * (len(idx_j) < N / n_nets) for p, idx_j in zip(proportions, idx_batch)])
-                    proportions = proportions / proportions.sum()
-                    proportions = (np.cumsum(proportions) * len(idx_k)).astype(int)[:-1]
-                    idx_batch = [idx_j + idx.tolist() for idx_j, idx in zip(idx_batch, np.split(idx_k, proportions))]
-            min_size = min([len(idx_j) for idx_j in idx_batch])
-
-        for j in range(n_nets):
-            np.random.shuffle(idx_batch[j])
-            net_dataidx_map[j] = idx_batch[j]
-
-        # partitioned_datasets = []
-        for i in range(self.partitions_number):
-            #    subset = torch.utils.data.Subset(dataset, net_dataidx_map[i])
-            #    partitioned_datasets.append(subset)
-
-            # Print class distribution in the current partition
-            class_counts = [0] * self.num_classes
-            for idx in net_dataidx_map[i]:
-                label = dataset.targets[idx]
-                class_counts[label] += 1
-            # print(f"Partition {i+1} class distribution: {class_counts}")
-
-        return net_dataidx_map
+            return np.asarray(dataset.targets)
 
     def homo_partition(self, dataset):
         """
@@ -288,10 +298,10 @@ class NebulaDataset(Dataset, ABC):
             federated_data = homo_partition(my_dataset)
             # This creates federated data subsets with homogeneous distribution.
         """
-        np.random.seed(self.seed)
         n_nets = self.partitions_number
 
         n_train = len(dataset.targets)
+        np.random.seed(self.seed)
         idxs = np.random.permutation(n_train)
         batch_idxs = np.array_split(idxs, n_nets)
         net_dataidx_map = {i: batch_idxs[i] for i in range(n_nets)}
@@ -306,7 +316,7 @@ class NebulaDataset(Dataset, ABC):
             for idx in net_dataidx_map[i]:
                 label = dataset.targets[idx]
                 class_counts[label] += 1
-            print(f"Partition {i+1} class distribution: {class_counts}")
+            logging_training.info(f"Partition {i+1} class distribution: {class_counts}")
 
         return net_dataidx_map
 
@@ -336,7 +346,6 @@ class NebulaDataset(Dataset, ABC):
             federated_data = balanced_iid_partition(my_dataset)
             # This creates federated data subsets with equal class distributions.
         """
-        np.random.seed(self.seed)
         num_clients = self.partitions_number
         clients_data = {i: [] for i in range(num_clients)}
 
@@ -355,6 +364,7 @@ class NebulaDataset(Dataset, ABC):
         for label in range(self.num_classes):
             # Get the indices of the same label samples
             label_indices = np.where(labels == label)[0]
+            np.random.seed(self.seed)
             np.random.shuffle(label_indices)
 
             # Split the data based on their labels
@@ -398,7 +408,6 @@ class NebulaDataset(Dataset, ABC):
             # This creates federated data subsets with varying number of samples based on
             # an imbalance factor of 2.
         """
-        np.random.seed(self.seed)
         num_clients = self.partitions_number
         clients_data = {i: [] for i in range(num_clients)}
 
@@ -420,6 +429,7 @@ class NebulaDataset(Dataset, ABC):
         for label in range(self.num_classes):
             # Get the indices of the same label samples
             label_indices = np.where(labels == label)[0]
+            np.random.seed(self.seed)
             np.random.shuffle(label_indices)
 
             # Split the data based on their labels
@@ -463,7 +473,6 @@ class NebulaDataset(Dataset, ABC):
             # This creates federated data subsets with varying class distributions based on
             # a percentage of 20.
         """
-        np.random.seed(self.seed)
         if isinstance(dataset.targets, np.ndarray):
             y_train = dataset.targets
         elif hasattr(dataset.targets, "numpy"):  # Check if it's a tensor with .numpy() method
@@ -488,6 +497,7 @@ class NebulaDataset(Dataset, ABC):
 
         subset_indices = [[] for _ in range(num_subsets)]
         class_list = list(range(num_classes))
+        np.random.seed(self.seed)
         np.random.shuffle(class_list)
 
         for i in range(num_subsets):
@@ -495,12 +505,13 @@ class NebulaDataset(Dataset, ABC):
                 # Use modulo operation to cycle through the class_list
                 class_idx = class_list[(i * classes_per_subset + j) % num_classes]
                 indices = class_indices[class_idx]
+                np.random.seed(self.seed)
                 np.random.shuffle(indices)
                 # Select approximately 50% of the indices
                 subset_indices[i].extend(indices[: min_count // 2])
 
             class_counts = np.bincount(np.array([dataset.targets[idx] for idx in subset_indices[i]]))
-            print(f"Partition {i+1} class distribution: {class_counts.tolist()}")
+            logging_training.info(f"Partition {i+1} class distribution: {class_counts.tolist()}")
 
         partitioned_datasets = {i: subset_indices[i] for i in range(num_subsets)}
 

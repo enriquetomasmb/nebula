@@ -204,14 +204,24 @@
                     <h5 class="step-number">Deployment <i class="fa fa-cloud-upload"></i></h5>
                     <h5 class="step-title">Deployment type</h5>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="deploymentRadioOptions" id="simulation-radio"
-                            value="simulation" checked>
-                        <label class="form-check-label" for="simulation-radio">Virtual participants</label>
+                        <input class="form-check-input" type="radio" name="deploymentRadioOptions" id="process-radio" value="process" checked>
+                        <label class="form-check-label" for="process-radio">Processes</label>
+                        <small id="processHelp" class="form-text text-muted"></small>
+                            <i id="processHelpIcon" class="fa fa-info-circle" style="cursor: pointer;"></i>
+                        </small>
                     </div>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="deploymentRadioOptions" id="real-radio"
-                            value="real" disabled>
-                        <label class="form-check-label" for="real-radio">Real devices</label>
+                        <input class="form-check-input" type="radio" name="deploymentRadioOptions" id="docker-radio"
+                            value="docker">
+                        <label class="form-check-label" for="docker-radio">Docker containers</label>
+                        <small id="dockerHelp" class="form-text text-muted"></small>
+                            <i id="dockerHelpIcon" class="fa fa-info-circle" style="cursor: pointer;"></i>
+                        </small>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="deploymentRadioOptions" id="physical-devices-radio"
+                            value="physical" disabled>
+                        <label class="form-check-label" for="physical-devices-radio">Physical devices</label>
                     </div>
                 </div>
                 <div class="form-group row container-shadow tiny grey">
@@ -230,7 +240,7 @@
                             <option>CFL</option>
                         </select>
                         <small id="architectureHelp" class="form-text text-muted">
-                            <i id="architectureHelpIcon" class="fa fa-info-circle"></i>
+                            <i id="architectureHelpIcon" class="fa fa-info-circle" style="cursor: pointer;"></i>
                         </small>
                     </div>
                 </div>
@@ -284,7 +294,7 @@
                             style="display: inline; width: 50%">
                         </select>
                         <small id="datasetHelp" class="form-text text-muted">
-                            <i id="datasetHelpIcon" class="fa fa-info-circle"></i>
+                            <i id="datasetHelpIcon" class="fa fa-info-circle" style="cursor: pointer;"></i>
                         </small>
                     </div>
                     <h5 class="step-title">Dataset type</h5>
@@ -294,7 +304,7 @@
                             <option value="false" selected>Non-IID</option>
                         </select>
                         <small id="iidHelp" class="form-text text-muted">
-                            <i id="iidHelpIcon" class="fa fa-info-circle"></i>
+                            <i id="iidHelpIcon" class="fa fa-info-circle" style="cursor: pointer;"></i>
                         </small>
                     </div>
                     <h5 class="step-title">Partition Methods</h5>
@@ -307,8 +317,8 @@
                             <option value="unbalancediid" disabled style="display: none;">Unbalanced IID</option>
                         </select>
                         <small id="partitionMethodsHelp" class="form-text text-muted">
-                            <i id="partitionMethodsHelpIcon" class="fa fa-info-circle"></i>
-                            <i id="methodtip" class="fa fa-image"></i>
+                            <i id="partitionMethodsHelpIcon" class="fa fa-info-circle" style="cursor: pointer;"></i>
+                            <i id="methodtip" class="fa fa-image" style="cursor: pointer;"></i>
                         </small>
                         <img id="methodtipImage" style="display: none; width: 200px; height: 200px;" alt="result">
                     </div>
@@ -317,7 +327,7 @@
                         <input type="number" step="0.1" class="form-control" id="partitionParameter" style="display: inline; width: 50%"
                             value="0.5">
                         <small id="parameterSettingHelp" class="form-text text-muted">
-                            <i id="parameterSettingHelpIcon" class="fa fa-info-circle"></i>
+                            <i id="parameterSettingHelpIcon" class="fa fa-info-circle" style="cursor: pointer;"></i>
                         </small>
                     </div>
                 </div>
@@ -333,7 +343,7 @@
                         <select class="form-control" id="modelSelect" name="model" style="display: inline; width: 50%">
                         </select>
                         <small id="modelHelp" class="form-text text-muted">
-                            <i id="modelHelpIcon" class="fa fa-info-circle"></i>
+                            <i id="modelHelpIcon" class="fa fa-info-circle" style="cursor: pointer;"></i>
                         </small>
                     </div>
                 </div>
@@ -966,6 +976,7 @@
 
     <script>
         function getScenarioData() {
+            document.getElementById("networkTopologyRandom").click();
             var nodes = {};
             var n_nodes = document.getElementById("info-participants-number").innerHTML;
             for (var i = 0; i < n_nodes; i++) {
@@ -994,7 +1005,13 @@
             data["scenario_title"] = document.getElementById("scenario-title").value
             data["scenario_description"] = document.getElementById("scenario-description").value
             // Step 2
-            data["simulation"] = true
+            if (document.getElementById("process-radio").checked) {
+                data["deployment"] = "process"
+            } else if (document.getElementById("docker-radio").checked) {
+                data["deployment"] = "docker"
+            } else {
+                data["deployment"] = "process"
+            }
             // Step 3
             data["federation"] = document.getElementById("federationArchitecture").value
             // Step 4
@@ -1059,7 +1076,14 @@
                 document.getElementById("scenario-title").value = data["scenario_title"];
                 document.getElementById("scenario-description").value = data["scenario_description"];
                 // Step 2
-                document.getElementById("simulation-radio").checked = data["simulation"];
+                // Read deployment from data and set the specific radio button
+                if (data["deployment"] == "process") {
+                    document.getElementById("process-radio").checked = true;
+                } else if (data["deployment"] == "docker") {
+                    document.getElementById("docker-radio").checked = true;
+                } else {
+                    document.getElementById("process-radio").checked = true;
+                }
                 // Step 3
                 document.getElementById("federationArchitecture").value = data["federation"];
                 // Step 4
@@ -1362,6 +1386,17 @@
             container: "body",
             delay: { show: 500, hide: 100 },
         });
+
+        // When click processHelpIcon, redirect to the documentation page
+        var processIcon = document.getElementById("processHelpIcon");
+        processIcon.addEventListener("click", function () {
+            window.open("#", "_blank");
+        });
+
+        var dockerIcon = document.getElementById("dockerHelpIcon");
+        dockerIcon.addEventListener("click", function () {
+            window.open("#", "_blank");
+        });
     </script>
 
     <script>
@@ -1588,7 +1623,7 @@
             document.getElementById("scenario-title").value = document.getElementById("scenario-title").defaultValue;
             document.getElementById("scenario-description").value = document.getElementById("scenario-description").value;
             // Step 2
-            document.getElementById("simulation-radio").checked = document.getElementById("simulation-radio").defaultValue;
+            document.getElementById("process-radio").checked = document.getElementById("process-radio").defaultValue;
             // Step 3
             if(!document.getElementById("fedarch-lock").checked){
                 document.getElementById("federationArchitecture").value = "DFL";
@@ -2003,8 +2038,10 @@
                 $('#confirm-modal-body').html('Please select one "start" participant for the scenario');
                 document.getElementById("yes-button").disabled = true;
             } else {
+                var deploymentOption = document.querySelector('input[name="deploymentRadioOptions"]:checked');
                 $('#confirm-modal-body').html('Are you sure you want to run the scenario?\n' +
-                    '<br><br><p class="badge text-bg-danger">Warning: you will stop the running scenario and start a new one</p>');
+                    '<br><p class="badge text-bg-warning">The scenario will be deployed using the selected deployment option: ' + deploymentOption.value + '</p>' +
+                    '<br><p class="badge text-bg-danger">Warning: you will stop the running scenario and start a new one</p>');
                 document.getElementById("yes-button").disabled = false;
 
                 document.getElementById("yes-button").addEventListener("click", function () {
@@ -2629,7 +2666,15 @@
             ip_split = ip_split[0].split(".");
             var ip_last = parseInt(ip_split[3]);
             for (var i = 0; i < nodes.length; i++) {
-                nodes[i].ip = ip_split[0] + "." + ip_split[1] + "." + ip_split[2] + "." + (ip_last + i + 2);
+                // Each node has a different IP in docker network, but the same localhost is used for processes
+                // Depending on docker-radio and process-radio, the IP is different
+                if (document.getElementById("process-radio").checked) {
+                    nodes[i].ip = "127.0.0.1";
+                } else {
+                    nodes[i].ip = ip_split[0] + "." + ip_split[1] + "." + ip_split[2] + "." + (ip_last + i + 2);
+                }                
+                // Port starts from 45001 and increases by 1
+                nodes[i].port = (45001 + i).toString();
             }
             gData.nodes = nodes;
 

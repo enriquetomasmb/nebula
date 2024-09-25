@@ -5,8 +5,12 @@ import signal
 import subprocess
 import sys
 import textwrap
+import threading
 import time
 from dotenv import load_dotenv
+import psutil
+from watchdog.observers import Observer
+from watchdog.events import PatternMatchingEventHandler
 
 from nebula.addons.env import check_environment
 from nebula.config.config import Config
@@ -46,7 +50,156 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 
+signal.signal(signal.SIGTERM, signal_handler)
 signal.signal(signal.SIGINT, signal_handler)
+
+
+class NebulaEventHandler(PatternMatchingEventHandler):
+    """
+    NebulaEventHandler handles file system events for .sh scripts.
+
+    This class monitors the creation, modification, and deletion of .sh scripts
+    in a specified directory.
+    """
+
+    patterns = ["*.sh", "*.ps1"]
+
+    def __init__(self):
+        super(NebulaEventHandler, self).__init__()
+        self.last_processed = {}
+        self.timeout_ns = 10 * 1e9
+        self.processing_files = set()
+        self.lock = threading.Lock()
+        
+    def _should_process_event(self, src_path: str) -> bool:
+        current_time_ns = time.time_ns()
+        logging.info(f"Current time (ns): {current_time_ns}")
+        with self.lock:
+            if src_path in self.last_processed:
+                logging.info(f"Last processed time for {src_path}: {self.last_processed[src_path]}")
+                last_time = self.last_processed[src_path]
+                if current_time_ns - last_time < self.timeout_ns:
+                    return False
+            self.last_processed[src_path] = current_time_ns
+        return True
+    
+    def _is_being_processed(self, src_path: str) -> bool:
+        with self.lock:
+            if src_path in self.processing_files:
+                logging.info(f"Skipping {src_path} as it is already being processed.")
+                return True
+            self.processing_files.add(src_path)
+        return False
+    
+    def _processing_done(self, src_path: str):
+        with self.lock:
+            if src_path in self.processing_files:
+                self.processing_files.remove(src_path)
+
+    def on_created(self, event):
+        """
+        Handles the event when a file is created.
+        """
+        if event.is_directory:
+            return
+        src_path = event.src_path
+        if not self._should_process_event(src_path):
+            return
+        if self._is_being_processed(src_path):
+            return
+        logging.info("File created: %s" % src_path)
+        try:
+            self.run_script(src_path)
+        finally:
+            self._processing_done(src_path)
+
+    def on_deleted(self, event):
+        """
+        Handles the event when a file is deleted.
+        """
+        if event.is_directory:
+            return
+        src_path = event.src_path
+        if not self._should_process_event(src_path):
+            return
+        if self._is_being_processed(src_path):
+            return
+        logging.info("File deleted: %s" % src_path)
+        directory_script = os.path.dirname(src_path)
+        pids_file = os.path.join(directory_script, "current_scenario_pids.txt")
+        logging.info(f"Killing processes from {pids_file}")
+        try:
+            self.kill_script_processes(pids_file)
+            os.remove(pids_file)
+        except FileNotFoundError:
+            logging.warning(f"{pids_file} not found.")
+        except Exception as e:
+            logging.error(f"Error while killing processes: {e}")
+        finally:
+            self._processing_done(src_path)
+
+    def run_script(self, script):
+        try:
+            logging.info("Running script: {}".format(script))
+            if script.endswith(".sh"):
+                result = subprocess.run(["bash", script], capture_output=True, text=True)
+                logging.info("Script output:\n{}".format(result.stdout))
+                if result.stderr:
+                    logging.error("Script error:\n{}".format(result.stderr))
+            elif script.endswith(".ps1"):
+                subprocess.Popen(["powershell", "-ExecutionPolicy", "Bypass", "-File", script], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=False)
+            else:
+                logging.error("Unsupported script format.")
+                return
+        except Exception as e:
+            logging.error("Error while running script: {}".format(e))
+
+    def kill_script_processes(self, pids_file):
+        try:
+            with open(pids_file, "r") as f:
+                pids = f.readlines()
+                for pid in pids:
+                    try:
+                        pid = int(pid.strip())
+                        if psutil.pid_exists(pid):
+                            process = psutil.Process(pid)
+                            children = process.children(recursive=True)
+                            logging.info(f"Forcibly killing process {pid} and {len(children)} child processes...")
+                            for child in children:
+                                try:
+                                    logging.info(f"Forcibly killing child process {child.pid}")
+                                    for fd in child.open_files():
+                                        try:
+                                            fd.close()
+                                        except Exception as e:
+                                            logging.error(f"Error closing file descriptor {fd.fd} for child process {child.pid}: {e}")
+                                    child.kill()
+                                except psutil.NoSuchProcess:
+                                    logging.warning(f"Child process {child.pid} already terminated.")
+                                except Exception as e:
+                                    logging.error(f"Error while forcibly killing child process {child.pid}: {e}")
+                            try:
+                                logging.info(f"Forcibly killing main process {pid}")
+                                for fd in process.open_files():
+                                    try:
+                                        fd.close()
+                                    except Exception as e:
+                                        logging.error(f"Error closing file descriptor {fd.fd} for main process {pid}: {e}")
+                                process.kill()
+                            except psutil.NoSuchProcess:
+                                logging.warning(f"Process {pid} already terminated.")
+                            except Exception as e:
+                                logging.error(f"Error while forcibly killing main process {pid}: {e}")
+                        else:
+                            logging.warning(f"PID {pid} does not exist.")
+                    except ValueError:
+                        logging.error(f"Invalid PID value in file: {pid}")
+                    except Exception as e:
+                        logging.error(f"Error while forcibly killing process {pid}: {e}")
+        except FileNotFoundError:
+            logging.error(f"PID file not found: {pids_file}")
+        except Exception as e:
+            logging.error(f"Error while reading PIDs from file: {e}")
 
 
 class Controller:
@@ -70,6 +223,7 @@ class Controller:
         self.advanced_analytics = args.advanced_analytics if hasattr(args, "advanced_analytics") else False
         self.matrix = args.matrix if hasattr(args, "matrix") else None
         self.root_path = args.root_path if hasattr(args, "root_path") else os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.host_platform = "windows" if sys.platform == "win32" else "unix"
 
         # Network configuration (nodes deployment in a network)
         self.network_subnet = args.network_subnet if hasattr(args, "network_subnet") else None
@@ -98,6 +252,10 @@ class Controller:
 
         # Load the environment variables
         load_dotenv(self.env_path)
+        
+        # Save controller pid
+        with open(os.path.join(os.path.dirname(__file__), "controller.pid"), "w") as f:
+            f.write(str(os.getpid()))
 
         # Check information about the environment
         check_environment()
@@ -110,14 +268,24 @@ class Controller:
         os.environ["NEBULA_CERTS_DIR"] = self.cert_dir
         os.environ["NEBULA_STATISTICS_PORT"] = str(self.statistics_port)
         os.environ["NEBULA_ROOT_HOST"] = self.root_path
-
+        os.environ["NEBULA_HOST_PLATFORM"] = self.host_platform
+        
         if self.production:
             self.run_waf()
+            logging.info("NEBULA WAF is running at port {}".format(self.waf_port))
+            logging.info("Grafana Dashboard is running at port {}".format(self.grafana_port))
 
         if self.test:
             self.run_test()
         else:
             self.run_frontend()
+            logging.info("NEBULA Frontend is running at port {}".format(self.frontend_port))
+
+        # Watchdog for running additional scripts in the host machine (i.e. during the execution of a federation)
+        event_handler = NebulaEventHandler()
+        observer = Observer()
+        observer.schedule(event_handler, path=self.config_dir, recursive=False)
+        observer.start()
 
         if self.mender:
             logging.info("[Mender.module] Mender module initialized")
@@ -140,15 +308,16 @@ class Controller:
                 time.sleep(5)
             sys.exit(0)
 
-        if not self.test:
-            logging.info("NEBULA Frontend is running at port {}".format(self.frontend_port))
-        if self.production:
-            logging.info("NEBULA WAF is running at port {}".format(self.waf_port))
-            logging.info("Grafana Dashboard is running at port {}".format(self.grafana_port))
-
         logging.info("Press Ctrl+C for exit from NEBULA (global exit)")
-        while True:
-            time.sleep(1)
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            logging.info("Closing NEBULA (exiting from components)... Please wait")
+            observer.stop()
+            self.stop()
+
+        observer.join()
 
     def run_waf(self):
         docker_compose_template = textwrap.dedent(
@@ -343,8 +512,10 @@ class Controller:
                     - NEBULA_CERTS_DIR=/nebula/app/certs/
                     - NEBULA_ENV_PATH=/nebula/app/.env
                     - NEBULA_ROOT_HOST={path}
+                    - NEBULA_HOST_PLATFORM={platform}
                     - NEBULA_DEFAULT_USER=admin
                     - NEBULA_DEFAULT_PASSWORD=admin
+                    - NEBULA_FRONTEND_PORT={frontend_port}
                 extra_hosts:
                     - "host.docker.internal:host-gateway"
                 ipc: host
@@ -379,7 +550,7 @@ class Controller:
                     external: true
         """
         )
-        
+
         try:
             subprocess.check_call(["nvidia-smi"])
             self.gpu_available = True
@@ -388,7 +559,7 @@ class Controller:
 
         # Generate the Docker Compose file dynamically
         services = ""
-        services += frontend_template.format(production=self.production, gpu_available=self.gpu_available, advanced_analytics=self.advanced_analytics, path=self.root_path, gw="192.168.10.1", ip="192.168.10.100", frontend_port=self.frontend_port, statistics_port=self.statistics_port)
+        services += frontend_template.format(production=self.production, gpu_available=self.gpu_available, advanced_analytics=self.advanced_analytics, path=self.root_path, platform=self.host_platform, gw="192.168.10.1", ip="192.168.10.100", frontend_port=self.frontend_port, statistics_port=self.statistics_port)
         docker_compose_file = docker_compose_template.format(services)
 
         if self.production:
@@ -424,7 +595,7 @@ class Controller:
 
     def run_test(self):
         deploy_tests.start()
-        
+
     @staticmethod
     def stop_frontend():
         if sys.platform == "win32":
@@ -523,4 +694,12 @@ class Controller:
         Controller.stop_frontend()
         Controller.stop_waf()
         Controller.stop_network()
+        controller_pid_file = os.path.join(os.path.dirname(__file__), "controller.pid")
+        try:
+            with open(controller_pid_file, "r") as f:
+                pid = int(f.read())
+                os.kill(pid, signal.SIGKILL)
+                os.remove(controller_pid_file)
+        except Exception as e:
+            logging.error(f"Error while killing controller process: {e}")
         sys.exit(0)
