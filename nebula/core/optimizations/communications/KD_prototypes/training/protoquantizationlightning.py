@@ -1,6 +1,9 @@
 import logging
 
 from nebula.core.training.lightning import Lightning
+from nebula.config.config import TRAINING_LOGGER
+
+logging_training = logging.getLogger(TRAINING_LOGGER)
 
 
 class ParameterProtoAndModelSettingError(Exception):
@@ -28,7 +31,7 @@ class ProtoQuantizationLightning(Lightning):
             return
 
         # Convert parameters back to float32
-        logging.info("[Learner] Decoding parameters...")
+        logging_training.info("[Learner] Decoding parameters...")
         for key, value in params.items():
             if key != "protos":
                 params[key] = value.float()
@@ -51,7 +54,7 @@ class ProtoQuantizationLightning(Lightning):
 
         model = self.model.state_dict()
         # Convert parameters to float16 before saving to reduce data size
-        logging.info("[Learner] Encoding parameters...")
+        logging_training.info("[Learner] Encoding parameters...")
         # print keys for debug
         # logging.info("[Learner] Keys of parameters: {}".format(model.keys()))
         # quantize parameters to half precision, only if the key is not 'protos'

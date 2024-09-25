@@ -3,6 +3,9 @@ import io
 import logging
 import torch
 from nebula.core.training.lightning import Lightning
+from nebula.config.config import TRAINING_LOGGER
+
+logging_training = logging.getLogger(TRAINING_LOGGER)
 
 
 class ParameterQuantizationSettingError(Exception):
@@ -44,7 +47,7 @@ class QuantizationLightning(Lightning):
             return
 
         # Convert parameters back to float32
-        logging.info("[Learner] Decoding parameters...")
+        logging_training.info("[Learner] Decoding parameters...")
 
         if hasattr(self.model, "set_protos"):
             self.model.set_protos(params)

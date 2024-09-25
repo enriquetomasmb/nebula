@@ -1,8 +1,8 @@
 import logging
-from lightning import Trainer
-from lightning.pytorch.callbacks import LearningRateMonitor, RichModelSummary
-import torch
 from nebula.core.training.lightning import Lightning, ParameterSettingError
+from nebula.config.config import TRAINING_LOGGER
+
+logging_training = logging.getLogger(TRAINING_LOGGER)
 
 
 class FMLLightning(Lightning):
@@ -33,7 +33,7 @@ class FMLLightning(Lightning):
             except Exception as e:
                 raise ParameterSettingError("Error setting parameters") from e
         else:
-            logging.error("[FMLLightning] (set_model_parameters) Personalized model does not have meme model.")
+            logging_training.error("[FMLLightning] (set_model_parameters) Personalized model does not have meme model.")
         return None
 
     def get_model_parameters(self, bytes=False, initialize=False):
@@ -47,34 +47,5 @@ class FMLLightning(Lightning):
                 return self.serialize_model(self.model.model_meme.state_dict())
             return self.model.model_meme.state_dict()
 
-        logging.error("[FMLLightning] (get_model_parameters) Personalized model does not have meme model.")
+        logging_training.error("[FMLLightning] (get_model_parameters) Personalized model does not have meme model.")
         return None
-
-    def create_trainer(self):
-        num_gpus = torch.cuda.device_count()
-        if self.config.participant["device_args"]["accelerator"] == "gpu" and num_gpus > 0:
-            gpu_index = self.config.participant["device_args"]["idx"] % num_gpus
-            logging.info(f"Creating trainer with accelerator GPU ({gpu_index}")
-            self._trainer = Trainer(
-                callbacks=[RichModelSummary(max_depth=1), LearningRateMonitor(logging_interval="epoch")],
-                max_epochs=self.epochs,
-                accelerator=self.config.participant["device_args"]["accelerator"],
-                devices=[gpu_index],
-                logger=self._logger,
-                enable_checkpointing=False,
-                enable_model_summary=False,
-                # deterministic=True
-            )
-        else:
-            logging.info("Creating trainer with accelerator CPU")
-            self._trainer = Trainer(
-                callbacks=[RichModelSummary(max_depth=1), LearningRateMonitor(logging_interval="epoch")],
-                max_epochs=self.epochs,
-                accelerator=self.config.participant["device_args"]["accelerator"],
-                devices="auto",
-                logger=self._logger,
-                enable_checkpointing=False,
-                enable_model_summary=False,
-                # deterministic=True
-            )
-        logging.info(f"Trainer strategy: {self._trainer.strategy}")

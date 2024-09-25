@@ -17,6 +17,7 @@ from nebula.config.config import TRAINING_LOGGER
 
 logging_training = logging.getLogger(TRAINING_LOGGER)
 
+
 class NebulaProgressBar(ProgressBar):
     """Nebula progress bar for training.
     Logs the percentage of completion of the training process using logging.
@@ -24,6 +25,10 @@ class NebulaProgressBar(ProgressBar):
 
     def __init__(self):
         super().__init__()
+        self.enable = True
+
+    def enable(self):
+        """Enable progress bar logging."""
         self.enable = True
 
     def disable(self):
@@ -277,7 +282,6 @@ class Lightning:
     def on_round_start(self):
         self._logger.log_data({"Round": self.round})
         # self.reporter.enqueue_data("Round", self.round)
-        pass
 
     def on_round_end(self):
         self._logger.global_step = self._logger.global_step + self._logger.local_step
@@ -286,9 +290,7 @@ class Lightning:
         logging.info("Flushing memory cache at the end of round...")
         torch.cuda.empty_cache()
         gc.collect()
-        pass
 
     def on_learning_cycle_end(self):
         self._logger.log_data({"Round": self.round})
         # self.reporter.enqueue_data("Round", self.round)
-        pass

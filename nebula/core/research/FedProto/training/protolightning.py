@@ -1,6 +1,9 @@
 import logging
 
 from nebula.core.training.lightning import Lightning
+from nebula.config.config import TRAINING_LOGGER
+
+logging_training = logging.getLogger(TRAINING_LOGGER)
 
 
 class ParameterProtosSettingError(Exception):
@@ -29,7 +32,7 @@ class ProtoLightning(Lightning):
         if hasattr(self.model, "set_protos"):
             self.model.set_protos(params)
         else:
-            logging.error("[ProtoLightning] (set_model_parameters) Error setting parameters")
+            logging_training.error("[ProtoLightning] (set_model_parameters) Error setting parameters")
         return None
 
     def get_model_parameters(self, bytes=False, initialize=False):
@@ -43,5 +46,5 @@ class ProtoLightning(Lightning):
                 return self.serialize_model(self.model.get_protos())
             return self.model.get_protos()
 
-        logging.error("[ProtoLightning] (get_model_parameters) Error getting parameters")
+        logging_training.error("[ProtoLightning] (get_model_parameters) Error getting parameters")
         return None

@@ -2,6 +2,9 @@ import logging
 import traceback
 
 from nebula.core.optimizations.communications.KD_prototypes.training.protoquantizationlightning import ProtoQuantizationLightning
+from nebula.config.config import TRAINING_LOGGER
+
+logging_training = logging.getLogger(TRAINING_LOGGER)
 
 
 class ProtoKDQuantizationLightning(ProtoQuantizationLightning):
@@ -19,7 +22,7 @@ class ProtoKDQuantizationLightning(ProtoQuantizationLightning):
         super().__init__(model, data, config, logger)
         self._trainer = None
 
-    def train(self):
+    async def train(self):
 
         try:
             # activate anomaly detection
@@ -42,9 +45,9 @@ class ProtoKDQuantizationLightning(ProtoQuantizationLightning):
                             self.model.teacher_model.set_student_model(self.model)
                             if hasattr(self.model, "send_logic_step"):
                                 logic = self.model.send_logic_step()
-                                logging.info(f"[Learner] Logic step: {logic}")
+                                logging_training.info(f"[Learner] Logic step: {logic}")
                         else:
-                            logging.info("[Learner] Mutual Distillation. Student model not updated on teacher model.")
+                            logging_training.info("[Learner] Mutual Distillation. Student model not updated on teacher model.")
                             self.model.teacher_model.set_student_model(None)
 
                     else:
@@ -56,16 +59,16 @@ class ProtoKDQuantizationLightning(ProtoQuantizationLightning):
                         ):
                             if hasattr(self.model, "send_logic_step"):
                                 logic = self.model.send_logic_step()
-                                logging.info(f"[Learner] Logic step: {logic}")
+                                logging_training.info(f"[Learner] Logic step: {logic}")
 
-                    logging.info("[Learner] Training teacher model...")
+                    logging_training.info("[Learner] Training teacher model...")
                     # train the teacher model with Lightning
                     self.create_trainer()
                     self._trainer.fit(self.model.teacher_model, self.data)
                     self._trainer = None
 
                 # train the student model with Lightning
-                logging.info("[Learner] Training student model...")
+                logging_training.info("[Learner] Training student model...")
                 self.create_trainer()
                 # torch.autograd.set_detect_anomaly(True)
                 self._trainer.fit(self.model, self.data)
@@ -73,11 +76,11 @@ class ProtoKDQuantizationLightning(ProtoQuantizationLightning):
 
         except RuntimeError as e:
 
-            logging.error(f"Runtime issue with PyTorch Lightning: {e}")
+            logging_training.error(f"Runtime issue with PyTorch Lightning: {e}")
             # Log full traceback
-            logging.error(traceback.format_exc())
+            logging_training.error(traceback.format_exc())
 
         except ValueError as e:
-            logging.error(f"Value error encountered: {e}")
+            logging_training.error(f"Value error encountered: {e}")
             # Log full traceback
-            logging.error(traceback.format_exc())
+            logging_training.error(traceback.format_exc())

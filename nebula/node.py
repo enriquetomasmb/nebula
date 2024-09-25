@@ -5,6 +5,7 @@ import random
 import warnings
 import numpy as np
 import torch
+
 torch.multiprocessing.set_start_method("spawn", force=True)
 
 # Ignore CryptographyDeprecationWarning (datatime issues with cryptography library)
@@ -689,7 +690,9 @@ async def main():
 if __name__ == "__main__":
     if sys.platform == "win32":
         import asyncio
+
         asyncio.run(main(), debug=False)
     else:
         import uvloop
+
         uvloop.run(main(), debug=False)
