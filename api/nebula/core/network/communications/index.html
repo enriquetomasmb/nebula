@@ -389,6 +389,7 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.pending_connections"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.pending_connections</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.incoming_connections"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.incoming_connections</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.outgoing_connections"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.outgoing_connections</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.ready_connections"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.ready_connections</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.received_messages_hashes"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.received_messages_hashes</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.receive_messages_lock"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.receive_messages_lock</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.connections_reconnect"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.connections_reconnect</span></code></a></li>
@@ -403,6 +404,8 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.forwarder"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.forwarder</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.propagator"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.propagator</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.mobility"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.mobility</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.check_federation_ready"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.check_federation_ready()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.add_ready_connection"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.add_ready_connection()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.handle_incoming_message"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.handle_incoming_message()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.handle_discovery_message"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.handle_discovery_message()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.handle_control_message"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.handle_control_message()</span></code></a></li>
@@ -550,6 +553,11 @@ document.write(`
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.ready_connections">
+<span class="sig-name descname"><span class="pre">ready_connections</span></span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.ready_connections" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.received_messages_hashes">
 <span class="sig-name descname"><span class="pre">received_messages_hashes</span></span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.received_messages_hashes" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
@@ -617,6 +625,16 @@ document.write(`
 <dl class="py property">
 <dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.mobility">
 <em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mobility</span></span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.mobility" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.check_federation_ready">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">check_federation_ready</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.check_federation_ready" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.network.communications.CommunicationsManager.add_ready_connection">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">add_ready_connection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">addr</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.communications.CommunicationsManager.add_ready_connection" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -881,6 +899,7 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.pending_connections"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.pending_connections</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.incoming_connections"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.incoming_connections</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.outgoing_connections"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.outgoing_connections</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.ready_connections"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.ready_connections</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.received_messages_hashes"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.received_messages_hashes</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.receive_messages_lock"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.receive_messages_lock</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.connections_reconnect"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.connections_reconnect</span></code></a></li>
@@ -895,6 +914,8 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.forwarder"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.forwarder</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.propagator"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.propagator</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.mobility"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.mobility</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.check_federation_ready"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.check_federation_ready()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.add_ready_connection"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.add_ready_connection()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.handle_incoming_message"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.handle_incoming_message()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.handle_discovery_message"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.handle_discovery_message()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.communications.CommunicationsManager.handle_control_message"><code class="docutils literal notranslate"><span class="pre">CommunicationsManager.handle_control_message()</span></code></a></li>

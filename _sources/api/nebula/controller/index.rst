@@ -19,6 +19,7 @@ Classes
 .. autoapisummary::
 
    nebula.controller.TermEscapeCodeFormatter
+   nebula.controller.NebulaEventHandler
    nebula.controller.Controller
 
 
@@ -102,6 +103,52 @@ Module Contents
 
 .. py:function:: signal_handler(sig, frame)
 
+.. py:class:: NebulaEventHandler
+
+   Bases: :py:obj:`watchdog.events.PatternMatchingEventHandler`
+
+
+   NebulaEventHandler handles file system events for .sh scripts.
+
+   This class monitors the creation, modification, and deletion of .sh scripts
+   in a specified directory.
+
+
+   .. py:attribute:: patterns
+      :value: ['*.sh', '*.ps1']
+
+
+
+   .. py:attribute:: last_processed
+
+
+   .. py:attribute:: timeout_ns
+
+
+   .. py:attribute:: processing_files
+
+
+   .. py:attribute:: lock
+
+
+   .. py:method:: on_created(event)
+
+      Handles the event when a file is created.
+
+
+
+   .. py:method:: on_deleted(event)
+
+      Handles the event when a file is deleted.
+
+
+
+   .. py:method:: run_script(script)
+
+
+   .. py:method:: kill_script_processes(pids_file)
+
+
 .. py:class:: Controller(args)
 
    .. py:attribute:: scenario_name
@@ -161,6 +208,9 @@ Module Contents
 
 
    .. py:attribute:: root_path
+
+
+   .. py:attribute:: host_platform
 
 
    .. py:attribute:: network_subnet

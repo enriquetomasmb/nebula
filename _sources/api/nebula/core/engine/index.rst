@@ -119,6 +119,9 @@ Module Contents
    .. py:attribute:: learning_cycle_lock
 
 
+   .. py:attribute:: federation_setup_lock
+
+
    .. py:attribute:: federation_ready_lock
 
 
@@ -162,6 +165,9 @@ Module Contents
 
 
    .. py:method:: get_federation_ready_lock()
+
+
+   .. py:method:: get_federation_setup_lock()
 
 
    .. py:method:: get_round_lock()

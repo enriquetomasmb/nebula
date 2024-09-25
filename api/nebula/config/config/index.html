@@ -372,8 +372,12 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#attributes">Attributes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.CYAN"><code class="docutils literal notranslate"><span class="pre">CYAN</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.RESET"><code class="docutils literal notranslate"><span class="pre">RESET</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.TRAINING_LOGGER"><code class="docutils literal notranslate"><span class="pre">TRAINING_LOGGER</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.Config"><code class="docutils literal notranslate"><span class="pre">Config</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.Config.topology"><code class="docutils literal notranslate"><span class="pre">Config.topology</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.Config.participant"><code class="docutils literal notranslate"><span class="pre">Config.participant</span></code></a></li>
@@ -382,6 +386,7 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.Config.entity"><code class="docutils literal notranslate"><span class="pre">Config.entity</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.Config.get_topology_config"><code class="docutils literal notranslate"><span class="pre">Config.get_topology_config()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.Config.get_participant_config"><code class="docutils literal notranslate"><span class="pre">Config.get_participant_config()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.Config.get_train_logging_config"><code class="docutils literal notranslate"><span class="pre">Config.get_train_logging_config()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.Config.to_json"><code class="docutils literal notranslate"><span class="pre">Config.to_json()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.Config.set_participant_config"><code class="docutils literal notranslate"><span class="pre">Config.set_participant_config()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.Config.set_topology_config"><code class="docutils literal notranslate"><span class="pre">Config.set_topology_config()</span></code></a></li>
@@ -409,6 +414,23 @@ document.write(`
                   
   <section id="module-nebula.config.config">
 <span id="nebula-config-config"></span><h1>nebula.config.config<a class="headerlink" href="#module-nebula.config.config" title="Link to this heading">#</a></h1>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.config.config.CYAN" title="nebula.config.config.CYAN"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CYAN</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.config.config.RESET" title="nebula.config.config.RESET"><code class="xref py py-obj docutils literal notranslate"><span class="pre">RESET</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.config.config.TRAINING_LOGGER" title="nebula.config.config.TRAINING_LOGGER"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TRAINING_LOGGER</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
 <section id="classes">
 <h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
@@ -422,6 +444,21 @@ document.write(`
 </section>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">#</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="nebula.config.config.CYAN">
+<span class="sig-prename descclassname"><span class="pre">nebula.config.config.</span></span><span class="sig-name descname"><span class="pre">CYAN</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\x1b[0;36m'</span></em><a class="headerlink" href="#nebula.config.config.CYAN" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nebula.config.config.RESET">
+<span class="sig-prename descclassname"><span class="pre">nebula.config.config.</span></span><span class="sig-name descname"><span class="pre">RESET</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\x1b[0m'</span></em><a class="headerlink" href="#nebula.config.config.RESET" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="nebula.config.config.TRAINING_LOGGER">
+<span class="sig-prename descclassname"><span class="pre">nebula.config.config.</span></span><span class="sig-name descname"><span class="pre">TRAINING_LOGGER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'nebula.training'</span></em><a class="headerlink" href="#nebula.config.config.TRAINING_LOGGER" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="nebula.config.config.Config">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.config.config.</span></span><span class="sig-name descname"><span class="pre">Config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">topology_config_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">participant_config_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.config.config.Config" title="Link to this definition">#</a></dt>
@@ -458,6 +495,11 @@ document.write(`
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.config.config.Config.get_participant_config">
 <span class="sig-name descname"><span class="pre">get_participant_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.config.config.Config.get_participant_config" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.config.config.Config.get_train_logging_config">
+<span class="sig-name descname"><span class="pre">get_train_logging_config</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.config.config.Config.get_train_logging_config" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -560,8 +602,12 @@ document.write(`
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#attributes">Attributes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.CYAN"><code class="docutils literal notranslate"><span class="pre">CYAN</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.RESET"><code class="docutils literal notranslate"><span class="pre">RESET</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.TRAINING_LOGGER"><code class="docutils literal notranslate"><span class="pre">TRAINING_LOGGER</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.Config"><code class="docutils literal notranslate"><span class="pre">Config</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.Config.topology"><code class="docutils literal notranslate"><span class="pre">Config.topology</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.Config.participant"><code class="docutils literal notranslate"><span class="pre">Config.participant</span></code></a></li>
@@ -570,6 +616,7 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.Config.entity"><code class="docutils literal notranslate"><span class="pre">Config.entity</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.Config.get_topology_config"><code class="docutils literal notranslate"><span class="pre">Config.get_topology_config()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.Config.get_participant_config"><code class="docutils literal notranslate"><span class="pre">Config.get_participant_config()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.Config.get_train_logging_config"><code class="docutils literal notranslate"><span class="pre">Config.get_train_logging_config()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.Config.to_json"><code class="docutils literal notranslate"><span class="pre">Config.to_json()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.Config.set_participant_config"><code class="docutils literal notranslate"><span class="pre">Config.set_participant_config()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.config.config.Config.set_topology_config"><code class="docutils literal notranslate"><span class="pre">Config.set_topology_config()</span></code></a></li>

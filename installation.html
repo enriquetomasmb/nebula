@@ -384,11 +384,11 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#checking-the-installation">Checking the installation</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#building-the-nebula-participant">Building the nebula participant</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#docker-image">Docker image</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#building-the-nebula-node">Building the nebula node</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-docker-containers">1. Using Docker containers</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-isolated-processes">2. Using isolated processes</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#checking-the-docker-images">Checking the docker images</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running-nebula">Running NEBULA</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula-frontend">NEBULA Frontend</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#stop-nebula">Stop NEBULA</a></li>
@@ -489,24 +489,30 @@ by listing the version of the NEBULA with the following command line:</p>
 </div>
 </section>
 </section>
-<section id="building-the-nebula-participant">
-<h2>Building the nebula participant<a class="headerlink" href="#building-the-nebula-participant" title="Link to this heading">#</a></h2>
-<section id="docker-image">
-<h3>Docker image<a class="headerlink" href="#docker-image" title="Link to this heading">#</a></h3>
-<p>You can build the docker image using the following command line in the root directory:</p>
+<section id="building-the-nebula-node">
+<h2>Building the nebula node<a class="headerlink" href="#building-the-nebula-node" title="Link to this heading">#</a></h2>
+<p>There are two ways to deploy the node in the federation: using Docker containers or isolated processes.
+You can choose the one that best fits your needs in the frontend.</p>
+<section id="using-docker-containers">
+<h3>1. Using Docker containers<a class="headerlink" href="#using-docker-containers" title="Link to this heading">#</a></h3>
+<p>You need to build the docker image using the following command line in the root directory:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">build</span> <span class="o">-</span><span class="n">t</span> <span class="n">nebula</span><span class="o">-</span><span class="n">core</span> <span class="o">.</span>
 </pre></div>
 </div>
 <p>In case of using GPU in the docker, you have to follow the instructions in the following link to install nvidia-container-toolkit:</p>
 <p><a class="reference external" href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html">https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html</a></p>
-</section>
-</section>
-<section id="checking-the-docker-images">
-<h2>Checking the docker images<a class="headerlink" href="#checking-the-docker-images" title="Link to this heading">#</a></h2>
 <p>You can check the docker images using the following command line:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">images</span>
 </pre></div>
 </div>
+</section>
+<section id="using-isolated-processes">
+<h3>2. Using isolated processes<a class="headerlink" href="#using-isolated-processes" title="Link to this heading">#</a></h3>
+<p>You need to install the requirements of the node (core) using the following command line in the root directory:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip3</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">nebula</span><span class="o">/</span><span class="n">requirements</span><span class="o">.</span><span class="n">txt</span>
+</pre></div>
+</div>
+</section>
 </section>
 <section id="running-nebula">
 <h2>Running NEBULA<a class="headerlink" href="#running-nebula" title="Link to this heading">#</a></h2>
@@ -544,7 +550,7 @@ by listing the version of the NEBULA with the following command line:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">app</span><span class="o">/</span><span class="n">main</span><span class="o">.</span><span class="n">py</span> <span class="o">--</span><span class="n">stop</span>
 </pre></div>
 </div>
-<p>Be careful, this command will stop all the containers related to NEBULA: frontend, controller, and participants.</p>
+<p>Be careful, this command will stop all the containers related to NEBULA: frontend, controller, and nodes.</p>
 </section>
 <section id="possible-issues-during-the-installation-or-execution">
 <h2>Possible issues during the installation or execution<a class="headerlink" href="#possible-issues-during-the-installation-or-execution" title="Link to this heading">#</a></h2>
@@ -580,7 +586,18 @@ by listing the version of the NEBULA with the following command line:</p>
 <div><p>sudo systemctl restart docker</p>
 </div></blockquote>
 <hr class="docutils" />
-<p>If the frontend is not working, check the logs in app/logs/server.log</p>
+<p>Error: Too many open files</p>
+<p>Solution: Increase the number of open files</p>
+<blockquote>
+<div><p>ulimit -n 65536</p>
+</div></blockquote>
+<p>Also, you can add the following lines to the file /etc/security/limits.conf</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>soft nofile 65536</p></li>
+<li><p>hard nofile 65536</p></li>
+</ul>
+</div></blockquote>
 </section>
 </section>
 
@@ -641,11 +658,11 @@ by listing the version of the NEBULA with the following command line:</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#checking-the-installation">Checking the installation</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#building-the-nebula-participant">Building the nebula participant</a><ul class="nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#docker-image">Docker image</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#building-the-nebula-node">Building the nebula node</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-docker-containers">1. Using Docker containers</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#using-isolated-processes">2. Using isolated processes</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#checking-the-docker-images">Checking the docker images</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#running-nebula">Running NEBULA</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula-frontend">NEBULA Frontend</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#stop-nebula">Stop NEBULA</a></li>

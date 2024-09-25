@@ -9,11 +9,26 @@ Classes
 
 .. autoapisummary::
 
+   nebula.core.network.connection.MessageChunk
    nebula.core.network.connection.Connection
 
 
 Module Contents
 ---------------
+
+.. py:class:: MessageChunk
+
+   .. py:attribute:: index
+      :type:  int
+
+
+   .. py:attribute:: data
+      :type:  bytes
+
+
+   .. py:attribute:: is_last
+      :type:  bool
+
 
 .. py:class:: Connection(cm, reader, writer, id, host, port, direct=True, active=True, compression='zlib', config=None)
 
@@ -77,23 +92,51 @@ Module Contents
 
 
 
+   .. py:attribute:: process_task
+      :value: None
+
+
+
+   .. py:attribute:: pending_messages_queue
+
+
+   .. py:attribute:: message_buffers
+      :type:  Dict[bytes, Dict[int, MessageChunk]]
+
+
    .. py:attribute:: EOT_CHAR
-      :value: b'\x01\x02\x03\x04'
+      :value: b'\x00\x00\x00\x04'
 
 
 
    .. py:attribute:: COMPRESSION_CHAR
-      :value: b'\x05\x06\x07\x08'
+      :value: b'\x00\x00\x00\x01'
 
 
 
    .. py:attribute:: DATA_TYPE_PREFIXES
 
 
+   .. py:attribute:: HEADER_SIZE
+      :value: 21
+
+
+
+   .. py:attribute:: MAX_CHUNK_SIZE
+
+
+   .. py:attribute:: BUFFER_SIZE
+      :value: 65536
+
+
+
    .. py:method:: get_addr()
 
 
    .. py:method:: get_federated_round()
+
+
+   .. py:method:: get_tunnel_status()
 
 
    .. py:method:: update_round(federated_round)
@@ -142,27 +185,22 @@ Module Contents
 
 
 
-   .. py:method:: compress(data, compression)
+   .. py:method:: reconnect(max_retries = 5, delay = 5)
       :async:
 
 
 
-   .. py:method:: decompress(compressed)
-      :async:
-
-
-
-   .. py:method:: send(data, pb=True, encoding_type='utf-8', compression='none')
-      :async:
-
-
-
-   .. py:method:: retrieve_message(message)
+   .. py:method:: send(data, pb = True, encoding_type = 'utf-8', is_compressed = False)
       :async:
 
 
 
    .. py:method:: handle_incoming_message()
+      :async:
+
+
+
+   .. py:method:: process_message_queue()
       :async:
 
 

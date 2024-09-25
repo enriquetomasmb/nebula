@@ -16,5 +16,6 @@ Submodules
    /api/nebula/core/utils/locker/index
    /api/nebula/core/utils/nebulalogger/index
    /api/nebula/core/utils/nebulalogger_tensorboard/index
+   /api/nebula/core/utils/tasks/index
 
 

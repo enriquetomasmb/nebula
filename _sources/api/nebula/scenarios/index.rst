@@ -16,7 +16,92 @@ Classes
 Module Contents
 ---------------
 
-.. py:class:: Scenario(scenario_title, scenario_description, simulation, federation, topology, nodes, nodes_graph, n_nodes, matrix, dataset, iid, partition_selection, partition_parameter, model, agg_algorithm, rounds, logginglevel, accelerator, network_subnet, network_gateway, epochs, attacks, poisoned_node_percent, poisoned_sample_percent, poisoned_noise_percent, with_reputation, is_dynamic_topology, is_dynamic_aggregation, target_aggregation, random_geo, latitude, longitude, mobility, mobility_type, radius_federation, scheme_mobility, round_frequency, mobile_participants_percent, additional_participants, schema_additional_participants)
+.. py:class:: Scenario(scenario_title, scenario_description, deployment, federation, topology, nodes, nodes_graph, n_nodes, matrix, dataset, iid, partition_selection, partition_parameter, model, agg_algorithm, rounds, logginglevel, accelerator, network_subnet, network_gateway, epochs, attacks, poisoned_node_percent, poisoned_sample_percent, poisoned_noise_percent, with_reputation, is_dynamic_topology, is_dynamic_aggregation, target_aggregation, random_geo, latitude, longitude, mobility, mobility_type, radius_federation, scheme_mobility, round_frequency, mobile_participants_percent, additional_participants, schema_additional_participants)
+
+   A class to represent a scenario.
+
+   Attributes:
+   scenario_title : str
+       Title of the scenario.
+   scenario_description : str
+       Description of the scenario.
+   deployment : str
+       Type of deployment (e.g., 'docker', 'process').
+   federation : str
+       Type of federation.
+   topology : str
+       Network topology.
+   nodes : dict
+       Dictionary of nodes.
+   nodes_graph : dict
+       Graph representation of nodes.
+   n_nodes : int
+       Number of nodes.
+   matrix : list
+       Matrix representation of the network.
+   dataset : str
+       Dataset used in the scenario.
+   iid : bool
+       Indicator if the dataset is IID.
+   partition_selection : str
+       Method of partition selection.
+   partition_parameter : float
+       Parameter for partition selection.
+   model : str
+       Model used in the scenario.
+   agg_algorithm : str
+       Aggregation algorithm.
+   rounds : int
+       Number of rounds.
+   logginglevel : str
+       Logging level.
+   accelerator : str
+       Accelerator used.
+   network_subnet : str
+       Network subnet.
+   network_gateway : str
+       Network gateway.
+   epochs : int
+       Number of epochs.
+   attacks : str
+       Type of attacks.
+   poisoned_node_percent : float
+       Percentage of poisoned nodes.
+   poisoned_sample_percent : float
+       Percentage of poisoned samples.
+   poisoned_noise_percent : float
+       Percentage of poisoned noise.
+   with_reputation : bool
+       Indicator if reputation is used.
+   is_dynamic_topology : bool
+       Indicator if topology is dynamic.
+   is_dynamic_aggregation : bool
+       Indicator if aggregation is dynamic.
+   target_aggregation : str
+       Target aggregation method.
+   random_geo : bool
+       Indicator if random geo is used.
+   latitude : float
+       Latitude for mobility.
+   longitude : float
+       Longitude for mobility.
+   mobility : bool
+       Indicator if mobility is used.
+   mobility_type : str
+       Type of mobility.
+   radius_federation : float
+       Radius of federation.
+   scheme_mobility : str
+       Scheme of mobility.
+   round_frequency : int
+       Frequency of rounds.
+   mobile_participants_percent : float
+       Percentage of mobile participants.
+   additional_participants : list
+       List of additional participants.
+   schema_additional_participants : str
+       Schema for additional participants.
+
 
    .. py:attribute:: scenario_title
 
@@ -24,7 +109,7 @@ Module Contents
    .. py:attribute:: scenario_description
 
 
-   .. py:attribute:: simulation
+   .. py:attribute:: deployment
 
 
    .. py:attribute:: federation
@@ -155,7 +240,7 @@ Module Contents
 
 
 
-.. py:class:: ScenarioManagement(scenario, controller)
+.. py:class:: ScenarioManagement(scenario)
 
    .. py:attribute:: scenario
 
@@ -167,6 +252,9 @@ Module Contents
 
 
    .. py:attribute:: root_path
+
+
+   .. py:attribute:: host_platform
 
 
    .. py:attribute:: config_dir
@@ -182,9 +270,6 @@ Module Contents
 
 
    .. py:attribute:: config
-
-
-   .. py:attribute:: controller
 
 
    .. py:attribute:: topologymanager
@@ -237,6 +322,9 @@ Module Contents
 
 
    .. py:method:: start_nodes_docker()
+
+
+   .. py:method:: start_nodes_process()
 
 
    .. py:method:: remove_files_by_scenario(scenario_name)

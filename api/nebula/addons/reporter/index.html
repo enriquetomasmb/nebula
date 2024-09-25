@@ -383,6 +383,15 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.data_queue"><code class="docutils literal notranslate"><span class="pre">Reporter.data_queue</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.url"><code class="docutils literal notranslate"><span class="pre">Reporter.url</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.counter"><code class="docutils literal notranslate"><span class="pre">Reporter.counter</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.first_net_metrics"><code class="docutils literal notranslate"><span class="pre">Reporter.first_net_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.prev_bytes_sent"><code class="docutils literal notranslate"><span class="pre">Reporter.prev_bytes_sent</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.prev_bytes_recv"><code class="docutils literal notranslate"><span class="pre">Reporter.prev_bytes_recv</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.prev_packets_sent"><code class="docutils literal notranslate"><span class="pre">Reporter.prev_packets_sent</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.prev_packets_recv"><code class="docutils literal notranslate"><span class="pre">Reporter.prev_packets_recv</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.acc_bytes_sent"><code class="docutils literal notranslate"><span class="pre">Reporter.acc_bytes_sent</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.acc_bytes_recv"><code class="docutils literal notranslate"><span class="pre">Reporter.acc_bytes_recv</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.acc_packets_sent"><code class="docutils literal notranslate"><span class="pre">Reporter.acc_packets_sent</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.acc_packets_recv"><code class="docutils literal notranslate"><span class="pre">Reporter.acc_packets_recv</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.enqueue_data"><code class="docutils literal notranslate"><span class="pre">Reporter.enqueue_data()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.start"><code class="docutils literal notranslate"><span class="pre">Reporter.start()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.run_reporter"><code class="docutils literal notranslate"><span class="pre">Reporter.run_reporter()</span></code></a></li>
@@ -463,6 +472,51 @@ document.write(`
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nebula.addons.reporter.Reporter.counter">
 <span class="sig-name descname"><span class="pre">counter</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#nebula.addons.reporter.Reporter.counter" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.reporter.Reporter.first_net_metrics">
+<span class="sig-name descname"><span class="pre">first_net_metrics</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#nebula.addons.reporter.Reporter.first_net_metrics" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.reporter.Reporter.prev_bytes_sent">
+<span class="sig-name descname"><span class="pre">prev_bytes_sent</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#nebula.addons.reporter.Reporter.prev_bytes_sent" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.reporter.Reporter.prev_bytes_recv">
+<span class="sig-name descname"><span class="pre">prev_bytes_recv</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#nebula.addons.reporter.Reporter.prev_bytes_recv" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.reporter.Reporter.prev_packets_sent">
+<span class="sig-name descname"><span class="pre">prev_packets_sent</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#nebula.addons.reporter.Reporter.prev_packets_sent" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.reporter.Reporter.prev_packets_recv">
+<span class="sig-name descname"><span class="pre">prev_packets_recv</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#nebula.addons.reporter.Reporter.prev_packets_recv" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.reporter.Reporter.acc_bytes_sent">
+<span class="sig-name descname"><span class="pre">acc_bytes_sent</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#nebula.addons.reporter.Reporter.acc_bytes_sent" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.reporter.Reporter.acc_bytes_recv">
+<span class="sig-name descname"><span class="pre">acc_bytes_recv</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#nebula.addons.reporter.Reporter.acc_bytes_recv" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.reporter.Reporter.acc_packets_sent">
+<span class="sig-name descname"><span class="pre">acc_packets_sent</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#nebula.addons.reporter.Reporter.acc_packets_sent" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.addons.reporter.Reporter.acc_packets_recv">
+<span class="sig-name descname"><span class="pre">acc_packets_recv</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="headerlink" href="#nebula.addons.reporter.Reporter.acc_packets_recv" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -546,6 +600,15 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.data_queue"><code class="docutils literal notranslate"><span class="pre">Reporter.data_queue</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.url"><code class="docutils literal notranslate"><span class="pre">Reporter.url</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.counter"><code class="docutils literal notranslate"><span class="pre">Reporter.counter</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.first_net_metrics"><code class="docutils literal notranslate"><span class="pre">Reporter.first_net_metrics</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.prev_bytes_sent"><code class="docutils literal notranslate"><span class="pre">Reporter.prev_bytes_sent</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.prev_bytes_recv"><code class="docutils literal notranslate"><span class="pre">Reporter.prev_bytes_recv</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.prev_packets_sent"><code class="docutils literal notranslate"><span class="pre">Reporter.prev_packets_sent</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.prev_packets_recv"><code class="docutils literal notranslate"><span class="pre">Reporter.prev_packets_recv</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.acc_bytes_sent"><code class="docutils literal notranslate"><span class="pre">Reporter.acc_bytes_sent</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.acc_bytes_recv"><code class="docutils literal notranslate"><span class="pre">Reporter.acc_bytes_recv</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.acc_packets_sent"><code class="docutils literal notranslate"><span class="pre">Reporter.acc_packets_sent</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.acc_packets_recv"><code class="docutils literal notranslate"><span class="pre">Reporter.acc_packets_recv</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.enqueue_data"><code class="docutils literal notranslate"><span class="pre">Reporter.enqueue_data()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.start"><code class="docutils literal notranslate"><span class="pre">Reporter.start()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.addons.reporter.Reporter.run_reporter"><code class="docutils literal notranslate"><span class="pre">Reporter.run_reporter()</span></code></a></li>

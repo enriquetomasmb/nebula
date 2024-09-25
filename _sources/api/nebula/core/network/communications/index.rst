@@ -59,6 +59,9 @@ Module Contents
    .. py:attribute:: outgoing_connections
 
 
+   .. py:attribute:: ready_connections
+
+
    .. py:attribute:: received_messages_hashes
 
 
@@ -105,6 +108,16 @@ Module Contents
 
 
    .. py:property:: mobility
+
+
+   .. py:method:: check_federation_ready()
+      :async:
+
+
+
+   .. py:method:: add_ready_connection(addr)
+      :async:
+
 
 
    .. py:method:: handle_incoming_message(data, addr_from)

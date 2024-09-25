@@ -4,6 +4,14 @@ nebula.core.models.cifar10.dualagg
 .. py:module:: nebula.core.models.cifar10.dualagg
 
 
+Attributes
+----------
+
+.. autoapisummary::
+
+   nebula.core.models.cifar10.dualagg.logging_training
+
+
 Classes
 -------
 
@@ -15,6 +23,8 @@ Classes
 
 Module Contents
 ---------------
+
+.. py:data:: logging_training
 
 .. py:class:: ContrastiveLoss(mu=0.5)
 

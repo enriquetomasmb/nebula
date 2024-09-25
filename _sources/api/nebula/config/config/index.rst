@@ -4,6 +4,16 @@ nebula.config.config
 .. py:module:: nebula.config.config
 
 
+Attributes
+----------
+
+.. autoapisummary::
+
+   nebula.config.config.CYAN
+   nebula.config.config.RESET
+   nebula.config.config.TRAINING_LOGGER
+
+
 Classes
 -------
 
@@ -14,6 +24,18 @@ Classes
 
 Module Contents
 ---------------
+
+.. py:data:: CYAN
+   :value: '\x1b[0;36m'
+
+
+.. py:data:: RESET
+   :value: '\x1b[0m'
+
+
+.. py:data:: TRAINING_LOGGER
+   :value: 'nebula.training'
+
 
 .. py:class:: Config(entity, topology_config_file=None, participant_config_file=None)
 
@@ -40,6 +62,9 @@ Module Contents
 
 
    .. py:method:: get_participant_config()
+
+
+   .. py:method:: get_train_logging_config()
 
 
    .. py:method:: to_json()

@@ -91,6 +91,10 @@ Module Contents
 
 .. py:class:: Settings
 
+   .. py:attribute:: port
+      :type:  int
+
+
    .. py:attribute:: production
       :type:  bool
 
@@ -101,6 +105,10 @@ Module Contents
 
    .. py:attribute:: advanced_analytics
       :type:  bool
+
+
+   .. py:attribute:: host_platform
+      :type:  str
 
 
    .. py:attribute:: log_dir

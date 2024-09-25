@@ -4,6 +4,14 @@ nebula.core.datasets.militarysar.militarysar
 .. py:module:: nebula.core.datasets.militarysar.militarysar
 
 
+Attributes
+----------
+
+.. autoapisummary::
+
+   nebula.core.datasets.militarysar.militarysar.logging_training
+
+
 Classes
 -------
 
@@ -17,6 +25,8 @@ Classes
 
 Module Contents
 ---------------
+
+.. py:data:: logging_training
 
 .. py:class:: RandomCrop(size)
 

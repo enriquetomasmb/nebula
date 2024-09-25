@@ -4,6 +4,14 @@ nebula.core.models.nebulamodel
 .. py:module:: nebula.core.models.nebulamodel
 
 
+Attributes
+----------
+
+.. autoapisummary::
+
+   nebula.core.models.nebulamodel.logging_training
+
+
 Classes
 -------
 
@@ -15,6 +23,8 @@ Classes
 
 Module Contents
 ---------------
+
+.. py:data:: logging_training
 
 .. py:class:: NebulaModel(input_channels=1, num_classes=10, learning_rate=0.001, metrics=None, confusion_matrix=None, seed=None)
 
@@ -120,6 +130,9 @@ Module Contents
 
 
 
+   .. py:method:: on_train_start()
+
+
    .. py:method:: on_train_end()
 
 
@@ -150,6 +163,9 @@ Module Contents
 
       Returns:
 
+
+
+   .. py:method:: on_test_start()
 
 
    .. py:method:: on_test_end()

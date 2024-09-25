@@ -4,16 +4,86 @@ nebula.core.training.lightning
 .. py:module:: nebula.core.training.lightning
 
 
+Attributes
+----------
+
+.. autoapisummary::
+
+   nebula.core.training.lightning.logging_training
+
+
 Classes
 -------
 
 .. autoapisummary::
 
+   nebula.core.training.lightning.NebulaProgressBar
    nebula.core.training.lightning.Lightning
 
 
 Module Contents
 ---------------
+
+.. py:data:: logging_training
+
+.. py:class:: NebulaProgressBar
+
+   Bases: :py:obj:`lightning.pytorch.callbacks.ProgressBar`
+
+
+   Nebula progress bar for training.
+   Logs the percentage of completion of the training process using logging.
+
+
+   .. py:attribute:: enable
+      :value: True
+
+
+
+   .. py:method:: disable()
+
+      Disable the progress bar logging.
+
+
+
+   .. py:method:: on_train_epoch_start(trainer, pl_module)
+
+      Called when the training epoch starts.
+
+
+
+   .. py:method:: on_train_batch_end(trainer, pl_module, outputs, batch, batch_idx)
+
+      Called at the end of each training batch.
+
+
+
+   .. py:method:: on_train_epoch_end(trainer, pl_module)
+
+      Called at the end of the training epoch.
+
+
+
+   .. py:method:: on_validation_epoch_start(trainer, pl_module)
+
+
+   .. py:method:: on_validation_epoch_end(trainer, pl_module)
+
+
+   .. py:method:: on_test_batch_start(trainer, pl_module, batch, batch_idx, dataloader_idx)
+
+
+   .. py:method:: on_test_batch_end(trainer, pl_module, outputs, batch, batch_idx, dataloader_idx)
+
+      Called at the end of each test batch.
+
+
+
+   .. py:method:: on_test_epoch_start(trainer, pl_module)
+
+
+   .. py:method:: on_test_epoch_end(trainer, pl_module)
+
 
 .. py:class:: Lightning(model, data, config=None, logger=None)
 
@@ -87,9 +157,13 @@ Module Contents
 
 
    .. py:method:: train()
+      :async:
+
 
 
    .. py:method:: test()
+      :async:
+
 
 
    .. py:method:: get_model_weight()

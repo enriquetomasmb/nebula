@@ -372,8 +372,10 @@ document.write(`
             </div>
             <nav aria-label="Page">
                 <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#attributes">Attributes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.logging_training"><code class="docutils literal notranslate"><span class="pre">logging_training</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel"><code class="docutils literal notranslate"><span class="pre">NebulaModel</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.process_metrics"><code class="docutils literal notranslate"><span class="pre">NebulaModel.process_metrics()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.log_metrics_end"><code class="docutils literal notranslate"><span class="pre">NebulaModel.log_metrics_end()</span></code></a></li>
@@ -390,12 +392,14 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.configure_optimizers"><code class="docutils literal notranslate"><span class="pre">NebulaModel.configure_optimizers()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.step"><code class="docutils literal notranslate"><span class="pre">NebulaModel.step()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.training_step"><code class="docutils literal notranslate"><span class="pre">NebulaModel.training_step()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.on_train_start"><code class="docutils literal notranslate"><span class="pre">NebulaModel.on_train_start()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.on_train_end"><code class="docutils literal notranslate"><span class="pre">NebulaModel.on_train_end()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.on_train_epoch_end"><code class="docutils literal notranslate"><span class="pre">NebulaModel.on_train_epoch_end()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.validation_step"><code class="docutils literal notranslate"><span class="pre">NebulaModel.validation_step()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.on_validation_end"><code class="docutils literal notranslate"><span class="pre">NebulaModel.on_validation_end()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.on_validation_epoch_end"><code class="docutils literal notranslate"><span class="pre">NebulaModel.on_validation_epoch_end()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.test_step"><code class="docutils literal notranslate"><span class="pre">NebulaModel.test_step()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.on_test_start"><code class="docutils literal notranslate"><span class="pre">NebulaModel.on_test_start()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.on_test_end"><code class="docutils literal notranslate"><span class="pre">NebulaModel.on_test_end()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.on_test_epoch_end"><code class="docutils literal notranslate"><span class="pre">NebulaModel.on_test_epoch_end()</span></code></a></li>
 </ul>
@@ -424,6 +428,17 @@ document.write(`
                   
   <section id="module-nebula.core.models.nebulamodel">
 <span id="nebula-core-models-nebulamodel"></span><h1>nebula.core.models.nebulamodel<a class="headerlink" href="#module-nebula.core.models.nebulamodel" title="Link to this heading">#</a></h1>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading">#</a></h2>
+<div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.core.models.nebulamodel.logging_training" title="nebula.core.models.nebulamodel.logging_training"><code class="xref py py-obj docutils literal notranslate"><span class="pre">logging_training</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
 <section id="classes">
 <h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
@@ -440,6 +455,11 @@ document.write(`
 </section>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">#</a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="nebula.core.models.nebulamodel.logging_training">
+<span class="sig-prename descclassname"><span class="pre">nebula.core.models.nebulamodel.</span></span><span class="sig-name descname"><span class="pre">logging_training</span></span><a class="headerlink" href="#nebula.core.models.nebulamodel.logging_training" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="nebula.core.models.nebulamodel.NebulaModel">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.core.models.nebulamodel.</span></span><span class="sig-name descname"><span class="pre">NebulaModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_channels</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metrics</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">confusion_matrix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.nebulamodel.NebulaModel" title="Link to this definition">#</a></dt>
@@ -552,6 +572,11 @@ The metrics are calculated in each batch.
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.models.nebulamodel.NebulaModel.on_train_start">
+<span class="sig-name descname"><span class="pre">on_train_start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.nebulamodel.NebulaModel.on_train_start" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.models.nebulamodel.NebulaModel.on_train_end">
 <span class="sig-name descname"><span class="pre">on_train_end</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.nebulamodel.NebulaModel.on_train_end" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
@@ -588,6 +613,11 @@ The metrics are calculated in each batch.
 :param batch_idx:</p>
 <p>Returns:</p>
 </dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.models.nebulamodel.NebulaModel.on_test_start">
+<span class="sig-name descname"><span class="pre">on_test_start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.models.nebulamodel.NebulaModel.on_test_start" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.models.nebulamodel.NebulaModel.on_test_end">
@@ -687,8 +717,10 @@ The metrics are calculated in each batch.
   </div>
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#attributes">Attributes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.logging_training"><code class="docutils literal notranslate"><span class="pre">logging_training</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel"><code class="docutils literal notranslate"><span class="pre">NebulaModel</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.process_metrics"><code class="docutils literal notranslate"><span class="pre">NebulaModel.process_metrics()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.log_metrics_end"><code class="docutils literal notranslate"><span class="pre">NebulaModel.log_metrics_end()</span></code></a></li>
@@ -705,12 +737,14 @@ The metrics are calculated in each batch.
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.configure_optimizers"><code class="docutils literal notranslate"><span class="pre">NebulaModel.configure_optimizers()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.step"><code class="docutils literal notranslate"><span class="pre">NebulaModel.step()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.training_step"><code class="docutils literal notranslate"><span class="pre">NebulaModel.training_step()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.on_train_start"><code class="docutils literal notranslate"><span class="pre">NebulaModel.on_train_start()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.on_train_end"><code class="docutils literal notranslate"><span class="pre">NebulaModel.on_train_end()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.on_train_epoch_end"><code class="docutils literal notranslate"><span class="pre">NebulaModel.on_train_epoch_end()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.validation_step"><code class="docutils literal notranslate"><span class="pre">NebulaModel.validation_step()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.on_validation_end"><code class="docutils literal notranslate"><span class="pre">NebulaModel.on_validation_end()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.on_validation_epoch_end"><code class="docutils literal notranslate"><span class="pre">NebulaModel.on_validation_epoch_end()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.test_step"><code class="docutils literal notranslate"><span class="pre">NebulaModel.test_step()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.on_test_start"><code class="docutils literal notranslate"><span class="pre">NebulaModel.on_test_start()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.on_test_end"><code class="docutils literal notranslate"><span class="pre">NebulaModel.on_test_end()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.models.nebulamodel.NebulaModel.on_test_epoch_end"><code class="docutils literal notranslate"><span class="pre">NebulaModel.on_test_epoch_end()</span></code></a></li>
 </ul>

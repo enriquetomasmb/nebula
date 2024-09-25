@@ -4,6 +4,14 @@ nebula.core.datasets.nebuladataset
 .. py:module:: nebula.core.datasets.nebuladataset
 
 
+Attributes
+----------
+
+.. autoapisummary::
+
+   nebula.core.datasets.nebuladataset.logging_training
+
+
 Classes
 -------
 
@@ -14,6 +22,8 @@ Classes
 
 Module Contents
 ---------------
+
+.. py:data:: logging_training
 
 .. py:class:: NebulaDataset(num_classes=10, partition_id=0, partitions_number=1, batch_size=32, num_workers=4, iid=True, partition='dirichlet', partition_parameter=0.5, seed=42, config=None)
 
@@ -76,6 +86,11 @@ Module Contents
 
 
 
+   .. py:attribute:: class_distribution
+      :value: None
+
+
+
    .. py:method:: initialize_dataset()
       :abstractmethod:
 
@@ -84,7 +99,7 @@ Module Contents
 
 
 
-   .. py:method:: generate_non_iid_map(dataset, partition='dirichlet')
+   .. py:method:: generate_non_iid_map(dataset, partition='dirichlet', plot=False)
       :abstractmethod:
 
 
@@ -92,11 +107,29 @@ Module Contents
 
 
 
-   .. py:method:: generate_iid_map(dataset)
+   .. py:method:: generate_iid_map(dataset, plot=False)
       :abstractmethod:
 
 
       Create an iid map of the dataset.
+
+
+
+   .. py:method:: get_train_labels()
+
+      Get the labels of the training set based on the indices map.
+
+
+
+   .. py:method:: get_test_labels()
+
+      Get the labels of the test set based on the indices map.
+
+
+
+   .. py:method:: get_local_test_labels()
+
+      Get the labels of the local test set based on the indices map.
 
 
 
@@ -114,39 +147,7 @@ Module Contents
    .. py:method:: visualize_tsne(dataset)
 
 
-   .. py:method:: dirichlet_partition(dataset, alpha=0.5)
-
-      Partition the dataset into multiple subsets using a Dirichlet distribution.
-
-      This function divides a dataset into a specified number of subsets (federated clients),
-      where each subset has a different class distribution. The class distribution in each
-      subset is determined by a Dirichlet distribution, making the partition suitable for
-      simulating non-IID (non-Independently and Identically Distributed) data scenarios in
-      federated learning.
-
-      :param dataset: The dataset to partition. It should have
-                      'data' and 'targets' attributes.
-      :type dataset: torch.utils.data.Dataset
-      :param alpha: The concentration parameter of the Dirichlet distribution. A lower
-                    alpha value leads to more imbalanced partitions.
-      :type alpha: float
-
-      :returns:
-
-                A dictionary where keys are subset indices (ranging from 0 to partitions_number-1)
-                    and values are lists of indices corresponding to the samples in each subset.
-      :rtype: dict
-
-      The function ensures that each class is represented in each subset but with varying
-      proportions. The partitioning process involves iterating over each class, shuffling
-      the indices of that class, and then splitting them according to the Dirichlet
-      distribution. The function also prints the class distribution in each subset for reference.
-
-      Example usage:
-          federated_data = dirichlet_partition(my_dataset, alpha=0.5)
-          # This creates federated data subsets with varying class distributions based on
-          # a Dirichlet distribution with alpha = 0.5.
-
+   .. py:method:: dirichlet_partition(dataset, alpha=0.5, min_samples_per_class=10)
 
 
    .. py:method:: homo_partition(dataset)

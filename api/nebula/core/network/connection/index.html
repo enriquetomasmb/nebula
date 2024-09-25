@@ -374,6 +374,12 @@ document.write(`
                 <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.MessageChunk"><code class="docutils literal notranslate"><span class="pre">MessageChunk</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.MessageChunk.index"><code class="docutils literal notranslate"><span class="pre">MessageChunk.index</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.MessageChunk.data"><code class="docutils literal notranslate"><span class="pre">MessageChunk.data</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.MessageChunk.is_last"><code class="docutils literal notranslate"><span class="pre">MessageChunk.is_last</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection"><code class="docutils literal notranslate"><span class="pre">Connection</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.DEFAULT_FEDERATED_ROUND"><code class="docutils literal notranslate"><span class="pre">Connection.DEFAULT_FEDERATED_ROUND</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.cm"><code class="docutils literal notranslate"><span class="pre">Connection.cm</span></code></a></li>
@@ -393,11 +399,18 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.longitude"><code class="docutils literal notranslate"><span class="pre">Connection.longitude</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.loop"><code class="docutils literal notranslate"><span class="pre">Connection.loop</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.read_task"><code class="docutils literal notranslate"><span class="pre">Connection.read_task</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.process_task"><code class="docutils literal notranslate"><span class="pre">Connection.process_task</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.pending_messages_queue"><code class="docutils literal notranslate"><span class="pre">Connection.pending_messages_queue</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.message_buffers"><code class="docutils literal notranslate"><span class="pre">Connection.message_buffers</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.EOT_CHAR"><code class="docutils literal notranslate"><span class="pre">Connection.EOT_CHAR</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.COMPRESSION_CHAR"><code class="docutils literal notranslate"><span class="pre">Connection.COMPRESSION_CHAR</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.DATA_TYPE_PREFIXES"><code class="docutils literal notranslate"><span class="pre">Connection.DATA_TYPE_PREFIXES</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.HEADER_SIZE"><code class="docutils literal notranslate"><span class="pre">Connection.HEADER_SIZE</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.MAX_CHUNK_SIZE"><code class="docutils literal notranslate"><span class="pre">Connection.MAX_CHUNK_SIZE</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.BUFFER_SIZE"><code class="docutils literal notranslate"><span class="pre">Connection.BUFFER_SIZE</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.get_addr"><code class="docutils literal notranslate"><span class="pre">Connection.get_addr()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.get_federated_round"><code class="docutils literal notranslate"><span class="pre">Connection.get_federated_round()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.get_tunnel_status"><code class="docutils literal notranslate"><span class="pre">Connection.get_tunnel_status()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.update_round"><code class="docutils literal notranslate"><span class="pre">Connection.update_round()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.update_geolocation"><code class="docutils literal notranslate"><span class="pre">Connection.update_geolocation()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.get_geolocation"><code class="docutils literal notranslate"><span class="pre">Connection.get_geolocation()</span></code></a></li>
@@ -412,11 +425,10 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.get_last_active"><code class="docutils literal notranslate"><span class="pre">Connection.get_last_active()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.start"><code class="docutils literal notranslate"><span class="pre">Connection.start()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.stop"><code class="docutils literal notranslate"><span class="pre">Connection.stop()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.compress"><code class="docutils literal notranslate"><span class="pre">Connection.compress()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.decompress"><code class="docutils literal notranslate"><span class="pre">Connection.decompress()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.reconnect"><code class="docutils literal notranslate"><span class="pre">Connection.reconnect()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.send"><code class="docutils literal notranslate"><span class="pre">Connection.send()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.retrieve_message"><code class="docutils literal notranslate"><span class="pre">Connection.retrieve_message()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.handle_incoming_message"><code class="docutils literal notranslate"><span class="pre">Connection.handle_incoming_message()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.process_message_queue"><code class="docutils literal notranslate"><span class="pre">Connection.process_message_queue()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -438,7 +450,10 @@ document.write(`
 <h2>Classes<a class="headerlink" href="#classes" title="Link to this heading">#</a></h2>
 <div class="pst-scrollable-table-container"><table class="autosummary longtable table autosummary">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.core.network.connection.Connection" title="nebula.core.network.connection.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.core.network.connection.MessageChunk" title="nebula.core.network.connection.MessageChunk"><code class="xref py py-obj docutils literal notranslate"><span class="pre">MessageChunk</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.core.network.connection.Connection" title="nebula.core.network.connection.Connection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Connection</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -447,6 +462,26 @@ document.write(`
 </section>
 <section id="module-contents">
 <h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading">#</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="nebula.core.network.connection.MessageChunk">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.core.network.connection.</span></span><span class="sig-name descname"><span class="pre">MessageChunk</span></span><a class="headerlink" href="#nebula.core.network.connection.MessageChunk" title="Link to this definition">#</a></dt>
+<dd><dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.MessageChunk.index">
+<span class="sig-name descname"><span class="pre">index</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#nebula.core.network.connection.MessageChunk.index" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.MessageChunk.data">
+<span class="sig-name descname"><span class="pre">data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bytes</span></em><a class="headerlink" href="#nebula.core.network.connection.MessageChunk.data" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.MessageChunk.is_last">
+<span class="sig-name descname"><span class="pre">is_last</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#nebula.core.network.connection.MessageChunk.is_last" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="nebula.core.network.connection.Connection">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.core.network.connection.</span></span><span class="sig-name descname"><span class="pre">Connection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">writer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">host</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">direct</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">active</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'zlib'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.connection.Connection" title="Link to this definition">#</a></dt>
@@ -546,18 +581,48 @@ document.write(`
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.process_task">
+<span class="sig-name descname"><span class="pre">process_task</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#nebula.core.network.connection.Connection.process_task" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.pending_messages_queue">
+<span class="sig-name descname"><span class="pre">pending_messages_queue</span></span><a class="headerlink" href="#nebula.core.network.connection.Connection.pending_messages_queue" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.message_buffers">
+<span class="sig-name descname"><span class="pre">message_buffers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">bytes</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="#nebula.core.network.connection.MessageChunk" title="nebula.core.network.connection.MessageChunk"><span class="pre">MessageChunk</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#nebula.core.network.connection.Connection.message_buffers" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="nebula.core.network.connection.Connection.EOT_CHAR">
-<span class="sig-name descname"><span class="pre">EOT_CHAR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">b'\x01\x02\x03\x04'</span></em><a class="headerlink" href="#nebula.core.network.connection.Connection.EOT_CHAR" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">EOT_CHAR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">b'\x00\x00\x00\x04'</span></em><a class="headerlink" href="#nebula.core.network.connection.Connection.EOT_CHAR" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nebula.core.network.connection.Connection.COMPRESSION_CHAR">
-<span class="sig-name descname"><span class="pre">COMPRESSION_CHAR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">b'\x05\x06\x07\x08'</span></em><a class="headerlink" href="#nebula.core.network.connection.Connection.COMPRESSION_CHAR" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">COMPRESSION_CHAR</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">b'\x00\x00\x00\x01'</span></em><a class="headerlink" href="#nebula.core.network.connection.Connection.COMPRESSION_CHAR" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nebula.core.network.connection.Connection.DATA_TYPE_PREFIXES">
 <span class="sig-name descname"><span class="pre">DATA_TYPE_PREFIXES</span></span><a class="headerlink" href="#nebula.core.network.connection.Connection.DATA_TYPE_PREFIXES" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.HEADER_SIZE">
+<span class="sig-name descname"><span class="pre">HEADER_SIZE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">21</span></em><a class="headerlink" href="#nebula.core.network.connection.Connection.HEADER_SIZE" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.MAX_CHUNK_SIZE">
+<span class="sig-name descname"><span class="pre">MAX_CHUNK_SIZE</span></span><a class="headerlink" href="#nebula.core.network.connection.Connection.MAX_CHUNK_SIZE" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.BUFFER_SIZE">
+<span class="sig-name descname"><span class="pre">BUFFER_SIZE</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">65536</span></em><a class="headerlink" href="#nebula.core.network.connection.Connection.BUFFER_SIZE" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -568,6 +633,11 @@ document.write(`
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.network.connection.Connection.get_federated_round">
 <span class="sig-name descname"><span class="pre">get_federated_round</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.connection.Connection.get_federated_round" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.get_tunnel_status">
+<span class="sig-name descname"><span class="pre">get_tunnel_status</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.connection.Connection.get_tunnel_status" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -641,29 +711,58 @@ document.write(`
 <dd></dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.compress">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compress</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.connection.Connection.compress" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.decompress">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">decompress</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compressed</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.connection.Connection.decompress" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.reconnect">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reconnect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_retries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.connection.Connection.reconnect" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>max_retries</strong> (<em>int</em>)</p></li>
+<li><p><strong>delay</strong> (<em>int</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.network.connection.Connection.send">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">send</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'utf-8'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'none'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.connection.Connection.send" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.retrieve_message">
-<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">retrieve_message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.connection.Connection.retrieve_message" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">send</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pb</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'utf-8'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_compressed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.connection.Connection.send" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>Any</em>)</p></li>
+<li><p><strong>pb</strong> (<em>bool</em>)</p></li>
+<li><p><strong>encoding_type</strong> (<em>str</em>)</p></li>
+<li><p><strong>is_compressed</strong> (<em>bool</em>)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.network.connection.Connection.handle_incoming_message">
 <em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">handle_incoming_message</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.connection.Connection.handle_incoming_message" title="Link to this definition">#</a></dt>
-<dd></dd></dl>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.network.connection.Connection.process_message_queue">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">process_message_queue</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.network.connection.Connection.process_message_queue" title="Link to this definition">#</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
 
 </dd></dl>
 
@@ -717,6 +816,12 @@ document.write(`
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#classes">Classes</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#module-contents">Module Contents</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.MessageChunk"><code class="docutils literal notranslate"><span class="pre">MessageChunk</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.MessageChunk.index"><code class="docutils literal notranslate"><span class="pre">MessageChunk.index</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.MessageChunk.data"><code class="docutils literal notranslate"><span class="pre">MessageChunk.data</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.MessageChunk.is_last"><code class="docutils literal notranslate"><span class="pre">MessageChunk.is_last</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection"><code class="docutils literal notranslate"><span class="pre">Connection</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.DEFAULT_FEDERATED_ROUND"><code class="docutils literal notranslate"><span class="pre">Connection.DEFAULT_FEDERATED_ROUND</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.cm"><code class="docutils literal notranslate"><span class="pre">Connection.cm</span></code></a></li>
@@ -736,11 +841,18 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.longitude"><code class="docutils literal notranslate"><span class="pre">Connection.longitude</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.loop"><code class="docutils literal notranslate"><span class="pre">Connection.loop</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.read_task"><code class="docutils literal notranslate"><span class="pre">Connection.read_task</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.process_task"><code class="docutils literal notranslate"><span class="pre">Connection.process_task</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.pending_messages_queue"><code class="docutils literal notranslate"><span class="pre">Connection.pending_messages_queue</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.message_buffers"><code class="docutils literal notranslate"><span class="pre">Connection.message_buffers</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.EOT_CHAR"><code class="docutils literal notranslate"><span class="pre">Connection.EOT_CHAR</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.COMPRESSION_CHAR"><code class="docutils literal notranslate"><span class="pre">Connection.COMPRESSION_CHAR</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.DATA_TYPE_PREFIXES"><code class="docutils literal notranslate"><span class="pre">Connection.DATA_TYPE_PREFIXES</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.HEADER_SIZE"><code class="docutils literal notranslate"><span class="pre">Connection.HEADER_SIZE</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.MAX_CHUNK_SIZE"><code class="docutils literal notranslate"><span class="pre">Connection.MAX_CHUNK_SIZE</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.BUFFER_SIZE"><code class="docutils literal notranslate"><span class="pre">Connection.BUFFER_SIZE</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.get_addr"><code class="docutils literal notranslate"><span class="pre">Connection.get_addr()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.get_federated_round"><code class="docutils literal notranslate"><span class="pre">Connection.get_federated_round()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.get_tunnel_status"><code class="docutils literal notranslate"><span class="pre">Connection.get_tunnel_status()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.update_round"><code class="docutils literal notranslate"><span class="pre">Connection.update_round()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.update_geolocation"><code class="docutils literal notranslate"><span class="pre">Connection.update_geolocation()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.get_geolocation"><code class="docutils literal notranslate"><span class="pre">Connection.get_geolocation()</span></code></a></li>
@@ -755,11 +867,10 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.get_last_active"><code class="docutils literal notranslate"><span class="pre">Connection.get_last_active()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.start"><code class="docutils literal notranslate"><span class="pre">Connection.start()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.stop"><code class="docutils literal notranslate"><span class="pre">Connection.stop()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.compress"><code class="docutils literal notranslate"><span class="pre">Connection.compress()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.decompress"><code class="docutils literal notranslate"><span class="pre">Connection.decompress()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.reconnect"><code class="docutils literal notranslate"><span class="pre">Connection.reconnect()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.send"><code class="docutils literal notranslate"><span class="pre">Connection.send()</span></code></a></li>
-<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.retrieve_message"><code class="docutils literal notranslate"><span class="pre">Connection.retrieve_message()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.handle_incoming_message"><code class="docutils literal notranslate"><span class="pre">Connection.handle_incoming_message()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.network.connection.Connection.process_message_queue"><code class="docutils literal notranslate"><span class="pre">Connection.process_message_queue()</span></code></a></li>
 </ul>
 </li>
 </ul>

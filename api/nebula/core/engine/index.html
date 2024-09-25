@@ -46,7 +46,7 @@
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
     <link rel="next" title="nebula.core.eventmanager" href="../eventmanager/index.html" />
-    <link rel="prev" title="nebula.core.utils.nebulalogger_tensorboard" href="../utils/nebulalogger_tensorboard/index.html" />
+    <link rel="prev" title="nebula.core.utils.tasks" href="../utils/tasks/index.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -404,6 +404,7 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.is_dynamic_aggregation"><code class="docutils literal notranslate"><span class="pre">Engine.is_dynamic_aggregation</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.target_aggregation"><code class="docutils literal notranslate"><span class="pre">Engine.target_aggregation</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.learning_cycle_lock"><code class="docutils literal notranslate"><span class="pre">Engine.learning_cycle_lock</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.federation_setup_lock"><code class="docutils literal notranslate"><span class="pre">Engine.federation_setup_lock</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.federation_ready_lock"><code class="docutils literal notranslate"><span class="pre">Engine.federation_ready_lock</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.round_lock"><code class="docutils literal notranslate"><span class="pre">Engine.round_lock</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.cm"><code class="docutils literal notranslate"><span class="pre">Engine.cm</span></code></a></li>
@@ -419,6 +420,7 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.set_initialization_status"><code class="docutils literal notranslate"><span class="pre">Engine.set_initialization_status()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.get_round"><code class="docutils literal notranslate"><span class="pre">Engine.get_round()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.get_federation_ready_lock"><code class="docutils literal notranslate"><span class="pre">Engine.get_federation_ready_lock()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.get_federation_setup_lock"><code class="docutils literal notranslate"><span class="pre">Engine.get_federation_setup_lock()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.get_round_lock"><code class="docutils literal notranslate"><span class="pre">Engine.get_round_lock()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.create_trainer_module"><code class="docutils literal notranslate"><span class="pre">Engine.create_trainer_module()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.start_communications"><code class="docutils literal notranslate"><span class="pre">Engine.start_communications()</span></code></a></li>
@@ -644,6 +646,11 @@ document.write(`
 <dd></dd></dl>
 
 <dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.federation_setup_lock">
+<span class="sig-name descname"><span class="pre">federation_setup_lock</span></span><a class="headerlink" href="#nebula.core.engine.Engine.federation_setup_lock" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
 <dt class="sig sig-object py" id="nebula.core.engine.Engine.federation_ready_lock">
 <span class="sig-name descname"><span class="pre">federation_ready_lock</span></span><a class="headerlink" href="#nebula.core.engine.Engine.federation_ready_lock" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
@@ -716,6 +723,11 @@ document.write(`
 <dl class="py method">
 <dt class="sig sig-object py" id="nebula.core.engine.Engine.get_federation_ready_lock">
 <span class="sig-name descname"><span class="pre">get_federation_ready_lock</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.engine.Engine.get_federation_ready_lock" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.core.engine.Engine.get_federation_setup_lock">
+<span class="sig-name descname"><span class="pre">get_federation_setup_lock</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#nebula.core.engine.Engine.get_federation_setup_lock" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py method">
@@ -825,12 +837,12 @@ document.write(`
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="../utils/nebulalogger_tensorboard/index.html"
+       href="../utils/tasks/index.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">nebula.core.utils.nebulalogger_tensorboard</p>
+        <p class="prev-next-title">nebula.core.utils.tasks</p>
       </div>
     </a>
     <a class="right-next"
@@ -890,6 +902,7 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.is_dynamic_aggregation"><code class="docutils literal notranslate"><span class="pre">Engine.is_dynamic_aggregation</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.target_aggregation"><code class="docutils literal notranslate"><span class="pre">Engine.target_aggregation</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.learning_cycle_lock"><code class="docutils literal notranslate"><span class="pre">Engine.learning_cycle_lock</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.federation_setup_lock"><code class="docutils literal notranslate"><span class="pre">Engine.federation_setup_lock</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.federation_ready_lock"><code class="docutils literal notranslate"><span class="pre">Engine.federation_ready_lock</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.round_lock"><code class="docutils literal notranslate"><span class="pre">Engine.round_lock</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.cm"><code class="docutils literal notranslate"><span class="pre">Engine.cm</span></code></a></li>
@@ -905,6 +918,7 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.set_initialization_status"><code class="docutils literal notranslate"><span class="pre">Engine.set_initialization_status()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.get_round"><code class="docutils literal notranslate"><span class="pre">Engine.get_round()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.get_federation_ready_lock"><code class="docutils literal notranslate"><span class="pre">Engine.get_federation_ready_lock()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.get_federation_setup_lock"><code class="docutils literal notranslate"><span class="pre">Engine.get_federation_setup_lock()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.get_round_lock"><code class="docutils literal notranslate"><span class="pre">Engine.get_round_lock()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.create_trainer_module"><code class="docutils literal notranslate"><span class="pre">Engine.create_trainer_module()</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.core.engine.Engine.start_communications"><code class="docutils literal notranslate"><span class="pre">Engine.start_communications()</span></code></a></li>

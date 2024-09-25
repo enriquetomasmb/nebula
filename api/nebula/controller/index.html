@@ -383,6 +383,18 @@ document.write(`
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.log_console_format"><code class="docutils literal notranslate"><span class="pre">log_console_format</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.console_handler"><code class="docutils literal notranslate"><span class="pre">console_handler</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.signal_handler"><code class="docutils literal notranslate"><span class="pre">signal_handler()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.NebulaEventHandler"><code class="docutils literal notranslate"><span class="pre">NebulaEventHandler</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.NebulaEventHandler.patterns"><code class="docutils literal notranslate"><span class="pre">NebulaEventHandler.patterns</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.NebulaEventHandler.last_processed"><code class="docutils literal notranslate"><span class="pre">NebulaEventHandler.last_processed</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.NebulaEventHandler.timeout_ns"><code class="docutils literal notranslate"><span class="pre">NebulaEventHandler.timeout_ns</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.NebulaEventHandler.processing_files"><code class="docutils literal notranslate"><span class="pre">NebulaEventHandler.processing_files</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.NebulaEventHandler.lock"><code class="docutils literal notranslate"><span class="pre">NebulaEventHandler.lock</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.NebulaEventHandler.on_created"><code class="docutils literal notranslate"><span class="pre">NebulaEventHandler.on_created()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.NebulaEventHandler.on_deleted"><code class="docutils literal notranslate"><span class="pre">NebulaEventHandler.on_deleted()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.NebulaEventHandler.run_script"><code class="docutils literal notranslate"><span class="pre">NebulaEventHandler.run_script()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.NebulaEventHandler.kill_script_processes"><code class="docutils literal notranslate"><span class="pre">NebulaEventHandler.kill_script_processes()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller"><code class="docutils literal notranslate"><span class="pre">Controller</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.scenario_name"><code class="docutils literal notranslate"><span class="pre">Controller.scenario_name</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.start_date_scenario"><code class="docutils literal notranslate"><span class="pre">Controller.start_date_scenario</span></code></a></li>
@@ -403,6 +415,7 @@ document.write(`
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.advanced_analytics"><code class="docutils literal notranslate"><span class="pre">Controller.advanced_analytics</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.matrix"><code class="docutils literal notranslate"><span class="pre">Controller.matrix</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.root_path"><code class="docutils literal notranslate"><span class="pre">Controller.root_path</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.host_platform"><code class="docutils literal notranslate"><span class="pre">Controller.host_platform</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.network_subnet"><code class="docutils literal notranslate"><span class="pre">Controller.network_subnet</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.network_gateway"><code class="docutils literal notranslate"><span class="pre">Controller.network_gateway</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.config"><code class="docutils literal notranslate"><span class="pre">Controller.config</span></code></a></li>
@@ -457,7 +470,10 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="#nebula.controller.TermEscapeCodeFormatter" title="nebula.controller.TermEscapeCodeFormatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">TermEscapeCodeFormatter</span></code></a></p></td>
 <td><p>Formatter instances are used to convert a LogRecord to text.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#nebula.controller.Controller" title="nebula.controller.Controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Controller</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#nebula.controller.NebulaEventHandler" title="nebula.controller.NebulaEventHandler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">NebulaEventHandler</span></code></a></p></td>
+<td><p>NebulaEventHandler handles file system events for .sh scripts.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#nebula.controller.Controller" title="nebula.controller.Controller"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Controller</span></code></a></p></td>
 <td><p></p></td>
 </tr>
 </tbody>
@@ -561,6 +577,62 @@ it is formatted using formatException() and appended to the message.</p>
 <dd></dd></dl>
 
 <dl class="py class">
+<dt class="sig sig-object py" id="nebula.controller.NebulaEventHandler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.controller.</span></span><span class="sig-name descname"><span class="pre">NebulaEventHandler</span></span><a class="headerlink" href="#nebula.controller.NebulaEventHandler" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">watchdog.events.PatternMatchingEventHandler</span></code></p>
+<p>NebulaEventHandler handles file system events for .sh scripts.</p>
+<p>This class monitors the creation, modification, and deletion of .sh scripts
+in a specified directory.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.NebulaEventHandler.patterns">
+<span class="sig-name descname"><span class="pre">patterns</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">['*.sh',</span> <span class="pre">'*.ps1']</span></em><a class="headerlink" href="#nebula.controller.NebulaEventHandler.patterns" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.NebulaEventHandler.last_processed">
+<span class="sig-name descname"><span class="pre">last_processed</span></span><a class="headerlink" href="#nebula.controller.NebulaEventHandler.last_processed" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.NebulaEventHandler.timeout_ns">
+<span class="sig-name descname"><span class="pre">timeout_ns</span></span><a class="headerlink" href="#nebula.controller.NebulaEventHandler.timeout_ns" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.NebulaEventHandler.processing_files">
+<span class="sig-name descname"><span class="pre">processing_files</span></span><a class="headerlink" href="#nebula.controller.NebulaEventHandler.processing_files" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.NebulaEventHandler.lock">
+<span class="sig-name descname"><span class="pre">lock</span></span><a class="headerlink" href="#nebula.controller.NebulaEventHandler.lock" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.controller.NebulaEventHandler.on_created">
+<span class="sig-name descname"><span class="pre">on_created</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.controller.NebulaEventHandler.on_created" title="Link to this definition">#</a></dt>
+<dd><p>Handles the event when a file is created.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.controller.NebulaEventHandler.on_deleted">
+<span class="sig-name descname"><span class="pre">on_deleted</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">event</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.controller.NebulaEventHandler.on_deleted" title="Link to this definition">#</a></dt>
+<dd><p>Handles the event when a file is deleted.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.controller.NebulaEventHandler.run_script">
+<span class="sig-name descname"><span class="pre">run_script</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">script</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.controller.NebulaEventHandler.run_script" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="nebula.controller.NebulaEventHandler.kill_script_processes">
+<span class="sig-name descname"><span class="pre">kill_script_processes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pids_file</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.controller.NebulaEventHandler.kill_script_processes" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
 <dt class="sig sig-object py" id="nebula.controller.Controller">
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">nebula.controller.</span></span><span class="sig-name descname"><span class="pre">Controller</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#nebula.controller.Controller" title="Link to this definition">#</a></dt>
 <dd><dl class="py attribute">
@@ -656,6 +728,11 @@ it is formatted using formatException() and appended to the message.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="nebula.controller.Controller.root_path">
 <span class="sig-name descname"><span class="pre">root_path</span></span><a class="headerlink" href="#nebula.controller.Controller.root_path" title="Link to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="nebula.controller.Controller.host_platform">
+<span class="sig-name descname"><span class="pre">host_platform</span></span><a class="headerlink" href="#nebula.controller.Controller.host_platform" title="Link to this definition">#</a></dt>
 <dd></dd></dl>
 
 <dl class="py attribute">
@@ -799,6 +876,18 @@ it is formatted using formatException() and appended to the message.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.log_console_format"><code class="docutils literal notranslate"><span class="pre">log_console_format</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.console_handler"><code class="docutils literal notranslate"><span class="pre">console_handler</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.signal_handler"><code class="docutils literal notranslate"><span class="pre">signal_handler()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.NebulaEventHandler"><code class="docutils literal notranslate"><span class="pre">NebulaEventHandler</span></code></a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.NebulaEventHandler.patterns"><code class="docutils literal notranslate"><span class="pre">NebulaEventHandler.patterns</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.NebulaEventHandler.last_processed"><code class="docutils literal notranslate"><span class="pre">NebulaEventHandler.last_processed</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.NebulaEventHandler.timeout_ns"><code class="docutils literal notranslate"><span class="pre">NebulaEventHandler.timeout_ns</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.NebulaEventHandler.processing_files"><code class="docutils literal notranslate"><span class="pre">NebulaEventHandler.processing_files</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.NebulaEventHandler.lock"><code class="docutils literal notranslate"><span class="pre">NebulaEventHandler.lock</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.NebulaEventHandler.on_created"><code class="docutils literal notranslate"><span class="pre">NebulaEventHandler.on_created()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.NebulaEventHandler.on_deleted"><code class="docutils literal notranslate"><span class="pre">NebulaEventHandler.on_deleted()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.NebulaEventHandler.run_script"><code class="docutils literal notranslate"><span class="pre">NebulaEventHandler.run_script()</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.NebulaEventHandler.kill_script_processes"><code class="docutils literal notranslate"><span class="pre">NebulaEventHandler.kill_script_processes()</span></code></a></li>
+</ul>
+</li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller"><code class="docutils literal notranslate"><span class="pre">Controller</span></code></a><ul class="nav section-nav flex-column">
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.scenario_name"><code class="docutils literal notranslate"><span class="pre">Controller.scenario_name</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.start_date_scenario"><code class="docutils literal notranslate"><span class="pre">Controller.start_date_scenario</span></code></a></li>
@@ -819,6 +908,7 @@ it is formatted using formatException() and appended to the message.</p>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.advanced_analytics"><code class="docutils literal notranslate"><span class="pre">Controller.advanced_analytics</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.matrix"><code class="docutils literal notranslate"><span class="pre">Controller.matrix</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.root_path"><code class="docutils literal notranslate"><span class="pre">Controller.root_path</span></code></a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.host_platform"><code class="docutils literal notranslate"><span class="pre">Controller.host_platform</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.network_subnet"><code class="docutils literal notranslate"><span class="pre">Controller.network_subnet</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.network_gateway"><code class="docutils literal notranslate"><span class="pre">Controller.network_gateway</span></code></a></li>
 <li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#nebula.controller.Controller.config"><code class="docutils literal notranslate"><span class="pre">Controller.config</span></code></a></li>
