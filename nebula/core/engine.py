@@ -157,6 +157,8 @@ class Engine:
         self.config.reload_config_file()
 
         self._cm = CommunicationsManager(engine=self)
+        # Set the communication manager in the model (send messages from there)
+        self.trainer.model.set_communication_manager(self._cm)
 
         self._reporter = Reporter(config=self.config, trainer=self.trainer, cm=self.cm)
 
@@ -378,7 +380,7 @@ class Engine:
 
                 await self._learning_cycle()
             else:
-                if await self.learning_cycle_lock.locked_async():  
+                if await self.learning_cycle_lock.locked_async():
                     await self.learning_cycle_lock.release_async()
         finally:
             if await self.learning_cycle_lock.locked_async():
@@ -473,7 +475,7 @@ class Engine:
         logging.info(f"Checking if all my connections reached the total rounds...")
         while not self.cm.check_finished_experiment():
             await asyncio.sleep(1)
-            
+
         # Enable loggin info
         logging.getLogger().disabled = True
 
@@ -482,7 +484,7 @@ class Engine:
             try:
                 self.client.containers.get(self.docker_id).stop()
             except Exception as e:
-                print(f"Error stopping Docker container with ID {self.docker_id}: {e}")   
+                print(f"Error stopping Docker container with ID {self.docker_id}: {e}")
 
     async def _extended_learning_cycle(self):
         """
@@ -565,8 +567,8 @@ class AggregatorNode(Engine):
 
     async def _extended_learning_cycle(self):
         # Define the functionality of the aggregator node
-        await self.trainer.test()
         await self.trainer.train()
+        await self.trainer.test()
 
         await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.get_model_weight(), source=self.addr, round=self.round)
 
@@ -597,8 +599,8 @@ class TrainerNode(Engine):
         logging.info(f"Waiting global update | Assign _waiting_global_update = True")
         self.aggregator.set_waiting_global_update()
 
-        await self.trainer.test()
         await self.trainer.train()
+        await self.trainer.test()
 
         await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.get_model_weight(), source=self.addr, round=self.round, local=True)
 

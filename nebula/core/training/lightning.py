@@ -272,6 +272,7 @@ class Lightning:
         self._logger.global_step = self._logger.global_step + self._logger.local_step
         self._logger.local_step = 0
         self.round += 1
+        self.model.on_round_end()
         logging.info("Flushing memory cache at the end of round...")
         torch.cuda.empty_cache()
         gc.collect()

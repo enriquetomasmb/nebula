@@ -3,8 +3,11 @@ import torch.nn.functional as F
 import lightning as pl
 from torchmetrics.classification import MulticlassAccuracy, MulticlassRecall, MulticlassPrecision, MulticlassF1Score, MulticlassConfusionMatrix
 from torchmetrics import MetricCollection
-import seaborn as sns
+import matplotlib
 import matplotlib.pyplot as plt
+import seaborn as sns
+matplotlib.use("Agg")
+plt.switch_backend("Agg")
 import logging
 from nebula.config.config import TRAINING_LOGGER
 
