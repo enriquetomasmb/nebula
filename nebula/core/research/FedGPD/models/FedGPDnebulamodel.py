@@ -24,6 +24,36 @@ class FedGPDNebulaModel(NebulaModel, ABC):
         self.global_protos = {}
         self.agg_protos_label = {}
 
+    def step(self, batch, batch_idx, phase):
+
+        images, labels_g = batch
+        images, labels = images.to(self.device), labels_g.to(self.device)
+        logits, features = self.forward_train(images, softmax=False)
+
+        features_copy = features.clone().detach()
+
+        # Compute loss ce
+        loss_ce = self.criterion_cls(logits, labels)
+
+        # Compute loss 2
+        loss_gpd = self.criterion_gpd(self.global_protos, features_copy, labels)
+
+        # Combine the losses
+        loss = loss_ce + self.lambd * loss_gpd
+
+        self.process_metrics(phase, logits, labels, loss)
+
+        if phase == "Train":
+            # Update the prototypes
+            for i in range(len(labels_g)):
+                label = labels_g[i].item()
+                if label not in self.agg_protos_label:
+                    self.agg_protos_label[label] = dict(sum=torch.zeros_like(features[i, :]), count=0)
+                self.agg_protos_label[label]["sum"] += features[i, :].detach().clone()
+                self.agg_protos_label[label]["count"] += 1
+
+        return loss
+
     def get_protos(self):
         """
         Get the protos for the model.
@@ -49,8 +79,6 @@ class FedGPDNebulaModel(NebulaModel, ABC):
         """
         self.agg_protos_label = {}
         self.global_protos = {k: v.to(self.device) for k, v in protos.items()}
-        if self.teacher_model is not None:
-            self.teacher_model.set_protos(protos)
 
     def load_state_dict(self, state_dict, strict=True):
         """
