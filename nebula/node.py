@@ -261,5 +261,10 @@ if __name__ == "__main__":
         import asyncio
         asyncio.run(main(), debug=False)
     else:
-        import uvloop 
-        uvloop.run(main(), debug=False)
+        try:
+            import uvloop 
+            uvloop.run(main(), debug=False)
+        except ImportError:
+            logging.warning("uvloop not available, using default loop")
+            import asyncio
+            asyncio.run(main(), debug=False)
