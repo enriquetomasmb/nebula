@@ -45,3 +45,4 @@ docker==7.1.0
 # aim==3.24.0
 openpyxl==3.1.5
 lz4==4.3.3
+uvloop==0.20.0
