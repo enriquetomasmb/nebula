@@ -50,6 +50,7 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
             self.send_logic_method = send_logic
         else:
             self.send_logic_method = None
+        self.model_updated_flag = False
         self.send_logic_counter = 0
         self.knowledge_distilation = knowledge_distilation
         self.global_protos = dict()
@@ -124,7 +125,7 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
 
         if phase == "Train":
             # Update the prototypes
-            self.model_updated_flag2 = True
+            self.model_updated_flag = True
             for i in range(len(labels_g)):
                 label = labels_g[i].item()
                 if label not in self.agg_protos_label:
@@ -132,14 +133,17 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
                 self.agg_protos_label[label]["sum"] += protos[i, :].detach().clone()
                 self.agg_protos_label[label]["count"] += 1
 
+        elif phase == "Validation":
+            if self.model_updated_flag:
+                self.model_updated_flag = False
+                self.send_logic_step()
+
         return loss
 
     def load_state_dict(self, state_dict, strict=True):
         """
         Overrides the default load_state_dict to handle missing teacher model keys gracefully.
         """
-        self.model_updated_flag1 = True
-
         # Obten el state_dict actual del modelo completo para preparar una comparación.
         own_state = self.state_dict()
         missing_keys = []
@@ -176,6 +180,7 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
         return
 
     def state_dict(self, destination=None, prefix="", keep_vars=False):
+
         original_state = super().state_dict(destination, prefix, keep_vars)
         # Filter out teacher model parameters
         if self.send_logic() == 0:

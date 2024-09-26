@@ -50,12 +50,12 @@ def signal_handler(sig, frame):
 
 def print_banner():
     banner = """
-                    ███╗   ██╗███████╗██████╗ ██╗   ██╗██╗      █████╗ 
+                    ███╗   ██╗███████╗██████╗ ██╗   ██╗██╗      █████╗
                     ████╗  ██║██╔════╝██╔══██╗██║   ██║██║     ██╔══██╗
                     ██╔██╗ ██║█████╗  ██████╔╝██║   ██║██║     ███████║
                     ██║╚██╗██║██╔══╝  ██╔══██╗██║   ██║██║     ██╔══██║
                     ██║ ╚████║███████╗██████╔╝╚██████╔╝███████╗██║  ██║
-                    ╚═╝  ╚═══╝╚══════╝╚═════╝  ╚═════╝ ╚══════╝╚═╝  ╚═╝                 
+                    ╚═╝  ╚═══╝╚══════╝╚═════╝  ╚═════╝ ╚══════╝╚═╝  ╚═╝
                       A Platform for Decentralized Federated Learning
                         Created by Enrique Tomás Martínez Beltrán
                         https://github.com/enriquetomasmb/nebula
@@ -106,7 +106,9 @@ class Engine:
         if self.config.participant["tracking_args"]["local_tracking"] == "csv":
             nebulalogger = CSVLogger(f"{self.log_dir}", name="metrics", version=f"participant_{self.idx}")
         elif self.config.participant["tracking_args"]["local_tracking"] == "basic":
-            nebulalogger = NebulaTensorBoardLogger(self.config.participant["scenario_args"]["start_time"], f"{self.log_dir}", name="metrics", version=f"participant_{self.idx}", log_graph=True)
+            nebulalogger = NebulaTensorBoardLogger(
+                self.config.participant["scenario_args"]["start_time"], f"{self.log_dir}", name="metrics", version=f"participant_{self.idx}", log_graph=True
+            )
         elif self.config.participant["tracking_args"]["local_tracking"] == "advanced":
             nebulalogger = NebulaLogger(
                 config=self.config,
@@ -378,7 +380,7 @@ class Engine:
 
                 await self._learning_cycle()
             else:
-                if await self.learning_cycle_lock.locked_async():  
+                if await self.learning_cycle_lock.locked_async():
                     await self.learning_cycle_lock.release_async()
         finally:
             if await self.learning_cycle_lock.locked_async():
@@ -473,7 +475,7 @@ class Engine:
         logging.info(f"Checking if all my connections reached the total rounds...")
         while not self.cm.check_finished_experiment():
             await asyncio.sleep(1)
-            
+
         # Enable loggin info
         logging.getLogger().disabled = True
 
@@ -482,7 +484,7 @@ class Engine:
             try:
                 self.client.containers.get(self.docker_id).stop()
             except Exception as e:
-                print(f"Error stopping Docker container with ID {self.docker_id}: {e}")   
+                print(f"Error stopping Docker container with ID {self.docker_id}: {e}")
 
     async def _extended_learning_cycle(self):
         """
@@ -581,6 +583,7 @@ class ServerNode(Engine):
     async def _extended_learning_cycle(self):
         # Define the functionality of the server node
         await self.trainer.test()
+        await self.trainer.train()  # TODO: Preguntar si esto no estaba aqui por algo en especial
 
         # In the first round, the server node doest take into account the initial model parameters for the aggregation
         await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.BYPASS_MODEL_WEIGHT, source=self.addr, round=self.round)
@@ -600,7 +603,9 @@ class TrainerNode(Engine):
         await self.trainer.test()
         await self.trainer.train()
 
-        await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.get_model_weight(), source=self.addr, round=self.round, local=True)
+        await self.aggregator.include_model_in_buffer(
+            self.trainer.get_model_parameters(), self.trainer.get_model_weight(), source=self.addr, round=self.round, local=True
+        )
 
         await self.cm.propagator.propagate("stable")
         await self._waiting_model_updates()

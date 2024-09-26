@@ -33,30 +33,16 @@ class ProtoKDQuantizationLightning(ProtoQuantizationLightning):
                     # check if the teacher model is using KD
                     if hasattr(self.model.teacher_model, "set_student_model"):
                         # check if the student model was updated
-                        if (
-                            hasattr(self.model, "model_updated_flag2")
-                            and hasattr(self.model, "model_updated_flag1")
-                            and self.model.model_updated_flag2
-                            and self.model.model_updated_flag1
-                        ):
+                        if hasattr(self.model, "model_updated_flag") and self.model.model_updated_flag:
                             logging.info("[Learner] Mutual Distillation. Student model updated on teacher model.")
-                            self.model.model_updated_flag2 = False
-                            self.model.model_updated_flag1 = False
+                            self.model.model_updated_flag = False
                             self.model.teacher_model.set_student_model(self.model)
-                            if hasattr(self.model, "send_logic_step"):
-                                logic = self.model.send_logic_step()
-                                logging_training.info(f"[Learner] Logic step: {logic}")
                         else:
                             logging_training.info("[Learner] Mutual Distillation. Student model not updated on teacher model.")
                             self.model.teacher_model.set_student_model(None)
 
                     else:
-                        if (
-                            hasattr(self.model, "model_updated_flag2")
-                            and hasattr(self.model, "model_updated_flag1")
-                            and self.model.model_updated_flag2
-                            and self.model.model_updated_flag1
-                        ):
+                        if hasattr(self.model, "model_updated_flag") and self.model.model_updated_flag:
                             if hasattr(self.model, "send_logic_step"):
                                 logic = self.model.send_logic_step()
                                 logging_training.info(f"[Learner] Logic step: {logic}")
