@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 
+# reputation
+nebula/core/reputation/
+
 # Distribution / packaging
 .Python
 docs/build/
