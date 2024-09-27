@@ -38,7 +38,7 @@ class Health(threading.Thread):
             conn.set_active(True)
         while True:
             if len(self.cm.connections) > 0:
-                start_time = datetime.now().strftime("%H:%M:%S")
+                start_time = self.cm.engine.start_time
                 logging.info(f"Health thread Start time: {start_time} ")
                 message = self.cm.mm.generate_control_message(nebula_pb2.ControlMessage.Action.ALIVE, log="Alive message", time=start_time)
                 current_connections = list(self.cm.connections.values())

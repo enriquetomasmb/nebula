@@ -27,9 +27,6 @@ class MessagesManager:
         return data
 
     def generate_control_message(self, action, log="Control message", time=None):
-        if time is None:
-            time = datetime.now().strftime("%H:%M:%S")
-
         message = nebula_pb2.ControlMessage(
             action=action,
             log=log,

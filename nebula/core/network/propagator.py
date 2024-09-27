@@ -144,7 +144,7 @@ class Propagator:
         if strategy_id == "initialization":
             return False
         
-        logging.info(f"self.aggregator.get_nodes_pending_models_to_aggregate(): {self.aggregator.get_nodes_pending_models_to_aggregate()}")
+        logging.info(f"Nodes pending: {self.aggregator.get_nodes_pending_models_to_aggregate()}")
         total_nodes = len(self.aggregator._federation_nodes) - len(self.engine.rejected_nodes)
         if len(self.aggregator.get_nodes_pending_models_to_aggregate()) >= total_nodes:
             return False

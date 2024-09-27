@@ -104,7 +104,7 @@ class Reputation:
         array_data_contribution = []
 
         communication_time_normalized = 0
-        aggregated_models_time_normalized = 0
+        aggregated_models_time_avg = 0
         data_contribution_normalized = 0
         node_participation = 0
 
@@ -146,21 +146,19 @@ class Reputation:
                     # Data similitude
                     similarity_file = os.path.join(log_dir, f"participant_{id_node}_similarity.csv")
                     similarity_reputation = Reputation.read_similarity_file(similarity_file, nei)
-                    #logging.info(f"Similarity reputation: {similarity_reputation}")
+                    logging.info(f"Similarity reputation: {similarity_reputation}")
 
                     if len(array_communication) > 0:
-                        logging.info(f"Array communication: {array_communication}")
                         communication_time_normalized = Reputation.callback_normalized_value(array_communication)
-                        logging.info(f"Communication time normalized: {communication_time_normalized}")
                     else: 
                         communication_time_normalized = 0
 
                     if len(array_aggregated_models) > 0:
-                        #logging.info(f"Array aggregated models: {array_aggregated_models}")
-                        aggregated_models_time_normalized = Reputation.callback_normalized_value(array_aggregated_models)
-                        #logging.info(f"Aggregated models time normalized: {aggregated_models_time_normalized}")
+                        aggregated_models_time_avg = sum(array_aggregated_models) / len(array_aggregated_models)
+                        if aggregated_models_time_avg >= 1:
+                            aggregated_models_time_avg = Reputation.normalize(aggregated_models_time_avg, 0.25, aggregated_models_time_avg+1)
                     else:
-                        aggregated_models_time_normalized = 0
+                        aggregated_models_time_avg = 0
 
                     if count_node_participation > 0:
                         node_participation = count_node_participation
@@ -168,9 +166,7 @@ class Reputation:
                         node_participation = 0
 
                     if len(array_data_contribution) > 0:
-                        #logging.info(f"Array data contribution: {array_data_contribution}")
                         data_contribution_normalized = Reputation.callback_normalized_value(array_data_contribution)
-                        #logging.info(f"Data contribution normalized: {data_contribution_normalized}")
                     else: 
                         data_contribution_normalized = 0
                     
@@ -204,34 +200,34 @@ class Reputation:
 
                     # Weights for each metric
                     weight_to_communication = 0.2
-                    weight_to_aggregated_models = 0.2
+                    weight_to_aggregated_models = 0.1
                     weight_to_data_contribution = 0.1
                     weight_to_similarity = 0.4
-                    weight_to_node_participation = 0.1
+                    weight_to_node_participation = 0.2
                     #weight_to_last_activity = 0.2
 
                     logging.info(f"Before calculate reputation")
                     logging.info(f"Communication: {communication_time_normalized}")
-                    logging.info(f"Aggregated models: {aggregated_models_time_normalized}")
+                    logging.info(f"Aggregated models: {aggregated_models_time_avg}")
                     logging.info(f"Data contribution: {data_contribution_normalized}")
                     logging.info(f"Node participation: {node_participation}")
                     logging.info(f"Similarity: {similarity_reputation}")
                     
                     logging.info(f"Width weigh*metric")
                     logging.info(f"Communication: {weight_to_communication * communication_time_normalized}")
-                    logging.info(f"Aggregated models: {weight_to_aggregated_models * aggregated_models_time_normalized}")
+                    logging.info(f"Aggregated models: {weight_to_aggregated_models * aggregated_models_time_avg}")
                     logging.info(f"Data contribution: {weight_to_data_contribution * data_contribution_normalized}")
                     logging.info(f"Node participation: {weight_to_node_participation * node_participation}")
                     logging.info(f"Similarity: {weight_to_similarity * similarity_reputation}")
                     # Reputation calculation
                     reputation = ( weight_to_communication * communication_time_normalized 
-                                + weight_to_aggregated_models * aggregated_models_time_normalized
+                                + weight_to_aggregated_models * aggregated_models_time_avg
                                 + weight_to_data_contribution * data_contribution_normalized
                                 + weight_to_node_participation * node_participation
                                 + weight_to_similarity * similarity_reputation )
 
                     # Create graphics to metrics
-                    self.create_graphics_to_metrics(communication_time_normalized, aggregated_models_time_normalized, data_contribution_normalized, node_participation, similarity_reputation, addr, nei, current_round, self.engine.total_rounds)
+                    self.create_graphics_to_metrics(communication_time_normalized, aggregated_models_time_avg, data_contribution_normalized, node_participation, similarity_reputation, addr, nei, current_round, self.engine.total_rounds)
 
                     # Save history reputation
                     average_reputation = Reputation.save_reputation_history_in_memory(addr, nei, reputation, current_round)
@@ -304,19 +300,55 @@ class Reputation:
             float: The cumulative reputation including the current round.
         """
 
-        key = (addr, nei, current_round) 
+        key = (addr, nei) 
 
         if key not in Reputation.reputation_history:
-            Reputation.reputation_history[key] = []
+            Reputation.reputation_history[key] = {}
 
-        Reputation.reputation_history[key].append(reputation)
+        logging.info(f"[Before Update] Reputation history for {key}: {Reputation.reputation_history[key]}")
+        Reputation.reputation_history[key][current_round] = reputation
 
-        total_reputation = sum(Reputation.reputation_history[key])
-        #logging.info(f"Total reputation: {total_reputation}")
-        average_reputation = total_reputation / len(Reputation.reputation_history[key])
+        total_reputation = 0
+        total_weights = 0
+        rounds = sorted(Reputation.reputation_history[key].keys(), reverse=True)
 
-        #logging.info(f"Reputation for node {addr} with neighbor {nei} in round {current_round} saved successfully.")
-        return average_reputation
+        logging.info(f"Rounds being processed for {key}: {rounds}")
+
+        for i, round in enumerate(rounds):
+            rep = Reputation.reputation_history[key][round]
+            decay_factor = Reputation.calculate_decay_rate(rep) ** i
+            total_reputation += rep * decay_factor
+            total_weights += decay_factor
+            logging.info(f"Round: {round}, Reputation: {rep}, Decay: {decay_factor}, Total reputation: {total_reputation}")
+
+        if total_weights > 0:
+            normalized_reputation = total_reputation / total_weights
+        else:
+            normalized_reputation = 0
+
+        logging.info(f"[After Update] Reputation history for {key}: {normalized_reputation}")
+        return normalized_reputation
+    
+    @staticmethod
+    def calculate_decay_rate(reputation):
+        """
+        Calculate the decay rate for a reputation value.
+
+        Args:
+            reputation (float): Reputation value.
+
+        Returns:
+            float: Decay rate.
+        """
+
+        if reputation > 0.8:
+            return reputation * 0.95 # Muy bajo decaimiento
+        elif reputation > 0.6:
+            return reputation * 0.9  # Bajo decaimiento
+        elif reputation > 0.4:
+            return reputation * 0.8  # Moderado decaimiento
+        else:
+            return reputation * 0.5  # Alto decaimiento
         
     @staticmethod
     def read_similarity_file(file_path, nei):
@@ -331,7 +363,8 @@ class Reputation:
                 Each IP will have a dictionary containing cosine, euclidean, minkowski,
                 manhattan, pearson_correlation, and jaccard values.
         """
-        reputation = 0.0
+        nei = nei.split(":")[0].strip()
+        similarity = 0.0
         with open(file_path, 'r') as file:
             reader = csv.DictReader(file)
             for row in reader:
@@ -343,11 +376,11 @@ class Reputation:
                     weight_manhattan = 0.25
                     weight_pearson = 0.25
                     # Calculate similarity
-                    reputation = ( float(row['cosine']) * weight_cosine + 
+                    similarity = ( float(row['cosine']) * weight_cosine + 
                                   float(row['euclidean']) * weight_euclidean + 
                                   float(row['manhattan']) * weight_manhattan + 
                                   float(row['pearson_correlation']) * weight_pearson)
-        return reputation
+        return similarity
 
     @staticmethod
     def callback_normalized_value (array):
