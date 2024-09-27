@@ -4,7 +4,7 @@
     "start_time": "",
     "federation": "DFL",
     "rounds": 10,
-    "simulation": true,
+    "deployment": "process",
     "controller": "127.0.0.1:5000",
     "random_seed": 42,
     "n_nodes": 0,
@@ -13,6 +13,7 @@
   "device_args": {
     "uid": "",
     "idx": "",
+    "docker_id": "",
     "name": "",
     "username": "pi",
     "password": "pi",

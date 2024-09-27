@@ -2,7 +2,6 @@ import random
 import logging
 import matplotlib
 import matplotlib.pyplot as plt
-
 matplotlib.use("Agg")
 plt.switch_backend("Agg")
 
@@ -111,8 +110,7 @@ class TopologyManager:
         # else:
         plt.savefig(f"{path}", dpi=100, bbox_inches="tight", pad_inches=0)
         # plt.gcf().canvas.draw()
-        if plot:
-            plt.show()
+        plt.close()
 
     def generate_topology(self):
         if self.b_fully_connected:

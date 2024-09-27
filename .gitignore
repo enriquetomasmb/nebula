@@ -139,8 +139,9 @@ _build/
 app/
 *.yaml
 data/
-*.db
+*.db*
 *.out
+*.pid
 
 .requirements.txt
 data-analysis/

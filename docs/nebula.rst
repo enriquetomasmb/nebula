@@ -11,6 +11,7 @@ Subpackages
    nebula.config
    nebula.core
    nebula.frontend
+   nebula.tests
 
 Submodules
 ----------
@@ -27,6 +28,14 @@ nebula.node module
 ------------------
 
 .. automodule:: nebula.node
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+nebula.scenarios module
+-----------------------
+
+.. automodule:: nebula.scenarios
    :members:
    :undoc-members:
    :show-inheritance:

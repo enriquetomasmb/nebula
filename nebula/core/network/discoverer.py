@@ -1,6 +1,5 @@
 import asyncio
 import logging
-import threading
 from nebula.addons.functions import print_msg_box
 from typing import TYPE_CHECKING
 
@@ -11,10 +10,9 @@ if TYPE_CHECKING:
     from nebula.core.network.communications import CommunicationsManager
 
 
-class Discoverer(threading.Thread):
+class Discoverer:
     def __init__(self, addr, config, cm: "CommunicationsManager"):
-        threading.Thread.__init__(self, daemon=True, name="discoverer_thread-" + config.participant["device_args"]["name"])
-        print_msg_box(msg=f"Starting discoverer thread...", indent=2, title="Discoverer thread")
+        print_msg_box(msg=f"Starting discoverer module...", indent=2, title="Discoverer module")
         self.addr = addr
         self.config = config
         self.cm = cm
@@ -22,12 +20,8 @@ class Discoverer(threading.Thread):
         self.period = self.config.participant["discoverer_args"]["discovery_frequency"]
         self.interval = self.config.participant["discoverer_args"]["discovery_interval"]
 
-    def run(self):
-        loop = asyncio.new_event_loop()
-        # loop.set_debug(True)
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(self.run_discover())
-        loop.close()
+    async def start(self):
+        asyncio.create_task(self.run_discover())
 
     async def run_discover(self):
         if self.config.participant["scenario_args"]["federation"] == "CFL":
@@ -41,7 +35,8 @@ class Discoverer(threading.Thread):
                 message = self.cm.mm.generate_discovery_message(action=nebula_pb2.DiscoveryMessage.Action.DISCOVER, latitude=latitude, longitude=longitude)
                 try:
                     logging.debug(f"🔍  Sending discovery message to neighbors...")
-                    await self.cm.send_message_to_neighbors(message, self.cm.get_all_addrs_current_connections(), self.interval)
+                    current_connections = await self.cm.get_addrs_current_connections(only_direct=True)
+                    await self.cm.send_message_to_neighbors(message, current_connections, self.interval)
                 except Exception as e:
                     logging.error(f"🔍  Cannot send discovery message to neighbors. Error: {str(e)}")
             await asyncio.sleep(self.period)

@@ -185,6 +185,19 @@
 {% endif %}
 
 <script>
+    setInterval(function () {
+        fetch('/nebula/api/dashboard/runningscenario')
+            .then(response => response.json())
+            .then(data => {
+                if (data.name) {
+                    location.reload();
+                }
+            })
+            .catch(error => console.error('Error:', error));
+    }, 10000);
+</script>
+
+<script>
     $(document).on('click', '#remove-btn', function () {
         var scenario_name = $(this).data('scenario-name');
         $('#confirm-modal').modal('show');

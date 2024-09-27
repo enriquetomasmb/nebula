@@ -36,7 +36,7 @@ class SyscallModelSGDOneClassSVM(NebulaModel):
     def hinge_loss(self, y):
         return torch.mean(torch.clamp(1 - y, min=0))
 
-    def step(self, batch, phase):
+    def step(self, batch, batch_idx, phase):
         x, labels = batch
         x = x.to(self.device)
         labels = labels.to(self.device)
@@ -50,7 +50,7 @@ class SyscallModelSGDOneClassSVM(NebulaModel):
             self.log(f"{phase}/Loss", loss, prog_bar=True)
             self.log(
                 f"{phase}/Accuracy",
-                torchmetrics.functional.accuracy(y_pred_classes, labels),
+                torchmetrics.functional.accuracy(y_pred_classes, labels, task="multiclass"),
                 prog_bar=True,
             )
         return loss

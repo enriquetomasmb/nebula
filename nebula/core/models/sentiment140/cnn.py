@@ -23,7 +23,7 @@ class SentimentModelCNN(NebulaModel):
 
         self.filter_sizes = [2, 3, 4]
         self.n_filters = math.ceil(300 * len(self.filter_sizes) / 3)
-        self.convs = torch.nn.ModuleList([torch.nn.Conv2d(input_channels=1, num_classes=self.n_filters, kernel_size=(fs, 300)) for fs in self.filter_sizes])
+        self.convs = torch.nn.ModuleList([torch.nn.Conv2d(in_channels=1, out_channels=self.n_filters, kernel_size=(fs, 300)) for fs in self.filter_sizes])
         self.fc = torch.nn.Linear(len(self.filter_sizes) * self.n_filters, self.num_classes)
         self.dropout = torch.nn.Dropout(0.5)
 

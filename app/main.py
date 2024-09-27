@@ -24,14 +24,6 @@ argparser.add_argument(
 )
 
 argparser.add_argument(
-    "--waf",
-    dest="waf",
-    action="store_true",
-    default=False,
-    help="Run WAF",
-)
-
-argparser.add_argument(
     "--wafport",
     dest="wafport",
     default=6050,
@@ -101,12 +93,12 @@ argparser.add_argument(
     help=".env file path",
 )
 argparser.add_argument(
-    "-d",
-    "--debug",
-    dest="debug",
+    "-p",
+    "--production",
+    dest="production",
     action="store_true",
     default=False,
-    help="Debug mode",
+    help="Production mode",
 )
 argparser.add_argument(
     "-ad",

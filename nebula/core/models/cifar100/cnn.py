@@ -23,60 +23,60 @@ class CNN(NebulaModel):
 
         self.example_input_array = torch.rand(1, 3, 32, 32)
 
-        self.criterion = torch.torch.nnCrossEntropyLoss()
+        self.criterion = torch.torch.nn.CrossEntropyLoss()
 
-        self.conv1 = torch.nnSequential(
-            torch.nnConv2d(input_channels=3, num_classes=64, kernel_size=3, padding=1),
-            torch.nnBatchNorm2d(64),
-            torch.nnReLU(inplace=True),
+        self.conv1 = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=3, out_channels=64, kernel_size=3, padding=1),
+            torch.nn.BatchNorm2d(64),
+            torch.nn.ReLU(inplace=True),
         )
-        self.conv2 = torch.nnSequential(
-            torch.nnConv2d(input_channels=64, num_classes=128, kernel_size=3, padding=1),
-            torch.nnBatchNorm2d(128),
-            torch.nnReLU(inplace=True),
-            torch.nnMaxPool2d(2),
+        self.conv2 = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3, padding=1),
+            torch.nn.BatchNorm2d(128),
+            torch.nn.ReLU(inplace=True),
+            torch.nn.MaxPool2d(2),
         )
 
-        self.res1 = torch.nnSequential(
-            torch.nnSequential(
-                torch.nnConv2d(input_channels=128, num_classes=128, kernel_size=3, padding=1),
-                torch.nnBatchNorm2d(128),
-                torch.nnReLU(inplace=True),
+        self.res1 = torch.nn.Sequential(
+            torch.nn.Sequential(
+                torch.nn.Conv2d(in_channels=128, out_channels=128, kernel_size=3, padding=1),
+                torch.nn.BatchNorm2d(128),
+                torch.nn.ReLU(inplace=True),
             ),
-            torch.nnSequential(
-                torch.nnConv2d(input_channels=128, num_classes=128, kernel_size=3, padding=1),
-                torch.nnBatchNorm2d(128),
-                torch.nnReLU(inplace=True),
-            ),
-        )
-
-        self.conv3 = torch.nnSequential(
-            torch.nnConv2d(input_channels=128, num_classes=256, kernel_size=3, padding=1),
-            torch.nnBatchNorm2d(256),
-            torch.nnReLU(inplace=True),
-            torch.nnMaxPool2d(2),
-        )
-        self.conv4 = torch.nnSequential(
-            torch.nnConv2d(input_channels=256, num_classes=512, kernel_size=3, padding=1),
-            torch.nnBatchNorm2d(512),
-            torch.nnReLU(inplace=True),
-            torch.nnMaxPool2d(2),
-        )
-
-        self.res2 = torch.nnSequential(
-            torch.nnSequential(
-                torch.nnConv2d(input_channels=512, num_classes=512, kernel_size=3, padding=1),
-                torch.nnBatchNorm2d(512),
-                torch.nnReLU(inplace=True),
-            ),
-            torch.nnSequential(
-                torch.nnConv2d(input_channels=512, num_classes=512, kernel_size=3, padding=1),
-                torch.nnBatchNorm2d(512),
-                torch.nnReLU(inplace=True),
+            torch.nn.Sequential(
+                torch.nn.Conv2d(in_channels=128, out_channels=128, kernel_size=3, padding=1),
+                torch.nn.BatchNorm2d(128),
+                torch.nn.ReLU(inplace=True),
             ),
         )
 
-        self.classifier = torch.nnSequential(torch.nnMaxPool2d(4), torch.nnFlatten(), torch.nnLinear(512, 10))
+        self.conv3 = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=128, out_channels=256, kernel_size=3, padding=1),
+            torch.nn.BatchNorm2d(256),
+            torch.nn.ReLU(inplace=True),
+            torch.nn.MaxPool2d(2),
+        )
+        self.conv4 = torch.nn.Sequential(
+            torch.nn.Conv2d(in_channels=256, out_channels=512, kernel_size=3, padding=1),
+            torch.nn.BatchNorm2d(512),
+            torch.nn.ReLU(inplace=True),
+            torch.nn.MaxPool2d(2),
+        )
+
+        self.res2 = torch.nn.Sequential(
+            torch.nn.Sequential(
+                torch.nn.Conv2d(in_channels=512, out_channels=512, kernel_size=3, padding=1),
+                torch.nn.BatchNorm2d(512),
+                torch.nn.ReLU(inplace=True),
+            ),
+            torch.nn.Sequential(
+                torch.nn.Conv2d(in_channels=512, out_channels=512, kernel_size=3, padding=1),
+                torch.nn.BatchNorm2d(512),
+                torch.nn.ReLU(inplace=True),
+            ),
+        )
+
+        self.classifier = torch.nn.Sequential(torch.nn.MaxPool2d(4), torch.nn.Flatten(), torch.nn.Linear(512, 10))
 
     def forward(self, x):
         x = self.conv1(x)

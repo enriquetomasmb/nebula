@@ -1,8 +1,6 @@
 import asyncio
 import logging
-import threading
 import time
-from queue import Queue
 from typing import TYPE_CHECKING
 from nebula.addons.functions import print_msg_box
 from nebula.core.utils.locker import Locker
@@ -11,30 +9,20 @@ if TYPE_CHECKING:
     from nebula.core.network.communications import CommunicationsManager
 
 
-class Forwarder(threading.Thread):
+class Forwarder:
     def __init__(self, config, cm: "CommunicationsManager"):
-        threading.Thread.__init__(
-            self,
-            daemon=True,
-            name="forwarder_thread-" + config.participant["device_args"]["name"],
-        )
-        print_msg_box(msg=f"Starting forwarder thread...", indent=2, title="Forwarder thread")
+        print_msg_box(msg=f"Starting forwarder module...", indent=2, title="Forwarder module")
         self.config = config
         self.cm = cm
-        self.pending_messages = Queue()
-        self.pending_messages_lock = Locker("pending_messages_lock", verbose=False)
+        self.pending_messages = asyncio.Queue()
+        self.pending_messages_lock = Locker("pending_messages_lock", verbose=False, async_lock=True)
 
         self.interval = self.config.participant["forwarder_args"]["forwarder_interval"]
         self.number_forwarded_messages = self.config.participant["forwarder_args"]["number_forwarded_messages"]
         self.messages_interval = self.config.participant["forwarder_args"]["forward_messages_interval"]
-
-    def run(self):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-
-        loop.run_until_complete(self.run_forwarder())
-
-        loop.close()
+        
+    async def start(self):
+        asyncio.create_task(self.run_forwarder())
 
     async def run_forwarder(self):
         if self.config.participant["scenario_args"]["federation"] == "CFL":
@@ -43,15 +31,15 @@ class Forwarder(threading.Thread):
         while True:
             # logging.debug(f"🔁  Pending messages: {self.pending_messages.qsize()}")
             start_time = time.time()
-            self.pending_messages_lock.acquire()
+            await self.pending_messages_lock.acquire_async()
             await self.process_pending_messages(messages_left=self.number_forwarded_messages)
-            self.pending_messages_lock.release()
+            await self.pending_messages_lock.release_async()
             sleep_time = max(0, self.interval - (time.time() - start_time))
             await asyncio.sleep(sleep_time)
 
     async def process_pending_messages(self, messages_left):
         while messages_left > 0 and not self.pending_messages.empty():
-            msg, neighbors = self.pending_messages.get()
+            msg, neighbors = await self.pending_messages.get()
             for neighbor in neighbors[:messages_left]:
                 if neighbor not in self.cm.connections:
                     continue
@@ -65,18 +53,19 @@ class Forwarder(threading.Thread):
             messages_left -= len(neighbors)
             if len(neighbors) > messages_left:
                 logging.debug(f"🔁  Putting message back in queue for forwarding to the remaining neighbors")
-                self.pending_messages.put((msg, neighbors[messages_left:]))
+                await self.pending_messages.put((msg, neighbors[messages_left:]))
 
-    def forward(self, msg, addr_from):
+    async def forward(self, msg, addr_from):
         if self.config.participant["scenario_args"]["federation"] == "CFL":
             logging.info("🔁  Federation is CFL. Forwarder is disabled...")
             return
         try:
-            self.pending_messages_lock.acquire()
-            pending_nodes_to_send = [n for n in self.cm.get_addrs_current_connections(only_direct=True) if n != addr_from]
+            await self.pending_messages_lock.acquire_async()
+            current_connections = await self.cm.get_addrs_current_connections(only_direct=True)
+            pending_nodes_to_send = [n for n in current_connections if n != addr_from]
             logging.debug(f"🔁  Puting message in queue for forwarding to {pending_nodes_to_send}")
-            self.pending_messages.put((msg, pending_nodes_to_send))
+            await self.pending_messages.put((msg, pending_nodes_to_send))
         except Exception as e:
             logging.error(f"🔁  Error forwarding message. Error: {str(e)}")
         finally:
-            self.pending_messages_lock.release()
+            await self.pending_messages_lock.release_async()

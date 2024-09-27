@@ -1,7 +1,7 @@
+import asyncio
 import logging
 import random
 import math
-import threading
 import time
 from nebula.addons.functions import print_msg_box
 from typing import TYPE_CHECKING
@@ -10,10 +10,9 @@ if TYPE_CHECKING:
     from nebula.core.network.communications import CommunicationsManager
 
 
-class Mobility(threading.Thread):
+class Mobility:
     def __init__(self, config, cm: "CommunicationsManager"):
-        threading.Thread.__init__(self, daemon=True, name="mobility_thread-" + config.participant["device_args"]["name"])
-        logging.info(f"Starting mobility thread")
+        logging.info(f"Starting mobility module...")
         self.config = config
         self.cm = cm
         self.grace_time = self.config.participant["mobility_args"]["grace_time_mobility"]
@@ -39,17 +38,20 @@ class Mobility(threading.Thread):
     @property
     def round(self):
         return self.cm.get_round()
+    
+    async def start(self):
+        asyncio.create_task(self.run_mobility())
 
-    def run(self):
+    async def run_mobility(self):
         if not self.mobility:
             return
-        time.sleep(self.grace_time)
+        await asyncio.sleep(self.grace_time)
         while True:
-            self.change_geo_location()
-            self.change_connections_based_on_distance()
-            time.sleep(self.period)
+            await self.change_geo_location()
+            await self.change_connections_based_on_distance()
+            await asyncio.sleep(self.period)
 
-    def change_geo_location_random_strategy(self, latitude, longitude):
+    async def change_geo_location_random_strategy(self, latitude, longitude):
         logging.info(f"📍  Changing geo location randomly")
         # radius_in_degrees = self.radius_federation / 111000
         max_radius_in_degrees = self.max_movement_random_strategy / 111000
@@ -57,9 +59,9 @@ class Mobility(threading.Thread):
         angle = random.uniform(0, 2 * math.pi)
         latitude += radius * math.cos(angle)
         longitude += radius * math.sin(angle)
-        self.set_geo_location(latitude, longitude)
+        await self.set_geo_location(latitude, longitude)
 
-    def change_geo_location_nearest_neighbor_strategy(self, distance, latitude, longitude, neighbor_latitude, neighbor_longitude):
+    async def change_geo_location_nearest_neighbor_strategy(self, distance, latitude, longitude, neighbor_latitude, neighbor_longitude):
         logging.info(f"📍  Changing geo location towards the nearest neighbor")
         scale_factor = min(1, self.max_movement_nearest_strategy / distance)
         # Calcular el ángulo hacia el vecino
@@ -73,9 +75,9 @@ class Mobility(threading.Thread):
         # Actualizar latitud y longitud
         new_latitude = latitude + delta_lat
         new_longitude = longitude + delta_lon
-        self.set_geo_location(new_latitude, new_longitude)
+        await self.set_geo_location(new_latitude, new_longitude)
 
-    def set_geo_location(self, latitude, longitude):
+    async def set_geo_location(self, latitude, longitude):
         if latitude < -90 or latitude > 90 or longitude < -180 or longitude > 180:
             # If the new location is out of bounds, we keep the old location
             latitude = self.config.participant["mobility_args"]["latitude"]
@@ -85,41 +87,41 @@ class Mobility(threading.Thread):
         self.config.participant["mobility_args"]["longitude"] = longitude
         logging.info(f"📍  New geo location: {latitude}, {longitude}")
 
-    def change_geo_location(self):
+    async def change_geo_location(self):
         if self.mobility and (self.mobility_type == "topology" or self.mobility_type == "both"):
             random.seed(time.time() + self.config.participant["device_args"]["idx"])
             latitude = float(self.config.participant["mobility_args"]["latitude"])
             longitude = float(self.config.participant["mobility_args"]["longitude"])
 
-            direct_connections = self.cm.get_direct_connections()
-            undirect_connection = self.cm.get_undirect_connections()
+            direct_connections = await self.cm.get_direct_connections()
+            undirect_connection = await self.cm.get_undirect_connections()
             if len(undirect_connection) > len(direct_connections):
                 logging.info(f"📍  Undirect Connections is higher than Direct Connections")
                 # Get neighbor closer to me
-                selected_neighbor = self.cm.get_nearest_connections(top=1)
+                selected_neighbor = await self.cm.get_nearest_connections(top=1)
                 logging.info(f"📍  Selected neighbor: {selected_neighbor}")
                 try:
                     neighbor_latitude, neighbor_longitude = selected_neighbor.get_geolocation()
                     distance = selected_neighbor.get_neighbor_distance()
                     if distance > self.max_initiate_approximation:
                         # If the distance is too big, we move towards the neighbor
-                        self.change_geo_location_nearest_neighbor_strategy(distance, latitude, longitude, neighbor_latitude, neighbor_longitude)
+                        await self.change_geo_location_nearest_neighbor_strategy(distance, latitude, longitude, neighbor_latitude, neighbor_longitude)
                     else:
-                        self.change_geo_location_random_strategy(latitude, longitude)
+                        await self.change_geo_location_random_strategy(latitude, longitude)
                 except Exception as e:
                     logging.info(f"📍  Neighbor location/distance not found for {selected_neighbor.get_addr()}: {e}")
-                    self.change_geo_location_random_strategy(latitude, longitude)
+                    await self.change_geo_location_random_strategy(latitude, longitude)
             else:
-                self.change_geo_location_random_strategy(latitude, longitude)
+                await self.change_geo_location_random_strategy(latitude, longitude)
         else:
             logging.error(f"📍  Mobility type {self.mobility_type} not implemented")
             return
 
-    def change_connections_based_on_distance(self):
+    async def change_connections_based_on_distance(self):
         if self.mobility and (self.mobility_type == "topology" or self.mobility_type == "both"):
             try:
                 # logging.info(f"📍  Checking connections based on distance")
-                connections_topology = self.cm.get_addrs_current_connections()
+                connections_topology = await self.cm.get_addrs_current_connections()
                 # logging.info(f"📍  Connections of the topology: {connections_topology}")
                 if len(connections_topology) < 1:
                     # logging.error(f"📍  Not enough connections for mobility")
@@ -160,8 +162,8 @@ class Mobility(threading.Thread):
     async def change_connections(self):
         if self.mobility and (self.mobility_type == "topology" or self.mobility_type == "both") and self.round % self.round_frequency == 0:
             logging.info(f"📍  Changing connections")
-            current_connections = self.cm.get_addrs_current_connections(only_direct=True)
-            potential_connections = self.cm.get_addrs_current_connections(only_undirected=True)
+            current_connections = await self.cm.get_addrs_current_connections(only_direct=True)
+            potential_connections = await self.cm.get_addrs_current_connections(only_undirected=True)
             logging.info(f"📍  Current connections: {current_connections} | Potential future connections: {potential_connections}")
             if len(current_connections) < 1 or len(potential_connections) < 1:
                 logging.error(f"📍  Not enough connections for mobility")
@@ -172,8 +174,8 @@ class Mobility(threading.Thread):
                 random_potential_neighbor = random.choice(potential_connections)
                 logging.info(f"📍  Selected node(s) to disconnect: {random_neighbor}")
                 logging.info(f"📍  Selected node(s) to connect: {random_potential_neighbor}")
-                self.cm.disconnect(random_neighbor, mutual_disconnection=True)
-                self.cm.connect(random_potential_neighbor, direct=True)
+                await self.cm.disconnect(random_neighbor, mutual_disconnection=True)
+                await self.cm.connect(random_potential_neighbor, direct=True)
                 logging.info(f"📍  New connections: {self.get_current_connections(only_direct=True)}")
                 logging.info(f"📍  Neighbors in config: {self.config.participant['network_args']['neighbors']}")
             else:
