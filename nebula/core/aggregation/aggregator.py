@@ -114,7 +114,7 @@ class Aggregator(ABC):
         self._aggregation_done_lock.release()
 
     def _add_pending_model(self, model, weight, source):
-        logging.info(f"🔄  rejected_nodes = {self.engine.rejected_nodes}") 
+        logging.info(f"🔄  _add_pending_model | rejected_nodes = {self.engine.rejected_nodes}") 
         logging.info(f"🔄  _add_pending_model | federation_nodes {len(self._federation_nodes)} <= len(self.get_nodes_pending_models_to_aggregate())  {len(self.get_nodes_pending_models_to_aggregate())}")
         if len(self._federation_nodes) <= len(self.get_nodes_pending_models_to_aggregate()):
             logging.info(f"🔄  _add_pending_model | Ignoring model...")
@@ -129,7 +129,6 @@ class Aggregator(ABC):
             return None
         
         if source not in self.get_nodes_pending_models_to_aggregate(): 
-            # Debes trabajar aqui, si hay un nodo que no esta en el buffer de agregacion, entonces lo agregas, pero ten en cuenta los rejected_nodes
             logging.info(f"🔄  _add_pending_model | Node {source} is not in the aggregation buffer --> Include model in the aggregation buffer.")
             self._pending_models_to_aggregate.update({source: (model, weight)})
             nodes_added = len(self.get_nodes_pending_models_to_aggregate())
@@ -140,7 +139,7 @@ class Aggregator(ABC):
 
         total_nodes_aggregation = len(self._federation_nodes) - len(self.engine.rejected_nodes)
         logging.info(f"🔄  _add_pending_model | total_nodes_aggregation={total_nodes_aggregation} and len(self.get_nodes_pending_models_to_aggregate())={len(self.get_nodes_pending_models_to_aggregate())}")
-        pending_nodes = self._federation_nodes - self.get_nodes_pending_models_to_aggregate() - self.engine.rejected_nodes
+        pending_nodes = self._federation_nodes - self.get_nodes_pending_models_to_aggregate() - set(self.engine.rejected_nodes.keys())
         models_added = f"{len(self.get_nodes_pending_models_to_aggregate())}/{total_nodes_aggregation}"
         logging.info(f"🔄  _add_pending_model | Model added in aggregation buffer ({models_added}) | Pending nodes: {pending_nodes}")
 
@@ -162,10 +161,15 @@ class Aggregator(ABC):
             logging.info(f"🔄  include_model_in_buffer | Reputation of node {source}: {self.engine.get_reputation().get(source)}")
         # Check the reputation of the source node
         if source in self.engine.rejected_nodes:
-            logging.info(f"🔄  include_model_in_buffer | Ignoring model from rejected node {source}")
-            if self._add_model_lock.locked():
-                self._add_model_lock.release()
-            return None
+            penalization_round, _ = self.engine.rejected_nodes[source]
+            if round - penalization_round < 3:
+                logging.info(f"🔄  include_model_in_buffer | Skipping model from rejected node {source} for round {round}")
+                if self._add_model_lock.locked():
+                    self._add_model_lock.release()
+                return None
+            else:
+                logging.info(f"🔄  include_model_in_buffer | Node {source} has been unblocked and can contribute again.")
+
         
         if source in self.engine.change_weight_nodes:
             weight = 0.7 * weight
@@ -211,7 +215,7 @@ class Aggregator(ABC):
         total_nodes_aggregation = len(self._federation_nodes) - len(self.engine.rejected_nodes)
 
         if len(unique_nodes_involved) != total_nodes_aggregation:
-            missing_nodes = self._federation_nodes - unique_nodes_involved - self.engine.rejected_nodes
+            missing_nodes = self._federation_nodes - unique_nodes_involved - set(self.engine.rejected_nodes.keys())
             logging.info(f"🔄  get_aggregation | Aggregation incomplete, missing models from: {missing_nodes}")
             logging.info(f"🔄  get_aggregation | missing nodes | nodes_involved: {unique_nodes_involved} and nodes_federation: {self._federation_nodes}")
         else:
