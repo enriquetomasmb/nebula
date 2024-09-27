@@ -16,13 +16,13 @@ class ProtoTeacherCIFAR10ModelCNN(ProtoTeacherNebulaModel):
         self,
         input_channels=3,
         num_classes=10,
-        learning_rate=1e-3,
+        learning_rate=1e-5,
         metrics=None,
         confusion_matrix=None,
         seed=None,
-        alpha_kd=1,
-        beta_feat=1,
-        lambda_proto=1,
+        alpha_kd=0.5,
+        beta_feat=0.3,
+        lambda_proto=0.2,
         weighting=None,
     ):
         super().__init__(
