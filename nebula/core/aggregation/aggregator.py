@@ -1,7 +1,9 @@
+import random
 from abc import ABC, abstractmethod
 import asyncio
 from functools import partial
 import logging
+
 from nebula.core.utils.locker import Locker
 from nebula.core.pb import nebula_pb2
 
@@ -241,3 +243,40 @@ def create_malicious_aggregator(aggregator, attack):
 
     aggregator.run_aggregation = partial(malicious_aggregate, aggregator)
     return aggregator
+
+def randomly_select_aggregation_function(self, config, engine):
+    from nebula.core.aggregation.fedavg import FedAvg
+    from nebula.core.aggregation.krum import Krum
+    from nebula.core.aggregation.median import Median
+    from nebula.core.aggregation.trimmedmean import TrimmedMean
+    from nebula.core.aggregation.bulyan import Bulyan
+    # Define the pool of aggregation functions
+    aggregation_functions = ["Krum", "Median", "TrimmedMean", "FedAvg", "Bulyan"]
+    #Get the current aggregation function
+    if not hasattr(self, "aggregator"):
+        current_aggregation_function_name = None
+    else:
+        current_aggregation_function_name = self.aggregator
+        logging.info(current_aggregation_function_name)
+        logging.info("Witold")
+    #Randomly select an aggregation function other than the current one
+    selected_aggregation_function_name = current_aggregation_function_name
+    while selected_aggregation_function_name == current_aggregation_function_name:
+        selected_aggregation_function_name = random.choice(aggregation_functions)
+    # Create the aggregation function based on the randomly chosen name
+    if selected_aggregation_function_name == "Krum":
+        selected_aggregation_function = Krum(config=config, engine=engine)
+
+    elif selected_aggregation_function_name == "Median":
+        selected_aggregation_function = Median(config=config, engine=engine)
+
+    elif selected_aggregation_function_name == "TrimmedMean":
+        selected_aggregation_function = TrimmedMean(config=config, engine=engine)
+
+    elif selected_aggregation_function_name == "FedAvg":
+        selected_aggregation_function = FedAvg(config=config, engine=engine)
+
+    elif selected_aggregation_function_name == "Bulyan":
+        selected_aggregation_function = Bulyan(config=config, engine=engine)
+
+    return selected_aggregation_function
