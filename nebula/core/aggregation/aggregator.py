@@ -61,8 +61,8 @@ class Aggregator(ABC):
         self._federation_nodes = set()
         self._waiting_global_update = False
         self._pending_models_to_aggregate = {}
-        self._add_model_lock = Locker(name="add_model_lock")
-        self._aggregation_done_lock = Locker(name="aggregation_done_lock")
+        self._add_model_lock = Locker(name="add_model_lock", async_lock=True)
+        self._aggregation_done_lock = Locker(name="aggregation_done_lock", async_lock=True)
         self._rejected_nodes = self.engine.rejected_nodes
 
     def __str__(self):
@@ -114,19 +114,17 @@ class Aggregator(ABC):
         await self._add_model_lock.release_async()
         await self._aggregation_done_lock.release_async()
 
-    def _add_pending_model(self, model, weight, source):
+    async def _add_pending_model(self, model, weight, source):
         logging.info(f"🔄  _add_pending_model | rejected_nodes = {self.engine.rejected_nodes}") 
         logging.info(f"🔄  _add_pending_model | federation_nodes {len(self._federation_nodes)} <= len(self.get_nodes_pending_models_to_aggregate())  {len(self.get_nodes_pending_models_to_aggregate())}")
         if len(self._federation_nodes) <= len(self.get_nodes_pending_models_to_aggregate()):
             logging.info(f"🔄  _add_pending_model | Ignoring model...")
-            if self._add_model_lock.locked():
-                self._add_model_lock.release()
+            await self._add_model_lock.release_async()
             return None
 
         if source not in self._federation_nodes:
             logging.info(f"🔄  _add_pending_model | Can't add a model from ({source}), which is not in the federation.")
-            if self._add_model_lock.locked():
-                self._add_model_lock.release()
+            await self._add_model_lock.release_async()
             return None
         
         if source not in self.get_nodes_pending_models_to_aggregate(): 
@@ -160,12 +158,9 @@ class Aggregator(ABC):
         logging.info(f"🔄  _add_pending_model | get nodes {len(self.get_nodes_pending_models_to_aggregate())} >= total_nodes {total_nodes_aggregation}")
         if len(self.get_nodes_pending_models_to_aggregate()) >= total_nodes_aggregation:
             logging.info(f"🔄  _add_pending_model | All models were added in the aggregation buffer. Run aggregation...")
-            if self._aggregation_done_lock.locked():
-                await self._aggregation_done_lock.release_async()
+            await self._aggregation_done_lock.release_async()
         
-        if self._add_model_lock.locked():
-            await self._add_model_lock.release_async()
-
+        await self._add_model_lock.release_async()
         return self.get_nodes_pending_models_to_aggregate()
 
     async def include_model_in_buffer(self, model, weight, source=None, round=None, local=False):
@@ -178,8 +173,7 @@ class Aggregator(ABC):
             penalization_round, _ = self.engine.rejected_nodes[source]
             if round - penalization_round < 3:
                 logging.info(f"🔄  include_model_in_buffer | Skipping model from rejected node {source} for round {round}")
-                if self._add_model_lock.locked():
-                    self._add_model_lock.release()
+                await self._add_model_lock.release_async()
                 return None
             else:
                 logging.info(f"🔄  include_model_in_buffer | Node {source} has been unblocked and can contribute again.")
@@ -191,7 +185,7 @@ class Aggregator(ABC):
 
         if model is None:
             logging.info(f"🔄  include_model_in_buffer | Ignoring model bad formed...")
-            self._add_model_lock.release()
+            await self._add_model_lock.release_async()
             return
 
         if self._waiting_global_update and not local:

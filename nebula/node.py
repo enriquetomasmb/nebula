@@ -257,14 +257,15 @@ async def main():
 
 
 if __name__ == "__main__":
-    if sys.platform == "win32":
-        import asyncio
-        asyncio.run(main(), debug=False)
-    else:
-        try:
-            import uvloop 
-            uvloop.run(main(), debug=False)
-        except ImportError:
-            logging.warning("uvloop not available, using default loop")
-            import asyncio
-            asyncio.run(main(), debug=False)
+    # if sys.platform == "win32":
+    import asyncio
+    asyncio.run(main(), debug=False)
+    # else:
+    #     try:
+    #         import uvloop 
+    #         uvloop.install()
+    #         uvloop.run(main(), debug=False)
+    #     except ImportError:
+    #         logging.warning("uvloop not available, using default loop")
+    #         import asyncio
+    #         asyncio.run(main(), debug=False)

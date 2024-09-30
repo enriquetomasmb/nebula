@@ -120,7 +120,7 @@ class Engine:
             self.reputation_with_feedback = {} # Reputation of the node with feedback
             self.start_time = 0
         
-        self.stop_message_reputation = threading.Event()
+        #self.stop_message_reputation = threading.Event()
 
         if self.config.participant["tracking_args"]["local_tracking"] == "csv":
             nebulalogger = CSVLogger(f"{self.log_dir}", name="metrics", version=f"participant_{self.idx}")
