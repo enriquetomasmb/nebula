@@ -23,23 +23,28 @@ def clamp(value, min_val, max_val):
     return max(min(value, max_val), min_val)
 
 
-def rclamp(value, min_val, max_val):
-    if value >= min_val:
-        return max_val
-    return value
-
-
 class AdaptiveWeighting(Weighting):
-    def __init__(self, min_val, max_val):
+    def __init__(self, min_weight=0.1, max_weight=5.0, scale=1.0):
         super().__init__()
-        self.min_val = min_val
-        self.max_val = max_val
+        self.min_weight = min_weight
+        self.max_weight = max_weight
+        self.scale = scale
 
-    def get_alpha(self, ce_value):
-        return 1 / rclamp(ce_value, self.min_val, self.max_val)
+    def get_alpha(self, ce_protos_value):
+        epsilon = 1e-8  # Para evitar división por cero
+        alpha = self.scale / (ce_protos_value + epsilon)
+        # Clampeamos el valor para que esté entre min_weight y max_weight
+        alpha = clamp(alpha, self.min_weight, self.max_weight)
+        return alpha
 
-    def get_beta(self, ce_value, kl_divergence_value):
-        return 1 / rclamp(ce_value + kl_divergence_value, self.min_val, self.max_val)
+    def get_beta(self, ce_protos_value, kl_divergence_value):
+        epsilon = 1e-8
+        beta = self.scale / (ce_protos_value + kl_divergence_value + epsilon)
+        beta = clamp(beta, self.min_weight, self.max_weight)
+        return beta
 
-    def get_lambda(self, ce_value, kl_divergence_value, mse_value):
-        return 1 / rclamp(ce_value + kl_divergence_value + mse_value, self.min_val, self.max_val)
+    def get_lambda(self, ce_protos_value, kl_divergence_value, mse_value):
+        epsilon = 1e-8
+        lambda_weight = self.scale / (ce_protos_value + kl_divergence_value + mse_value + epsilon)
+        lambda_weight = clamp(lambda_weight, self.min_weight, self.max_weight)
+        return lambda_weight
