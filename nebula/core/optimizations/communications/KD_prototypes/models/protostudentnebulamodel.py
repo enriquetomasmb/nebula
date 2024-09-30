@@ -6,6 +6,7 @@ from nebula.core.optimizations.adaptative_weighted.decreasingweighting import De
 from nebula.core.optimizations.adaptative_weighted.weighting import Weighting
 from nebula.core.optimizations.communications.KD.models.studentnebulamodel import StudentNebulaModel
 from nebula.core.optimizations.adaptative_weighted.adaptativeweighting import AdaptiveWeighting
+from nebula.core.optimizations.communications.KD_prototypes.utils.GlobalPrototypeDistillationLoss import GlobalPrototypeDistillationLoss
 
 
 class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
@@ -20,11 +21,11 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
         seed=None,
         teacher_model=None,
         T=2,
-        alpha_kd=1,
-        beta_feat=1,
-        lambda_proto=1,
+        alpha_kd=0.5,
+        beta_feat=0.3,
+        lambda_proto=0.2,
         knowledge_distilation="KD",
-        send_logic=None,
+        send_logic="both",
         weighting=None,
     ):
         super().__init__(
@@ -55,6 +56,7 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
         self.knowledge_distilation = knowledge_distilation
         self.global_protos = dict()
         self.agg_protos_label = dict()
+        self.criterion_gpd = GlobalPrototypeDistillationLoss(temperature=T)
 
     def get_protos(self):
         """
@@ -101,14 +103,16 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
         if len(self.global_protos) == 0:
             loss_protos = 0 * loss_ce
         else:
+            """
             proto_new = protos.clone()
             i = 0
             for label in labels:
                 if label.item() in self.global_protos.keys():
                     proto_new[i, :] = self.global_protos[label.item()].data
                 i += 1
+            """
             # Compute the loss for the prototypes
-            loss_protos = self.criterion_mse(proto_new, protos)
+            loss_protos = self.criterion_gpd(self.global_protos, protos, labels)
 
         # Compute loss knowledge distillation
         loss_kd = self.criterion_kd(logits, teacher_logits)
@@ -117,9 +121,9 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
         loss_protos_teacher = self.criterion_mse(protos_copy, teacher_protos)
 
         # Combine the losses
-        loss = (
-            loss_ce + self.weighting.get_alpha(loss_ce) * loss_kd + self.weighting.get_beta(loss_ce, loss_kd) * (0.8 * loss_protos + 0.2 * loss_protos_teacher)
-        )
+        loss_ce_protos = loss_ce + 0.05 * loss_protos
+
+        loss = loss_ce_protos + self.weighting.get_alpha(loss_ce_protos) * loss_kd + self.weighting.get_beta(loss_ce_protos, loss_kd) * loss_protos_teacher
 
         self.process_metrics(phase, logits, labels, loss)
 
@@ -140,7 +144,7 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
 
         return loss
 
-    def load_state_dict(self, state_dict, strict=True):
+    def load_state_dict(self, state_dict, strict=False):
         """
         Overrides the default load_state_dict to handle missing teacher model keys gracefully.
         """
@@ -165,7 +169,12 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
                             name, param.size(), own_state[name].size(), e
                         )
                     ) from e
-            elif strict:
+
+            if name == "protos":
+                self.set_protos(param)
+                continue
+
+            if strict:
                 # Si el modo es estricto, avisa que este parámetro no fue encontrado.
                 missing_keys.append(name)
 
@@ -206,7 +215,7 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
 
         """
         if self.send_logic_method is None:
-            return 0
+            return 2
 
         if self.send_logic_method == "only_protos":
             return 1

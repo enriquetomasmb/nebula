@@ -15,73 +15,58 @@ class ProtoFedAvg(Aggregator):
     def run_aggregation(self, models):
         super().run_aggregation(models)
 
-        # Get a dictionary with the prototypes with (node: prototypes, num_samples)
-        proto_flag = False
-        prototypes = dict()
-        for node, model_info in models.items():
-            if "protos" in model_info[0]:
-                proto_flag = True
-                prototypes[node] = model_info[0]["protos"], model_info[1]
-                # Eliminamos los prototipos del modelo
-                del model_info[0]["protos"]
-
         models = list(models.values())
 
-        # Total Samples
-        total_samples = sum(w for _, w in models)
+        total_samples = float(sum(weight for _, weight in models))
 
-        # Create a Zero Model
-        accum = {layer: torch.zeros_like(param) for layer, param in models[-1][0].items()}
+        if total_samples == 0:
+            raise ValueError("Total number of samples must be greater than zero.")
 
-        # Add weighted models
-        for model, weight in models:
-            for layer in accum:
-                # Convert to accum type (float16 or float32)
-                model[layer] = model[layer].to(accum[layer].dtype)
-                accum[layer] += model[layer] * weight
+        # Obtener las claves de los parámetros de modelo desde el último modelo recibido
+        last_model_params = models[-1][0]
+        param_keys = [k for k in last_model_params.keys() if k != "protos"]
 
-        # Normalize Accum
-        for layer in accum:
-            # Convert to float32
-            accum[layer] = accum[layer].float()
-            accum[layer] /= total_samples
+        # Inicializar acumuladores para los parámetros del modelo (excluyendo prototipos)
+        accum_params = {key: torch.zeros_like(last_model_params[key], dtype=torch.float32) for key in param_keys}
 
-        # self.print_model_size(accum)
+        # Inicializar estructuras de datos para prototipos
+        proto_accum = {}  # Acumular prototipos por clase
+        proto_weights = {}  # Acumular pesos totales por clase
 
-        # Agregamos los prototipos al modelo
-        if proto_flag:
-            # Agregamos los prototipos
-            agregated_protos = self.__agregate_prototypes(prototypes)
-            accum["protos"] = agregated_protos
+        with torch.no_grad():
+            for model_parameters, weight in models:
+                normalized_weight = weight / total_samples
 
-        return accum
+                # Agregar parámetros estándar del modelo
+                for key in param_keys:
+                    if key in model_parameters:
+                        accum_params[key].add_(model_parameters[key].to(accum_params[key].dtype), alpha=normalized_weight)
+                    else:
+                        # Si la clave no está en el modelo actual, podría ser debido al filtrado por send_logic
+                        pass  # Puedes manejar esto si es necesario
 
-    def __agregate_prototypes(self, prototypes):
-        """
-        Weighted average of the prototypes
+                # Manejar prototipos si están presentes
+                if "protos" in model_parameters:
+                    client_protos = model_parameters["protos"]
+                    for class_label, proto in client_protos.items():
+                        if class_label not in proto_accum:
+                            # Inicializar acumulador para esta clase
+                            proto_accum[class_label] = proto.clone().detach() * normalized_weight
+                            proto_weights[class_label] = normalized_weight
+                        else:
+                            # Acumular prototipos y pesos
+                            proto_accum[class_label] += proto.clone().detach() * normalized_weight
+                            proto_weights[class_label] += normalized_weight
+                else:
+                    # Si el modelo no contiene prototipos, continuamos
+                    pass
 
-        Args:
-            prototypes: Dictionary with the prototypes (node: prototypes, num_samples)
-        """
-        if len(prototypes) == 0:
-            return None
+        # Normalizar prototipos
+        for class_label in proto_accum:
+            proto_accum[class_label] /= proto_weights[class_label]
 
-        prototypes = list(prototypes.values())
+        # Fusionar los prototipos agregados de vuelta en los parámetros del modelo
+        accum_params["protos"] = proto_accum
 
-        # Total Samples
-        total_samples = sum(w for _, w in prototypes)
-
-        # Create a Zero Prototype
-        accum = {label: torch.zeros_like(proto_info) for label, proto_info in prototypes[-1][0].items()}
-
-        # Add weighted models
-        for prototype, weight in prototypes:
-            for label in prototype:
-                if label not in accum:
-                    accum[label] = torch.zeros_like(prototype[label])
-                accum[label] += prototype[label] * weight
-        # Normalize Accum
-        for label in accum:
-            accum[label] /= total_samples
-
-        return accum
+        # self.print_model_size(accum_params)
+        return accum_params

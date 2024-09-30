@@ -15,7 +15,7 @@ class ProtoStudentCIFAR10ModelCNN(ProtoStudentNebulaModel):
         self,
         input_channels=3,
         num_classes=10,
-        learning_rate=1e-5,
+        learning_rate=1e-3,
         metrics=None,
         confusion_matrix=None,
         seed=None,
@@ -160,8 +160,9 @@ class ProtoStudentCIFAR10ModelCNN(ProtoStudentNebulaModel):
 
     def configure_optimizers(self):
         """ """
+        student_params = [p for name, p in self.named_parameters() if not name.startswith("teacher_model.")]
         optimizer = torch.optim.Adam(
-            self.parameters(),
+            student_params,
             lr=self.learning_rate,
             betas=(self.config["beta1"], self.config["beta2"]),
             amsgrad=self.config["amsgrad"],

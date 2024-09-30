@@ -18,9 +18,9 @@ class ProtoTeacherNebulaModel(TeacherNebulaModel, ABC):
         confusion_matrix=None,
         seed=None,
         T=2,
-        alpha_kd=1,
-        beta_feat=1,
-        lambda_proto=1,
+        alpha_kd=0.5,
+        beta_feat=0.3,
+        lambda_proto=0.2,
         weighting=None,
     ):
 

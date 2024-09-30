@@ -47,9 +47,9 @@ class ProtoTeacherCIFAR100ModelResNet32(ProtoTeacherNebulaModel):
         metrics=None,
         confusion_matrix=None,
         seed=None,
-        alpha_kd=1,
-        beta_feat=1,
-        lambda_proto=1,
+        alpha_kd=0.5,
+        beta_feat=0.3,
+        lambda_proto=0.2,
         weighting=None,
     ):
         super().__init__(
@@ -180,9 +180,9 @@ class MDProtoTeacherCIFAR100ModelResNet32(MDProtoTeacherNebulaModel):
         seed=None,
         T=2,
         p=2,
-        alpha_kd=1,
+        alpha_kd=0.5,
         beta_feat=100,
-        lambda_proto=1,
+        lambda_proto=0.2,
         weighting=None,
     ):
         super().__init__(

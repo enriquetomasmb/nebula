@@ -50,7 +50,7 @@ class ProtoStudentCIFAR10ModelResnet8(ProtoStudentNebulaModel):
         self,
         input_channels=3,
         num_classes=10,
-        learning_rate=1e-5,
+        learning_rate=1e-3,
         metrics=None,
         confusion_matrix=None,
         seed=None,

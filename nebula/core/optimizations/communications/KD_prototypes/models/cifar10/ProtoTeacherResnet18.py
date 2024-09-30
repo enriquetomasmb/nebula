@@ -47,7 +47,7 @@ class ProtoTeacherCIFAR10ModelResnet18(ProtoTeacherNebulaModel):
         self,
         input_channels=3,
         num_classes=10,
-        learning_rate=1e-5,
+        learning_rate=1e-3,
         metrics=None,
         confusion_matrix=None,
         seed=None,
@@ -185,9 +185,9 @@ class MDProtoTeacherCIFAR10ModelResnet18(MDProtoTeacherNebulaModel):
         seed=None,
         T=2,
         p=2,
-        alpha_kd=1,
+        alpha_kd=0.5,
         beta_feat=1000,
-        lambda_proto=1,
+        lambda_proto=0.2,
         weighting=None,
     ):
         super().__init__(

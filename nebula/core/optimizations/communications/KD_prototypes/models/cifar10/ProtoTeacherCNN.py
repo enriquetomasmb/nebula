@@ -16,7 +16,7 @@ class ProtoTeacherCIFAR10ModelCNN(ProtoTeacherNebulaModel):
         self,
         input_channels=3,
         num_classes=10,
-        learning_rate=1e-5,
+        learning_rate=1e-3,
         metrics=None,
         confusion_matrix=None,
         seed=None,

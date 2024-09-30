@@ -25,7 +25,7 @@ class ProtoStudentMNISTModelCNN(ProtoStudentNebulaModel):
         beta_feat=1,
         lambda_proto=1,
         knowledge_distilation="KD",
-        send_logic=None,
+        send_logic="both",
         weighting=None,
     ):
         if teacher_model is None:
@@ -138,8 +138,10 @@ class ProtoStudentMNISTModelCNN(ProtoStudentNebulaModel):
 
     def configure_optimizers(self):
         """Configure the optimizer for training."""
+        # Excluir los parámetros del modelo del profesor
+        student_params = [p for name, p in self.named_parameters() if not name.startswith("teacher_model.")]
         optimizer = torch.optim.Adam(
-            self.parameters(),
+            student_params,
             lr=self.learning_rate,
             betas=(self.config["beta1"], self.config["beta2"]),
             amsgrad=self.config["amsgrad"],
