@@ -1123,7 +1123,7 @@ async def run_scenarios(data, role):
             factsheet.populate_factsheet_post_train(scenario)
     
             # Get the weight of the different pillars
-            data_file_path = f"{os.environ.get('NEBULA_LOGS_DIR')}/{scenario_name}/trustworthiness/data.json"
+            data_file_path = os.path.join(os.environ.get('NEBULA_CONFIG_DIR'),scenario_name,"scenario.json")
             with open(data_file_path, 'r') as data_file:
                 data = json.load(data_file)
             

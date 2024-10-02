@@ -36,9 +36,9 @@ class Factsheet:
             scenario_name (string): The name of the scenario.
         """
 
-        factsheet_file = os.path.join(f"{os.environ.get('NEBULA_LOGS_DIR')}/{scenario_name}/trustworthiness/{self.factsheet_file_nm}")
+        factsheet_file = os.path.join(os.environ.get('NEBULA_LOGS_DIR'), scenario_name, "trustworthiness", self.factsheet_file_nm)
 
-        factsheet_template = os.path.join(dirname, f"configs/{self.factsheet_template_file_nm}")
+        factsheet_template = os.path.join(dirname, "configs", self.factsheet_template_file_nm)
 
         if not os.path.exists(factsheet_file):
             shutil.copyfile(factsheet_template, factsheet_file)
@@ -154,10 +154,6 @@ class Factsheet:
                 data_dir = "../addons/trustworthiness/benchmarks"
 
                 models_files = glob.glob(os.path.join(files_dir, "*final_model*"))
-                bytes_sent_files = glob.glob(os.path.join(files_dir, "*bytes_sent*"))
-                bytes_recv_files = glob.glob(os.path.join(files_dir, "*bytes_recv*"))
-                loss_files = glob.glob(os.path.join(files_dir, "*loss*"))
-                accuracy_files = glob.glob(os.path.join(files_dir, "*accuracy*"))
                 dataloaders_files = glob.glob(os.path.join(files_dir, "*train_loader*"))
                 test_dataloader_file = f"{files_dir}/participant_1_test_loader.pk"
                 train_model_file = f"{files_dir}/participant_1_train_model.pk"
@@ -183,7 +179,7 @@ class Factsheet:
                 factsheet["data"]["avg_entropy"] = avg_entropy
 
                 # Set performance data
-                result_avg_loss_accuracy = get_avg_loss_accuracy(loss_files, accuracy_files)
+                result_avg_loss_accuracy = get_avg_loss_accuracy(scenario_name)
                 factsheet["performance"]["test_loss_avg"] = result_avg_loss_accuracy[0]
                 factsheet["performance"]["test_acc_avg"] = result_avg_loss_accuracy[1]
                 test_acc_cv = get_cv(std=result_avg_loss_accuracy[2], mean=result_avg_loss_accuracy[1])
@@ -192,7 +188,7 @@ class Factsheet:
                 factsheet["system"]["avg_time_minutes"] = get_elapsed_time(scenario)
                 factsheet["system"]["avg_model_size"] = get_bytes_models(models_files)
 
-                result_bytes_sent_recv = get_bytes_sent_recv(bytes_sent_files, bytes_recv_files)
+                result_bytes_sent_recv = get_bytes_sent_recv(scenario_name)
                 factsheet["system"]["total_upload_bytes"] = result_bytes_sent_recv[0]
                 factsheet["system"]["total_download_bytes"] = result_bytes_sent_recv[1]
                 factsheet["system"]["avg_upload_bytes"] = result_bytes_sent_recv[2]

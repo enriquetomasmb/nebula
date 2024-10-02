@@ -39,9 +39,9 @@ class TrustMetricManager:
         """
         # Get scenario name
         scenario_name = scenario[0]
-        factsheet_file = os.path.join(f"{os.environ.get('NEBULA_LOGS_DIR')}/{scenario_name}/trustworthiness/{self.factsheet_file_nm}")
-        metrics_cfg_file = os.path.join(dirname, f"configs/{self.eval_metrics_file_nm}")
-        results_file = os.path.join(f"{os.environ.get('NEBULA_LOGS_DIR')}/{scenario_name}/trustworthiness/{self.nebula_trust_results_nm}")
+        factsheet_file = os.path.join(os.environ.get('NEBULA_LOGS_DIR'), scenario_name, "trustworthiness", self.factsheet_file_nm)
+        metrics_cfg_file = os.path.join(dirname, "configs", self.eval_metrics_file_nm)
+        results_file = os.path.join(os.environ.get('NEBULA_LOGS_DIR'), scenario_name, "trustworthiness", self.nebula_trust_results_nm)
 
         if not os.path.exists(factsheet_file):
             logger.error(f"{factsheet_file} is missing! Please check documentation.")
@@ -63,7 +63,7 @@ class TrustMetricManager:
             for key, value in metrics:
                 pillar = TrustPillar(key, value, input_docs, use_weights)
                 score, result = pillar.evaluate()
-                weight = weights.get(key)
+                weight = weights.get(key) / 100
                 final_score += weight * score
                 result_print.append([key, score])
                 result_json["pillars"].append(result)

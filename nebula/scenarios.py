@@ -303,21 +303,13 @@ class ScenarioManagement:
         self.topologymanager = None
         self.env_path = None
         self.use_blockchain = self.scenario.agg_algorithm == "BlockchainReputation"
-        
-        #Trustworthiness
-        trustworthiness = self.scenario.with_trustworthiness
-        
-        trust_dir = f'{self.log_dir}/{self.scenario_name}/trustworthiness'
-        
-        # Create a directory to save files to calcutate trust
-        os.makedirs(trust_dir, exist_ok=True)
-        os.chmod(trust_dir, 0o777)
             
-        if trustworthiness is True:
-            data_filename = f"{trust_dir}/data.json"
-            # Save data in a json file
-            with open(data_filename, 'w') as data_file:
-                json.dump(scenario, data_file, indent=4)
+        if self.scenario.with_trustworthiness is True:
+            trust_dir = os.path.join(self.log_dir, self.scenario_name, "trustworthiness")
+        
+            # Create a directory to save files to calcutate trust
+            os.makedirs(trust_dir, exist_ok=True)
+            os.chmod(trust_dir, 0o777)
                 
             factsheet = Factsheet()
             factsheet.populate_factsheet_pre_train(scenario, self.scenario_name)
