@@ -34,37 +34,81 @@ class FedGPDCIFAR10ModelCNN(FedGPDNebulaModel):
             T,
         )
 
+        self.embedding_dim = 512
         self.example_input_array = torch.zeros(1, 3, 32, 32)
         self.criterion_cls = nn.CrossEntropyLoss()
         self.criterion_gpd = GlobalPrototypeDistillationLoss(temperature=T)
         self.lambd = lambd
+        # Define layers of the model
+        self.layer1 = torch.nn.Sequential(
+            torch.nn.Conv2d(input_channels, 32, kernel_size=3, padding=1),
+            torch.nn.BatchNorm2d(32),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(32, 32, kernel_size=3, padding=1),
+            torch.nn.BatchNorm2d(32),
+            torch.nn.ReLU(),
+            torch.nn.MaxPool2d(kernel_size=2, stride=2),
+            torch.nn.Dropout(0.25),
+        )
 
-        self.conv1 = nn.Conv2d(in_channels=input_channels, out_channels=32, kernel_size=(5, 5), padding="same")
-        self.relu = nn.ReLU()
-        self.pool1 = nn.MaxPool2d(kernel_size=(2, 2), stride=2)
-        self.conv2 = nn.Conv2d(in_channels=32, out_channels=64, kernel_size=(5, 5), padding="same")
-        self.pool2 = nn.MaxPool2d(kernel_size=(2, 2), stride=2)
-        self.l1 = nn.Linear(8 * 8 * 64, 2048)  # Adjusted for CIFAR-10 image size
-        self.l2 = nn.Linear(2048, num_classes)
+        self.layer2 = torch.nn.Sequential(
+            torch.nn.Conv2d(32, 64, kernel_size=3, padding=1),
+            torch.nn.BatchNorm2d(64),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(64, 64, kernel_size=3, padding=1),
+            torch.nn.BatchNorm2d(64),
+            torch.nn.ReLU(),
+            torch.nn.MaxPool2d(kernel_size=2, stride=2),
+            torch.nn.Dropout(0.25),
+        )
+
+        self.layer3 = torch.nn.Sequential(
+            torch.nn.Conv2d(64, 128, kernel_size=3, padding=1),
+            torch.nn.BatchNorm2d(128),
+            torch.nn.ReLU(),
+            torch.nn.Conv2d(128, 128, kernel_size=3, padding=1),
+            torch.nn.BatchNorm2d(128),
+            torch.nn.ReLU(),
+            torch.nn.MaxPool2d(kernel_size=2, stride=2),
+            torch.nn.Dropout(0.25),
+        )
+
+        self.fc_layer_dense = torch.nn.Sequential(
+            torch.nn.Linear(128 * 4 * 4, self.embedding_dim),
+            torch.nn.ReLU(),
+            torch.nn.Dropout(0.5),
+        )
+
+        self.fc_layer = torch.nn.Linear(self.embedding_dim, num_classes)
 
     def forward_train(self, x, softmax=True, is_feat=False):
+        """Forward pass only for train the model.
+        is_feat: bool, if True return the features of the model.
+        softmax: bool, if True apply softmax to the logits.
+        """
+        # Reshape the input tensor
         input_layer = x.view(-1, 3, 32, 32)
 
-        conv1 = self.relu(self.conv1(input_layer))
-        pool1 = self.pool1(conv1)
+        # First convolutional layer
+        conv1 = self.layer1(input_layer)
 
-        conv2 = self.relu(self.conv2(pool1))
-        pool2 = self.pool2(conv2)
+        # Second convolutional layer
+        conv2 = self.layer2(conv1)
 
-        pool2_flat = pool2.reshape(-1, 8 * 8 * 64)
+        # Third convolutional layer
+        conv3 = self.layer3(conv2)
 
-        dense = self.relu(self.l1(pool2_flat))
-        logits = self.l2(dense)
+        # Flatten the tensor
+        flattened = conv3.view(conv3.size(0), -1)
+
+        # Fully connected layers
+        dense = self.fc_layer_dense(flattened)
+        logits = self.fc_layer(dense)
 
         if is_feat:
             if softmax:
-                return F.log_softmax(logits, dim=1), dense, [conv1, conv2]
-            return logits, dense, [conv1, conv2]
+                return F.log_softmax(logits, dim=1), dense, [conv1, conv2, conv3]
+            return logits, dense, [conv1, conv2, conv3]
 
         if softmax:
             return F.log_softmax(logits, dim=1), dense
@@ -79,19 +123,11 @@ class FedGPDCIFAR10ModelCNN(FedGPDNebulaModel):
         # Reshape the input tensor
         input_layer = x.view(-1, 3, 32, 32)
 
-        # First convolutional layer
-        conv1 = self.relu(self.conv1(input_layer))
-        pool1 = self.pool1(conv1)
-
-        # Second convolutional layer
-        conv2 = self.relu(self.conv2(pool1))
-        pool2 = self.pool2(conv2)
-
-        # Flatten the tensor
-        pool2_flat = pool2.reshape(-1, 8 * 8 * 64)
-
-        # Fully connected layers
-        dense = self.relu(self.l1(pool2_flat))
+        conv1 = self.layer1(input_layer)
+        conv2 = self.layer2(conv1)
+        conv3 = self.layer3(conv2)
+        flattened = conv3.view(conv3.size(0), -1)  # Flatten the layer
+        dense = self.fc_layer_dense(flattened)
 
         # Calculate distances
         distances = []
