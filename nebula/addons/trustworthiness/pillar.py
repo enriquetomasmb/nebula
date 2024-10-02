@@ -1,3 +1,9 @@
+#
+# This file contains code developed by Eduardo López Bernal during his Master Thesis at the University of Murcia.
+# - Design and implementation of a system to measure the trust level in federated learning scenarios
+# The code has been adapted and integrated into the Nebula platform.
+#
+
 import logging
 
 from nebula.addons.trustworthiness import calculation
