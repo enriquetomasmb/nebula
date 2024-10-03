@@ -1,6 +1,4 @@
 import asyncio
-import base64
-import gc
 import logging
 import time
 from geopy import distance
@@ -241,7 +239,6 @@ class Connection:
             await self.writer.drain()
 
             logging.debug(f"Sent message {message_id.hex()} | chunk {chunk_index+1}/{num_chunks} | size: {len(chunk)} bytes")
-
 
     def _calculate_chunk_size(self, data_size: int) -> int:
         if data_size <= 1024:  # 1 KB

@@ -15,6 +15,8 @@ def print_msg_box(msg, indent=1, width=None, title=None, logger_name=None):
     space = " " * indent
     if not width:
         width = max(map(len, lines))
+        if title:
+            width = max(width, len(title))
     box = f'\n╔{"═" * (width + indent * 2)}╗\n'  # upper_border
     if title:
         if not isinstance(title, str):

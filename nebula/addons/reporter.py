@@ -131,7 +131,6 @@ class Reporter:
         packets_sent = net_io_counters.packets_sent
         packets_recv = net_io_counters.packets_recv
         
-
         if self.first_net_metrics:
             bytes_sent_diff = 0
             bytes_recv_diff = 0

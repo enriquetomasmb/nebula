@@ -74,6 +74,7 @@ class CommunicationsManager:
         self.network_engine = None
 
         self.stop_network_engine = asyncio.Event()
+        self.loop = asyncio.get_event_loop()
 
     @property
     def engine(self):

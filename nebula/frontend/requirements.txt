@@ -25,7 +25,6 @@ web3==6.20.0
 aiosqlite==0.20.0
 docker==7.1.0
 # aim==3.24.0
-# TODO [FER] check if necessary down here
 torch==2.3.1
 torchvision==0.18.1
 lightning==2.3.3

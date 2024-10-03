@@ -232,7 +232,6 @@ class Lightning:
     def _train_sync(self):
         try:
             self.__trainer.fit(self.model, self.data)
-            self.__trainer = None
         except Exception as e:
             logging_training.error(f"Error in _train_sync: {e}")
             tb = traceback.format_exc()
@@ -280,6 +279,7 @@ class Lightning:
         self._logger.global_step = self._logger.global_step + self._logger.local_step
         self._logger.local_step = 0
         self.round += 1
+        self.model.on_round_end()
         logging.info("Flushing memory cache at the end of round...")
         torch.cuda.empty_cache()
         gc.collect()

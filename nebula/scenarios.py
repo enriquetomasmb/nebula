@@ -819,7 +819,7 @@ class ScenarioManagement:
         # Write the Docker Compose file in config directory
         with open(f"{self.config_dir}/docker-compose.yml", "w") as f:
             f.write(docker_compose_file)
-            
+
         # Include additional config to the participants
         for idx, node in enumerate(self.config.participants):
             node["tracking_args"]["log_dir"] = "/nebula/app/logs"
@@ -828,8 +828,8 @@ class ScenarioManagement:
             node["security_args"]["certfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_cert.pem"
             node["security_args"]["keyfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_key.pem"
             node["security_args"]["cafile"] = f"/nebula/app/certs/ca_cert.pem"
-            
-             # Write the config file in config directory
+
+            # Write the config file in config directory
             with open(f"{self.config_dir}/participant_{node['device_args']['idx']}.json", "w") as f:
                 json.dump(node, f, indent=4)
 
