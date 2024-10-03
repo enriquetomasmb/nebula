@@ -137,21 +137,6 @@ class Connection:
     def set_active(self, active):
         self.active = active
         self.last_active = time.time()
-        """"addr_node = self.config.participant["network_args"]["addr"].split(":")[0]
-        current_round = self.cm.get_round()
-        direct_connections = self.cm.get_all_addrs_current_connections(only_direct=True)
-        logging.info(f"Direct connections: {direct_connections}")
-        logging.info(f"Addr_node: {addr_node}")
-        logging.info(f"self.addr: {self.addr}")
-        # Save activity time to reputation
-        if self.active:
-            for conn in direct_connections:
-                conn = conn.split(":")[0]
-                addr_ip = self.addr.split(":")[0]
-                if addr_ip == conn:
-                    save_data(self.config.participant['scenario_args']['name'], 'last_activity', self.addr, addr_node, round=current_round, time=self.last_active)
-                else:
-                    logging.info(f"❗️  {addr_ip} is not a direct neighbor of {addr_node}")"""
 
         logging.info(f"Connection [active]: {self.addr} (id: {self.id}) (active: {self.active}) (last_active: {self.last_active})")
 

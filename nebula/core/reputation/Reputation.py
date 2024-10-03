@@ -72,7 +72,6 @@ def save_data(scenario, type_data, source_ip, addr, round=None, time=None, data_
     except Exception as e:
         logging.error(f"Error saving data: {e}")
 
-
 class Reputation:
     """
     Class to define the reputation of a participant.
@@ -107,6 +106,7 @@ class Reputation:
         aggregated_models_time_avg = 0
         data_contribution_normalized = 0
         node_participation = 0
+        threshold_communication = 10
 
         try:
             script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -119,7 +119,7 @@ class Reputation:
                     all_metrics = json.load(json_file)
                     for metric in all_metrics:
                         if "communication" in metric:
-                            round = metric["communication"]["round"]    
+                            round = metric["communication"]["round"] 
                             if round == current_round:
                                 array_communication.append(metric["communication"]["time"])
                         if "aggregated_models" in metric:
@@ -134,23 +134,25 @@ class Reputation:
                             round = metric["data_contribution"]["round"]
                             if round == current_round:
                                 array_data_contribution.append(metric["data_contribution"]["data_contribution"])
-                                
-                        """if "last_activity" in metric:
-                            round = metric["last_activity"]["round"]
-                            if round == current_round:
-                                last_activity_time = metric["last_activity"]["time"]
-                                if isinstance(last_activity_time, float):
-                                    last_activity_time = datetime.fromtimestamp(last_activity_time).strftime("%Y-%m-%d %H:%M:%S")
-                                last_activity_times.append(last_activity_time)"""
 
                     # Data similitude
                     similarity_file = os.path.join(log_dir, f"participant_{id_node}_similarity.csv")
                     similarity_reputation = Reputation.read_similarity_file(similarity_file, nei)
-                    logging.info(f"Similarity reputation: {similarity_reputation}")
+                    #logging.info(f"Similarity reputation: {similarity_reputation}")
 
                     if len(array_communication) > 0:
-                        communication_time_normalized = Reputation.callback_normalized_value(array_communication)
+                        logging.info(f"Array communication: {array_communication}")
+                        if len(array_communication) == 1:
+                            if array_communication[0] <= 0:
+                                communication_time_normalized = 0
+                            elif array_communication[0] > threshold_communication:
+                                communication_time_normalized = 0
+                            else:
+                                communication_time_normalized = 1.0 - (array_communication[0] / threshold_communication)
+                        else:
+                            communication_time_normalized = Reputation.callback_normalized_value(array_communication)
                     else: 
+                        logging.info(f"Array communication is empty")
                         communication_time_normalized = 0
 
                     if len(array_aggregated_models) > 0:
@@ -169,34 +171,6 @@ class Reputation:
                         data_contribution_normalized = Reputation.callback_normalized_value(array_data_contribution)
                     else: 
                         data_contribution_normalized = 0
-                    
-                    # Calculate average last_activity
-                    """if len(last_activity_times) > 0:
-                        last_activity_datetimes = [datetime.strptime(time_str, "%Y-%m-%d %H:%M:%S") for time_str in last_activity_times]
-
-                        avg_last_activity_datetime = sum([(dt - datetime(1970, 1, 1)).total_seconds() for dt in last_activity_datetimes]) / len(last_activity_datetimes)
-                        avg_last_activity = datetime(1970, 1, 1) + timedelta(seconds=avg_last_activity_datetime)
-
-                        current_time = datetime.now()
-                        time_diff = (current_time - avg_last_activity).total_seconds()
-
-                        intervals = [
-                            (10, 1),
-                            (15, 0.9),
-                            (20, 0.8),
-                            (30, 0.7),
-                            (40, 0.6),
-                            (50, 0.5),
-                            (60, 0.4),
-                            (70, 0.3),
-                            (80, 0.2),
-                            (90, 0.1),
-                        ]
-                        avg_last_activity_normalized = next((score for threshold, score in intervals if time_diff <= threshold), 0.1)
-                        logging.info(f"Avg last activity times: {avg_last_activity_normalized}")
-
-                    else:
-                        avg_last_activity_normalized = 0 # No last activity """
 
                     # Weights for each metric
                     weight_to_communication = 0.2
@@ -213,12 +187,6 @@ class Reputation:
                     logging.info(f"Node participation: {node_participation}")
                     logging.info(f"Similarity: {similarity_reputation}")
                     
-                    logging.info(f"Width weigh*metric")
-                    logging.info(f"Communication: {weight_to_communication * communication_time_normalized}")
-                    logging.info(f"Aggregated models: {weight_to_aggregated_models * aggregated_models_time_avg}")
-                    logging.info(f"Data contribution: {weight_to_data_contribution * data_contribution_normalized}")
-                    logging.info(f"Node participation: {weight_to_node_participation * node_participation}")
-                    logging.info(f"Similarity: {weight_to_similarity * similarity_reputation}")
                     # Reputation calculation
                     reputation = ( weight_to_communication * communication_time_normalized 
                                 + weight_to_aggregated_models * aggregated_models_time_avg
@@ -342,13 +310,13 @@ class Reputation:
         """
 
         if reputation > 0.8:
-            return reputation * 0.95 # Muy bajo decaimiento
+            return 0.95 # Muy bajo decaimiento
         elif reputation > 0.6:
-            return reputation * 0.9  # Bajo decaimiento
+            return 0.9  # Bajo decaimiento
         elif reputation > 0.4:
-            return reputation * 0.8  # Moderado decaimiento
+            return 0.8  # Moderado decaimiento
         else:
-            return reputation * 0.5  # Alto decaimiento
+            return 0.5  # Alto decaimiento
         
     @staticmethod
     def read_similarity_file(file_path, nei):

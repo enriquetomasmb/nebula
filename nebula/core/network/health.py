@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import time
-from datetime import datetime
 from nebula.addons.functions import print_msg_box
 from typing import TYPE_CHECKING
 
@@ -33,9 +32,7 @@ class Health:
             conn.set_active(True)
         while True:
             if len(self.cm.connections) > 0:
-                start_time = self.cm.engine.start_time
-                logging.info(f"Health thread Start time: {start_time} ")
-                message = self.cm.mm.generate_control_message(nebula_pb2.ControlMessage.Action.ALIVE, log="Alive message", time=start_time)
+                message = self.cm.mm.generate_control_message(nebula_pb2.ControlMessage.Action.ALIVE, log="Alive message")
                 current_connections = list(self.cm.connections.values())
                 for conn in current_connections:
                     if conn.get_direct():

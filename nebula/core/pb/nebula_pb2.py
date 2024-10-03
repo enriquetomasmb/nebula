@@ -3,12 +3,10 @@
 # NO CHECKED-IN PROTOBUF GENCODE
 # source: nebula.proto
 # Protobuf Python Version: 5.28.1
-# Protobuf Python Version: 4.25.3
 """Generated protocol buffer code."""
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import descriptor_pool as _descriptor_pool
 from google.protobuf import symbol_database as _symbol_database
-from google.protobuf.internal import builder as _builder
 from google.protobuf.internal import builder as _builder
 
 _sym_db = _symbol_database.Default()
@@ -34,17 +32,17 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_CONTROLMESSAGE_ACTION']._serialized_start=708
   _globals['_CONTROLMESSAGE_ACTION']._serialized_end=784
   _globals['_FEDERATIONMESSAGE']._serialized_start=787
-  _globals['_FEDERATIONMESSAGE']._serialized_end=970
+  _globals['_FEDERATIONMESSAGE']._serialized_end=992
   _globals['_FEDERATIONMESSAGE_ACTION']._serialized_start=892
-  _globals['_FEDERATIONMESSAGE_ACTION']._serialized_end=970
-  _globals['_MODELMESSAGE']._serialized_start=972
-  _globals['_MODELMESSAGE']._serialized_end=1037
-  _globals['_CONNECTIONMESSAGE']._serialized_start=1039
-  _globals['_CONNECTIONMESSAGE']._serialized_end=1147
-  _globals['_CONNECTIONMESSAGE_ACTION']._serialized_start=1110
-  _globals['_CONNECTIONMESSAGE_ACTION']._serialized_end=1147
-  _globals['_RESPONSEMESSAGE']._serialized_start=1149
-  _globals['_RESPONSEMESSAGE']._serialized_end=1184
-  _globals['_REPUTATIONMESSAGE']._serialized_start=1186
-  _globals['_REPUTATIONMESSAGE']._serialized_end=1252
+  _globals['_FEDERATIONMESSAGE_ACTION']._serialized_end=992
+  _globals['_MODELMESSAGE']._serialized_start=994
+  _globals['_MODELMESSAGE']._serialized_end=1059
+  _globals['_CONNECTIONMESSAGE']._serialized_start=1061
+  _globals['_CONNECTIONMESSAGE']._serialized_end=1169
+  _globals['_CONNECTIONMESSAGE_ACTION']._serialized_start=1132
+  _globals['_CONNECTIONMESSAGE_ACTION']._serialized_end=1169
+  _globals['_RESPONSEMESSAGE']._serialized_start=1171
+  _globals['_RESPONSEMESSAGE']._serialized_end=1206
+  _globals['_REPUTATIONMESSAGE']._serialized_start=1208
+  _globals['_REPUTATIONMESSAGE']._serialized_end=1274
 # @@protoc_insertion_point(module_scope)

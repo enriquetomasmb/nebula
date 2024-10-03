@@ -4,7 +4,7 @@ import sys
 import os
 import traceback
 import collections
-from datetime import datetime, timedelta
+from datetime import datetime
 import requests
 import asyncio
 import subprocess
@@ -188,18 +188,6 @@ class CommunicationsManager:
         current_round = self.engine.get_round()
         if current_round is not None:
             logging.info(f"🔧 handle_control_message | Received message from {source} with round {current_round}")
-            start_time = message.time  
-
-            if start_time:
-                end_time = datetime.now()
-                logging.info(f"🔧 handle_control_message | Start time {start_time} | End time {end_time}")
-                start_time_obj = datetime.strptime(start_time, '%H:%M:%S') 
-                latency = round((end_time - start_time_obj).total_seconds(), 2)
-                logging.info(f"🔧 handle_control_message | Latency {latency}")
-                logging.info(f"🔧 handle_control_message | Received message from neighbor {source} with message {message} after {latency} seconds")
-                save_data(self.config.participant['scenario_args']['name'], 'communication', source, self.addr, round=current_round, time=latency)
-            else:
-                logging.info(f"🔧 handle_control_message | No time received")
 
         logging.info(f"🔧  handle_control_message | Received [Action {message.action}] from {source} with log {message.log}")
         try:
@@ -263,15 +251,8 @@ class CommunicationsManager:
                             if os.stat(file).st_size == 0:
                                 f.write("timestamp,source_ip,round,current_round,cosine,euclidean,minkowski,manhattan,pearson_correlation,jaccard\n")
                             f.write(f"{datetime.now()}, {source}, {message.round}, {current_round}, {cosine_value}, {euclidean_value}, {minkowski_value}, {manhattan_value}, {pearson_correlation_value}, {jaccard_value}\n")
-
-                        """if cosine_value < 0.5:
-                            logging.info(f"🤖  handle_model_message | Model similarity is below 0.5 {cosine_value} with source {source}")
-                            #if source not in self.engine.rejected_nodes:
-                                #self.engine.rejected_nodes.add(source) 
-                            if self.engine.get_federation_ready_lock().locked():
-                                self.engine.get_federation_ready_lock().release()
-                        else:"""
                         
+                        # Manage add model in buffer
                         models_added = None
                         reputation = self.engine.get_reputation()  
                         reputation_data = reputation.get(source, None) 
@@ -314,7 +295,7 @@ class CommunicationsManager:
 
                                 if self.engine.get_federation_ready_lock().locked():
                                     logging.info("Releasing federation lock.")
-                                    self.engine.get_federation_ready_lock().release()
+                                    self.engine.get_federation_ready_lock().release_async()
                             else:
                                 logging.info(f"🤖  handle_model_message | Reputation above 0.6. Aggregating model from {source}")
                                 start_time_models_aggregated = time.time()
@@ -385,49 +366,23 @@ class CommunicationsManager:
     async def handle_reputation_message(self, source, message):
         try:
             logging.info(f"handle_reputation_message | Reputation message received from {source} | Node: {message.node_id} | Score: {message.score} | Round: {message.round}")
-            #self.total_messages_reputation_received += 1
             current_node = self.addr.split(":")[0].strip()
             source = source.split(":")[0].strip()
             node_ip = message.node_id.split(":")[0].strip()
 
-            if current_node != node_ip:
-                if message.round == self.get_round():
-                    key = (current_node, node_ip, message.round)
+            # Manage reputation 
+            if current_node != source:
+                logging.info(f"handle_reputation_message | Current node {current_node} is different from node ip {source}")
+                key = (current_node, source, message.round)
 
-                    if key not in self.reputation_with_all_feedback:
-                        self.reputation_with_all_feedback[key] = []
+                if key not in self.reputation_with_all_feedback:
+                    logging.info(f"handle_reputation_message | Creating key {key}")
+                    self.reputation_with_all_feedback[key] = []
 
-                    self.reputation_with_all_feedback[key].append(message.score)
+                self.reputation_with_all_feedback[key].append(message.score)
 
-                    # Total expected = number of federation nodes + number of direct connections - 1 (current node)
-                    """ total_expected_reputation = len(self.engine.get_federation_nodes()) + len(self.get_all_addrs_current_connections(only_direct=True)) - 1
-                    logging.info(f"handle_reputation_message | Expected reputation: {total_expected_reputation}")
-                    logging.info(f"handle_reputation_message | self.total_messages_reputation_received: {self.total_messages_reputation_received}")
-                    # Para la espera cuando se recibe la reputación de todos los vecinos
-                    if total_expected_reputation == self.total_messages_reputation_received:
-                        logging.info(f"handle_reputation_message | Stop")
-                        self.engine.stop_waiting_reputation()"""
         except Exception as e:
             logging.error(f"Error handling reputation message: {e}")
-
-        """if self.engine.reputation is not None:
-            if source in self.engine.reputation:
-                if self.engine.reputation[source]['round'] == message.round:
-                    logging.info(f"Reputation to engine {self.engine.reputation}")
-                    reputation = self.reputation_instance.combine_reputation_with_neighbour(current_node, source, message.node_id, message.score, message.round)
-                    logging.info(f"Reputation updated with feedback: {reputation}")
-                    if reputation is not None:
-                        reputation_dict_with_feedback = {
-                            f"Reputation_with_peer_feedback/{self.addr}": {
-                                f"{message.node_id}": float(reputation) if reputation is not None else None
-                            }
-                        }
-                        logging.info(f"Reputation dict with neighbor: {reputation_dict_with_feedback}")
-
-                        self.engine.trainer._logger.log_data(reputation_dict_with_feedback, step=message.round)
-
-                        # Receive feedback from the neighbor
-                        """
     
     def get_connections_lock(self):
         return self.connections_lock
@@ -743,16 +698,17 @@ class CommunicationsManager:
         if interval > 0:
             await asyncio.sleep(interval)
 
-    async def send_model(self, dest_addr, round, serialized_model, weight=1):
+    async def send_model(self, dest_addr, round_number, serialized_model, weight=1):
         try:
             conn = self.connections.get(dest_addr)
             if conn is None:
                 logging.info(f"❗️  Connection with {dest_addr} not found")
                 return
-            logging.info(f"Sending model to {dest_addr} with round {round}: weight={weight} | size={sys.getsizeof(serialized_model) / (1024 ** 2) if serialized_model is not None else 0} MB")
-            message = self.mm.generate_model_message(round, serialized_model, weight)
+            
+            logging.info(f"Sending model to {dest_addr} with round {round_number}: weight={weight} | size={sys.getsizeof(serialized_model) / (1024 ** 2) if serialized_model is not None else 0} MB")
+            message = self.mm.generate_model_message(round_number, serialized_model, weight)
             await conn.send(data=message, is_compressed=True)
-            logging.info(f"Model sent to {dest_addr} with round {round}")
+            logging.info(f"Model sent to {dest_addr} with round {round_number}")
         except Exception as e:
             logging.error(f"❗️  Cannot send model to {dest_addr}: {str(e)}")
             await self.disconnect(dest_addr, mutual_disconnection=False)

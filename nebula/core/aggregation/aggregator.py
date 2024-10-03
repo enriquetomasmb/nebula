@@ -61,6 +61,7 @@ class Aggregator(ABC):
         self._federation_nodes = set()
         self._waiting_global_update = False
         self._pending_models_to_aggregate = {}
+        self._future_models_to_aggregate = {}
         self._add_model_lock = Locker(name="add_model_lock", async_lock=True)
         self._aggregation_done_lock = Locker(name="aggregation_done_lock", async_lock=True)
         self._rejected_nodes = self.engine.rejected_nodes
