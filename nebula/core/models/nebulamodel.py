@@ -27,6 +27,13 @@ class NebulaModel(pl.LightningModule, ABC):
 
     This class is an abstract class that defines the interface for the NEBULA model.
     """
+    
+    def __getstate__(self):
+        """Customize the state to be pickled."""
+        state = self.__dict__.copy()
+        # Remove the communication_manager from the state
+        state.pop('communication_manager', None)  # safely remove if it exists
+        return state
 
     def process_metrics(self, phase, y_pred, y, loss=None):
         """
