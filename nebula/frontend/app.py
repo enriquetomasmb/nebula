@@ -1106,7 +1106,7 @@ async def run_scenarios(data, role):
         finish_scenario_event.clear()
         scenarios_finished = scenarios_finished + 1
         stop_scenario(scenario_name)
-        await asyncio.sleep(1)
+        await asyncio.sleep(5)
 
 
 @app.post("/nebula/dashboard/deployment/run")
