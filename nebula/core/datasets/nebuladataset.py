@@ -475,46 +475,65 @@ class NebulaDataset(Dataset, ABC):
         """
         if isinstance(dataset.targets, np.ndarray):
             y_train = dataset.targets
-        elif hasattr(dataset.targets, "numpy"):  # Check if it's a tensor with .numpy() method
+        elif hasattr(dataset.targets, "numpy"):  # Verificar si es un tensor con el método .numpy()
             y_train = dataset.targets.numpy()
-        else:  # If it's a list
+        else:  # Si es una lista
             y_train = np.asarray(dataset.targets)
 
         num_classes = self.num_classes
         num_subsets = self.partitions_number
+
+        # Crear un diccionario con los índices de cada clase
         class_indices = {i: np.where(y_train == i)[0] for i in range(num_classes)}
-
-        # Get the labels from the dataset
-        labels = np.array([dataset.targets[idx] for idx in range(len(dataset))])
-        label_counts = np.bincount(labels)
-
-        min_label = label_counts.argmin()
-        min_count = label_counts[min_label]
 
         classes_per_subset = int(num_classes * percentage / 100)
         if classes_per_subset < 1:
-            raise ValueError("The percentage is too low to assign at least one class to each subset.")
+            raise ValueError("El porcentaje es demasiado bajo para asignar al menos una clase a cada nodo.")
 
-        subset_indices = [[] for _ in range(num_subsets)]
+        # Mezclar la lista de clases
         class_list = list(range(num_classes))
-        np.random.seed(self.seed)
+        if self.seed is not None:
+            np.random.seed(self.seed)
         np.random.shuffle(class_list)
 
+        # Asignar clases a nodos sin superposición
+        subset_classes = {}
         for i in range(num_subsets):
-            for j in range(classes_per_subset):
-                # Use modulo operation to cycle through the class_list
-                class_idx = class_list[(i * classes_per_subset + j) % num_classes]
-                indices = class_indices[class_idx]
-                np.random.seed(self.seed)
-                np.random.shuffle(indices)
-                # Select approximately 50% of the indices
-                subset_indices[i].extend(indices[: min_count // 2])
+            start_idx = (i * classes_per_subset) % num_classes
+            end_idx = start_idx + classes_per_subset
+            if end_idx <= num_classes:
+                subset_classes[i] = class_list[start_idx:end_idx]
+            else:
+                # Si excede el número de clases, se toma el resto desde el inicio
+                subset_classes[i] = class_list[start_idx:] + class_list[:end_idx - num_classes]
 
-            class_counts = np.bincount(np.array([dataset.targets[idx] for idx in subset_indices[i]]))
-            logging_training.info(f"Partition {i+1} class distribution: {class_counts.tolist()}")
+        # Preparar los índices para cada clase sin superposición
+        class_indices_chunks = {class_idx: [] for class_idx in range(num_classes)}
+        for class_idx in range(num_classes):
+            indices = class_indices[class_idx]
+            if self.seed is not None:
+                np.random.seed(self.seed + class_idx)  # Para mayor aleatoriedad entre clases
+            np.random.shuffle(indices)
+            # Determinar los nodos que tendrán esta clase
+            nodes_with_class = [i for i in range(num_subsets) if class_idx in subset_classes[i]]
+            # Dividir los índices entre los nodos que tienen esta clase
+            chunks = np.array_split(indices, len(nodes_with_class))
+            for node_idx, chunk in zip(nodes_with_class, chunks):
+                class_indices_chunks[class_idx].append((node_idx, chunk))
+
+        # Asignar índices a cada nodo
+        subset_indices = [[] for _ in range(num_subsets)]
+        for class_idx in range(num_classes):
+            for node_idx, chunk in class_indices_chunks[class_idx]:
+                subset_indices[node_idx].extend(chunk.tolist())
+
+        # Imprimir la distribución de clases en cada partición
+        for i in range(num_subsets):
+            class_counts = np.bincount(
+                np.array([y_train[idx] for idx in subset_indices[i]]), minlength=num_classes)
+            logging_training.info(f"Partición {i + 1} distribución de clases: {class_counts.tolist()}")
 
         partitioned_datasets = {i: subset_indices[i] for i in range(num_subsets)}
-
         return partitioned_datasets
 
     def plot_all_data_distribution(self, dataset, partitions_map):
