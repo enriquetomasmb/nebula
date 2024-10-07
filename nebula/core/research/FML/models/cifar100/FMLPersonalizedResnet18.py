@@ -16,7 +16,7 @@ class FMLCIFAR100PersonalizedModelResNet18(FMLPersonalizedNebulaModel):
         self,
         input_channels=3,
         num_classes=100,
-        learning_rate=1e-3,
+        learning_rate=0.1,
         metrics=None,
         confusion_matrix=None,
         seed=None,
@@ -40,8 +40,8 @@ class FMLCIFAR100PersonalizedModelResNet18(FMLPersonalizedNebulaModel):
         self.criterion_div = FMLDistillKL(self.T)
 
         self.resnet = resnet18()
-        self.resnet.fc_dense = nn.Linear(self.resnet.fc.in_features, self.embedding_dim)
-        self.resnet.fc = nn.Linear(self.embedding_dim, num_classes)
+        self.resnet.fc_dense = nn.Linear(self.resnet.fc.in_features, 512)
+        self.resnet.fc = nn.Linear(512, num_classes)
 
     def forward(self, x, softmax=True, is_feat=False):
         """Forward pass only for train the model.

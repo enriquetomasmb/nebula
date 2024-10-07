@@ -20,12 +20,12 @@ class ProtoStudentCIFAR100ModelResnet18(ProtoStudentNebulaModel):
         self,
         input_channels=3,
         num_classes=100,
-        learning_rate=1e-3,
+        learning_rate=0.1,
         metrics=None,
         confusion_matrix=None,
         seed=None,
         teacher_model=None,
-        T=2,
+        T=20,
         alpha_kd=0.5,
         beta_feat=0.3,
         lambda_proto=0.2,
@@ -60,7 +60,7 @@ class ProtoStudentCIFAR100ModelResnet18(ProtoStudentNebulaModel):
         self.criterion_mse = torch.nn.MSELoss()
         self.criterion_cls = torch.nn.CrossEntropyLoss()
         self.criterion_kd = DistillKL(self.T)
-        self.resnet = resnet18()
+        self.resnet = resnet18(num_classes=num_classes)
         self.resnet.fc_dense = nn.Linear(self.resnet.fc.in_features, self.embedding_dim)
         self.resnet.fc = nn.Linear(self.embedding_dim, num_classes)
 
