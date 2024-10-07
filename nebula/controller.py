@@ -100,13 +100,13 @@ class NebulaEventHandler(PatternMatchingEventHandler):
         """
         Handles the event when a file is created.
         """
-        if event.is_directory:
-            return
+        # if event.is_directory:
+        #    return
         src_path = event.src_path
-        if not self._should_process_event(src_path):
-            return
-        if self._is_being_processed(src_path):
-            return
+        # if not self._should_process_event(src_path):
+        #     return
+        # if self._is_being_processed(src_path):
+        #     return
         logging.info("File created: %s" % src_path)
         try:
             self.run_script(src_path)
