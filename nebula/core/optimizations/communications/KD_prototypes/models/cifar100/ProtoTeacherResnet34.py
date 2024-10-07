@@ -7,7 +7,7 @@ from nebula.core.optimizations.communications.KD_prototypes.models.prototeachern
 from nebula.core.optimizations.communications.KD.utils.AT import Attention
 
 
-class ProtoTeacherCIFAR100ModelResNet32(ProtoTeacherNebulaModel):
+class ProtoTeacherCIFAR100ModelResNet34(ProtoTeacherNebulaModel):
     def __init__(
         self,
         input_channels=3,
@@ -41,7 +41,6 @@ class ProtoTeacherCIFAR100ModelResNet32(ProtoTeacherNebulaModel):
         self.resnet = resnet34()
         self.resnet.fc_dense = nn.Linear(self.resnet.fc.in_features, self.embedding_dim)
         self.resnet.fc = nn.Linear(self.embedding_dim, num_classes)
-
 
     def forward_train(self, x, softmax=True, is_feat=False):
         """Forward pass solo para entrenamiento.
@@ -124,7 +123,7 @@ class ProtoTeacherCIFAR100ModelResNet32(ProtoTeacherNebulaModel):
         return optimizer
 
 
-class MDProtoTeacherCIFAR100ModelResNet32(MDProtoTeacherNebulaModel):
+class MDProtoTeacherCIFAR100ModelResNet34(MDProtoTeacherNebulaModel):
     def __init__(
         self,
         input_channels=3,

@@ -7,7 +7,7 @@ from nebula.core.research.FedProto.models.fedprotonebulamodel import FedProtoNeb
 
 class FedProtoCIFAR10ModelResNet8(FedProtoNebulaModel):
     """
-    LightningModule para CIFAR-100 usando ResNet-18.
+    LightningModule para CIFAR-10 usando ResNet-8.
     """
 
     def __init__(
@@ -53,7 +53,7 @@ class FedProtoCIFAR10ModelResNet8(FedProtoNebulaModel):
         self.classifier = nn.Linear(2048, num_classes)
 
     def forward_train(self, x, softmax=True, is_feat=False):
-        # Extraer las características intermedias usando ResNet-18
+        # Extraer las características intermedias usando ResNet-8
         features = self.features(x)
         features_flat = torch.flatten(features, 1)  # Aplanar para la capa fully connected
         dense = self.fc(features_flat)
