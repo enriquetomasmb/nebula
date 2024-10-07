@@ -263,7 +263,7 @@ def get_elapsed_time(scenario):
         float: The elapsed time.
     """
     start_time = scenario[1]
-    completed_time = scenario[2]
+    completed_time = scenario[3]
 
     start_date = datetime.strptime(start_time, "%d/%m/%Y %H:%M:%S")
     end_date = datetime.strptime(completed_time, "%d/%m/%Y %H:%M:%S")

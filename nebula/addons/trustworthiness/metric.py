@@ -8,6 +8,7 @@ import json
 import logging
 import os
 
+from nebula.addons.trustworthiness.graphics import Graphics
 from nebula.addons.trustworthiness.pillar import TrustPillar
 from nebula.addons.trustworthiness.utils import write_results_json
 
@@ -21,10 +22,11 @@ class TrustMetricManager:
     Manager class to help store the output directory and handle calls from the FL framework.
     """
 
-    def __init__(self):
+    def __init__(self, scenario_start_time):
         self.factsheet_file_nm = "factsheet.json"
         self.eval_metrics_file_nm = "eval_metrics.json"
         self.nebula_trust_results_nm = "nebula_trust_results.json"
+        self.scenario_start_time = scenario_start_time
 
     def evaluate(self, scenario, weights, use_weights=False):
         """
@@ -68,3 +70,6 @@ class TrustMetricManager:
             final_score = round(final_score, 2)
             result_json["trust_score"] = final_score
             write_results_json(results_file, result_json)
+            
+            graphics = Graphics(self.scenario_start_time, scenario_name)
+            graphics.graphics()

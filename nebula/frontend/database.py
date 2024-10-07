@@ -316,7 +316,7 @@ def scenario_set_all_status_to_finished():
     _c = _conn.cursor()
 
     command = "UPDATE scenarios SET status = 'finished', end_time = ? WHERE status = 'running';"
-    current_time = str(datetime.datetime.now())
+    current_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     _c.execute(command, (current_time,))
 
     _conn.commit()
@@ -328,7 +328,7 @@ def scenario_set_status_to_finished(scenario_name):
     _c = _conn.cursor()
 
     command = "UPDATE scenarios SET status = 'finished', end_time = ? WHERE name = ?;"
-    current_time = str(datetime.datetime.now())
+    current_time = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
     _c.execute(command, (current_time, scenario_name))
 
     _conn.commit()

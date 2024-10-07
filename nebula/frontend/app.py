@@ -1104,13 +1104,17 @@ async def run_scenarios(data, role):
         if stop_all_scenarios_event.is_set():
             stop_all_scenarios_event.clear()
             stop_scenario(scenario_name)
-            return
+            return      
+
+        finish_scenario_event.clear()
+        scenarios_finished = scenarios_finished + 1
+        stop_scenario(scenario_name)
         
         #Trust#
-        from nebula.addons.trustworthiness.factsheet import Factsheet
-        from nebula.addons.trustworthiness.metric import TrustMetricManager
-        
         if scenario_data['with_trustworthiness']:
+            from nebula.addons.trustworthiness.factsheet import Factsheet
+            from nebula.addons.trustworthiness.metric import TrustMetricManager
+            
             # Calculate of post training metrics for trustworthiness
             # Get the start and the end time of the scenario to calculate the elapsed time
             
@@ -1137,12 +1141,9 @@ async def run_scenarios(data, role):
                 "sustainability": float(data["sustainability_importance_percent"])
             }
     
-            trust_metric_manager = TrustMetricManager()
+            trust_metric_manager = TrustMetricManager(scenario[1])
             trust_metric_manager.evaluate(scenario, weights, use_weights=True)
-               
-        finish_scenario_event.clear()
-        scenarios_finished = scenarios_finished + 1
-        stop_scenario(scenario_name)
+            
         await asyncio.sleep(1)
 
 
