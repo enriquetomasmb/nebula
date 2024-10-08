@@ -101,8 +101,7 @@
     "with_reputation": false,
     "is_dynamic_topology": false,
     "is_dynamic_aggregation": false,
-    "target_aggregation": false,
-    "dynamic_aggregation_mode": false
+    "target_aggregation": false
   },
   "adversarial_args": {
     "attacks": "No Attack",

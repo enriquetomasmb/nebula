@@ -662,7 +662,7 @@
                 <!-- Advanced Defense -->
                 <div class="form-group row container-shadow tiny grey">
                     <h5 class="step-number">Defense <i class="fa fa-wrench"></i>
-                        <input type="checkbox" id="defense-lock" onchange="lock('without-reputation-btn', 'with-reputation-btn', 'dynamic-topology-btn', 'dynamic-aggregation-btn', 'targetAggregationSelect', 'dynamicAggregationModeSelect', checked)" style="display: none;">
+                        <input type="checkbox" id="defense-lock" onchange="lock('without-reputation-btn', 'with-reputation-btn', 'dynamic-topology-btn', 'dynamic-aggregation-btn', 'targetAggregationSelect', checked)" style="display: none;">
                         <label for="defense-lock" class="icon-container" style="float: right;">
                             <i class="fa fa-lock"></i> 
                         </label>
@@ -692,17 +692,6 @@
                             <label class="form-check-label" for="dynamic-aggregation-btn">Dynamic
                                 Aggregation</label>
                         </div>
-                        <div id="dynamic-aggregation-mode" style="display: none; margin-left: 20px">
-                            <label class="form-check-label" for="dynamic-aggregation-mode">Dynamic
-                                Aggregation Mode</label>
-                            <select class="form-control" id="dynamicAggregationModeSelect" name="dynamicAggregationMode" style="display: inline; width: 20%">
-                                <option selected>Proactive</option>
-                                <option>Reactive</option>
-                            </select>
-                            <small id="dynamicAggHelp" class="form-text text-muted">
-                                <i id="dynamicAggHelpIcon" class="fa fa-info-circle"></i>
-                            </small>
-                        </div >
                         <div id="target-aggregation" style="display: none; margin-left: 20px">
                             <h5 class="step-title">Target Aggregation Algorithm</h5>
                             <div class="form-check form-check-inline">
@@ -1206,7 +1195,6 @@
             data["with_reputation"] = document.getElementById("with-reputation-btn").checked ? true : false
             data["is_dynamic_topology"] = document.getElementById("dynamic-topology-btn").checked ? true : false
             data["is_dynamic_aggregation"] = document.getElementById("dynamic-aggregation-btn").checked ? true : false
-            data["dynamic-aggregation_mode"] = document.getElementById("dynamic-aggregation-btn").checked ? document.getElementById("dynamicAggregationModeSelect").value : false
             data["target_aggregation"] = document.getElementById("dynamic-aggregation-btn").checked ? document.getElementById("targetAggregationSelect").value : false
             // Step 15
             data["random_geo"] = document.getElementById("random-geo-btn").checked ? true : false
@@ -1296,7 +1284,6 @@
                 }
                 document.getElementById("dynamic-topology-btn").checked = data["is_dynamic_topology"];
                 document.getElementById("dynamic-aggregation-btn").checked = data["is_dynamic_aggregation"];
-                document.getElementById("dynamicAggregationModeSelect").value = data["dynamic_aggregation_mode"];
                 document.getElementById("targetAggregationSelect").value = data["target_aggregation"];
                 // Step 15
                 document.getElementById("random-geo-btn").checked = data["random_geo"];
@@ -1450,11 +1437,6 @@
             '                    <li>RNN: Recurrent neural network</li>\n' +
             '                </ul>'
 
-          dynamicAggregationModeHelp = '<ul>\n' +
-            '                    <li>Proactive: Changes aggregation function randomly at each training round</li>\n' +
-            '                     <li>Reactive: When malicious nodes are detected/broadcasted, changes aggregation function.</li>\n' +
-            '                </ul>'
-
         var popoverTriggerEl = document.getElementById("topologyCustomIcon");
         var popover = new bootstrap.Popover(popoverTriggerEl, {
             title: "Network topology",
@@ -1536,17 +1518,6 @@
         var popover = new bootstrap.Popover(popoverTriggerEl, {
             title: "Model",
             content: contentModelHelp,
-            trigger: "hover",
-            placement: "right",
-            html: true,
-            container: "body",
-            delay: { show: 500, hide: 100 },
-        });
-
-        var popoverTriggerEl = document.getElementById("dynamicAggHelpIcon");
-        var popover = new bootstrap.Popover(popoverTriggerEl, {
-            title: "DynamicAgg",
-            content: dynamicAggregationModeHelp,
             trigger: "hover",
             placement: "right",
             html: true,
@@ -1843,7 +1814,6 @@
             if(!document.getElementById("defense-lock").checked){
                 document.getElementById("without-reputation-btn").checked = true;
                 document.getElementById("dynamic-aggregation-btn").checked = false;
-                document.getElementById("dynamicAggregationModeSelect").checked = "Proactive";
                 document.getElementById("targetAggregationSelect").value = "Krum";
                 $('#dynamic-aggregation-btn').change();
                 document.getElementById("without-reputation-btn").click();
@@ -2413,24 +2383,13 @@
         });
 
         // When click on "with-reputation-btn" check input, display "predefined-topology"
-        //targetAggregation = document.getElementById("target-aggregation")
-        //targetAggregationSelect = document.getElementById("dynamic-aggregation-btn");
-        //targetAggregationSelect.addEventListener("change", function () {
-        //    if (this.checked) {
-        //        targetAggregation.style.display = "block";
-        //    } else {
-        //        targetAggregation.style.display = "none";
-        //    }
-        //});
-
-        // When click on "dynamic-aggregation-btn" check input, display "dynamic-aggregation-mode"
-        dynamicAggregationMode = document.getElementById("dynamic-aggregation-mode")
-        dynamicAggregationModeSelect = document.getElementById("dynamic-aggregation-btn");
-        dynamicAggregationModeSelect.addEventListener("change", function () {
+        targetAggregation = document.getElementById("target-aggregation")
+        targetAggregationSelect = document.getElementById("dynamic-aggregation-btn");
+        targetAggregationSelect.addEventListener("change", function () {
             if (this.checked) {
-                dynamicAggregationMode.style.display = "block";
+                targetAggregation.style.display = "block";
             } else {
-                dynamicAggregationMode.style.display = "none";
+                targetAggregation.style.display = "none";
             }
         });
 
