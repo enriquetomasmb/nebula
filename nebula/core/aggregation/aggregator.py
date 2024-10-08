@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import asyncio
 from functools import partial
 import logging
+
 from nebula.core.utils.locker import Locker
 from nebula.core.pb import nebula_pb2
 
@@ -17,6 +18,8 @@ def create_aggregator(config, engine):
     from nebula.core.aggregation.trimmedmean import TrimmedMean
     from nebula.core.aggregation.bulyan import Bulyan
     from nebula.core.aggregation.blockchainReputation import BlockchainReputation
+    from nebula.core.aggregation.dynamicAggregator import DynamicAggregator
+    from nebula.core.aggregation.reactiveAggregator import ReactiveAggregator
 
     ALGORITHM_MAP = {
         "FedAvg": FedAvg,
@@ -25,6 +28,8 @@ def create_aggregator(config, engine):
         "TrimmedMean": TrimmedMean,
         "Bulyan": Bulyan,
         "BlockchainReputation": BlockchainReputation,
+        "DynamicAggregator": DynamicAggregator,
+        "ReactiveAggregator": ReactiveAggregator,
     }
     algorithm = config.participant["aggregator_args"]["algorithm"]
     aggregator = ALGORITHM_MAP.get(algorithm)
@@ -40,6 +45,8 @@ def create_target_aggregator(config, engine):
     from nebula.core.aggregation.median import Median
     from nebula.core.aggregation.trimmedmean import TrimmedMean
     from nebula.core.aggregation.bulyan import Bulyan
+    from nebula.core.aggregation.dynamicAggregator import DynamicAggregator
+    from nebula.core.aggregation.reactiveAggregator import ReactiveAggregator
 
     ALGORITHM_MAP = {
         "FedAvg": FedAvg,
@@ -47,6 +54,8 @@ def create_target_aggregator(config, engine):
         "Median": Median,
         "TrimmedMean": TrimmedMean,
         "Bulyan": Bulyan,
+        "DynamicAggregator": DynamicAggregator,
+        "ReactiveAggregator": ReactiveAggregator,
     }
     algorithm = config.participant["defense_args"]["target_aggregation"]
     aggregator = ALGORITHM_MAP.get(algorithm)

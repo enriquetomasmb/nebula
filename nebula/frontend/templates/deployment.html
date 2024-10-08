@@ -356,6 +356,8 @@
                             <option>Median</option>
                             <option>Bulyan</option>
                             <option>BlockchainReputation</option>
+                            <option>DynamicAggregator</option>
+                            <option>ReactiveAggregator</option>
                         </select>
                     </div>
                 </div>
@@ -709,6 +711,8 @@
                                     <option>TrimmedMean</option>
                                     <option>Median</option>
                                     <option>Bulyan</option>
+                                    <option>DynamicAggregator</option>
+                                    <option>ReactiveAggregator</option>
                                 </select>
                             </div>
                         </div>
@@ -1182,6 +1186,7 @@
             data["model"] = document.getElementById("modelSelect").value
             // Step 7
             data["agg_algorithm"] = document.getElementById("aggregationSelect").value
+            data["reactive_aggregator_default"] = "FedAvg"
             // Step 8
             data["rounds"] = document.getElementById("rounds").value
             data["logginglevel"] = document.getElementById("loggingLevel").value === "true"

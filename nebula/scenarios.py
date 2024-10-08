@@ -38,6 +38,7 @@ class Scenario:
         partition_parameter,
         model,
         agg_algorithm,
+        reactive_aggregator_default,
         rounds,
         logginglevel,
         accelerator,
@@ -81,6 +82,7 @@ class Scenario:
         self.partition_parameter = partition_parameter
         self.model = model
         self.agg_algorithm = agg_algorithm
+        self.reactive_aggregator_default = reactive_aggregator_default
         self.rounds = rounds
         self.logginglevel = logginglevel
         self.accelerator = accelerator
@@ -271,6 +273,7 @@ class ScenarioManagement:
             participant_config["device_args"]["accelerator"] = self.scenario.accelerator
             participant_config["device_args"]["logging"] = self.scenario.logginglevel
             participant_config["aggregator_args"]["algorithm"] = self.scenario.agg_algorithm
+            participant_config["aggregator_args"]["reactive_aggregator_default"] = self.scenario.reactive_aggregator_default
             participant_config["adversarial_args"]["attacks"] = node_config["attacks"]
             participant_config["adversarial_args"]["poisoned_sample_percent"] = node_config["poisoned_sample_percent"]
             participant_config["adversarial_args"]["poisoned_ratio"] = node_config["poisoned_ratio"]
