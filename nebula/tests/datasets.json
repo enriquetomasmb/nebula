@@ -1311,7 +1311,6 @@
     "with_reputation": false,
     "is_dynamic_topology": false,
     "is_dynamic_aggregation": false,
-    "dynamic_aggregato"
     "target_aggregation": false,
     "random_geo": true,
     "latitude": 38.023522,

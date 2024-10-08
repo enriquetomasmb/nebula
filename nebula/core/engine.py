@@ -9,7 +9,7 @@ import time
 from nebula.addons.functions import print_msg_box
 from nebula.addons.attacks.attacks import create_attack
 from nebula.addons.reporter import Reporter
-from nebula.core.aggregation.aggregator import create_aggregator, create_malicious_aggregator, create_target_aggregator, randomly_select_aggregation_function
+from nebula.core.aggregation.aggregator import create_aggregator, create_malicious_aggregator, create_target_aggregator
 from nebula.core.eventmanager import EventManager, event_handler
 from nebula.core.network.communications import CommunicationsManager
 from nebula.core.pb import nebula_pb2
@@ -162,11 +162,9 @@ class Engine:
         self.with_reputation = self.config.participant["defense_args"]["with_reputation"]
         self.is_dynamic_topology = self.config.participant["defense_args"]["is_dynamic_topology"]
         self.is_dynamic_aggregation = self.config.participant["defense_args"]["is_dynamic_aggregation"]
-        self.dynamic_aggregation_mode = self.config.participant["defense_args"]["dynamic_aggregation_mode"]
-        #self.target_aggregation = create_target_aggregator(config=self.config, engine=self) if self.is_dynamic_aggregation else None
-        self.target_aggregation = randomly_select_aggregation_function(self, config=self.config, engine=self) if self.is_dynamic_aggregation else None
+        self.target_aggregation = create_target_aggregator(config=self.config, engine=self) if self.is_dynamic_aggregation else None
         msg = f"Reputation system: {self.with_reputation}\nDynamic topology: {self.is_dynamic_topology}\nDynamic aggregation: {self.is_dynamic_aggregation}"
-        #msg += f"\nTarget aggregation: {self.target_aggregation.__class__.__name__}" if self.is_dynamic_aggregation else ""
+        msg += f"\nTarget aggregation: {self.target_aggregation.__class__.__name__}" if self.is_dynamic_aggregation else ""
         print_msg_box(msg=msg, indent=2, title="Defense information")
 
         self.learning_cycle_lock = Locker(name="learning_cycle_lock", async_lock=True)
@@ -294,7 +292,7 @@ class Engine:
             if len(malicious_nodes) > 0 and not self._is_malicious:
                 if self.is_dynamic_topology:
                     await self._disrupt_connection_using_reputation(malicious_nodes)
-                if self.is_dynamic_aggregation and self.dynamic_aggregation_mode == "Reactive":
+                if self.is_dynamic_aggregation and self.aggregator != self.target_aggregation:
                     await self._dynamic_aggregator(self.aggregator.get_nodes_pending_models_to_aggregate(), malicious_nodes)
 
     @event_handler(nebula_pb2.FederationMessage, nebula_pb2.FederationMessage.Action.FEDERATION_MODELS_INCLUDED)
@@ -433,12 +431,9 @@ class Engine:
                         logging.info(f"Connect new connection with at round {self.round}: {connected}")
 
     async def _dynamic_aggregator(self, aggregated_models_weights, malicious_nodes):
-        logging.info("Witold+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++DA")
-
         logging.info(f"malicious detected at round {self.round}, change aggergation protocol!")
         if self.aggregator != self.target_aggregation:
             logging.info(f"Current aggregator is: {self.aggregator}")
-            logging.info(self.target_aggregation)
             self.aggregator = self.target_aggregation
             await self.aggregator.update_federation_nodes(self.federation_nodes)
 
@@ -481,33 +476,12 @@ class Engine:
                 print_msg_box(msg=_nss_features_msg, indent=2, title="NSS features (this node)")
                 self.node_selection_strategy_selector.node_selection(self)
 
-            #dynamic aggregation function
-            logging.info("Witold+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++star")
-            if self.with_reputation and not self._is_malicious:
-                logging.info("Witold+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++")
-                malicious_nodes = []
-                # Proactive dynamic aggregation function
-                if self.round > 0:
-                    if (self.is_dynamic_aggregation) and (self.dynamic_aggregation_mode == "Proactive"):
-                        await self._dynamic_aggregator(self.aggregator.get_nodes_pending_models_to_aggregate(), malicious_nodes)
-                # Reactive dynamic aggregation function
-                if self.round > 2:
-                    if (self.is_dynamic_aggregation) and (self.dynamic_aggregation_mode == "Reactive"):
-                        # Calculate the malicious nodes and reputation score
-                        malicious_nodes,reputation = self.reputation_calculation(self.aggregator.get_nodes_pending_models_to_aggregate())
-                        if len(malicious_nodes) > 0:
-                            # Send reputation message to other nodes
-                            await self.send_reputation(malicious_nodes)
-                            # Call the dynamic aggregator function , change the aggregator to the target_aggregation
-                            await self._dynamic_aggregator(self.aggregator.get_nodes_pending_models_to_aggregate(), malicious_nodes)
-
-
             await self.aggregator.update_federation_nodes(self.federation_nodes)
             await self._extended_learning_cycle()
             await self.get_round_lock().acquire_async()
 
             print_msg_box(msg=f"Round {self.round} of {self.total_rounds} finished.", indent=2, title="Round information")
-            await self.aggregator.reset()
+            self.aggregator.reset()
             self.trainer.on_round_end()
             self.round = self.round + 1
             self.config.participant["federation_args"]["round"] = self.round  # Set current round in config (send to the controller)
