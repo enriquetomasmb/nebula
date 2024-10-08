@@ -1,5 +1,8 @@
 import copy
+import logging
 import random
+import sys
+
 import torch
 
 
@@ -11,6 +14,9 @@ def labelflipping_untargeted(dataset, indices, flipping_persent):
         indices: Indices of subsets, list like.
         flipping_persent: The ratio of labels want to change, float like.
     """
+    logging.info("[Attack labelflipping_untargeted] running attack on dataset")
+    logging.info("[Attack labelflipping_untargeted] Received Config: flipping_percent: {}".format(flipping_persent))
+    sys.set_int_max_str_digits(0)
     new_dataset = copy.copy(dataset)
 
     if type(new_dataset.targets) == list:
@@ -20,8 +26,7 @@ def labelflipping_untargeted(dataset, indices, flipping_persent):
     classes = new_dataset.classes
     class_to_idx = new_dataset.class_to_idx
     class_list = [class_to_idx[i] for i in classes]
-
-    num_flipped = int(flipping_persent * num_indices)
+    num_flipped = int(float(flipping_persent)*0.01 * num_indices)
     if num_indices == 0:
         return new_dataset
     if num_flipped > num_indices:

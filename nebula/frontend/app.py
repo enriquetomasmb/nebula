@@ -1118,6 +1118,7 @@ async def nebula_dashboard_deployment_run(request: Request, background_tasks: Ba
     finish_scenario_event.clear()
     stop_all_scenarios_event.clear()
     data = await request.json()
+    print(data)
     global scenarios_finished, scenarios_list_length
     scenarios_finished = 0
     scenarios_list_length = len(data)

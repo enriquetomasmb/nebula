@@ -554,7 +554,7 @@
                             } else if (attack === 'label_flipping_untargeted') {
                                 document.getElementById('options_label_flipping_untargeted').style.display = 'block';
                             } else if (attack === 'label_flipping_fang') {
-                                document.getElementById('label_flipping_fang').style.display = 'block';
+                                document.getElementById('options_label_flipping_fang').style.display = 'block';
                             } else {
                                 document.getElementById('other_attacks_config').style.display = 'block';
                             }
@@ -563,16 +563,23 @@
                             if (document.getElementById('poisoning-attack-select').value.includes('label_flipping')) {
                                 var attack = document.getElementById('poisoning-attack-select').value;
                                 if (attack === 'label_flipping_targeted_specific') {
+                                    let label_flipping_targeted_specific_config_elem_og = document.getElementById('options_label_flipping_targeted_specific_config_label_og');
+                                    let label_flipping_targeted_specific_config_elem_goal = document.getElementById('options_label_flipping_targeted_specific_config_label_goal');
+                                    let selectedValuesOG = Array.from(label_flipping_targeted_specific_config_elem_og.selectedOptions).map(option => option.value);
+                                    let selectedValuesGoal = Array.from(label_flipping_targeted_specific_config_elem_goal.selectedOptions).map(option => option.value);
+
                                     return {
                                         attack: attack,
-                                        label_og: document.getElementById('options_label_flipping_targeted_specific_config_label_og').value,
-                                        label_goal: document.getElementById('options_label_flipping_targeted_specific_config_label_goal').value,
+                                        label_og: selectedValuesOG,
+                                        label_goal: selectedValuesGoal,
                                         node_percent: document.getElementById('options_label_flipping_targeted_specific_config_label_node_percent').value
                                     };
                                 } else if (attack === "label_flipping_targeted_unspecific") {
+                                    let label_flipping_targeted_unspecific_config_elem = document.getElementById('options_label_flipping_targeted_unspecific_config_label_og');
+                                    let selectedValues = Array.from(label_flipping_targeted_unspecific_config_elem.selectedOptions).map(option => option.value);
                                     return {
                                         attack: attack,
-                                        label_og: document.getElementById('options_label_flipping_targeted_unspecific_config_label_og').value,
+                                        label_og: selectedValues,
                                         node_percent: document.getElementById('aoptions_label_flipping_targeted_unspecific_config_node_percent').value
                                     }
                                 } else if (attack === "label_flipping_untargeted") {

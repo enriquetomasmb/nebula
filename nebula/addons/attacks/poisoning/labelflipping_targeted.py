@@ -16,6 +16,8 @@ def labelflipping_targeted_specific(dataset, indices, label_og: Union[list, int]
     :param label_goal: The label / class ID to which label_og will be changed
     :return:
     """
+    logging.info("[Attack Labelflipping_targeted_specific] running attack on dataset")
+    logging.info(f"received: label_og{label_og}, label_goal{label_goal}")
     new_dataset = copy.copy(dataset)
     try:
         targets = new_dataset.targets.detach().clone()
@@ -48,8 +50,8 @@ def labelflipping_targeted_unspecific(dataset, indices, label_og: Union[list, in
     logging.info("[LabelFlipping Attack] Changing labels from {} randomly.".format(label_og))
 
     for i in indices:
-        t = targets[i].numpy()
-        if (t in label_og) or (str(t) in label_og):
+        t = targets[i]
+        if str(t) in label_og:
             targets[i] = torch.tensor(
                 random.sample(sorted([x for x in class_list if x != t]), 1)
             )

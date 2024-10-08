@@ -44,3 +44,11 @@ class NebulaTensorBoardLogger(TensorBoardLogger):
             self.experiment.add_figure(name, figure, step)
         except Exception as e:
             logging.error(f"Error logging figure [{name}] for step [{step}]: {e}")
+
+    def log_text(self, tag, text, step=None):
+        if step is None:
+            step = self.get_step()
+        try:
+            self.experiment.add_text(tag, text, step)
+        except Exception as e:
+            logging.error(f"Error logging text [{text}] with tag [{tag}] at step [{step}]: {e}")

@@ -24,26 +24,27 @@ class ChangeableSubset(Subset):
         self.noise_type = noise_type
 
         if self.label_flipping:
-            if self.label_flipping_config["attack"] == "targeted_specific":
+            logging.info("[Labelflipping] Received attack: {}".format(self.label_flipping_config["attack"]))
+            if self.label_flipping_config["attack"] == "label_flipping_targeted_specific":
                 self.dataset = labelflipping_targeted_specific(
                     self.dataset,
                     self.indices,
                     self.label_flipping_config["label_og"],
                     self.label_flipping_config["label_goal"]
                 )
-            elif self.label_flipping_config["attack"] == "targeted_unspecific":
+            elif self.label_flipping_config["attack"] == "label_flipping_targeted_unspecific":
                 self.dataset = labelflipping_targeted_unspecific(
                     self.dataset,
                     self.indices,
                     self.label_flipping_config["label_og"]
                 )
-            elif self.label_flipping_config["attack"] == "untargeted":
+            elif self.label_flipping_config["attack"] == "label_flipping_untargeted":
                 self.dataset = labelflipping_untargeted(
                     self.dataset,
                     self.indices,
                     self.label_flipping_config["sample_percent"]
                 )
-            elif self.label_flipping_config["attack"] == "fang":
+            elif self.label_flipping_config["attack"] == "label_flipping_fang":
                 self.dataset = labelflipping_fang(self.dataset)
             logging.info("[Labelflipping] Dataset manipulated (attack: {})".format(self.label_flipping_config["attack"]))
 

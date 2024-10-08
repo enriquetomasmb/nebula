@@ -2,6 +2,7 @@ import logging
 import math
 
 import numpy as np
+from numpy.ma.core import maximum
 
 from nebula.core.selectors.selector import Selector
 
@@ -15,7 +16,9 @@ class RandomSelector(Selector):
         can be selected as percentage of the total amount of neighbors
     """
     MIN_AMOUNT_OF_SELECTED_NEIGHBORS = 1
-    MAX_PERCENT_SELECTABLE_NEIGHBORS = 0.8
+    MAX_PERCENT_SELECTABLE_NEIGHBORS = 0.7
+    #TODO: uniform distribution between minimum and maximum to sample
+    #TODO: make max percent configurable
 
     def __init__(self, config = None):
         super().__init__(config)

@@ -144,6 +144,7 @@ class Engine:
             self.config.participant["tracking_args"]["run_hash"] = nebulalogger.experiment.hash
         else:
             nebulalogger = None
+        self.nebulalogger = nebulalogger
         self._trainer = trainer(model, dataset, config=self.config, logger=nebulalogger)
         self._aggregator = create_aggregator(config=self.config, engine=self)
 
@@ -474,7 +475,9 @@ class Engine:
                 await self.cm.send_message_to_neighbors(message)
                 _nss_features_msg = f"""NSS features for round {self.round}:\nCPU Usage (%): {self.nss_features['cpu_percent']}%\nBytes Sent: {self.nss_features['bytes_sent']}\nBytes Received: {self.nss_features['bytes_received']}\nLoss: {self.nss_features['loss']}\nData Size: {self.nss_features['data_size']}"""
                 print_msg_box(msg=_nss_features_msg, indent=2, title="NSS features (this node)")
-                self.node_selection_strategy_selector.node_selection(self)
+                selected_nodes = self.node_selection_strategy_selector.node_selection(self)
+
+                self.nebulalogger.log_text("[NSS] Selected nodes", str(selected_nodes), step=self.round)
 
             await self.aggregator.update_federation_nodes(self.federation_nodes)
             await self._extended_learning_cycle()

@@ -1,4 +1,6 @@
 import copy
+import logging
+
 import torch
 
 
@@ -16,6 +18,8 @@ def labelflipping_fang(dataset):
     dataset: the dataset of training data, torch.util.data.dataset like.
     :return:
     """
+    logging.info("[Attack Labelflipping_fang] running attack on dataset")
+
     new_dataset = copy.copy(dataset)
     targets = new_dataset.targets.detach().clone()
     class_list = new_dataset.class_to_idx.values()
