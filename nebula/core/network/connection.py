@@ -171,7 +171,7 @@ class Connection:
             except Exception as e:
                 logging.error(f"Reconnection attempt {attempt + 1} failed: {e}")
                 await asyncio.sleep(delay)
-        logging.error(f"Failed to reconnect to {self.addr} after {max_retries} attempts")
+        logging.error(f"Failed to reconnect to {self.addr} after {max_retries} attempts. Stopping connection...")
         await self.stop()
 
     async def send(self, data: Any, pb: bool = True, encoding_type: str = "utf-8", is_compressed: bool = False) -> None:
@@ -194,7 +194,7 @@ class Connection:
             await self._send_chunks(message_id, data_to_send)
         except Exception as e:
             logging.error(f"Error sending data: {e}")
-            await self.stop()
+            await self.reconnect()
 
     def _prepare_data(self, data: Any, pb: bool, encoding_type: str) -> tuple[bytes, bytes]:
         if pb:
@@ -267,8 +267,6 @@ class Connection:
             await self.reconnect()
         except Exception as e:
             logging.error(f"Error handling incoming message: {e}")
-        finally:
-            await self.stop()
 
     async def _read_exactly(self, num_bytes: int, max_retries: int = 3) -> bytes:
         data = b""
