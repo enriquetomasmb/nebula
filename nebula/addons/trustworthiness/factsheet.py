@@ -255,7 +255,7 @@ class Factsheet:
                     emissions.drop("gpuName", axis=1, inplace=True)
                     emissions["powerPerf"] = emissions["powerPerf"].astype(float)
                     emissions["powerPerformance"] = emissions["powerPerformance"].astype(float)
-                    client_emissions = emissions.loc[emissions["role"] == "client"]
+                    client_emissions = emissions.loc[emissions["role"] == "trainer"]
                     client_avg_carbon_intensity = round(client_emissions["energy_grid"].mean(), 2)
                     factsheet["sustainability"]["avg_carbon_intensity_clients"] = check_field_filled(factsheet, ["sustainability", "avg_carbon_intensity_clients"], client_avg_carbon_intensity, "")
                     factsheet["sustainability"]["emissions_training"] = check_field_filled(factsheet, ["sustainability", "emissions_training"], client_emissions["emissions"].sum(), "")
