@@ -32,7 +32,7 @@ class Graphics():
         log_dir = os.path.join(os.environ["NEBULA_LOGS_DIR"], scenario_name)
         self.nebulalogger = NebulaTensorBoardLogger(scenario_start_time, f"{log_dir}", name="metrics", version=f"trust", log_graph=True)
         
-    def __log_figure(self, df, pillar, color, notion_y_pos = -0.4):
+    def __log_figure(self, df, pillar, color, notion_y_pos = -0.4, figsize=(10,6)):
         filtered_df = df[df['Pillar'] == pillar].copy()
 
         filtered_df.loc[:, 'Metric'] = filtered_df['Metric'].astype(str).str.replace('_', ' ')
@@ -44,7 +44,7 @@ class Graphics():
         unique_notion_count = filtered_df['Notion'].nunique()
         palette = [color] * unique_notion_count 
 
-        plt.figure(figsize=(10, 6))
+        plt.figure(figsize=figsize)
         ax = sns.barplot(data=filtered_df, x='Metric', y='Metric Score', hue='Notion', palette=palette, dodge=False)
 
         x_positions = range(len(filtered_df))
@@ -141,7 +141,7 @@ class Graphics():
         self.__log_figure(df, "explainability", "#FCEFC3")
         self.__log_figure(df, "accountability", "#8FAADC", -0.3)
         self.__log_figure(df, "architectural_soundness", "#DBB9FA", -0.3)
-        self.__log_figure(df, "sustainability", "#BBFDAF", -0.5)
+        self.__log_figure(df, "sustainability", "#BBFDAF", -0.5, figsize=(12,8))
 
         categories = [
             "robustness",
