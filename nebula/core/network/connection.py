@@ -314,6 +314,7 @@ class Connection:
             self.message_buffers[message_id] = {}
         self.message_buffers[message_id][chunk_index] = MessageChunk(chunk_index, data, is_last)
         logging.debug(f"Stored chunk {chunk_index} of message {message_id.hex()} | size: {len(data)} bytes")
+        logging.debug(f"SIZE of messages in buffer: {len(self.message_buffers)}")
 
     async def _process_complete_message(self, message_id: bytes) -> None:
         chunks = sorted(self.message_buffers[message_id].values(), key=lambda x: x.index)
@@ -330,6 +331,7 @@ class Connection:
 
         await self.pending_messages_queue.put((data_type_prefix, message_content))
         logging.debug(f"Processed complete message {message_id.hex()} | total size: {len(complete_message)} bytes")
+        logging.debug(f"SIZE of messages in queue: {self.pending_messages_queue.qsize()}")
 
     def _decompress(self, data: bytes, compression: str) -> Optional[bytes]:
         if compression == "zlib":

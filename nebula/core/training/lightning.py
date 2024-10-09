@@ -139,7 +139,7 @@ class Lightning:
             gpu_index = self.config.participant["device_args"]["idx"] % num_gpus
             logging_training.info("Creating trainer with accelerator GPU ({})".format(gpu_index))
             self._trainer = Trainer(
-                callbacks=[ModelSummary(max_depth=1), LearningRateMonitor(logging_interval="epoch"), NebulaProgressBar()],
+                callbacks=[ModelSummary(max_depth=1), NebulaProgressBar()],
                 max_epochs=self.epochs,
                 accelerator=self.config.participant["device_args"]["accelerator"],
                 devices=[gpu_index],
@@ -151,7 +151,7 @@ class Lightning:
         else:
             logging_training.info("Creating trainer with accelerator CPU")
             self._trainer = Trainer(
-                callbacks=[ModelSummary(max_depth=1), LearningRateMonitor(logging_interval="epoch"), NebulaProgressBar()],
+                callbacks=[ModelSummary(max_depth=1), NebulaProgressBar()],
                 max_epochs=self.epochs,
                 accelerator=self.config.participant["device_args"]["accelerator"],
                 devices="auto",

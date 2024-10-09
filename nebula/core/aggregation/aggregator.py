@@ -150,6 +150,10 @@ class Aggregator(ABC):
                         f"🔄  _add_pending_model | Next model added in aggregation buffer ({str(len(self.get_nodes_pending_models_to_aggregate()))}/{str(len(self._federation_nodes))}) | Pending nodes: {self._federation_nodes - self.get_nodes_pending_models_to_aggregate()}"
                     )
             del self._future_models_to_aggregate[self.engine.get_round()]
+            
+            for future_round in list(self._future_models_to_aggregate.keys()):
+                if future_round < self.engine.get_round():
+                    del self._future_models_to_aggregate[future_round]
 
         if len(self.get_nodes_pending_models_to_aggregate()) >= len(self._federation_nodes):
             logging.info(f"🔄  _add_pending_model | All models were added in the aggregation buffer. Run aggregation...")

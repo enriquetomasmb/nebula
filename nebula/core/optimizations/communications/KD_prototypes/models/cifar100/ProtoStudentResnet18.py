@@ -3,12 +3,16 @@ from torchvision.models import resnet18
 import torch.nn.functional as F
 from torch import nn
 
+from nebula.core.optimizations.adaptative_weighted.adaptativeweighting import AdaptiveWeighting
+from nebula.core.optimizations.adaptative_weighted.decreasingweighting import DeacreasingWeighting
 from nebula.core.optimizations.communications.KD.utils.KD import DistillKL
 from nebula.core.optimizations.communications.KD_prototypes.models.cifar100.ProtoTeacherResnet34 import (
     ProtoTeacherCIFAR100ModelResNet34,
     MDProtoTeacherCIFAR100ModelResNet34,
 )
 from nebula.core.optimizations.communications.KD_prototypes.models.protostudentnebulamodel import ProtoStudentNebulaModel
+from nebula.core.optimizations.communications.KD_prototypes.utils.GlobalPrototypeDistillationLoss import \
+    GlobalPrototypeDistillationLoss
 
 
 class ProtoStudentCIFAR100ModelResnet18(ProtoStudentNebulaModel):
@@ -20,12 +24,12 @@ class ProtoStudentCIFAR100ModelResnet18(ProtoStudentNebulaModel):
         self,
         input_channels=3,
         num_classes=100,
-        learning_rate=0.1,
+        learning_rate=1e-3,
         metrics=None,
         confusion_matrix=None,
         seed=None,
         teacher_model=None,
-        T=20,
+        T=10,
         alpha_kd=0.5,
         beta_feat=0.3,
         lambda_proto=0.2,
@@ -33,11 +37,18 @@ class ProtoStudentCIFAR100ModelResnet18(ProtoStudentNebulaModel):
         send_logic=None,
         weighting=None,
     ):
+
+        if weighting == "adaptative":
+            self.weighting = AdaptiveWeighting(min_val=1, max_val=10)
+        elif weighting == "decreasing":
+            self.weighting = DeacreasingWeighting(alpha_value=alpha_kd, beta_value=beta_feat, lambda_value=lambda_proto,
+                                                  limit=0.1, rounds=500)
         if teacher_model is None:
             if knowledge_distilation is not None and knowledge_distilation == "MD":
                 teacher_model = MDProtoTeacherCIFAR100ModelResNet34(weighting=weighting)
             elif knowledge_distilation is not None and knowledge_distilation == "KD":
                 teacher_model = ProtoTeacherCIFAR100ModelResNet34(weighting=weighting)
+
 
         super().__init__(
             input_channels,
@@ -60,6 +71,7 @@ class ProtoStudentCIFAR100ModelResnet18(ProtoStudentNebulaModel):
         self.criterion_mse = torch.nn.MSELoss()
         self.criterion_cls = torch.nn.CrossEntropyLoss()
         self.criterion_kd = DistillKL(self.T)
+        self.criterion_gpd = GlobalPrototypeDistillationLoss(temperature=2)
         self.resnet = resnet18(num_classes=num_classes)
         self.resnet.fc_dense = nn.Linear(self.resnet.fc.in_features, self.embedding_dim)
         self.resnet.fc = nn.Linear(self.embedding_dim, num_classes)

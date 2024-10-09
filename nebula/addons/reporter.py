@@ -44,12 +44,12 @@ class Reporter:
 
     async def run_reporter(self):
         while True:
-            if self.config.participant["scenario_args"]["controller"] != "nebula-test":
-                await self.__report_status_to_controller()
-            await self.__report_data_queue()
+            # if self.config.participant["scenario_args"]["controller"] != "nebula-test":
+            #     await self.__report_status_to_controller()
+            # await self.__report_data_queue()
             await self.__report_resources()
             self.counter += 1
-            if self.counter % 50 == 0:
+            if self.counter % 200 == 0:
                 logging.info(f"Reloading config file...")
                 self.cm.engine.config.reload_config_file()
             await asyncio.sleep(self.frequency)

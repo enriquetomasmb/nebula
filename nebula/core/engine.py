@@ -583,7 +583,6 @@ class ServerNode(Engine):
     async def _extended_learning_cycle(self):
         # Define the functionality of the server node
         await self.trainer.test()
-        await self.trainer.train()  # TODO: Preguntar si esto no estaba aqui por algo en especial
 
         # In the first round, the server node doest take into account the initial model parameters for the aggregation
         await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.BYPASS_MODEL_WEIGHT, source=self.addr, round=self.round)

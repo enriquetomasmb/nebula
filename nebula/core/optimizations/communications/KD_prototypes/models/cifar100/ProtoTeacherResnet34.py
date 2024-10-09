@@ -5,6 +5,8 @@ from torchvision.models import resnet34
 from nebula.core.optimizations.communications.KD.utils.KD import DistillKL
 from nebula.core.optimizations.communications.KD_prototypes.models.prototeachernebulamodel import ProtoTeacherNebulaModel, MDProtoTeacherNebulaModel
 from nebula.core.optimizations.communications.KD.utils.AT import Attention
+from nebula.core.optimizations.communications.KD_prototypes.utils.GlobalPrototypeDistillationLoss import \
+    GlobalPrototypeDistillationLoss
 
 
 class ProtoTeacherCIFAR100ModelResNet34(ProtoTeacherNebulaModel):
@@ -12,7 +14,7 @@ class ProtoTeacherCIFAR100ModelResNet34(ProtoTeacherNebulaModel):
         self,
         input_channels=3,
         num_classes=100,
-        learning_rate=0.1,
+        learning_rate=1e-3,
         metrics=None,
         confusion_matrix=None,
         seed=None,
@@ -38,6 +40,7 @@ class ProtoTeacherCIFAR100ModelResNet34(ProtoTeacherNebulaModel):
         self.embedding_dim = 512
         self.criterion_cls = nn.CrossEntropyLoss()
         self.criterion_mse = torch.nn.MSELoss()
+        self.criterion_gpd = GlobalPrototypeDistillationLoss(temperature=2)
         self.resnet = resnet34(num_classes=num_classes)
         self.resnet.fc_dense = nn.Linear(self.resnet.fc.in_features, self.embedding_dim)
         self.resnet.fc = nn.Linear(self.embedding_dim, num_classes)
@@ -114,6 +117,7 @@ class ProtoTeacherCIFAR100ModelResNet34(ProtoTeacherNebulaModel):
         return distances.argmin(dim=1)
 
     def configure_optimizers(self):
+        """ """
         optimizer = torch.optim.Adam(
             self.parameters(),
             lr=self.learning_rate,
@@ -236,6 +240,7 @@ class MDProtoTeacherCIFAR100ModelResNet34(MDProtoTeacherNebulaModel):
         return distances.argmin(dim=1)
 
     def configure_optimizers(self):
+        """ """
         optimizer = torch.optim.Adam(
             self.parameters(),
             lr=self.learning_rate,

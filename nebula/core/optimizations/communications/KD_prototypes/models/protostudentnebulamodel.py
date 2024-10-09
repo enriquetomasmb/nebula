@@ -20,7 +20,7 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
         confusion_matrix=None,
         seed=None,
         teacher_model=None,
-        T=2,
+        T=20,
         alpha_kd=0.5,
         beta_feat=0.3,
         lambda_proto=0.2,
@@ -39,12 +39,13 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
             T,
         )
 
+        self.automatic_optimization = False
         self.config = {"beta1": 0.851436, "beta2": 0.999689, "amsgrad": True}
         if weighting == "adaptative":
             self.weighting = AdaptiveWeighting(min_val=1, max_val=10)
         elif weighting == "decreasing":
             self.weighting = DeacreasingWeighting(alpha_value=alpha_kd, beta_value=beta_feat, lambda_value=lambda_proto, limit=0.1)
-        else:
+        elif weighting is None:
             self.weighting = Weighting(alpha_value=alpha_kd, beta_value=beta_feat, lambda_value=lambda_proto)
 
         if send_logic is not None:
@@ -56,7 +57,7 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
         self.knowledge_distilation = knowledge_distilation
         self.global_protos = dict()
         self.agg_protos_label = dict()
-        self.criterion_gpd = GlobalPrototypeDistillationLoss(temperature=T)
+        self.criterion_gpd = GlobalPrototypeDistillationLoss(temperature=2)
 
     def get_protos(self):
         """
@@ -64,15 +65,15 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
         """
 
         if len(self.agg_protos_label) == 0:
-            return {k: v.cpu() for k, v in self.global_protos.items()}
+            return {k: v.detach() for k, v in self.global_protos.items()}
 
         proto = dict()
         for label, proto_info in self.agg_protos_label.items():
 
             if proto_info["count"] > 1:
-                proto[label] = (proto_info["sum"] / proto_info["count"]).to("cpu")
+                proto[label] = (proto_info["sum"] / proto_info["count"]).detach()
             else:
-                proto[label] = proto_info["sum"].to("cpu")
+                proto[label] = proto_info["sum"].detach()
 
         # logging.info(f"[ProtoFashionMNISTModelCNN.get_protos] Protos: {proto}")
         return proto
@@ -89,10 +90,13 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
     def step(self, batch, batch_idx, phase):
 
         images, labels_g = batch
+        if phase == "Train":
+            optimizer = self.optimizers()
+
         images, labels = images.to(self.device), labels_g.to(self.device)
         logits, protos = self.forward_train(images, softmax=False)
 
-        protos_copy = protos.clone()
+        protos_copy = protos.clone().detach()
         with torch.no_grad():
             teacher_logits, teacher_protos = self.teacher_model.forward_train(images, softmax=False)
 
@@ -125,15 +129,22 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
 
         loss = loss_ce_protos + self.weighting.get_alpha(loss_ce_protos) * loss_kd + self.weighting.get_beta(loss_ce_protos, loss_kd) * loss_protos_teacher
 
-        self.process_metrics(phase, logits, labels, loss)
+        if phase == "Train":
+            optimizer.zero_grad()
+            self.manual_backward(loss)
+            optimizer.step()
+
+        self.process_metrics(phase, logits, labels, loss.detach())
+
+        del loss_protos, loss_protos_teacher, loss_ce_protos, loss
 
         if phase == "Train":
             # Update the prototypes
             self.model_updated_flag = True
             for i in range(len(labels_g)):
-                label = labels_g[i].item()
+                label = labels_g[i].detach()
                 if label not in self.agg_protos_label:
-                    self.agg_protos_label[label] = dict(sum=torch.zeros_like(protos[i, :]), count=0)
+                    self.agg_protos_label[label] = dict(sum=torch.zeros_like(protos[i, :]).detach(), count=0)
                 self.agg_protos_label[label]["sum"] += protos[i, :].detach().clone()
                 self.agg_protos_label[label]["count"] += 1
 
@@ -142,7 +153,7 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
                 self.model_updated_flag = False
                 self.send_logic_step()
 
-        return loss
+        del labels, labels_g, logits, protos, protos_copy, teacher_protos, teacher_logits
 
     def load_state_dict(self, state_dict, strict=False):
         """

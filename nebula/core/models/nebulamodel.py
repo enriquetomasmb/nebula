@@ -36,10 +36,10 @@ class NebulaModel(pl.LightningModule, ABC):
             loss (torch.Tensor, optional): Loss value
         """
 
-        y_pred_classes = torch.argmax(y_pred, dim=1)
+        y_pred_classes = torch.argmax(y_pred, dim=1).detach()
+        y = y.detach()
         if phase == "Train":
-            # self.log(name=f"{phase}/Loss", value=loss, add_dataloader_idx=False)
-            self.logger.log_data({f"{phase}/Loss": loss.item()})
+            self.logger.log_data({f"{phase}/Loss": loss.detach()})
             self.train_metrics.update(y_pred_classes, y)
         elif phase == "Validation":
             self.val_metrics.update(y_pred_classes, y)
@@ -71,7 +71,7 @@ class NebulaModel(pl.LightningModule, ABC):
         else:
             raise NotImplementedError
 
-        output = {f"{phase}/{key.replace('Multiclass', '').split('/')[-1]}": value for key, value in output.items()}
+        output = {f"{phase}/{key.replace('Multiclass', '').split('/')[-1]}": value.detach() for key, value in output.items()}
 
         self.logger.log_data(output, step=self.global_number[phase])
 

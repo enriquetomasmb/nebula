@@ -28,6 +28,7 @@ from nebula.core.training.siamese import Siamese
 from nebula.core.models.cifar10.dualagg import DualAggModel
 from nebula.core.models.mnist.mlp import MNISTModelMLP
 from nebula.core.models.mnist.cnn import MNISTModelCNN
+from nebula.core.models.cifar10.cnnV3 import CIFAR10ModelCNN_V3
 from nebula.core.models.fashionmnist.mlp import FashionMNISTModelMLP
 from nebula.core.models.fashionmnist.cnn import FashionMNISTModelCNN
 from nebula.core.models.syscall.mlp import SyscallModelMLP
@@ -330,8 +331,7 @@ async def main():
             config=config,
         )
         if model_name == "CNN":
-            model = StudentCIFAR10ModelCNN(mutual_distilation=None)
-            learner = KDLightning
+            model = CIFAR10ModelCNN_V3()
         elif model_name == "CNN KD":
             model = StudentCIFAR10ModelCNN()
             learner = KDLightning
