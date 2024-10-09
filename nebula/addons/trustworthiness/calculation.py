@@ -370,7 +370,7 @@ def get_feature_importance_cv(model, test_sample):
         cv = 0
         batch_size = 10
         device = "cpu"
-
+        
         if isinstance(model, torch.nn.Module):
             batched_data, _ = test_sample
 
@@ -379,15 +379,19 @@ def get_feature_importance_cv(model, test_sample):
 
             background = batched_data[:m].to(device)
             test_data = batched_data[m:n].to(device)
-
-            e = shap.DeepExplainer(model, background)
-            shap_values = e.shap_values(test_data)
+            try:
+                e = shap.DeepExplainer(model, background)
+                shap_values = e.shap_values(test_data)
+            except Exception as e:
+                e = shap.GradientExplainer(model, background)
+                shap_values = e.shap_values(test_data)
+            
             if shap_values is not None and len(shap_values) > 0:
                 sums = np.array([shap_values[i].sum() for i in range(len(shap_values))])
                 abs_sums = np.absolute(sums)
                 cv = variation(abs_sums)
     except Exception as e:
-        logger.warning("Could not compute feature importance CV with shap")
+        logger.warning(f"Could not compute feature importance CV with shap {e}")
         cv = 1
     if math.isnan(cv):
         cv = 1
