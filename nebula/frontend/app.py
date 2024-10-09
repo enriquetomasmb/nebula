@@ -1132,13 +1132,30 @@ async def run_scenarios(data, role):
                 data = json.load(data_file)
             
             weights = {
-                "robustness": float(data["robustness_importance_percent"]),
-                "privacy": float(data["privacy_importance_percent"]),
-                "fairness": float(data["fairness_importance_percent"]),
-                "explainability": float(data["explainability_importance_percent"]),
-                "accountability": float(data["accountability_importance_percent"]),
-                "architectural_soundness": float(data["architectural_soundness_importance_percent"]),
-                "sustainability": float(data["sustainability_importance_percent"])
+                "robustness": float(data["robustness_pillar"]),
+                "resilience_to_attacks": float(data["resilience_to_attacks"]),
+                "algorithm_robustness": float(data["algorithm_robustness"]),
+                "client_reliability": float(data["client_reliability"]),
+                "privacy": float(data["privacy_pillar"]),
+                "technique": float(data["technique"]),
+                "uncertainty": float(data["uncertainty"]),
+                "indistinguishability": float(data["indistinguishability"]),
+                "fairness": float(data["fairness_pillar"]),
+                "selection_fairness": float(data["selection_fairness"]),
+                "performance_fairness": float(data["performance_fairness"]),
+                "class_distribution": float(data["class_distribution"]),
+                "explainability": float(data["explainability_pillar"]),
+                "interpretability": float(data["interpretability"]),
+                "post_hoc_methods": float(data["post_hoc_methods"]),
+                "accountability": float(data["accountability_pillar"]),
+                "factsheet_completeness":  float(data["factsheet_completeness"]),
+                "architectural_soundness": float(data["architectural_soundness_pillar"]),
+                "client_management": float(data["client_management"]),
+                "optimization": float(data["optimization"]),
+                "sustainability": float(data["sustainability_pillar"]),
+                "energy_source": float(data["energy_source"]),
+                "hardware_efficiency": float(data["hardware_efficiency"]),
+                "federation_complexity": float(data["federation_complexity"])
             }
     
             trust_metric_manager = TrustMetricManager(scenario[1])

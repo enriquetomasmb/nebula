@@ -151,13 +151,30 @@ class Scenario:
         additional_participants,
         schema_additional_participants,
         with_trustworthiness,
-        robustness_importance_percent,
-        privacy_importance_percent,
-        fairness_importance_percent,
-        explainability_importance_percent,
-        accountability_importance_percent,
-        architectural_soundness_importance_percent,
-        sustainability_importance_percent,
+        robustness_pillar,
+        resilience_to_attacks,
+        algorithm_robustness,
+        client_reliability,
+        privacy_pillar,
+        technique,
+        uncertainty,
+        indistinguishability,
+        fairness_pillar,
+        selection_fairness,
+        performance_fairness,
+        class_distribution,
+        explainability_pillar,
+        interpretability,
+        post_hoc_methods,
+        accountability_pillar,
+        factsheet_completeness,
+        architectural_soundness_pillar,
+        client_management,
+        optimization,
+        sustainability_pillar,
+        energy_source,
+        hardware_efficiency,
+        federation_complexity,
     ):
         self.scenario_title = scenario_title
         self.scenario_description = scenario_description
@@ -200,13 +217,30 @@ class Scenario:
         self.additional_participants = additional_participants
         self.schema_additional_participants = schema_additional_participants
         self.with_trustworthiness = with_trustworthiness
-        self.robustness_importance_percent = robustness_importance_percent
-        self.privacy_importance_percent = privacy_importance_percent
-        self.fairness_importance_percent = fairness_importance_percent
-        self.explainability_importance_percent = explainability_importance_percent
-        self.accountability_importance_percent = accountability_importance_percent
-        self.architectural_soundness_importance_percent = architectural_soundness_importance_percent
-        self.sustainability_importance_percent = sustainability_importance_percent
+        self.robustness_pillar  = robustness_pillar 
+        self.resilience_to_attacks  = resilience_to_attacks 
+        self.algorithm_robustness  = algorithm_robustness 
+        self.client_reliability  = client_reliability 
+        self.privacy_pillar = privacy_pillar
+        self.technique = technique
+        self.uncertainty = uncertainty
+        self.indistinguishability = indistinguishability
+        self.fairness_pillar = fairness_pillar
+        self.selection_fairness = selection_fairness
+        self.performance_fairness = performance_fairness
+        self.class_distribution = class_distribution
+        self.explainability_pillar = explainability_pillar
+        self.interpretability = interpretability
+        self.post_hoc_methods = post_hoc_methods
+        self.accountability_pillar = accountability_pillar
+        self.factsheet_completeness = factsheet_completeness
+        self.architectural_soundness_pillar = architectural_soundness_pillar
+        self.client_management = client_management
+        self.optimization = optimization
+        self.sustainability_pillar = sustainability_pillar
+        self.energy_source = energy_source
+        self.hardware_efficiency = hardware_efficiency
+        self.federation_complexity = federation_complexity
 
     def attack_node_assign(
         self,
@@ -409,13 +443,30 @@ class ScenarioManagement:
             participant_config["mobility_args"]["scheme_mobility"] = self.scenario.scheme_mobility
             participant_config["mobility_args"]["round_frequency"] = self.scenario.round_frequency
             participant_config["trust_args"]["with_trustworthiness"] = self.scenario.with_trustworthiness
-            participant_config["trust_args"]["robustness_importance_percent"] = self.scenario.robustness_importance_percent
-            participant_config["trust_args"]["privacy_importance_percent"] = self.scenario.privacy_importance_percent
-            participant_config["trust_args"]["fairness_importance_percent"] = self.scenario.fairness_importance_percent
-            participant_config["trust_args"]["explainability_importance_percent"] = self.scenario.explainability_importance_percent
-            participant_config["trust_args"]["accountability_importance_percent"] = self.scenario.accountability_importance_percent
-            participant_config["trust_args"]["architectural_soundness_importance_percent"] = self.scenario.architectural_soundness_importance_percent
-            participant_config["trust_args"]["sustainability_importance_percent"] = self.scenario.sustainability_importance_percent
+            participant_config["trust_args"]["robustness_pillar"] = self.scenario.robustness_pillar
+            participant_config["trust_args"]["resilience_to_attacks"] = self.scenario.resilience_to_attacks
+            participant_config["trust_args"]["algorithm_robustness"] = self.scenario.algorithm_robustness
+            participant_config["trust_args"]["client_reliability"] = self.scenario.client_reliability
+            participant_config["trust_args"]["privacy_pillar"] = self.scenario.privacy_pillar
+            participant_config["trust_args"]["technique"] = self.scenario.technique
+            participant_config["trust_args"]["uncertainty"] = self.scenario.uncertainty
+            participant_config["trust_args"]["indistinguishability"] = self.scenario.indistinguishability
+            participant_config["trust_args"]["fairness_pillar"] = self.scenario.fairness_pillar
+            participant_config["trust_args"]["selection_fairness"] = self.scenario.selection_fairness
+            participant_config["trust_args"]["performance_fairness"] = self.scenario.performance_fairness
+            participant_config["trust_args"]["class_distribution"] = self.scenario.class_distribution
+            participant_config["trust_args"]["explainability_pillar"] = self.scenario.explainability_pillar
+            participant_config["trust_args"]["interpretability"] = self.scenario.interpretability
+            participant_config["trust_args"]["post_hoc_methods"] = self.scenario.post_hoc_methods
+            participant_config["trust_args"]["accountability_pillar"] =self.scenario.accountability_pillar
+            participant_config["trust_args"]["factsheet_completeness"] = self.scenario.factsheet_completeness
+            participant_config["trust_args"]["architectural_soundness_pillar"] =self.scenario.architectural_soundness_pillar
+            participant_config["trust_args"]["client_management"] = self.scenario.client_management
+            participant_config["trust_args"]["optimization"] = self.scenario.optimization
+            participant_config["trust_args"]["sustainability_pillar"] = self.scenario.sustainability_pillar
+            participant_config["trust_args"]["energy_source"] = self.scenario.energy_source
+            participant_config["trust_args"]["hardware_efficiency"] = self.scenario.hardware_efficiency
+            participant_config["trust_args"]["federation_complexity"] = self.scenario.federation_complexity
 
             with open(participant_file, "w") as f:
                 json.dump(participant_config, f, sort_keys=False, indent=2)

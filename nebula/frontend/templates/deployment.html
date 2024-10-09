@@ -707,8 +707,11 @@
                 <div class="form-group row container-shadow tiny grey">
                     <h5 class="step-number">Trustworthiness <i class="fa fa-handshake-o"></i>
                         <input type="checkbox" id="trustworthiness-lock" onchange="lock('without-trustworthiness-btn', 'with-trustworthiness-btn',
-                        'robustness-importance-percent', 'privacy-importance-percent', 'fairness-importance-percent', 'explainability-importance-percent',
-                        'accountability-importance-percent', 'architectural_soundness-importance-percent', 'sustainability-importance-percent',
+                        'robustness-pillar', 'privacy-pillar', 'fairness-pillar', 'explainability-pillar',
+                        'accountability-pillar', 'architectural-soundness-pillar', 'sustainability-pillar', 'robustness-notion-1', 'robustness-notion-2', 
+                        'robustness-notion-3', 'privacy-notion-1', 'privacy-notion-2', 'privacy-notion-3', 'fairness-notion-1', 'fairness-notion-2', 'fairness-notion-3',
+                        'explainability-notion-1', 'explainability-notion-2', 'accountability-notion-1', 'architectural_soundness-notion-1', 'architectural_soundness-notion-2',
+                        'sustainability-notion-1', 'sustainability-notion-2', 'sustainability-notion-3',
                         checked)" style="display: none;">
                         <label for="trustworthiness-lock" class="icon-container" style="float: right;">
                             <i class="fa fa-lock"></i> 
@@ -722,42 +725,203 @@
                         <input class="form-check-input" type="radio" name="trustworthiness" id="with-trustworthiness-btn">
                         <label class="form-check-label" for="with-trustworthiness-btn">With Trustworthiness</label>
                     </div>
-                    <div id="trustworthiness-options" style="display: none; margin-left: 10px">
-                        <h5 class="step-title">Importance of the robustness pillar</h5>
-                        <input type="number" class="form-control" id="robustness-importance-percent"
-                            placeholder="Importance of the robustness pillar" min="5" value="20"
-                            style="display: inline; width: 20%">
-                        <small class="form-text text-muted">%</small>
-                        <h5 class="step-title">Importance of the privacy pillar</h5>
-                        <input type="number" class="form-control" id="privacy-importance-percent"
-                            placeholder="Importance of the privacy pillar" min="5" value="15"
-                            style="display: inline; width: 20%">
-                        <small class="form-text text-muted">%</small>
-                        <h5 class="step-title">Importance of the fairness pillar</h5>
-                        <input type="number" class="form-control" id="fairness-importance-percent"
-                            placeholder="Importance of the fairness pillar" min="5" value="15"
-                            style="display: inline; width: 20%">
-                        <small class="form-text text-muted">%</small>
-                        <h5 class="step-title">Importance of the explainability pillar</h5>
-                        <input type="number" class="form-control" id="explainability-importance-percent"
-                            placeholder="Importance of the explainability pillar" min="5" value="15"
-                            style="display: inline; width: 20%">
-                        <small class="form-text text-muted">%</small>
-                        <h5 class="step-title">Importance of the accountability pillar</h5>
-                        <input type="number" class="form-control" id="accountability-importance-percent"
-                            placeholder="Importance of the accountability pillar" min="5" value="10"
-                            style="display: inline; width: 20%">
-                        <small class="form-text text-muted">%</small>
-                        <h5 class="step-title">Importance of the architectural soundness pillar</h5>
-                        <input type="number" class="form-control" id="architectural_soundness-importance-percent"
-                            placeholder="Importance of the architectural soundness pillar" min="5" value="10"
-                            style="display: inline; width: 20%">
-                        <small class="form-text text-muted">%</small>
-                        <h5 class="step-title">Importance of the sustainability pillar</h5>
-                        <input type="number" class="form-control" id="sustainability-importance-percent"
-                            placeholder="Importance of the sustainability pillar" min="5" value="15"
-                            style="display: inline; width: 20%">
-                        <small class="form-text text-muted">%</small>
+                    <div id="trustworthiness-options" style="display: none;">
+                        <div class="trust-options">
+                            <div class="pillar">
+                                <h5 class="step-title">Robustness pillar</h5>
+                                <input type="number" class="form-control" id="robustness-pillar"
+                                    placeholder="Robustness pillar" min="5" value="20"
+                                    style="display: inline; width: 67%;">
+                                <small class="form-text text-muted">%</small>
+                            </div>
+                            <div class="notion-container">
+                                <div class="notion">
+                                    <h5 class="step-title">Resilience to attacks notion</h5>
+                                    <input type="number" class="form-control" id="robustness-notion-1"
+                                        placeholder="Resilience to attacks" min="20" value="40"
+                                        style="display: inline; width: 70%;">
+                                    <small class="form-text text-muted">%</small>
+                                </div>
+                                <div class="notion">
+                                    <h5 class="step-title" >Algorithm robustness notion</h5>
+                                    <input type="number" class="form-control" id="robustness-notion-2"
+                                        placeholder="Algorithm robustness" min="20" value="40"
+                                        style="display: inline; width: 70%;">
+                                    <small class="form-text text-muted">%</small>
+                                </div>
+                                <div class="notion">
+                                    <h5 class="step-title">Client reliability notion</h5>
+                                    <input type="number" class="form-control" id="robustness-notion-3"
+                                        placeholder="Client reliability" min="20" value="20"
+                                        style="display: inline; width: 70%;">
+                                    <small class="form-text text-muted">%</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="trust-options">
+                            <div class="pillar">
+                                <h5 class="step-title">Privacy pillar</h5>
+                                <input type="number" class="form-control" id="privacy-pillar"
+                                    placeholder="Privacy pillar" min="5" value="15"
+                                    style="display: inline; width: 67%">
+                                <small class="form-text text-muted">%</small>
+                            </div>
+                            <div class="notion-container">
+                                <div class="notion">
+                                    <h5 class="step-title">Technique notion</h5>
+                                    <input type="number" class="form-control" id="privacy-notion-1"
+                                        placeholder="Technique notion" min="20" value="20"
+                                        style="display: inline; width: 70%;">
+                                    <small class="form-text text-muted">%</small>
+                                </div>
+                                <div class="notion">
+                                    <h5 class="step-title">Uncertainty notion</h5>
+                                    <input type="number" class="form-control" id="privacy-notion-2"
+                                        placeholder="Uncertainty notion" min="20" value="60"
+                                        style="display: inline; width: 70%;">
+                                    <small class="form-text text-muted">%</small>
+                                </div>
+                                <div class="notion">
+                                    <h5 class="step-title">Indistinguishability notion</h5>
+                                    <input type="number" class="form-control" id="privacy-notion-3"
+                                        placeholder="Indistinguishability notion" min="20" value="20"
+                                        style="display: inline; width: 70%;">
+                                    <small class="form-text text-muted">%</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="trust-options">
+                            <div class="pillar">
+                                <h5 class="step-title">Fairness pillar</h5>
+                                <input type="number" class="form-control" id="fairness-pillar"
+                                    placeholder="Fairness pillar" min="5" value="15"
+                                    style="display: inline; width: 67%">
+                                <small class="form-text text-muted">%</small> 
+                            </div>
+                            <div class="notion-container">
+                                <div class="notion">
+                                    <h5 class="step-title">Selection fairness notion</h5>
+                                    <input type="number" class="form-control" id="fairness-notion-1"
+                                        placeholder="Selection fairness notion" min="20" value="30"
+                                        style="display: inline; width: 70%;">
+                                    <small class="form-text text-muted">%</small>
+                                </div>
+                                <div class="notion">
+                                    <h5 class="step-title">Performance fairness  notion</h5>
+                                    <input type="number" class="form-control" id="fairness-notion-2"
+                                        placeholder="Performance fairness notion" min="20" value="35"
+                                        style="display: inline; width: 70%;">
+                                    <small class="form-text text-muted">%</small>
+                                </div>
+                                <div class="notion">
+                                    <h5 class="step-title">Class distribution notion</h5>
+                                    <input type="number" class="form-control" id="fairness-notion-3"
+                                        placeholder="Class distribution notion" min="20" value="35"
+                                        style="display: inline; width: 70%;">
+                                    <small class="form-text text-muted">%</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="trust-options">
+                            <div class="pillar">
+                                <h5 class="step-title">Explainability pillar</h5>
+                                <input type="number" class="form-control" id="explainability-pillar"
+                                    placeholder="Explainability pillar" min="5" value="15"
+                                    style="display: inline; width: 67%">
+                                <small class="form-text text-muted">%</small>
+                            </div>
+                            <div class="notion-container">
+                                <div class="notion">
+                                    <h5 class="step-title">Interpretability notion</h5>
+                                    <input type="number" class="form-control" id="explainability-notion-1"
+                                        placeholder="Interpretability notion" min="20" value="40"
+                                        style="display: inline; width: 70%;">
+                                    <small class="form-text text-muted">%</small>
+                                </div>
+                                <div class="notion">
+                                    <h5 class="step-title">Post hoc methods notion</h5>
+                                    <input type="number" class="form-control" id="explainability-notion-2"
+                                        placeholder="Post hoc methods notion" min="20" value="60"
+                                        style="display: inline; width: 70%;">
+                                    <small class="form-text text-muted">%</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="trust-options">
+                            <div class="pillar">
+                                <h5 class="step-title">Accountability pillar</h5>
+                                <input type="number" class="form-control" id="accountability-pillar"
+                                    placeholder="Accountability pillar" min="5" value="10"
+                                    style="display: inline; width: 67%">
+                                <small class="form-text text-muted">%</small>
+                            </div>
+                            <div class="notion-container">
+                                <div class="notion">
+                                    <h5 class="step-title">Factsheet completeness notion</h5>
+                                    <input type="number" class="form-control" id="accountability-notion-1"
+                                        placeholder="Factsheet completeness notion" min="100" value="100"
+                                        style="display: inline; width: 70%;">
+                                    <small class="form-text text-muted">%</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="trust-options">
+                            <div class="pillar">
+                                <h5 class="step-title">Architectural soundness pillar</h5>
+                                <input type="number" class="form-control" id="architectural-soundness-pillar"
+                                    placeholder="Architectural soundness pillar" min="5" value="10"
+                                    style="display: inline; width: 67%">
+                                <small class="form-text text-muted">%</small>
+                            </div>
+                            <div class="notion-container">
+                                <div class="notion">
+                                    <h5 class="step-title">Client management notion</h5>
+                                    <input type="number" class="form-control" id="architectural_soundness-notion-1"
+                                        placeholder="Client management notion" min="20" value="50"
+                                        style="display: inline; width: 70%;">
+                                    <small class="form-text text-muted">%</small>
+                                </div>
+                                <div class="notion">
+                                    <h5 class="step-title">Optimization notion</h5>
+                                    <input type="number" class="form-control" id="architectural_soundness-notion-2"
+                                        placeholder="Optimization notion" min="20" value="50"
+                                        style="display: inline; width: 70%;">
+                                    <small class="form-text text-muted">%</small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="trust-options">
+                            <div class="pillar">
+                                <h5 class="step-title">Sustainability pillar</h5>
+                                <input type="number" class="form-control" id="sustainability-pillar"
+                                    placeholder="Sustainability pillar" min="5" value="15"
+                                    style="display: inline; width: 67%">
+                                <small class="form-text text-muted">%</small>
+                            </div>
+                            <div class="notion-container">
+                                <div class="notion">
+                                    <h5 class="step-title">Energy source notion</h5>
+                                    <input type="number" class="form-control" id="sustainability-notion-1"
+                                        placeholder="Energy source notion" min="20" value="50"
+                                        style="display: inline; width: 70%;">
+                                    <small class="form-text text-muted">%</small>
+                                </div>
+                                <div class="notion">
+                                    <h5 class="step-title">Hardware efficiency notion</h5>
+                                    <input type="number" class="form-control" id="sustainability-notion-2"
+                                        placeholder="Hardware efficiency notion" min="20" value="25"
+                                        style="display: inline; width: 70%;">
+                                    <small class="form-text text-muted">%</small>
+                                </div>
+                                <div class="notion">
+                                    <h5 class="step-title">Federation complexity notion</h5>
+                                    <input type="number" class="form-control" id="sustainability-notion-3"
+                                        placeholder="Federation complexity notion" min="20" value="25"
+                                        style="display: inline; width: 70%;">
+                                    <small class="form-text text-muted">%</small>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
         </form>
@@ -806,6 +970,25 @@
 
         .icon-container {
             cursor: pointer;
+        }
+
+        .trust-options {
+            display: flex; 
+            align-items: center; 
+            margin-bottom: 20px;
+        }
+
+        .pillar {
+            flex-basis: 20%; 
+        }
+
+        .notion-container {
+            flex-basis: 65%;
+            display: flex;
+        }
+
+        .notion {
+            flex-basis: 30%;
         }
 
         input[type="checkbox"][id$="-lock"]:checked + .icon-container i::before {
@@ -1119,13 +1302,30 @@
             data["schema_additional_participants"] = document.getElementById("schemaAdditionalParticipantsSelect").value
             // Step 16
             data["with_trustworthiness"] = document.getElementById("with-trustworthiness-btn").checked ? true : false
-            data["robustness_importance_percent"] = document.getElementById("robustness-importance-percent").value
-            data["privacy_importance_percent"] = document.getElementById("privacy-importance-percent").value
-            data["fairness_importance_percent"] = document.getElementById("fairness-importance-percent").value
-            data["explainability_importance_percent"] = document.getElementById("explainability-importance-percent").value
-            data["accountability_importance_percent"] = document.getElementById("accountability-importance-percent").value
-            data["architectural_soundness_importance_percent"] = document.getElementById("architectural_soundness-importance-percent").value
-            data["sustainability_importance_percent"] = document.getElementById("sustainability-importance-percent").value
+            data["robustness_pillar"] = document.getElementById("robustness-pillar").value
+            data["resilience_to_attacks"] = document.getElementById("robustness-notion-1").value
+            data["algorithm_robustness"] = document.getElementById("robustness-notion-2").value
+            data["client_reliability"] = document.getElementById("robustness-notion-3").value
+            data["privacy_pillar"] = document.getElementById("privacy-pillar").value
+            data["technique"] = document.getElementById("privacy-notion-1").value
+            data["uncertainty"] = document.getElementById("privacy-notion-2").value
+            data["indistinguishability"] = document.getElementById("privacy-notion-3").value
+            data["fairness_pillar"] = document.getElementById("fairness-pillar").value
+            data["selection_fairness"] = document.getElementById("fairness-notion-1").value
+            data["performance_fairness"] = document.getElementById("fairness-notion-2").value
+            data["class_distribution"] = document.getElementById("fairness-notion-3").value
+            data["explainability_pillar"] = document.getElementById("explainability-pillar").value
+            data["interpretability"] = document.getElementById("explainability-notion-1").value
+            data["post_hoc_methods"] = document.getElementById("explainability-notion-2").value
+            data["accountability_pillar"] = document.getElementById("accountability-pillar").value
+            data["factsheet_completeness"] = document.getElementById("accountability-notion-1").value
+            data["architectural_soundness_pillar"] = document.getElementById("architectural-soundness-pillar").value
+            data["client_management"] = document.getElementById("architectural_soundness-notion-1").value
+            data["optimization"] = document.getElementById("architectural_soundness-notion-2").value
+            data["sustainability_pillar"] = document.getElementById("sustainability-pillar").value
+            data["energy_source"] = document.getElementById("sustainability-notion-1").value
+            data["hardware_efficiency"] = document.getElementById("sustainability-notion-2").value
+            data["federation_complexity"] = document.getElementById("sustainability-notion-3").value
             return data
         }
 
@@ -1231,13 +1431,30 @@
                 if (data["with_trustworthiness"]) {
                     document.getElementById("trustworthiness-options").style.display = "block";
                 }
-                document.getElementById("robustness-importance-percent").value = data["robustness_importance_percent"]
-                document.getElementById("privacy-importance-percent").value = data["privacy_importance_percent"]
-                document.getElementById("fairness-importance-percent").value = data["fairness_importance_percent"]
-                document.getElementById("explainability-importance-percent").value = data["explainability_importance_percent"]
-                document.getElementById("accountability-importance-percent").value = data["accountability_importance_percent"]
-                document.getElementById("architectural_soundness-importance-percent").value = data["architectural_soundness_importance_percent"]
-                document.getElementById("sustainability-importance-percent").value = data["sustainability_importance_percent"]
+                document.getElementById("robustness-pillar").value = data["robustness_pillar"]
+                document.getElementById("robustness-notion-1").value = data["resilience_to_attacks"]
+                document.getElementById("robustness-notion-2").value = data["algorithm_robustness"]
+                document.getElementById("robustness-notion-3").value = data["client_reliability"]
+                document.getElementById("privacy-pillar").value = data["privacy_pillar"]
+                document.getElementById("privacy-notion-1").value = data["technique"]
+                document.getElementById("privacy-notion-2").value = data["uncertainty"]
+                document.getElementById("privacy-notion-3").value = data["indistinguishability"]
+                document.getElementById("fairness-pillar").value = data["fairness_pillar"]
+                document.getElementById("fairness-notion-1").value = data["selection_fairness"]
+                document.getElementById("fairness-notion-2").value = data["performance_fairness"]
+                document.getElementById("fairness-notion-3").value = data["class_distribution"]
+                document.getElementById("explainability-pillar").value = data["explainability_pillar"]
+                document.getElementById("explainability-notion-1").value = data["interpretability"]
+                document.getElementById("explainability-notion-2").value = data["post_hoc_methods"]
+                document.getElementById("accountability-pillar").value = data["accountability_pillar"]
+                document.getElementById("accountability-notion-1").value = data["factsheet_completeness"]
+                document.getElementById("architectural_soundness-pillar").value = data["architectural_soundness_pillar"]
+                document.getElementById("architectural_soundness-notion-1").value = data["client_management"]
+                document.getElementById("architectural_soundness-notion-2").value = data["optimization"]
+                document.getElementById("sustainability-pillar").value = data["sustainability_pillar"]
+                document.getElementById("sustainability-notion-1").value = data["energy_source"]
+                document.getElementById("sustainability-notion-2").value = data["hardware_efficiency"]
+                document.getElementById("sustainability-notion-3").value = data["federation_complexity"]
                 // Additional Participants
                 console.log(data["additional_participants"])
                 var additionalParticipants = document.getElementById("additionalParticipants");
@@ -2406,13 +2623,13 @@
         });
 
         function checkWights() {
-            var robustness_percent = parseFloat(document.getElementById("robustness-importance-percent").value);
-            var privacy_percent = parseFloat(document.getElementById("privacy-importance-percent").value);
-            var fairness_percent = parseFloat(document.getElementById("fairness-importance-percent").value);
-            var explainability_percent = parseFloat(document.getElementById("explainability-importance-percent").value);
-            var accountability_percent = parseFloat(document.getElementById("accountability-importance-percent").value);
-            var architectural_soundness_percent = parseFloat(document.getElementById("architectural_soundness-importance-percent").value);
-            var sustainability_percent = parseFloat(document.getElementById("sustainability-importance-percent").value);
+            var robustness_percent = parseFloat(document.getElementById("robustness-pillar").value);
+            var privacy_percent = parseFloat(document.getElementById("privacy-pillar").value);
+            var fairness_percent = parseFloat(document.getElementById("fairness-pillar").value);
+            var explainability_percent = parseFloat(document.getElementById("explainability-pillar").value);
+            var accountability_percent = parseFloat(document.getElementById("accountability-pillar").value);
+            var architectural_soundness_percent = parseFloat(document.getElementById("architectural-soundness-pillar").value);
+            var sustainability_percent = parseFloat(document.getElementById("sustainability-pillar").value);
 
             var total_percent = robustness_percent + privacy_percent + fairness_percent + explainability_percent + accountability_percent + architectural_soundness_percent + sustainability_percent;
 
