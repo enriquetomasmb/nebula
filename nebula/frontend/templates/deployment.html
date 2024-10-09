@@ -710,7 +710,7 @@
                         'robustness-pillar', 'privacy-pillar', 'fairness-pillar', 'explainability-pillar',
                         'accountability-pillar', 'architectural-soundness-pillar', 'sustainability-pillar', 'robustness-notion-1', 'robustness-notion-2', 
                         'robustness-notion-3', 'privacy-notion-1', 'privacy-notion-2', 'privacy-notion-3', 'fairness-notion-1', 'fairness-notion-2', 'fairness-notion-3',
-                        'explainability-notion-1', 'explainability-notion-2', 'accountability-notion-1', 'architectural_soundness-notion-1', 'architectural_soundness-notion-2',
+                        'explainability-notion-1', 'explainability-notion-2', 'architectural-soundness-notion-1', 'architectural-soundness-notion-2',
                         'sustainability-notion-1', 'sustainability-notion-2', 'sustainability-notion-3',
                         checked)" style="display: none;">
                         <label for="trustworthiness-lock" class="icon-container" style="float: right;">
@@ -860,7 +860,7 @@
                                     <h5 class="step-title">Factsheet completeness notion</h5>
                                     <input type="number" class="form-control" id="accountability-notion-1"
                                         placeholder="Factsheet completeness notion" min="100" value="100"
-                                        style="display: inline; width: 70%;">
+                                        style="display: inline; width: 70%;" disabled="true">
                                     <small class="form-text text-muted">%</small>
                                 </div>
                             </div>
@@ -876,14 +876,14 @@
                             <div class="notion-container">
                                 <div class="notion">
                                     <h5 class="step-title">Client management notion</h5>
-                                    <input type="number" class="form-control" id="architectural_soundness-notion-1"
+                                    <input type="number" class="form-control" id="architectural-soundness-notion-1"
                                         placeholder="Client management notion" min="20" value="50"
                                         style="display: inline; width: 70%;">
                                     <small class="form-text text-muted">%</small>
                                 </div>
                                 <div class="notion">
                                     <h5 class="step-title">Optimization notion</h5>
-                                    <input type="number" class="form-control" id="architectural_soundness-notion-2"
+                                    <input type="number" class="form-control" id="architectural-soundness-notion-2"
                                         placeholder="Optimization notion" min="20" value="50"
                                         style="display: inline; width: 70%;">
                                     <small class="form-text text-muted">%</small>
@@ -1320,8 +1320,8 @@
             data["accountability_pillar"] = document.getElementById("accountability-pillar").value
             data["factsheet_completeness"] = document.getElementById("accountability-notion-1").value
             data["architectural_soundness_pillar"] = document.getElementById("architectural-soundness-pillar").value
-            data["client_management"] = document.getElementById("architectural_soundness-notion-1").value
-            data["optimization"] = document.getElementById("architectural_soundness-notion-2").value
+            data["client_management"] = document.getElementById("architectural-soundness-notion-1").value
+            data["optimization"] = document.getElementById("architectural-soundness-notion-2").value
             data["sustainability_pillar"] = document.getElementById("sustainability-pillar").value
             data["energy_source"] = document.getElementById("sustainability-notion-1").value
             data["hardware_efficiency"] = document.getElementById("sustainability-notion-2").value
@@ -1448,9 +1448,9 @@
                 document.getElementById("explainability-notion-2").value = data["post_hoc_methods"]
                 document.getElementById("accountability-pillar").value = data["accountability_pillar"]
                 document.getElementById("accountability-notion-1").value = data["factsheet_completeness"]
-                document.getElementById("architectural_soundness-pillar").value = data["architectural_soundness_pillar"]
-                document.getElementById("architectural_soundness-notion-1").value = data["client_management"]
-                document.getElementById("architectural_soundness-notion-2").value = data["optimization"]
+                document.getElementById("architectural-soundness-pillar").value = data["architectural_soundness_pillar"]
+                document.getElementById("architectural-soundness-notion-1").value = data["client_management"]
+                document.getElementById("architectural-soundness-notion-2").value = data["optimization"]
                 document.getElementById("sustainability-pillar").value = data["sustainability_pillar"]
                 document.getElementById("sustainability-notion-1").value = data["energy_source"]
                 document.getElementById("sustainability-notion-2").value = data["hardware_efficiency"]
@@ -2032,30 +2032,42 @@
 
         //When click "add-btn" button, save actual scenario in the list of scenarios
         document.getElementById("add-btn").addEventListener("click", function(){
-            scenarioStorage.saveScenario();
-            scenarioStorage.actual_scenario = scenarioStorage.scenariosList.length - 1;
+            trust = document.getElementById("with-trustworthiness-btn").checked ? true : false
 
-            sessionStorage.setItem("ScenarioList", JSON.stringify(scenarioStorage.scenariosList));
+            var message= null;
+            if (trust === true){
+                message = checkWeights()
+            }
 
-            updateScenariosPosition();
-
-            var actual_scenario = scenarioStorage.scenariosList[scenarioStorage.actual_scenario];
-            setScenarioData(actual_scenario);
-
-            document.getElementById("add-btn").style.display = "none";
-            if(scenarioStorage.scenariosList.length == 1){
-                document.getElementById("prev-btn").style.display = "none";
-                document.getElementById("next-btn").style.display = "none";
+            if (message!=null){
+                showAlert('info', message);
             }
             else{
-                document.getElementById("prev-btn").style.display = "inline-block";
-            }
-            document.getElementById("new-btn").style.display = "inline-block";
-            document.getElementById("del-btn").style.display = "inline-block";
+                scenarioStorage.saveScenario();
+                scenarioStorage.actual_scenario = scenarioStorage.scenariosList.length - 1;
 
-            //Enable run
-            if(document.getElementById("run-btn").disabled){
-                document.getElementById("run-btn").disabled = false;
+                sessionStorage.setItem("ScenarioList", JSON.stringify(scenarioStorage.scenariosList));
+
+                updateScenariosPosition();
+
+                var actual_scenario = scenarioStorage.scenariosList[scenarioStorage.actual_scenario];
+                setScenarioData(actual_scenario);
+
+                document.getElementById("add-btn").style.display = "none";
+                if(scenarioStorage.scenariosList.length == 1){
+                    document.getElementById("prev-btn").style.display = "none";
+                    document.getElementById("next-btn").style.display = "none";
+                }
+                else{
+                    document.getElementById("prev-btn").style.display = "inline-block";
+                }
+                document.getElementById("new-btn").style.display = "inline-block";
+                document.getElementById("del-btn").style.display = "inline-block";
+
+                //Enable run
+                if(document.getElementById("run-btn").disabled){
+                    document.getElementById("run-btn").disabled = false;
+                }
             }
         });
 
@@ -2338,58 +2350,42 @@
                     '<br><p class="badge text-bg-danger">Warning: you will stop the running scenario and start a new one</p>');
                 document.getElementById("yes-button").disabled = false;
 
-                trust = document.getElementById("with-trustworthiness-btn").checked ? true : false
+                document.getElementById("yes-button").addEventListener("click", function () {
 
-                var check_weights = true;
+                scenarioStorage.replaceScenario();
+                var data = scenarioStorage.scenariosList;
 
-                if (trust === true){
-                    check_weights = checkWights()
-                }
+                    // Hide the modal
+                    $('#confirm-modal').modal('hide');
+                    document.querySelector(".overlay").style.display = "block";
+                    document.getElementById("spinner").style.display = "block";
 
-                if (checkWights){
-
-                    document.getElementById("yes-button").addEventListener("click", function () {
-
-                    scenarioStorage.replaceScenario();
-                    var data = scenarioStorage.scenariosList;
-
-                        // Hide the modal
-                        $('#confirm-modal').modal('hide');
-                        document.querySelector(".overlay").style.display = "block";
-                        document.getElementById("spinner").style.display = "block";
-
-                        fetch("/nebula/dashboard/deployment/run", {
-                            method: "POST",
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify(data)
-                        })
-                        .then(response => {
-                            if (response.redirected) {
-                                window.location.href = response.url;
-                            } else {
-                                document.querySelector(".overlay").style.display = "none";
-                                document.getElementById("spinner").style.display = "none";
-                                // If the user is a demo, show a modal with a message
-                                $('#confirm-modal').on('hidden.bs.modal', function () {
-                                    $('#info-modal-body').html('You are not allowed to run a scenario. You have a limited functionality or a scenario is already running');
-                                    $('#info-modal').modal('show');
-                                });
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
+                    fetch("/nebula/dashboard/deployment/run", {
+                        method: "POST",
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(data)
+                    })
+                    .then(response => {
+                        if (response.redirected) {
+                            window.location.href = response.url;
+                        } else {
                             document.querySelector(".overlay").style.display = "none";
                             document.getElementById("spinner").style.display = "none";
-                        });
-
+                            // If the user is a demo, show a modal with a message
+                            $('#confirm-modal').on('hidden.bs.modal', function () {
+                                $('#info-modal-body').html('You are not allowed to run a scenario. You have a limited functionality or a scenario is already running');
+                                $('#info-modal').modal('show');
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.querySelector(".overlay").style.display = "none";
+                        document.getElementById("spinner").style.display = "none";
                     });
-                } else {
-                    $('#confirm-modal-body').html('The sum of all pillar importances is not equal to 100.\n' +
-                    '<br><br><p style="color: #772953; font-weight: bold">To calculate the trustworthiness of the scenario, the importance of all the pillas must be equal to 100.</p>');
-                    document.getElementById("yes-button").disabled = false;
-                }
+                });
             }
         });
 
@@ -2622,7 +2618,9 @@
             document.getElementById("federationArchitecture").disabled = true;
         });
 
-        function checkWights() {
+        function checkWeights() {
+            var message = null
+
             var robustness_percent = parseFloat(document.getElementById("robustness-pillar").value);
             var privacy_percent = parseFloat(document.getElementById("privacy-pillar").value);
             var fairness_percent = parseFloat(document.getElementById("fairness-pillar").value);
@@ -2630,14 +2628,52 @@
             var accountability_percent = parseFloat(document.getElementById("accountability-pillar").value);
             var architectural_soundness_percent = parseFloat(document.getElementById("architectural-soundness-pillar").value);
             var sustainability_percent = parseFloat(document.getElementById("sustainability-pillar").value);
+            var robustness_notion_1 = parseFloat(document.getElementById("robustness-notion-1").value);
+            var robustness_notion_2 = parseFloat(document.getElementById("robustness-notion-2").value);
+            var robustness_notion_3 = parseFloat(document.getElementById("robustness-notion-3").value);
+            var privacy_notion_1 = parseFloat(document.getElementById("privacy-notion-1").value);
+            var privacy_notion_2 = parseFloat(document.getElementById("privacy-notion-2").value);
+            var privacy_notion_3 = parseFloat(document.getElementById("privacy-notion-3").value);
+            var fairness_notion_1 = parseFloat(document.getElementById("fairness-notion-1").value);
+            var fairness_notion_2 = parseFloat(document.getElementById("fairness-notion-2").value);
+            var fairness_notion_3 = parseFloat(document.getElementById("fairness-notion-3").value);
+            var explainability_notion_1 = parseFloat(document.getElementById("explainability-notion-1").value);
+            var explainability_notion_2 = parseFloat(document.getElementById("explainability-notion-2").value);
+            var architectural_soundness_notion_1 = parseFloat(document.getElementById("architectural-soundness-notion-1").value);
+            var architectural_soundness_notion_2 = parseFloat(document.getElementById("architectural-soundness-notion-2").value);
+            var sustainability_notion_1 = parseFloat(document.getElementById("sustainability-notion-1").value);
+            var sustainability_notion_2 = parseFloat(document.getElementById("sustainability-notion-2").value);
+            var sustainability_notion_3 = parseFloat(document.getElementById("sustainability-notion-3").value);
 
-            var total_percent = robustness_percent + privacy_percent + fairness_percent + explainability_percent + accountability_percent + architectural_soundness_percent + sustainability_percent;
+            var total_pillar = robustness_percent + privacy_percent + fairness_percent + explainability_percent + accountability_percent + architectural_soundness_percent + sustainability_percent;
+            var total_robustness_notion = robustness_notion_1 + robustness_notion_2 + robustness_notion_3;
+            var total_privacy_notion = privacy_notion_1 + privacy_notion_2 + privacy_notion_3;
+            var total_fairness_notion = fairness_notion_1 + fairness_notion_2 + fairness_notion_3;
+            var total_explainability_notion = explainability_notion_1 + explainability_notion_2;
+            var total_architectural_soundness_notion = architectural_soundness_notion_1 + architectural_soundness_notion_2;
+            var total_sustainability_notion = sustainability_notion_1 + sustainability_notion_2 + sustainability_notion_3;
 
-            if (total_percent === 100) {
-                return true;
+            if (total_pillar != 100) {
+                return '[Trustworthiness] Check pillars weights';
             }
-
-            return false;
+            if(total_robustness_notion != 100){
+                return '[Trustworthiness] Check robustness notions weights';
+            }
+            if(total_privacy_notion != 100){
+                return '[Trustworthiness] Check privacy notions weights';
+            }
+            if(total_fairness_notion != 100){
+                return '[Trustworthiness] Check fairness notions weights';
+            }
+            if(total_explainability_notion != 100){
+                return '[Trustworthiness] Check explainability notions weights';
+            }
+            if(total_architectural_soundness_notion != 100){
+                return '[Trustworthiness] Check architectural soundness notions weights';
+            }
+            if(total_sustainability_notion != 100){
+                return '[Trustworthiness] Check sustainability notions weights';
+            }
         }
     </script>
 
