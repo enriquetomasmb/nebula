@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import logging
+import gc
 import torch
 from nebula.addons.functions import print_msg_box
 import lightning as pl
@@ -51,6 +52,8 @@ class NebulaModel(pl.LightningModule, ABC):
             self.cm_global.update(y_pred_classes, y) if self.cm_global is not None else None
         else:
             raise NotImplementedError
+        
+        del y_pred_classes, y
 
     def log_metrics_end(self, phase):
         """
@@ -79,6 +82,8 @@ class NebulaModel(pl.LightningModule, ABC):
         for key, value in output.items():
             metrics_str += f"{key}: {value:.4f}\n"
         print_msg_box(metrics_str, indent=2, title=f"{phase} Metrics | Step: {self.global_number[phase]}", logger_name=TRAINING_LOGGER)
+        
+        del output
 
     def generate_confusion_matrix(self, phase, print_cm=False, plot_cm=False):
         """
@@ -131,12 +136,16 @@ class NebulaModel(pl.LightningModule, ABC):
 
             self.logger.log_figure(fig, step=self.global_number[phase], name=f"{phase}/CM")
             plt.close()
+            
+            del cm_numpy, classes, fig, ax
 
         # Restablecer la matriz de confusión
         if phase == "Test (Local)":
             self.cm.reset()
         else:
             self.cm_global.reset()
+            
+        del cm
 
     def __init__(
         self,
@@ -216,6 +225,7 @@ class NebulaModel(pl.LightningModule, ABC):
     def on_train_epoch_end(self):
         self.log_metrics_end("Train")
         self.train_metrics.reset()
+        gc.collect()
 
     def validation_step(self, batch, batch_idx):
         """
@@ -234,6 +244,7 @@ class NebulaModel(pl.LightningModule, ABC):
     def on_validation_epoch_end(self):
         self.log_metrics_end("Validation")
         self.val_metrics.reset()
+        gc.collect()
 
     def test_step(self, batch, batch_idx, dataloader_idx=None):
         """
@@ -264,6 +275,7 @@ class NebulaModel(pl.LightningModule, ABC):
         self.generate_confusion_matrix("Test (Global)", print_cm=True, plot_cm=True)
         self.test_metrics.reset()
         self.test_metrics_global.reset()
+        gc.collect()
 
 
 class NebulaModelStandalone(NebulaModel):

@@ -244,6 +244,8 @@ class Lightning:
         except Exception as e:
             logging_training.error(f"Error training model: {e}")
             logging_training.error(traceback.format_exc())
+        finally:
+            self.cleanup()
 
     def _train_sync(self):
         try:
@@ -266,6 +268,8 @@ class Lightning:
         except Exception as e:
             logging_training.error(f"Error testing model: {e}")
             logging_training.error(traceback.format_exc())
+        finally:
+            self.cleanup()
 
     def _test_sync(self):
         try:
@@ -275,6 +279,10 @@ class Lightning:
             tb = traceback.format_exc()
             logging_training.error(f"Traceback: {tb}")
             # If "raise", the exception will be managed by the main thread
+    
+    def cleanup(self):
+        gc.collect()
+        torch.cuda.empty_cache()
 
     def get_model_weight(self):
         return len(self.data.train_dataloader().dataset)

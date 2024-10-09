@@ -1,4 +1,5 @@
 import asyncio
+import gc
 import logging
 import time
 from geopy import distance
@@ -320,6 +321,7 @@ class Connection:
         chunks = sorted(self.message_buffers[message_id].values(), key=lambda x: x.index)
         complete_message = b"".join(chunk.data for chunk in chunks)
         del self.message_buffers[message_id]
+        gc.collect()
 
         data_type_prefix = complete_message[:4]
         message_content = complete_message[4:]
