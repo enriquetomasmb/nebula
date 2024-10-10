@@ -159,6 +159,8 @@ class Engine:
         self.config.reload_config_file()
 
         self._cm = CommunicationsManager(engine=self)
+        # Set the communication manager in the model (send messages from there)
+        self.trainer.model.set_communication_manager(self._cm)
 
         self._reporter = Reporter(config=self.config, trainer=self.trainer, cm=self.cm)
 
@@ -567,8 +569,8 @@ class AggregatorNode(Engine):
 
     async def _extended_learning_cycle(self):
         # Define the functionality of the aggregator node
-        await self.trainer.test()
         await self.trainer.train()
+        await self.trainer.test()
 
         await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.get_model_weight(), source=self.addr, round=self.round)
 
@@ -599,8 +601,8 @@ class TrainerNode(Engine):
         logging.info(f"Waiting global update | Assign _waiting_global_update = True")
         self.aggregator.set_waiting_global_update()
 
-        await self.trainer.test()
         await self.trainer.train()
+        await self.trainer.test()
 
         await self.aggregator.include_model_in_buffer(
             self.trainer.get_model_parameters(), self.trainer.get_model_weight(), source=self.addr, round=self.round, local=True

@@ -1,3 +1,8 @@
+import matplotlib
+import matplotlib.pyplot as plt
+import seaborn as sns
+matplotlib.use("Agg")
+plt.switch_backend("Agg")
 import lightning as pl
 from torch import nn
 import torch
@@ -47,9 +52,6 @@ class SimpleMobileNetV1(NebulaModel):
             cm = self.cm.compute().cpu()
             print(f"{phase}Epoch/CM\n", cm) if print_cm else None
             if plot_cm:
-                import seaborn as sns
-                import matplotlib.pyplot as plt
-
                 plt.figure(figsize=(10, 7))
                 ax = sns.heatmap(cm.numpy(), annot=True, fmt="d", cmap="Blues")
                 ax.set_xlabel("Predicted labels")

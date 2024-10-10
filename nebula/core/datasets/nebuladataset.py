@@ -4,6 +4,12 @@ import time
 import numpy as np
 from sklearn.manifold import TSNE
 from torch.utils.data import Dataset
+import matplotlib
+import matplotlib.pyplot as plt
+import seaborn as sns
+matplotlib.use("Agg")
+plt.switch_backend("Agg")
+
 from nebula.core.utils.deterministic import enable_deterministic
 import logging
 from nebula.config.config import TRAINING_LOGGER
@@ -126,9 +132,6 @@ class NebulaDataset(Dataset, ABC):
             partitions_map: The map of the dataset partitions.
         """
         # Plot the data distribution of the dataset, one graph per partition
-        import matplotlib.pyplot as plt
-        import seaborn as sns
-
         sns.set()
         sns.set_style("whitegrid", {"axes.grid": False})
         sns.set_context("paper", font_scale=1.5)
@@ -190,9 +193,6 @@ class NebulaDataset(Dataset, ABC):
             self.visualize_tsne(dataset)
 
     def visualize_tsne(self, dataset):
-        import matplotlib.pyplot as plt
-        import seaborn as sns
-
         X = []  # List for storing the characteristics of the samples
         y = []  # Ready to store the labels of the samples
         for idx in range(len(dataset)):  # Assuming that 'dataset' is a list or array of your samples
@@ -545,9 +545,6 @@ class NebulaDataset(Dataset, ABC):
             dataset: The dataset to plot (torch.utils.data.Dataset).
             partitions_map: The map of the dataset partitions.
         """
-        import matplotlib.pyplot as plt
-        import seaborn as sns
-
         sns.set()
         sns.set_style("whitegrid", {"axes.grid": False})
         sns.set_context("paper", font_scale=1.5)

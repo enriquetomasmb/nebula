@@ -4,6 +4,13 @@ import seaborn as sns
 import torch
 from torch import nn
 from torchmetrics import MetricCollection
+import matplotlib
+import matplotlib.pyplot as plt
+import seaborn as sns
+matplotlib.use("Agg")
+plt.switch_backend("Agg")
+import lightning as pl
+import torch
 from torchmetrics.classification import (
     MulticlassAccuracy,
     MulticlassRecall,
