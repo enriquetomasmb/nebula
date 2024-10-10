@@ -1042,8 +1042,10 @@ class ScenarioManagement:
     
     @classmethod
     def remove_trustworthiness_files(cls, scenario_name):
-        trustworthiness_files_path = f'{os.environ.get("NEBULA_LOGS_DIR")}/{scenario_name}/trustworthiness'
+        trustworthiness_files_path = os.path.normpath(os.path.join(os.environ.get("NEBULA_LOGS_DIR"), scenario_name, "trustworthiness"))
         try:
+            if not trustworthiness_files_path.startswith(os.environ.get("NEBULA_LOGS_DIR")):
+                raise Exception(f"Removing {scenario_name} is not allowed")
             shutil.rmtree(trustworthiness_files_path) 
         except PermissionError:
             # Avoid error if the user does not have enough permissions to remove the files
