@@ -5,8 +5,7 @@ from torchvision.models import resnet34
 from nebula.core.optimizations.communications.KD.utils.KD import DistillKL
 from nebula.core.optimizations.communications.KD_prototypes.models.prototeachernebulamodel import ProtoTeacherNebulaModel, MDProtoTeacherNebulaModel
 from nebula.core.optimizations.communications.KD.utils.AT import Attention
-from nebula.core.optimizations.communications.KD_prototypes.utils.GlobalPrototypeDistillationLoss import \
-    GlobalPrototypeDistillationLoss
+from nebula.core.optimizations.communications.KD_prototypes.utils.GlobalPrototypeDistillationLoss import GlobalPrototypeDistillationLoss
 
 
 class ProtoTeacherCIFAR100ModelResNet34(ProtoTeacherNebulaModel):
@@ -71,6 +70,7 @@ class ProtoTeacherCIFAR100ModelResNet34(ProtoTeacherNebulaModel):
         dense = self.resnet.fc_dense(x)
         logits = self.resnet.fc(dense)
 
+        del x
         if is_feat:
             if softmax:
                 return (
@@ -79,6 +79,8 @@ class ProtoTeacherCIFAR100ModelResNet34(ProtoTeacherNebulaModel):
                     [conv1, conv2, conv3, conv4, conv5],
                 )
             return logits, dense, [conv1, conv2, conv3, conv4, conv5]
+
+        del conv1, conv2, conv3, conv4, conv5
 
         if softmax:
             return F.log_softmax(logits, dim=1), dense
@@ -112,6 +114,8 @@ class ProtoTeacherCIFAR100ModelResNet34(ProtoTeacherNebulaModel):
             dist = torch.norm(dense - proto, dim=1)
             distances.append(dist.unsqueeze(1))
         distances = torch.cat(distances, dim=1)
+
+        del x, dense
 
         # Retorna la clase predicha basada en el prototipo más cercano
         return distances.argmin(dim=1)
@@ -194,6 +198,8 @@ class MDProtoTeacherCIFAR100ModelResNet34(MDProtoTeacherNebulaModel):
         dense = self.resnet.fc_dense(x)
         logits = self.resnet.fc(dense)
 
+        del x
+
         if is_feat:
             if softmax:
                 return (
@@ -202,6 +208,8 @@ class MDProtoTeacherCIFAR100ModelResNet34(MDProtoTeacherNebulaModel):
                     [conv1, conv2, conv3, conv4, conv5],
                 )
             return logits, dense, [conv1, conv2, conv3, conv4, conv5]
+
+        del conv1, conv2, conv3, conv4, conv5
 
         if softmax:
             return F.log_softmax(logits, dim=1), dense
@@ -235,6 +243,8 @@ class MDProtoTeacherCIFAR100ModelResNet34(MDProtoTeacherNebulaModel):
             dist = torch.norm(dense - proto, dim=1)
             distances.append(dist.unsqueeze(1))
         distances = torch.cat(distances, dim=1)
+
+        del x, dense
 
         # Retorna la clase predicha basada en el prototipo más cercano
         return distances.argmin(dim=1)

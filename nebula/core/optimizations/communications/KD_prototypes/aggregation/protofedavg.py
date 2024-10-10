@@ -1,3 +1,4 @@
+import gc
 import torch
 
 from nebula.core.aggregation.aggregator import Aggregator
@@ -68,5 +69,8 @@ class ProtoFedAvg(Aggregator):
         # Fusionar los prototipos agregados de vuelta en los parámetros del modelo
         accum_params["protos"] = proto_accum
 
-        # self.print_model_size(accum_params)
+        # Marcamos con 'del' todas las variables intermedias
+        del proto_accum, proto_weights, last_model_params, total_samples
+        gc.collect()
+
         return accum_params

@@ -88,6 +88,8 @@ class ProtoStudentCIFAR10ModelResnet8(ProtoStudentNebulaModel):
         dense = self.resnet.fc_dense(x)
         logits = self.resnet.fc(dense)
 
+        del x
+
         if is_feat:
             if softmax:
                 return (
@@ -96,6 +98,8 @@ class ProtoStudentCIFAR10ModelResnet8(ProtoStudentNebulaModel):
                     [conv1, conv2, conv3, conv4],
                 )
             return logits, dense, [conv1, conv2, conv3, conv4]
+
+        del conv1, conv2, conv3, conv4
 
         if softmax:
             return F.log_softmax(logits, dim=1), dense
@@ -121,6 +125,7 @@ class ProtoStudentCIFAR10ModelResnet8(ProtoStudentNebulaModel):
         x = torch.flatten(x, 1)
         dense = self.resnet.fc_dense(x)
 
+        del x
         # Calculate distances
         distances = []
         for key, proto in self.global_protos.items():
@@ -130,13 +135,16 @@ class ProtoStudentCIFAR10ModelResnet8(ProtoStudentNebulaModel):
             distances.append(dist.unsqueeze(1))
         distances = torch.cat(distances, dim=1)
 
+        del dense
         # Return the predicted class based on the closest prototype
         return distances.argmin(dim=1)
 
     def configure_optimizers(self):
-        """ """
+        """Configure the optimizer for training."""
+        # Excluir los parámetros del modelo del profesor
+        student_params = [p for name, p in self.named_parameters() if not name.startswith("teacher_model.")]
         optimizer = torch.optim.Adam(
-            self.parameters(),
+            student_params,
             lr=self.learning_rate,
             betas=(self.config["beta1"], self.config["beta2"]),
             amsgrad=self.config["amsgrad"],

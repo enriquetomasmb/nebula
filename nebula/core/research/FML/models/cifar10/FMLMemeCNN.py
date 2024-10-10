@@ -89,8 +89,12 @@ class FMLCIFAR10MemeModelCNN(FMLMemeNebulaModel):
         flattened = conv3.view(conv3.size(0), -1)  # Flatten the layer
         logits = self.fc_layer(flattened)
 
+        del flattened
+
         if is_feat:
             return logits, [conv1, conv2, conv3]
+
+        del conv1, conv2, conv3
         return logits
 
     def configure_optimizers(self):

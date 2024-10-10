@@ -18,7 +18,7 @@ class FedGPDNebulaModel(NebulaModel, ABC):
         T=2,
     ):
         super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed)
-
+        self.automatic_optimization = False
         self.config = {"beta1": 0.851436, "beta2": 0.999689, "amsgrad": True}
         self.T = T
         self.global_protos = {}
@@ -27,6 +27,9 @@ class FedGPDNebulaModel(NebulaModel, ABC):
     def step(self, batch, batch_idx, phase):
 
         images, labels_g = batch
+        if phase == "Train":
+            optimizer = self.optimizers()
+
         images, labels = images.to(self.device), labels_g.to(self.device)
         logits, features = self.forward_train(images, softmax=False)
 
@@ -41,18 +44,25 @@ class FedGPDNebulaModel(NebulaModel, ABC):
         # Combine the losses
         loss = loss_ce + self.lambd * loss_gpd
 
-        self.process_metrics(phase, logits, labels, loss)
+        if phase == "Train":
+            optimizer.zero_grad()
+            self.manual_backward(loss)
+            optimizer.step()
+
+        self.process_metrics(phase, logits, labels, loss.detach())
+
+        del loss_ce, loss_gpd, loss
 
         if phase == "Train":
             # Update the prototypes
             for i in range(len(labels_g)):
                 label = labels_g[i].item()
                 if label not in self.agg_protos_label:
-                    self.agg_protos_label[label] = dict(sum=torch.zeros_like(features[i, :]), count=0)
+                    self.agg_protos_label[label] = dict(sum=torch.zeros_like(features[i, :].detach()), count=0)
                 self.agg_protos_label[label]["sum"] += features[i, :].detach().clone()
                 self.agg_protos_label[label]["count"] += 1
 
-        return loss
+        del labels, labels_g, logits, features, features_copy
 
     def get_protos(self):
         """
@@ -60,17 +70,16 @@ class FedGPDNebulaModel(NebulaModel, ABC):
         """
 
         if len(self.agg_protos_label) == 0:
-            return {k: v.cpu() for k, v in self.global_protos.items()}
+            return {k: v.detach() for k, v in self.global_protos.items()}
 
         proto = {}
         for label, proto_info in self.agg_protos_label.items():
 
             if proto_info["count"] > 1:
-                proto[label] = (proto_info["sum"] / proto_info["count"]).to("cpu")
+                proto[label] = (proto_info["sum"] / proto_info["count"]).detach()
             else:
-                proto[label] = proto_info["sum"].to("cpu")
+                proto[label] = proto_info["sum"].detach()
 
-        # logging.info(f"[ProtoFashionMNISTModelCNN.get_protos] Protos: {proto}")
         return proto
 
     def set_protos(self, protos):
@@ -117,6 +126,8 @@ class FedGPDNebulaModel(NebulaModel, ABC):
             if len(missing_keys) > 0 or len(unexpected_keys) > 0:
                 message = "Error loading state_dict, missing keys:{} and unexpected keys:{}".format(missing_keys, unexpected_keys)
                 raise KeyError(message)
+
+        del missing_keys
 
         return
 

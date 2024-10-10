@@ -78,6 +78,8 @@ class FedGPDCIFAR100ModelResNet18(FedGPDNebulaModel):
                 )
             return logits, dense, [conv1, conv2, conv3, conv4, conv5]
 
+        del conv1, conv2, conv3, conv4, conv5
+
         if softmax:
             return F.log_softmax(logits, dim=1), dense
         return logits, dense
@@ -112,6 +114,7 @@ class FedGPDCIFAR100ModelResNet18(FedGPDNebulaModel):
             distances.append(dist.unsqueeze(1))
         distances = torch.cat(distances, dim=1)
 
+        del x, dense
         # Return the predicted class based on the closest prototype
         return distances.argmin(dim=1)
 

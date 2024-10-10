@@ -1,7 +1,6 @@
 import torch
 from torch import nn
 from torch.nn import functional as F
-from torchvision.models.resnet import BasicBlock
 
 from nebula.core.optimizations.communications.KD_prototypes.models.cifar10.resnet8 import ResNet8
 from nebula.core.research.FedProto.models.fedprotonebulamodel import FedProtoNebulaModel
@@ -63,6 +62,8 @@ class FedProtoCIFAR10ModelResNet8(FedProtoNebulaModel):
         dense = self.resnet.fc_dense(x)
         logits = self.resnet.fc(dense)
 
+        del x
+
         if is_feat:
             if softmax:
                 return (
@@ -71,6 +72,8 @@ class FedProtoCIFAR10ModelResNet8(FedProtoNebulaModel):
                     [conv1, conv2, conv3, conv4],
                 )
             return logits, dense, [conv1, conv2, conv3, conv4]
+
+        del conv1, conv2, conv3, conv4
 
         if softmax:
             return F.log_softmax(logits, dim=1), dense
@@ -96,6 +99,7 @@ class FedProtoCIFAR10ModelResNet8(FedProtoNebulaModel):
         x = torch.flatten(x, 1)
         dense = self.resnet.fc_dense(x)
 
+        del x
         # Calculate distances
         distances = []
         for key, proto in self.global_protos.items():
@@ -105,5 +109,6 @@ class FedProtoCIFAR10ModelResNet8(FedProtoNebulaModel):
             distances.append(dist.unsqueeze(1))
         distances = torch.cat(distances, dim=1)
 
+        del dense
         # Return the predicted class based on the closest prototype
         return distances.argmin(dim=1)

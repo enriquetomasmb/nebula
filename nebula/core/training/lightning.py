@@ -10,7 +10,7 @@ import io
 import gzip
 import torch
 from lightning import Trainer
-from lightning.pytorch.callbacks import LearningRateMonitor, ProgressBar, ModelSummary
+from lightning.pytorch.callbacks import ProgressBar, ModelSummary
 from torch.nn import functional as F
 from nebula.core.utils.deterministic import enable_deterministic
 from nebula.config.config import TRAINING_LOGGER
@@ -207,7 +207,11 @@ class Lightning:
             buffer = io.BytesIO()
             with gzip.GzipFile(fileobj=buffer, mode="wb") as f:
                 torch.save(model, f)
-            return buffer.getvalue()
+            serialized_data = buffer.getvalue()
+            buffer.close()
+            del buffer
+            gc.collect()
+            return serialized_data
         except Exception as e:
             raise ParameterSerializeError("Error serializing model") from e
 
@@ -217,6 +221,9 @@ class Lightning:
             buffer = io.BytesIO(data)
             with gzip.GzipFile(fileobj=buffer, mode="rb") as f:
                 params_dict = torch.load(f, map_location="cpu")
+            buffer.close()
+            del buffer
+            gc.collect()
             return OrderedDict(params_dict)
         except Exception as e:
             raise ParameterDeserializeError("Error decoding parameters") from e
@@ -279,7 +286,7 @@ class Lightning:
             tb = traceback.format_exc()
             logging_training.error(f"Traceback: {tb}")
             # If "raise", the exception will be managed by the main thread
-    
+
     def cleanup(self):
         gc.collect()
         torch.cuda.empty_cache()

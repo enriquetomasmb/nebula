@@ -42,7 +42,7 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
         self.automatic_optimization = False
         self.config = {"beta1": 0.851436, "beta2": 0.999689, "amsgrad": True}
         if weighting == "adaptative":
-            self.weighting = AdaptiveWeighting(min_val=1, max_val=10)
+            self.weighting = AdaptiveWeighting(min_weight=1, max_weight=10)
         elif weighting == "decreasing":
             self.weighting = DeacreasingWeighting(alpha_value=alpha_kd, beta_value=beta_feat, lambda_value=lambda_proto, limit=0.1)
         elif weighting is None:
@@ -75,7 +75,6 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
             else:
                 proto[label] = proto_info["sum"].detach()
 
-        # logging.info(f"[ProtoFashionMNISTModelCNN.get_protos] Protos: {proto}")
         return proto
 
     def set_protos(self, protos):
@@ -142,10 +141,10 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
             # Update the prototypes
             self.model_updated_flag = True
             for i in range(len(labels_g)):
-                label = labels_g[i].detach()
+                label = labels_g[i].item()
                 if label not in self.agg_protos_label:
-                    self.agg_protos_label[label] = dict(sum=torch.zeros_like(protos[i, :]).detach(), count=0)
-                self.agg_protos_label[label]["sum"] += protos[i, :].detach().clone()
+                    self.agg_protos_label[label] = dict(sum=torch.zeros_like(protos[i, :].detach()), count=0)
+                self.agg_protos_label[label]["sum"] += protos[i, :].clone().detach()
                 self.agg_protos_label[label]["count"] += 1
 
         elif phase == "Validation":
@@ -197,6 +196,8 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
                 message = "Error loading state_dict, missing keys:{} and unexpected keys:{}".format(missing_keys, unexpected_keys)
                 raise KeyError(message)
 
+        del missing_keys
+
         return
 
     def state_dict(self, destination=None, prefix="", keep_vars=False):
@@ -215,6 +216,7 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
             filtered_state = {k: v for k, v in original_state.items() if not k.startswith("teacher_model.")}
             filtered_state["protos"] = self.get_protos()
 
+        del original_state
         return filtered_state
 
     def send_logic(self):

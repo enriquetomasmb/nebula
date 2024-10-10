@@ -101,6 +101,8 @@ class FMLCombinedNebulaModel(NebulaModel, ABC):
         else:
             raise NotImplementedError
 
+        del y, y_pred_classes
+
     def log_metrics_end(self, phase):
         """
         Log metrics for both models at the end of the given phase.
@@ -110,7 +112,7 @@ class FMLCombinedNebulaModel(NebulaModel, ABC):
         if phase == "Train":
             # Computar y registrar métricas del modelo personalizado
             output_local = self.train_metrics.compute()
-            output_local = {f"{phase}/Personalized/{key.replace('Multiclass', '').split('/')[-1]}": value for key, value in output_local.items()}
+            output_local = {f"{phase}/{key.replace('Multiclass', '').split('/')[-1]}": value for key, value in output_local.items()}
             self.logger.log_data(output_local, step=self.global_number[phase])
 
             # Computar y registrar métricas del modelo meme
@@ -121,7 +123,7 @@ class FMLCombinedNebulaModel(NebulaModel, ABC):
         elif phase == "Validation":
             # Computar y registrar métricas del modelo personalizado
             output_local = self.val_metrics.compute()
-            output_local = {f"{phase}/Personalized/{key.replace('Multiclass', '').split('/')[-1]}": value for key, value in output_local.items()}
+            output_local = {f"{phase}/{key.replace('Multiclass', '').split('/')[-1]}": value for key, value in output_local.items()}
             self.logger.log_data(output_local, step=self.global_number[phase])
 
             # Computar y registrar métricas del modelo meme
@@ -132,7 +134,7 @@ class FMLCombinedNebulaModel(NebulaModel, ABC):
         elif phase == "Test (Local)":
             # Computar y registrar métricas del modelo personalizado
             output_local = self.test_metrics.compute()
-            output_local = {f"{phase}/Personalized/{key.replace('Multiclass', '').split('/')[-1]}": value for key, value in output_local.items()}
+            output_local = {f"{phase}/{key.replace('Multiclass', '').split('/')[-1]}": value for key, value in output_local.items()}
             self.logger.log_data(output_local, step=self.global_number[phase])
 
             # Computar y registrar métricas del modelo meme
@@ -143,7 +145,7 @@ class FMLCombinedNebulaModel(NebulaModel, ABC):
         elif phase == "Test (Global)":
             # Computar y registrar métricas del modelo personalizado
             output_local = self.test_metrics_global.compute()
-            output_local = {f"{phase}/Personalized/{key.replace('Multiclass', '').split('/')[-1]}": value for key, value in output_local.items()}
+            output_local = {f"{phase}/{key.replace('Multiclass', '').split('/')[-1]}": value for key, value in output_local.items()}
             self.logger.log_data(output_local, step=self.global_number[phase])
 
             # Computar y registrar métricas del modelo meme
@@ -161,6 +163,8 @@ class FMLCombinedNebulaModel(NebulaModel, ABC):
             metrics_str += f"{key}: {value:.4f}\n"
 
         print_msg_box(metrics_str, indent=2, title=f"{phase} Metrics | Step: {self.global_number[phase]}")
+
+        del output_local, output_meme
 
     def forward(self, x, is_feat=False):
         return self.model_local(x, is_feat=is_feat)
@@ -194,5 +198,9 @@ class FMLCombinedNebulaModel(NebulaModel, ABC):
             self.manual_backward(loss_meme)
             optimizer_meme.step()
 
-        self.process_metrics(phase, output_local, labels, loss_local, model_name="Local")
-        self.process_metrics(phase, output_meme, labels, loss_meme, model_name="Meme")
+        self.process_metrics(phase, output_local, labels, loss_local.detach(), model_name="Local")
+        self.process_metrics(phase, output_meme, labels, loss_meme.detach(), model_name="Meme")
+
+        del loss_cls_local, loss_div_local, output_local
+        del loss_cls_meme, loss_div_meme, output_meme
+        del images, labels

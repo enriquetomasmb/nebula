@@ -1,3 +1,4 @@
+import gc
 import torch
 
 from nebula.core.aggregation.aggregator import Aggregator
@@ -32,5 +33,8 @@ class ProtoAvg(Aggregator):
         # Normalize Accum
         for label in accum:
             accum[label] /= total_samples
+
+        del prototypes, total_samples
+        gc.collect()
 
         return accum

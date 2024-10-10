@@ -69,6 +69,8 @@ class FMLCIFAR100PersonalizedModelResNet18(FMLPersonalizedNebulaModel):
         dense = self.resnet.fc_dense(x)
         logits = self.resnet.fc(dense)
 
+        del x
+
         if is_feat:
             if softmax:
                 return (
@@ -77,6 +79,8 @@ class FMLCIFAR100PersonalizedModelResNet18(FMLPersonalizedNebulaModel):
                     [conv1, conv2, conv3, conv4, conv5],
                 )
             return logits, dense, [conv1, conv2, conv3, conv4, conv5]
+
+        del conv1, conv2, conv3, conv4, conv5
 
         if softmax:
             return F.log_softmax(logits, dim=1), dense

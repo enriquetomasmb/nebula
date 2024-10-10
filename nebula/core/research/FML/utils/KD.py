@@ -13,4 +13,5 @@ class FMLDistillKL(nn.Module):
         p_s = F.log_softmax(y_s / self.T, dim=1)
         p_t = F.softmax(y_t / self.T, dim=1)
         loss = nn.KLDivLoss(reduction="batchmean")(p_s, p_t) * (self.T**2)
+        del p_s, p_t
         return loss

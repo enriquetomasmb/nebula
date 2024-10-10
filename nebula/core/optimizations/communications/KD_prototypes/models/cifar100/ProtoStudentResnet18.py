@@ -11,8 +11,7 @@ from nebula.core.optimizations.communications.KD_prototypes.models.cifar100.Prot
     MDProtoTeacherCIFAR100ModelResNet34,
 )
 from nebula.core.optimizations.communications.KD_prototypes.models.protostudentnebulamodel import ProtoStudentNebulaModel
-from nebula.core.optimizations.communications.KD_prototypes.utils.GlobalPrototypeDistillationLoss import \
-    GlobalPrototypeDistillationLoss
+from nebula.core.optimizations.communications.KD_prototypes.utils.GlobalPrototypeDistillationLoss import GlobalPrototypeDistillationLoss
 
 
 class ProtoStudentCIFAR100ModelResnet18(ProtoStudentNebulaModel):
@@ -39,16 +38,14 @@ class ProtoStudentCIFAR100ModelResnet18(ProtoStudentNebulaModel):
     ):
 
         if weighting == "adaptative":
-            self.weighting = AdaptiveWeighting(min_val=1, max_val=10)
+            self.weighting = AdaptiveWeighting(min_weight=1, max_weight=10)
         elif weighting == "decreasing":
-            self.weighting = DeacreasingWeighting(alpha_value=alpha_kd, beta_value=beta_feat, lambda_value=lambda_proto,
-                                                  limit=0.1, rounds=500)
+            self.weighting = DeacreasingWeighting(alpha_value=alpha_kd, beta_value=beta_feat, lambda_value=lambda_proto, limit=0.1, rounds=200)
         if teacher_model is None:
             if knowledge_distilation is not None and knowledge_distilation == "MD":
                 teacher_model = MDProtoTeacherCIFAR100ModelResNet34(weighting=weighting)
             elif knowledge_distilation is not None and knowledge_distilation == "KD":
                 teacher_model = ProtoTeacherCIFAR100ModelResNet34(weighting=weighting)
-
 
         super().__init__(
             input_channels,
@@ -102,6 +99,8 @@ class ProtoStudentCIFAR100ModelResnet18(ProtoStudentNebulaModel):
         dense = self.resnet.fc_dense(x)
         logits = self.resnet.fc(dense)
 
+        del x
+
         if is_feat:
             if softmax:
                 return (
@@ -110,6 +109,8 @@ class ProtoStudentCIFAR100ModelResnet18(ProtoStudentNebulaModel):
                     [conv1, conv2, conv3, conv4, conv5],
                 )
             return logits, dense, [conv1, conv2, conv3, conv4, conv5]
+
+        del conv1, conv2, conv3, conv4, conv5
 
         if softmax:
             return F.log_softmax(logits, dim=1), dense
@@ -136,6 +137,7 @@ class ProtoStudentCIFAR100ModelResnet18(ProtoStudentNebulaModel):
         x = torch.flatten(x, 1)
         dense = self.resnet.fc_dense(x)
 
+        del x
         # Calculate distances
         distances = []
         for key, proto in self.global_protos.items():
@@ -145,13 +147,16 @@ class ProtoStudentCIFAR100ModelResnet18(ProtoStudentNebulaModel):
             distances.append(dist.unsqueeze(1))
         distances = torch.cat(distances, dim=1)
 
+        del dense
         # Return the predicted class based on the closest prototype
         return distances.argmin(dim=1)
 
     def configure_optimizers(self):
-        """ """
+        """Configure the optimizer for training."""
+        # Excluir los parámetros del modelo del profesor
+        student_params = [p for name, p in self.named_parameters() if not name.startswith("teacher_model.")]
         optimizer = torch.optim.Adam(
-            self.parameters(),
+            student_params,
             lr=self.learning_rate,
             betas=(self.config["beta1"], self.config["beta2"]),
             amsgrad=self.config["amsgrad"],

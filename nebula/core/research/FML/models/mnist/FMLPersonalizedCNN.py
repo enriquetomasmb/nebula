@@ -67,8 +67,12 @@ class FMLMNISTPersonalizedModelCNN(FMLPersonalizedNebulaModel):
         dense = self.relu(self.l1(pool2_flat))
         logits = self.l2(dense)
 
+        del input_layer, pool1, pool2_flat, pool2, dense
+
         if is_feat:
             return logits, [conv1, conv2]
+
+        del conv1, conv2
         return logits
 
     def configure_optimizers(self):
