@@ -42,98 +42,129 @@ class DataModule(LightningDataModule):
         self.val_percent = val_percent
         self.label_flipping = label_flipping
         self.data_poisoning = data_poisoning
-        self.poisoned_percent = poisoned_persent
+        self.poisoned_persent = poisoned_persent
         self.poisoned_ratio = poisoned_ratio
         self.targeted = targeted
         self.target_label = target_label
         self.target_changed_label = target_changed_label
         self.noise_type = noise_type
+        
+        self.model_weight = None
 
-        # logging_training.debug(f"Train set indices: {train_set_indices}")
-        # logging_training.debug(f"Test set indices: {test_set_indices}")
-        # logging_training.debug(f"Local test set indices: {local_test_set_indices}")
+        # Split train and validation datasets
+        self.data_train = None
+        self.data_val = None
+        self.global_te_subset = None
+        self.local_te_subset = None
 
+    def setup(self, stage=None):
+        if stage in (None, 'fit'):
+        # Training / validation set
         # Training / validation set
         # rows_by_sub = floor(len(train_set) / self.partitions_number)
-        tr_subset = ChangeableSubset(
-            train_set,
-            train_set_indices,
-            label_flipping=self.label_flipping,
-            data_poisoning=self.data_poisoning,
-            poisoned_persent=self.poisoned_percent,
-            poisoned_ratio=self.poisoned_ratio,
-            targeted=self.targeted,
-            target_label=self.target_label,
-            target_changed_label=self.target_changed_label,
-            noise_type=self.noise_type,
-        )
+            # Training / validation set
+        # rows_by_sub = floor(len(train_set) / self.partitions_number)
+            tr_subset = ChangeableSubset(
+                self.train_set,
+                self.train_set_indices,
+                label_flipping=self.label_flipping,
+                data_poisoning=self.data_poisoning,
+                poisoned_persent=self.poisoned_persent,
+                poisoned_ratio=self.poisoned_ratio,
+                targeted=self.targeted,
+                target_label=self.target_label,
+                target_changed_label=self.target_changed_label,
+                noise_type=self.noise_type,
+            )
 
-        train_size = round(len(tr_subset) * (1 - self.val_percent))
-        val_size = len(tr_subset) - train_size
+            train_size = round(len(tr_subset) * (1 - self.val_percent))
+            val_size = len(tr_subset) - train_size
 
-        data_train, data_val = random_split(
-            tr_subset,
-            [
-                train_size,
-                val_size,
-            ],
-        )
+            self.data_train, self.data_val = random_split(tr_subset, [train_size, val_size])
+            
+            self.model_weight = len(self.data_train)
 
-        # Test set
-        # rows_by_sub = floor(len(test_set) / self.partitions_number)
-        global_te_subset = ChangeableSubset(test_set, test_set_indices)
+        if stage in (None, 'test'):
+            # Test sets
+            self.global_te_subset = ChangeableSubset(self.test_set, self.test_set_indices)
+            self.local_te_subset = ChangeableSubset(self.test_set, self.local_test_set_indices)
 
-        # Local test set
-        local_te_subset = ChangeableSubset(test_set, local_test_set_indices)
+            if len(self.test_set) < self.partitions_number:
+                raise ValueError("Too many partitions for the size of the test set.")
 
-        if len(test_set) < self.partitions_number:
-            raise "Too much partitions"
+    def teardown(self, stage=None):
+        # Teardown the datasets
+        if stage in (None, 'fit'):
+            self.data_train = None
+            self.data_val = None
 
-        # DataLoaders
-        self.train_loader = DataLoader(
-            data_train,
+        if stage in (None, 'test'):
+            self.global_te_subset = None
+            self.local_te_subset = None
+
+    def train_dataloader(self):
+        if self.data_train is None:
+            raise ValueError("Train dataset not initialized. Please call setup('fit') before requesting train_dataloader.")
+        logging_training.info("Train set size: {}".format(len(self.data_train)))
+        return DataLoader(
+            self.data_train,
             batch_size=self.batch_size,
             shuffle=True,
             num_workers=self.num_workers,
             drop_last=True,
             pin_memory=False,
         )
-        self.val_loader = DataLoader(
-            data_val,
-            batch_size=self.batch_size,
-            shuffle=False,
-            num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=False,
-        )
-        self.test_loader = DataLoader(
-            local_te_subset,
-            batch_size=self.batch_size,
-            shuffle=False,
-            num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=False,
-        )
-        self.global_test_loader = DataLoader(
-            global_te_subset,
-            batch_size=self.batch_size,
-            shuffle=False,
-            num_workers=self.num_workers,
-            drop_last=True,
-            pin_memory=False,
-        )
-        random_sampler = RandomSampler(data_source=data_val, replacement=False, num_samples=max(int(len(data_val) / 3), 300))
-        self.bootstrap_loader = DataLoader(data_train, batch_size=self.batch_size, shuffle=False, sampler=random_sampler)
-        logging_training.info("Train samples: {} Val samples: {} Test samples: {} Global Test samples: {}".format(len(data_train), len(data_val), len(local_te_subset), len(global_te_subset)))
-
-    def train_dataloader(self):
-        return self.train_loader
 
     def val_dataloader(self):
-        return self.val_loader
+        if self.data_val is None:
+            raise ValueError("Validation dataset not initialized. Please call setup('fit') before requesting val_dataloader.")
+        logging_training.info("Validation set size: {}".format(len(self.data_val)))
+        return DataLoader(
+            self.data_val,
+            batch_size=self.batch_size,
+            shuffle=False,
+            num_workers=self.num_workers,
+            drop_last=True,
+            pin_memory=False,
+        )
 
     def test_dataloader(self):
-        return [self.test_loader, self.global_test_loader]
+        if self.local_te_subset is None or self.global_te_subset is None:
+            raise ValueError("Test datasets not initialized. Please call setup('test') before requesting test_dataloader.")
+        logging_training.info("Local test set size: {}".format(len(self.local_te_subset)))
+        logging_training.info("Global test set size: {}".format(len(self.global_te_subset)))
+        return [
+            DataLoader(
+                self.local_te_subset,
+                batch_size=self.batch_size,
+                shuffle=False,
+                num_workers=self.num_workers,
+                drop_last=True,
+                pin_memory=False,
+            ),
+            DataLoader(
+                self.global_te_subset,
+                batch_size=self.batch_size,
+                shuffle=False,
+                num_workers=self.num_workers,
+                drop_last=True,
+                pin_memory=False,
+            ),
+        ]
 
     def bootstrap_dataloader(self):
-        return self.bootstrap_loader
+        if self.data_val is None:
+            raise ValueError("Validation dataset not initialized. Please call setup('fit') before requesting bootstrap_dataloader.")
+        random_sampler = RandomSampler(
+            data_source=self.data_val, replacement=False, num_samples=max(int(len(self.data_val) / 3), 300)
+        )
+        logging_training.info("Bootstrap samples: {}".format(len(random_sampler)))
+        return DataLoader(
+            self.data_train,
+            batch_size=self.batch_size,
+            shuffle=False,
+            sampler=random_sampler,
+            num_workers=self.num_workers,
+            drop_last=True,
+            pin_memory=False,
+        )

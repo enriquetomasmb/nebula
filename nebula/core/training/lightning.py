@@ -243,16 +243,11 @@ class Lightning:
         try:
             self.create_trainer()
             logging.info(f"{'='*10} [Training] Started (check training logs for progress) {'='*10}")
-            with ThreadPoolExecutor() as pool:
-                future = asyncio.get_running_loop().run_in_executor(pool, self._train_sync)
-                await asyncio.wait_for(future, timeout=3600)
-            self._trainer = None
+            await asyncio.to_thread(self._train_sync)
             logging.info(f"{'='*10} [Training] Finished (check training logs for progress) {'='*10}")
         except Exception as e:
             logging_training.error(f"Error training model: {e}")
             logging_training.error(traceback.format_exc())
-        finally:
-            self.cleanup()
 
     def _train_sync(self):
         try:
@@ -267,16 +262,11 @@ class Lightning:
         try:
             self.create_trainer()
             logging.info(f"{'='*10} [Testing] Started (check training logs for progress) {'='*10}")
-            with ThreadPoolExecutor() as pool:
-                future = asyncio.get_running_loop().run_in_executor(pool, self._test_sync)
-                await asyncio.wait_for(future, timeout=3600)
-            self._trainer = None
+            await asyncio.to_thread(self._test_sync)
             logging.info(f"{'='*10} [Testing] Finished (check training logs for progress) {'='*10}")
         except Exception as e:
             logging_training.error(f"Error testing model: {e}")
             logging_training.error(traceback.format_exc())
-        finally:
-            self.cleanup()
 
     def _test_sync(self):
         try:
@@ -288,13 +278,22 @@ class Lightning:
             # If "raise", the exception will be managed by the main thread
 
     def cleanup(self):
+        if self._trainer is not None:
+            self._trainer._teardown()
+            del self._trainer
+        if self.data is not None:
+            self.data.teardown()
         gc.collect()
         torch.cuda.empty_cache()
 
     def get_model_weight(self):
-        return len(self.data.train_dataloader().dataset)
+        weight = self.data.model_weight
+        if weight is None:
+            raise ValueError("Model weight not set. Please call setup('fit') before requesting model weight.")
+        return weight
 
     def on_round_start(self):
+        self.data.setup()
         self._logger.log_data({"Round": self.round})
         # self.reporter.enqueue_data("Round", self.round)
 
@@ -304,8 +303,7 @@ class Lightning:
         self.round += 1
         self.model.on_round_end()
         logging.info("Flushing memory cache at the end of round...")
-        torch.cuda.empty_cache()
-        gc.collect()
+        self.cleanup()
 
     def on_learning_cycle_end(self):
         self._logger.log_data({"Round": self.round})
