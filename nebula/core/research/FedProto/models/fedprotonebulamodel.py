@@ -20,6 +20,7 @@ class FedProtoNebulaModel(NebulaModel, ABC):
         beta=1,
     ):
         super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed)
+        self.automatic_optimization = False
         self.config = {"beta1": 0.851436, "beta2": 0.999689, "amsgrad": True}
         self.beta = beta
         self.global_protos = {}
@@ -44,6 +45,9 @@ class FedProtoNebulaModel(NebulaModel, ABC):
     def step(self, batch, batch_idx, phase):
 
         images, labels_g = batch
+        if phase == "Train":
+            optimizer = self.optimizers()
+
         images, labels = images.to(self.device), labels_g.to(self.device)
         logits, protos = self.forward_train(images)
 
@@ -64,23 +68,30 @@ class FedProtoNebulaModel(NebulaModel, ABC):
             loss2 = self.loss_mse(proto_new, protos)
         # Compute the final loss
         loss = loss1 + self.beta * loss2
-        self.process_metrics(phase, logits, labels, loss)
+
+        if phase == "Train":
+            optimizer.zero_grad()
+            self.manual_backward(loss)
+            optimizer.step()
+
+        self.process_metrics(phase, logits, labels, loss.detach())
+        del loss2, loss1, loss
 
         if phase == "Train":
             # Aggregate the protos
             for i in range(len(labels_g)):
                 label = labels_g[i].item()
                 if label not in self.agg_protos_label:
-                    self.agg_protos_label[label] = dict(sum=torch.zeros_like(protos[i, :]), count=0)
+                    self.agg_protos_label[label] = dict(sum=torch.zeros_like(protos[i, :].detach()), count=0)
                 self.agg_protos_label[label]["sum"] += protos[i, :].detach().clone()
                 self.agg_protos_label[label]["count"] += 1
 
-        return loss
+        del labels, labels_g, logits, protos, proto_new, images
 
     def get_protos(self):
 
         if len(self.agg_protos_label) == 0:
-            proto = {k: v.cpu() for k, v in self.global_protos.items()}
+            proto = {k: v.detach() for k, v in self.global_protos.items()}
 
             return proto
 
@@ -88,9 +99,9 @@ class FedProtoNebulaModel(NebulaModel, ABC):
         for label, proto_info in self.agg_protos_label.items():
 
             if proto_info["count"] > 1:
-                proto[label] = (proto_info["sum"] / proto_info["count"]).to("cpu")
+                proto[label] = (proto_info["sum"] / proto_info["count"]).detach()
             else:
-                proto[label] = proto_info["sum"].to("cpu")
+                proto[label] = proto_info["sum"].detach()
 
         return proto
 

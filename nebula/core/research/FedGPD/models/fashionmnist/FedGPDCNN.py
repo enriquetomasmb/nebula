@@ -80,6 +80,8 @@ class FedGPDFashionMNISTModelCNN(FedGPDNebulaModel):
                 return F.log_softmax(logits, dim=1), dense, [conv1, conv2]
             return logits, dense, [conv1, conv2]
 
+        del conv1, conv2
+
         if softmax:
             return F.log_softmax(logits, dim=1), dense
         return logits, dense
@@ -115,6 +117,8 @@ class FedGPDFashionMNISTModelCNN(FedGPDNebulaModel):
             dist = torch.norm(dense - proto, dim=1)
             distances.append(dist.unsqueeze(1))
         distances = torch.cat(distances, dim=1)
+
+        del input_layer, conv1, pool1, conv2, pool2, pool2_flat, dense
 
         # Return the predicted class based on the closest prototype
         return distances.argmin(dim=1)

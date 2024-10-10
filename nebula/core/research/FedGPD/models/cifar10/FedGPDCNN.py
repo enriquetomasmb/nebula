@@ -110,6 +110,8 @@ class FedGPDCIFAR10ModelCNN(FedGPDNebulaModel):
                 return F.log_softmax(logits, dim=1), dense, [conv1, conv2, conv3]
             return logits, dense, [conv1, conv2, conv3]
 
+        del conv1, conv2, conv3
+
         if softmax:
             return F.log_softmax(logits, dim=1), dense
         return logits, dense

@@ -122,10 +122,13 @@ class ProtoStudentCIFAR10ModelCNN(ProtoStudentNebulaModel):
         dense = self.fc_layer_dense(flattened)
         logits = self.fc_layer(dense)
 
+        del input_layer, flattened
         if is_feat:
             if softmax:
                 return F.log_softmax(logits, dim=1), dense, [conv1, conv2, conv3]
             return logits, dense, [conv1, conv2, conv3]
+
+        del conv1, conv2, conv3
 
         if softmax:
             return F.log_softmax(logits, dim=1), dense
@@ -146,6 +149,7 @@ class ProtoStudentCIFAR10ModelCNN(ProtoStudentNebulaModel):
         flattened = conv3.view(conv3.size(0), -1)  # Flatten the layer
         dense = self.fc_layer_dense(flattened)
 
+        del input_layer, flattened
         # Calculate distances
         distances = []
         for key, proto in self.global_protos.items():
@@ -155,6 +159,7 @@ class ProtoStudentCIFAR10ModelCNN(ProtoStudentNebulaModel):
             distances.append(dist.unsqueeze(1))
         distances = torch.cat(distances, dim=1)
 
+        del dense
         # Return the predicted class based on the closest prototype
         return distances.argmin(dim=1)
 

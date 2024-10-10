@@ -1,12 +1,9 @@
-import logging
 import copy
 from abc import ABC
 import torch
 from nebula.core.optimizations.adaptative_weighted.weighting import Weighting
 from nebula.core.optimizations.communications.KD.models.teachernebulamodel import TeacherNebulaModel
 from nebula.core.optimizations.adaptative_weighted.adaptativeweighting import AdaptiveWeighting
-from nebula.core.optimizations.communications.KD_prototypes.utils.GlobalPrototypeDistillationLoss import \
-    GlobalPrototypeDistillationLoss
 
 
 class ProtoTeacherNebulaModel(TeacherNebulaModel, ABC):
@@ -30,7 +27,7 @@ class ProtoTeacherNebulaModel(TeacherNebulaModel, ABC):
         self.automatic_optimization = False
         self.config = {"beta1": 0.851436, "beta2": 0.999689, "amsgrad": True}
         if weighting == "adaptative":
-            self.weighting = AdaptiveWeighting(min_val=1, max_val=10)
+            self.weighting = AdaptiveWeighting(min_weight=1, max_weight=10)
         else:
             self.weighting = Weighting(alpha_value=alpha_kd, beta_value=beta_feat, lambda_value=lambda_proto)
         self.global_protos = dict()
@@ -95,9 +92,9 @@ class ProtoTeacherNebulaModel(TeacherNebulaModel, ABC):
         if phase == "Train":
             # Aggregate the prototypes
             for i in range(len(labels_g)):
-                label = labels_g[i].detach()
+                label = labels_g[i].item()
                 if label not in self.agg_protos_label:
-                    self.agg_protos_label[label] = dict(sum=torch.zeros_like(protos[i, :]).detach(), count=0)
+                    self.agg_protos_label[label] = dict(sum=torch.zeros_like(protos[i, :].detach()), count=0)
                 self.agg_protos_label[label]["sum"] += protos[i, :].detach().clone()
                 self.agg_protos_label[label]["count"] += 1
 
@@ -139,7 +136,7 @@ class MDProtoTeacherNebulaModel(ProtoTeacherNebulaModel, ABC):
         if len(self.global_protos) == 0:
             loss_protos = 0 * loss_cls
         else:
-            proto_new = protos.clone()
+            proto_new = protos.clone().detach()
             i = 0
             for label in labels:
                 if label.detach() in self.global_protos.keys():
@@ -175,9 +172,9 @@ class MDProtoTeacherNebulaModel(ProtoTeacherNebulaModel, ABC):
         if phase == "Train":
             # Aggregate the prototypes
             for i in range(len(labels_g)):
-                label = labels_g[i].detach()
+                label = labels_g[i].item()
                 if label not in self.agg_protos_label:
-                    self.agg_protos_label[label] = dict(sum=torch.zeros_like(protos[i, :]), count=0)
+                    self.agg_protos_label[label] = dict(sum=torch.zeros_like(protos[i, :].detach()), count=0)
                 self.agg_protos_label[label]["sum"] += protos[i, :].detach().clone()
                 self.agg_protos_label[label]["count"] += 1
 

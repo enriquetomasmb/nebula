@@ -96,11 +96,13 @@ class ProtoStudentFashionMNISTModelCNN(ProtoStudentNebulaModel):
         dense = self.relu(self.l1(pool2_flat))
         logits = self.l2(dense)
 
+        del input_layer, pool2_flat, pool2, pool1
         if is_feat:
             if softmax:
                 return F.log_softmax(logits, dim=1), dense, [conv1, conv2]
             return logits, dense, [conv1, conv2]
 
+        del conv1, conv2
         if softmax:
             return F.log_softmax(logits, dim=1), dense
         return logits, dense
@@ -127,7 +129,7 @@ class ProtoStudentFashionMNISTModelCNN(ProtoStudentNebulaModel):
 
         # Fully connected layers
         dense = self.relu(self.l1(pool2_flat))
-
+        del input_layer, pool2_flat, pool2, pool1, conv2, conv1
         # Calculate distances
         distances = []
         for key, proto in self.global_protos.items():
@@ -137,6 +139,7 @@ class ProtoStudentFashionMNISTModelCNN(ProtoStudentNebulaModel):
             distances.append(dist.unsqueeze(1))
         distances = torch.cat(distances, dim=1)
 
+        del dense
         # Return the predicted class based on the closest prototype
         return distances.argmin(dim=1)
 

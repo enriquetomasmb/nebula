@@ -23,6 +23,7 @@ class Attention(nn.Module):
             f_t = F.adaptive_avg_pool2d(f_t, (s_H, s_H))
         else:
             pass
+        del s_H, t_H
         return (self.at(f_s) - self.at(f_t)).pow(2).mean()
 
     def at(self, f):

@@ -54,6 +54,8 @@ class FedProtoMNISTModelCNN(FedProtoNebulaModel):
         dense = self.relu(self.l1(pool2_flat))
         logits = self.l2(dense)
 
+        del input_layer, conv1, pool1, conv2, pool2, pool2_flat
+
         return F.log_softmax(logits, dim=1), dense
 
     def forward(self, x):
@@ -79,6 +81,7 @@ class FedProtoMNISTModelCNN(FedProtoNebulaModel):
         # Fully connected layers
         dense = self.relu(self.l1(pool2_flat))
 
+        del input_layer, conv1, pool1, conv2, pool2, pool2_flat
         # Calculate distances
         distances = []
         for key, proto in self.global_protos.items():
@@ -89,5 +92,6 @@ class FedProtoMNISTModelCNN(FedProtoNebulaModel):
             distances.append(dist.unsqueeze(1))
         distances = torch.cat(distances, dim=1)
 
+        del dense
         # Return the predicted class based on the closest prototype
         return distances.argmin(dim=1)

@@ -48,4 +48,6 @@ class GlobalPrototypeDistillationLoss(nn.Module):
                 global_softmax = F.softmax(global_proto / self.temperature, dim=0)
                 loss_gpd += torch.sum(global_softmax * torch.log(local_softmax[i]))
 
+        del local_softmax
+
         return -loss_gpd
