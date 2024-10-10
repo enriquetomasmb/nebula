@@ -49,6 +49,7 @@ class Reporter:
             await self.__report_data_queue()
             await self.__report_resources()
             self.counter += 1
+            
             if self.counter % 50 == 0:
                 logging.info(f"Reloading config file...")
                 self.cm.engine.config.reload_config_file()

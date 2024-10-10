@@ -717,6 +717,7 @@ def remove_scenario(scenario_name=None):
     remove_scenario_by_name(scenario_name)
     remove_note(scenario_name)
     ScenarioManagement.remove_files_by_scenario(scenario_name)
+    ScenarioManagement.remove_trustworthiness_files(scenario_name)
 
 
 @app.get("/nebula/dashboard/{scenario_name}/remove")
@@ -1057,6 +1058,7 @@ async def run_scenario(scenario_data, role):
     scenario_update_record(
         scenario_name=scenarioManagement.scenario_name,
         start_time=scenarioManagement.start_date_scenario,
+        completed_time = "",
         end_time="",
         status="running",
         title=scenario_data["scenario_title"],
@@ -1102,10 +1104,63 @@ async def run_scenarios(data, role):
         if stop_all_scenarios_event.is_set():
             stop_all_scenarios_event.clear()
             stop_scenario(scenario_name)
-            return
+            return      
+
         finish_scenario_event.clear()
         scenarios_finished = scenarios_finished + 1
         stop_scenario(scenario_name)
+        
+        #Trust#
+        if scenario_data['with_trustworthiness']:
+            from nebula.addons.trustworthiness.factsheet import Factsheet
+            from nebula.addons.trustworthiness.metric import TrustMetricManager
+            
+            # Calculate of post training metrics for trustworthiness
+            # Get the start and the end time of the scenario to calculate the elapsed time
+            
+            # Wait to ensure it's completed
+            await asyncio.sleep(15)
+            
+            scenario = get_scenario_by_name(scenario_name)
+            
+            factsheet = Factsheet()
+            factsheet.populate_factsheet_post_train(scenario)
+    
+            # Get the weight of the different pillars
+            data_file_path = os.path.join(os.environ.get('NEBULA_CONFIG_DIR'),scenario_name,"scenario.json")
+            with open(data_file_path, 'r') as data_file:
+                data = json.load(data_file)
+            
+            weights = {
+                "robustness": float(data["robustness_pillar"]),
+                "resilience_to_attacks": float(data["resilience_to_attacks"]),
+                "algorithm_robustness": float(data["algorithm_robustness"]),
+                "client_reliability": float(data["client_reliability"]),
+                "privacy": float(data["privacy_pillar"]),
+                "technique": float(data["technique"]),
+                "uncertainty": float(data["uncertainty"]),
+                "indistinguishability": float(data["indistinguishability"]),
+                "fairness": float(data["fairness_pillar"]),
+                "selection_fairness": float(data["selection_fairness"]),
+                "performance_fairness": float(data["performance_fairness"]),
+                "class_distribution": float(data["class_distribution"]),
+                "explainability": float(data["explainability_pillar"]),
+                "interpretability": float(data["interpretability"]),
+                "post_hoc_methods": float(data["post_hoc_methods"]),
+                "accountability": float(data["accountability_pillar"]),
+                "factsheet_completeness":  float(data["factsheet_completeness"]),
+                "architectural_soundness": float(data["architectural_soundness_pillar"]),
+                "client_management": float(data["client_management"]),
+                "optimization": float(data["optimization"]),
+                "sustainability": float(data["sustainability_pillar"]),
+                "energy_source": float(data["energy_source"]),
+                "hardware_efficiency": float(data["hardware_efficiency"]),
+                "federation_complexity": float(data["federation_complexity"])
+            }
+    
+            trust_metric_manager = TrustMetricManager(scenario[1])
+            trust_metric_manager.evaluate(scenario, weights, use_weights=True)
+            
         await asyncio.sleep(5)
 
 

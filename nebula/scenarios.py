@@ -15,6 +15,7 @@ import docker
 
 from nebula.addons.blockchain.blockchain_deployer import BlockchainDeployer
 from nebula.addons.topologymanager import TopologyManager
+from nebula.addons.trustworthiness.factsheet import Factsheet
 from nebula.config.config import Config
 from nebula.core.utils.certificate import generate_ca_certificate, generate_certificate
 
@@ -149,6 +150,31 @@ class Scenario:
         mobile_participants_percent,
         additional_participants,
         schema_additional_participants,
+        with_trustworthiness,
+        robustness_pillar,
+        resilience_to_attacks,
+        algorithm_robustness,
+        client_reliability,
+        privacy_pillar,
+        technique,
+        uncertainty,
+        indistinguishability,
+        fairness_pillar,
+        selection_fairness,
+        performance_fairness,
+        class_distribution,
+        explainability_pillar,
+        interpretability,
+        post_hoc_methods,
+        accountability_pillar,
+        factsheet_completeness,
+        architectural_soundness_pillar,
+        client_management,
+        optimization,
+        sustainability_pillar,
+        energy_source,
+        hardware_efficiency,
+        federation_complexity,
     ):
         self.scenario_title = scenario_title
         self.scenario_description = scenario_description
@@ -190,6 +216,31 @@ class Scenario:
         self.mobile_participants_percent = mobile_participants_percent
         self.additional_participants = additional_participants
         self.schema_additional_participants = schema_additional_participants
+        self.with_trustworthiness = with_trustworthiness
+        self.robustness_pillar  = robustness_pillar 
+        self.resilience_to_attacks  = resilience_to_attacks 
+        self.algorithm_robustness  = algorithm_robustness 
+        self.client_reliability  = client_reliability 
+        self.privacy_pillar = privacy_pillar
+        self.technique = technique
+        self.uncertainty = uncertainty
+        self.indistinguishability = indistinguishability
+        self.fairness_pillar = fairness_pillar
+        self.selection_fairness = selection_fairness
+        self.performance_fairness = performance_fairness
+        self.class_distribution = class_distribution
+        self.explainability_pillar = explainability_pillar
+        self.interpretability = interpretability
+        self.post_hoc_methods = post_hoc_methods
+        self.accountability_pillar = accountability_pillar
+        self.factsheet_completeness = factsheet_completeness
+        self.architectural_soundness_pillar = architectural_soundness_pillar
+        self.client_management = client_management
+        self.optimization = optimization
+        self.sustainability_pillar = sustainability_pillar
+        self.energy_source = energy_source
+        self.hardware_efficiency = hardware_efficiency
+        self.federation_complexity = federation_complexity
 
     def attack_node_assign(
         self,
@@ -286,6 +337,16 @@ class ScenarioManagement:
         self.topologymanager = None
         self.env_path = None
         self.use_blockchain = self.scenario.agg_algorithm == "BlockchainReputation"
+            
+        if self.scenario.with_trustworthiness is True:
+            trust_dir = os.path.join(self.log_dir, self.scenario_name, "trustworthiness")
+        
+            # Create a directory to save files to calcutate trust
+            os.makedirs(trust_dir, exist_ok=True)
+            os.chmod(trust_dir, 0o777)
+                
+            factsheet = Factsheet()
+            factsheet.populate_factsheet_pre_train(scenario, self.scenario_name)
 
         # Create Scenario management dirs
         os.makedirs(self.config_dir, exist_ok=True)
@@ -381,6 +442,31 @@ class ScenarioManagement:
             participant_config["mobility_args"]["radius_federation"] = self.scenario.radius_federation
             participant_config["mobility_args"]["scheme_mobility"] = self.scenario.scheme_mobility
             participant_config["mobility_args"]["round_frequency"] = self.scenario.round_frequency
+            participant_config["trust_args"]["with_trustworthiness"] = self.scenario.with_trustworthiness
+            participant_config["trust_args"]["robustness_pillar"] = self.scenario.robustness_pillar
+            participant_config["trust_args"]["resilience_to_attacks"] = self.scenario.resilience_to_attacks
+            participant_config["trust_args"]["algorithm_robustness"] = self.scenario.algorithm_robustness
+            participant_config["trust_args"]["client_reliability"] = self.scenario.client_reliability
+            participant_config["trust_args"]["privacy_pillar"] = self.scenario.privacy_pillar
+            participant_config["trust_args"]["technique"] = self.scenario.technique
+            participant_config["trust_args"]["uncertainty"] = self.scenario.uncertainty
+            participant_config["trust_args"]["indistinguishability"] = self.scenario.indistinguishability
+            participant_config["trust_args"]["fairness_pillar"] = self.scenario.fairness_pillar
+            participant_config["trust_args"]["selection_fairness"] = self.scenario.selection_fairness
+            participant_config["trust_args"]["performance_fairness"] = self.scenario.performance_fairness
+            participant_config["trust_args"]["class_distribution"] = self.scenario.class_distribution
+            participant_config["trust_args"]["explainability_pillar"] = self.scenario.explainability_pillar
+            participant_config["trust_args"]["interpretability"] = self.scenario.interpretability
+            participant_config["trust_args"]["post_hoc_methods"] = self.scenario.post_hoc_methods
+            participant_config["trust_args"]["accountability_pillar"] =self.scenario.accountability_pillar
+            participant_config["trust_args"]["factsheet_completeness"] = self.scenario.factsheet_completeness
+            participant_config["trust_args"]["architectural_soundness_pillar"] =self.scenario.architectural_soundness_pillar
+            participant_config["trust_args"]["client_management"] = self.scenario.client_management
+            participant_config["trust_args"]["optimization"] = self.scenario.optimization
+            participant_config["trust_args"]["sustainability_pillar"] = self.scenario.sustainability_pillar
+            participant_config["trust_args"]["energy_source"] = self.scenario.energy_source
+            participant_config["trust_args"]["hardware_efficiency"] = self.scenario.hardware_efficiency
+            participant_config["trust_args"]["federation_complexity"] = self.scenario.federation_complexity
 
             with open(participant_file, "w") as f:
                 json.dump(participant_config, f, sort_keys=False, indent=2)
@@ -798,6 +884,19 @@ class ScenarioManagement:
             with open(f"{self.config_dir}/participant_{node['device_args']['idx']}.json", "w") as f:
                 json.dump(node, f, indent=4)
 
+        # Include additional config to the participants
+        for idx, node in enumerate(self.config.participants):
+            node["tracking_args"]["log_dir"] = "/nebula/app/logs"
+            node["tracking_args"]["config_dir"] = f"/nebula/app/config/{self.scenario_name}"
+            node["scenario_args"]["controller"] = self.controller
+            node["security_args"]["certfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_cert.pem"
+            node["security_args"]["keyfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_key.pem"
+            node["security_args"]["cafile"] = f"/nebula/app/certs/ca_cert.pem"
+
+            # Write the config file in config directory
+            with open(f"{self.config_dir}/participant_{node['device_args']['idx']}.json", "w") as f:
+                json.dump(node, f, indent=4)
+
         # Start the Docker Compose file, catch error if any
         try:
             subprocess.check_call(
@@ -934,6 +1033,23 @@ class ScenarioManagement:
                 os.path.join(os.environ["NEBULA_LOGS_DIR"], scenario_name),
                 os.path.join(os.environ["NEBULA_ROOT"], "app", "tmp", scenario_name),
             )
+        except FileNotFoundError:
+            logging.warning("Files not found, nothing to remove")
+        except Exception as e:
+            logging.error("Unknown error while removing files")
+            logging.error(e)
+            raise e
+    
+    @classmethod
+    def remove_trustworthiness_files(cls, scenario_name):
+        trustworthiness_files_path = os.path.normpath(os.path.join(os.environ.get("NEBULA_LOGS_DIR"), scenario_name, "trustworthiness"))
+        try:
+            if not trustworthiness_files_path.startswith(os.environ.get("NEBULA_LOGS_DIR")):
+                raise Exception(f"Removing {scenario_name} is not allowed")
+            shutil.rmtree(trustworthiness_files_path) 
+        except PermissionError:
+            # Avoid error if the user does not have enough permissions to remove the files
+            logging.warning("Not enough permissions to remove the files, moving them to tmp folder")
         except FileNotFoundError:
             logging.warning("Files not found, nothing to remove")
         except Exception as e:

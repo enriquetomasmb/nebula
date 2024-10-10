@@ -1,3 +1,9 @@
+#
+# This file contains code developed by Eduardo López Bernal during his Master Thesis at the University of Murcia.
+# - Design and implementation of a system to measure the trust level in federated learning scenarios
+# The code has been adapted and integrated into the Nebula platform.
+#
+
 import logging
 import math
 import numbers
@@ -6,6 +12,7 @@ from datetime import datetime
 from math import e
 
 import numpy as np
+from nebula.addons.trustworthiness.utils import read_csv
 import shap
 import torch.nn
 from art.estimators.classification import PyTorchClassifier
@@ -256,10 +263,10 @@ def get_elapsed_time(scenario):
         float: The elapsed time.
     """
     start_time = scenario[1]
-    end_time = scenario[2]
+    completed_time = scenario[3]
 
     start_date = datetime.strptime(start_time, "%d/%m/%Y %H:%M:%S")
-    end_date = datetime.strptime(end_time, "%d/%m/%Y %H:%M:%S")
+    end_date = datetime.strptime(completed_time, "%d/%m/%Y %H:%M:%S")
 
     elapsed_time = (end_date - start_date).total_seconds() / 60
 
@@ -289,7 +296,7 @@ def get_bytes_models(models_files):
     return avg_model_size
 
 
-def get_bytes_sent_recv(bytes_sent_files, bytes_recv_files):
+def get_bytes_sent_recv(scenario_name):
     """
     Calculates the mean bytes sent and received of the nodes.
 
@@ -302,24 +309,23 @@ def get_bytes_sent_recv(bytes_sent_files, bytes_recv_files):
     """
     total_upload_bytes = 0
     total_download_bytes = 0
-    number_files = len(bytes_sent_files)
 
-    for file_bytes_sent, file_bytes_recv in zip(bytes_sent_files, bytes_recv_files):
-        with open(file_bytes_sent, "r") as f:
-            bytes_sent = f.read()
+    data_file = os.path.join(os.environ.get('NEBULA_LOGS_DIR'), scenario_name, "trustworthiness", "data_results.csv")
 
-        with open(file_bytes_recv, "r") as f:
-            bytes_recv = f.read()
+    data = read_csv(data_file)
 
-        total_upload_bytes += int(bytes_sent)
-        total_download_bytes += int(bytes_recv)
+    number_files = len(data)
 
+    total_upload_bytes = int(data["bytes_sent"].sum())
+    total_download_bytes = int(data["bytes_recv"].sum())
+    
     avg_upload_bytes = total_upload_bytes / number_files
     avg_download_bytes = total_download_bytes / number_files
+
     return total_upload_bytes, total_download_bytes, avg_upload_bytes, avg_download_bytes
 
 
-def get_avg_loss_accuracy(loss_files, accuracy_files):
+def get_avg_loss_accuracy(scenario_name):
     """
     Calculates the mean accuracy and loss models of the nodes.
 
@@ -332,27 +338,21 @@ def get_avg_loss_accuracy(loss_files, accuracy_files):
     """
     total_accuracy = 0
     total_loss = 0
-    number_files = len(loss_files)
-    accuracies = []
 
-    for file_loss, file_accuracy in zip(loss_files, accuracy_files):
-        with open(file_loss, "r") as f:
-            loss = f.read()
+    data_file = os.path.join(os.environ.get('NEBULA_LOGS_DIR'), scenario_name, "trustworthiness", "data_results.csv")
 
-        with open(file_accuracy, "r") as f:
-            accuracy = f.read()
+    data = read_csv(data_file)
 
-        total_loss += float(loss)
-        total_accuracy += float(accuracy)
-        accuracies.append(float(accuracy))
+    number_files = len(data)
 
+    total_loss = data["loss"].sum()
+    total_accuracy = data["accuracy"].sum()
+    
     avg_loss = total_loss / number_files
     avg_accuracy = total_accuracy / number_files
-
-    std_accuracy = statistics.stdev(accuracies)
+    std_accuracy = statistics.stdev(data["accuracy"])
 
     return avg_loss, avg_accuracy, std_accuracy
-
 
 def get_feature_importance_cv(model, test_sample):
     """
@@ -370,7 +370,7 @@ def get_feature_importance_cv(model, test_sample):
         cv = 0
         batch_size = 10
         device = "cpu"
-
+        
         if isinstance(model, torch.nn.Module):
             batched_data, _ = test_sample
 
@@ -379,15 +379,19 @@ def get_feature_importance_cv(model, test_sample):
 
             background = batched_data[:m].to(device)
             test_data = batched_data[m:n].to(device)
-
-            e = shap.DeepExplainer(model, background)
-            shap_values = e.shap_values(test_data)
+            try:
+                e = shap.DeepExplainer(model, background)
+                shap_values = e.shap_values(test_data)
+            except Exception as e:
+                e = shap.GradientExplainer(model, background)
+                shap_values = e.shap_values(test_data)
+            
             if shap_values is not None and len(shap_values) > 0:
                 sums = np.array([shap_values[i].sum() for i in range(len(shap_values))])
                 abs_sums = np.absolute(sums)
                 cv = variation(abs_sums)
     except Exception as e:
-        logger.warning("Could not compute feature importance CV with shap")
+        logger.warning(f"Could not compute feature importance CV with shap {e}")
         cv = 1
     if math.isnan(cv):
         cv = 1
@@ -439,7 +443,12 @@ def stop_emissions_tracking_and_save(tracker: EmissionsTracker, outdir: str, emi
     emissions_file = os.path.join(outdir, emissions_file)
 
     if exists(emissions_file):
-        df = pd.read_csv(emissions_file)
+        try:
+            df = pd.read_csv(emissions_file)
+        except pd.errors.EmptyDataError:
+            logging.info(f"The file {emissions_file} is empty.")
+        except Exception as e:
+            logging.error(f"Error reading the file {emissions_file}: {e}")
     else:
         df = pd.DataFrame(columns=["role", "energy_grid", "emissions", "workload", "CPU_model", "GPU_model"])
     try:

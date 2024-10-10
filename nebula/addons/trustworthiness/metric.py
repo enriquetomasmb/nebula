@@ -1,15 +1,14 @@
+#
+# This file contains code developed by Eduardo López Bernal during his Master Thesis at the University of Murcia.
+# - Design and implementation of a system to measure the trust level in federated learning scenarios
+# The code has been adapted and integrated into the Nebula platform.
+#
+
 import json
 import logging
-import math
 import os
-import shutil
-from json import JSONDecodeError
 
-import numpy as np
-import pandas as pd
-from numpy import NaN
-from tabulate import tabulate
-
+from nebula.addons.trustworthiness.graphics import Graphics
 from nebula.addons.trustworthiness.pillar import TrustPillar
 from nebula.addons.trustworthiness.utils import write_results_json
 
@@ -23,10 +22,11 @@ class TrustMetricManager:
     Manager class to help store the output directory and handle calls from the FL framework.
     """
 
-    def __init__(self):
+    def __init__(self, scenario_start_time):
         self.factsheet_file_nm = "factsheet.json"
         self.eval_metrics_file_nm = "eval_metrics.json"
         self.nebula_trust_results_nm = "nebula_trust_results.json"
+        self.scenario_start_time = scenario_start_time
 
     def evaluate(self, scenario, weights, use_weights=False):
         """
@@ -39,9 +39,9 @@ class TrustMetricManager:
         """
         # Get scenario name
         scenario_name = scenario[0]
-        factsheet_file = os.path.join(dirname, f"files/{scenario_name}/{self.factsheet_file_nm}")
-        metrics_cfg_file = os.path.join(dirname, f"configs/{self.eval_metrics_file_nm}")
-        results_file = os.path.join(dirname, f"files/{scenario_name}/{self.nebula_trust_results_nm}")
+        factsheet_file = os.path.join(os.environ.get('NEBULA_LOGS_DIR'), scenario_name, "trustworthiness", self.factsheet_file_nm)
+        metrics_cfg_file = os.path.join(dirname, "configs", self.eval_metrics_file_nm)
+        results_file = os.path.join(os.environ.get('NEBULA_LOGS_DIR'), scenario_name, "trustworthiness", self.nebula_trust_results_nm)
 
         if not os.path.exists(factsheet_file):
             logger.error(f"{factsheet_file} is missing! Please check documentation.")
@@ -63,10 +63,13 @@ class TrustMetricManager:
             for key, value in metrics:
                 pillar = TrustPillar(key, value, input_docs, use_weights)
                 score, result = pillar.evaluate()
-                weight = weights.get(key)
+                weight = weights.get(key) / 100
                 final_score += weight * score
                 result_print.append([key, score])
                 result_json["pillars"].append(result)
             final_score = round(final_score, 2)
             result_json["trust_score"] = final_score
             write_results_json(results_file, result_json)
+            
+            graphics = Graphics(self.scenario_start_time, scenario_name)
+            graphics.graphics()

@@ -111,6 +111,9 @@
     "config_dir": "/Users/enrique/Documents/nebula/app/config",
     "run_hash": ""
   },
+  "trust_args": {
+    "with_trustworthiness": false
+  },
   "mender_args": {
     "id": "",
     "mac": "",

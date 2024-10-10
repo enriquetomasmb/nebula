@@ -2,9 +2,13 @@ import logging
 from lightning import LightningDataModule
 from torch.utils.data import DataLoader, random_split, RandomSampler
 from nebula.core.datasets.changeablesubset import ChangeableSubset
+
 from nebula.config.config import TRAINING_LOGGER
 
 logging_training = logging.getLogger(TRAINING_LOGGER)
+
+import pickle as pk
+
 
 
 class DataModule(LightningDataModule):
@@ -28,6 +32,9 @@ class DataModule(LightningDataModule):
         target_label=0,
         target_changed_label=0,
         noise_type="salt",
+        trust = False,
+        scenario_name="",
+        idx = 0,
     ):
         super().__init__()
         self.train_set = train_set
@@ -48,6 +55,9 @@ class DataModule(LightningDataModule):
         self.target_label = target_label
         self.target_changed_label = target_changed_label
         self.noise_type = noise_type
+        self.trust = trust
+        self.scenario_name = scenario_name
+        self.idx = idx
 
         # logging_training.debug(f"Train set indices: {train_set_indices}")
         # logging_training.debug(f"Test set indices: {test_set_indices}")
@@ -124,7 +134,21 @@ class DataModule(LightningDataModule):
         )
         random_sampler = RandomSampler(data_source=data_val, replacement=False, num_samples=max(int(len(data_val) / 3), 300))
         self.bootstrap_loader = DataLoader(data_train, batch_size=self.batch_size, shuffle=False, sampler=random_sampler)
-        logging_training.info("Train samples: {} Val samples: {} Test samples: {} Global Test samples: {}".format(len(data_train), len(data_val), len(local_te_subset), len(global_te_subset)))
+
+        logging_training.info("Train samples: {} Val samples:{} Test samples:{} Global Test samples:{}".format(len(data_train), len(data_val), len(local_te_subset), len(global_te_subset)))
+        
+        if trust:
+            # Save data to local files to calculate the trustworthyness
+            train_loader_filename = f"app/logs/{scenario_name}/trustworthiness/participant_{self.idx}_train_loader.pk"
+            test_loader_filename = f"app/logs/{scenario_name}/trustworthiness/participant_{self.idx}_test_loader.pk"
+
+            with open(train_loader_filename, 'wb') as f:
+                pk.dump(self.train_loader, f)
+                f.close()
+            with open(test_loader_filename, 'wb') as f:
+                pk.dump(self.test_loader, f)
+                f.close()
+
 
     def train_dataloader(self):
         return self.train_loader
