@@ -1161,7 +1161,7 @@ async def run_scenarios(data, role):
             trust_metric_manager = TrustMetricManager(scenario[1])
             trust_metric_manager.evaluate(scenario, weights, use_weights=True)
             
-        await asyncio.sleep(1)
+        await asyncio.sleep(5)
 
 
 @app.post("/nebula/dashboard/deployment/run")
