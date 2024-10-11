@@ -39,7 +39,7 @@ class InitialModelPropagation(PropagationStrategy):
         return node not in self.engine.cm.get_ready_connections()
 
     def prepare_model_payload(self, node: str) -> Optional[Tuple[Any, List[str], float]]:
-        return self.trainer.get_model_parameters(), self.trainer.DEFAULT_MODEL_WEIGHT
+        return self.trainer.get_model_parameters(initialize=True), self.trainer.DEFAULT_MODEL_WEIGHT
 
 
 class StableModelPropagation(PropagationStrategy):
