@@ -59,6 +59,8 @@ class ProtoFedAvg(Aggregator):
                 if "protos" in model_parameters:
                     client_protos = model_parameters["protos"]
                     for class_label, proto in client_protos.items():
+                        # Asegurarse de que el prototipo esté en el mismo dispositivo que proto_accum
+                        proto = proto.to(proto_accum[class_label].device) if class_label in proto_accum else proto
                         if class_label not in proto_accum:
                             # Inicializar acumulador para esta clase
                             proto_accum[class_label] = proto.clone().detach() * normalized_weight
