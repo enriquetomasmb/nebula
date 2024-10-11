@@ -16,8 +16,8 @@ class ProtoLightning(Lightning):
 
     """
 
-    def __init__(self, model, data, config=None, logger=None):
-        super().__init__(model, data, config, logger)
+    def __init__(self, model, data, config=None):
+        super().__init__(model, data, config)
 
     def set_model_parameters(self, params, initialize=False):
         if initialize:

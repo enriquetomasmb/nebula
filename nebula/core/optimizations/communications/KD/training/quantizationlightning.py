@@ -27,8 +27,8 @@ class QuantizationLightning(Lightning):
         logger: Logger.
     """
 
-    def __init__(self, model, data, config=None, logger=None):
-        super().__init__(model, data, config, logger)
+    def __init__(self, model, data, config=None):
+        super().__init__(model, data, config)
 
     def serialize_model(self, model):
 

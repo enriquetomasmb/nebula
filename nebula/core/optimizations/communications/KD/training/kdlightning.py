@@ -19,8 +19,8 @@ class KDLightning(QuantizationLightning):
         logger: Logger.
     """
 
-    def __init__(self, model, data, config=None, logger=None):
-        super().__init__(model, data, config, logger)
+    def __init__(self, model, data, config=None):
+        super().__init__(model, data, config)
         self._trainer = None
 
     async def train(self):

@@ -66,6 +66,8 @@ class FedProtoNebulaModel(NebulaModel, ABC):
                 i += 1
             # Compute the loss with the global protos
             loss2 = self.loss_mse(proto_new, protos)
+            del proto_new
+
         # Compute the final loss
         loss = loss1 + self.beta * loss2
 
@@ -86,7 +88,7 @@ class FedProtoNebulaModel(NebulaModel, ABC):
                 self.agg_protos_label[label]["sum"] += protos[i, :].detach().clone()
                 self.agg_protos_label[label]["count"] += 1
 
-        del labels, labels_g, logits, protos, proto_new, images
+        del labels, labels_g, logits, protos, images
 
     def get_protos(self):
 

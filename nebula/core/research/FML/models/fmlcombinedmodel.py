@@ -40,13 +40,13 @@ class FMLCombinedNebulaModel(NebulaModel, ABC):
                     MulticlassF1Score(num_classes=num_classes),
                 ]
             )
-        self.train_metrics = metrics.clone(prefix="Train/Personalized/")
+        self.train_metrics = metrics.clone(prefix="Train/")
         self.train_metrics_meme = metrics.clone(prefix="Train/Meme/")
-        self.val_metrics = metrics.clone(prefix="Validation/Personalized/")
+        self.val_metrics = metrics.clone(prefix="Validation/")
         self.val_metrics_meme = metrics.clone(prefix="Validation/Meme/")
-        self.test_metrics = metrics.clone(prefix="Test (Local)/Personalized/")
+        self.test_metrics = metrics.clone(prefix="Test (Local)/")
         self.test_metrics_meme = metrics.clone(prefix="Test (Local)/Meme/")
-        self.test_metrics_global = metrics.clone(prefix="Test (Global)/Personalized/")
+        self.test_metrics_global = metrics.clone(prefix="Test (Global)/")
         self.test_metrics_global_meme = metrics.clone(prefix="Test (Global)/Meme/")
         del metrics
 

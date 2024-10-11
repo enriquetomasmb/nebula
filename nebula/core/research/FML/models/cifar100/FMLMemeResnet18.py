@@ -16,7 +16,7 @@ class FMLCIFAR100MemeModelResNet18(FMLMemeNebulaModel):
         self,
         input_channels=3,
         num_classes=100,
-        learning_rate=0.1,
+        learning_rate=1e-3,
         metrics=None,
         confusion_matrix=None,
         seed=None,
@@ -43,7 +43,7 @@ class FMLCIFAR100MemeModelResNet18(FMLMemeNebulaModel):
         self.resnet.fc_dense = nn.Linear(self.resnet.fc.in_features, 512)
         self.resnet.fc = nn.Linear(512, num_classes)
 
-    def forward(self, x, softmax=True, is_feat=False):
+    def forward(self, x, softmax=False, is_feat=False):
         """Forward pass only for train the model.
         is_feat: bool, if True return the features of the model.
         softmax: bool, if True apply softmax to the logits.
@@ -75,16 +75,15 @@ class FMLCIFAR100MemeModelResNet18(FMLMemeNebulaModel):
             if softmax:
                 return (
                     F.log_softmax(logits, dim=1),
-                    dense,
                     [conv1, conv2, conv3, conv4, conv5],
                 )
-            return logits, dense, [conv1, conv2, conv3, conv4, conv5]
+            return logits, [conv1, conv2, conv3, conv4, conv5]
 
         del conv1, conv2, conv3, conv4, conv5
 
         if softmax:
-            return F.log_softmax(logits, dim=1), dense
-        return logits, dense
+            return F.log_softmax(logits, dim=1)
+        return logits
 
     def configure_optimizers(self):
         """ """
