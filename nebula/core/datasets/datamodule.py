@@ -59,11 +59,6 @@ class DataModule(LightningDataModule):
 
     def setup(self, stage=None):
         if stage in (None, 'fit'):
-        # Training / validation set
-        # Training / validation set
-        # rows_by_sub = floor(len(train_set) / self.partitions_number)
-            # Training / validation set
-        # rows_by_sub = floor(len(train_set) / self.partitions_number)
             tr_subset = ChangeableSubset(
                 self.train_set,
                 self.train_set_indices,
