@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import logging
+import gc
 import torch
 from nebula.addons.functions import print_msg_box
 import lightning as pl
@@ -39,10 +40,10 @@ class NebulaModel(pl.LightningModule, ABC):
             loss (torch.Tensor, optional): Loss value
         """
 
-        y_pred_classes = torch.argmax(y_pred, dim=1)
+        y_pred_classes = torch.argmax(y_pred, dim=1).detach()
+        y = y.detach()
         if phase == "Train":
-            # self.log(name=f"{phase}/Loss", value=loss, add_dataloader_idx=False)
-            self.logger.log_data({f"{phase}/Loss": loss.item()})
+            self.logger.log_data({f"{phase}/Loss": loss.detach()})
             self.train_metrics.update(y_pred_classes, y)
         elif phase == "Validation":
             self.val_metrics.update(y_pred_classes, y)
@@ -54,6 +55,8 @@ class NebulaModel(pl.LightningModule, ABC):
             self.cm_global.update(y_pred_classes, y) if self.cm_global is not None else None
         else:
             raise NotImplementedError
+        
+        del y_pred_classes, y
 
     def log_metrics_end(self, phase):
         """
@@ -74,7 +77,7 @@ class NebulaModel(pl.LightningModule, ABC):
         else:
             raise NotImplementedError
 
-        output = {f"{phase}/{key.replace('Multiclass', '').split('/')[-1]}": value for key, value in output.items()}
+        output = {f"{phase}/{key.replace('Multiclass', '').split('/')[-1]}": value.detach() for key, value in output.items()}
 
         self.logger.log_data(output, step=self.global_number[phase])
 
@@ -88,9 +91,6 @@ class NebulaModel(pl.LightningModule, ABC):
         Generate and plot the confusion matrix for the given phase.
         Args:
             phase (str): One of 'Train', 'Validation', 'Test (Local)', or 'Test (Global)'
-            :param phase:
-            :param print:
-            :param plot:
         """
         if phase == "Test (Local)":
             if self.cm is None:
@@ -107,21 +107,37 @@ class NebulaModel(pl.LightningModule, ABC):
             logging_training.info(f"{phase} / Confusion Matrix:\n{cm}")
 
         if plot_cm:
-            # TODO: Improve with strings for class names
-            cm_numpy = cm.numpy()
-            cm_numpy = cm_numpy.astype(int)
+            cm_numpy = cm.numpy().astype(int)
             classes = [i for i in range(self.num_classes)]
-            fig, ax = plt.subplots(figsize=(10, 10))
-            ax = plt.subplot()
-            sns.heatmap(cm_numpy, annot=True, fmt="d", cmap="Blues", ax=ax)
-            ax.set_xlabel("Predicted labels")
-            ax.set_ylabel("True labels")
-            ax.set_title("Confusion Matrix")
-            ax.xaxis.set_ticklabels(classes, rotation=90)
-            ax.yaxis.set_ticklabels(classes, rotation=0)
+            fig, ax = plt.subplots(figsize=(12, 12))
+            sns.heatmap(
+                cm_numpy,
+                annot=False,
+                fmt="",
+                cmap="Blues",
+                ax=ax,
+                xticklabels=classes,
+                yticklabels=classes,
+                square=True
+            )
+            ax.set_xlabel("Predicted labels", fontsize=12)
+            ax.set_ylabel("True labels", fontsize=12)
+            ax.set_title(f"{phase} Confusion Matrix", fontsize=16)
+            plt.xticks(rotation=90, fontsize=6)
+            plt.yticks(rotation=0, fontsize=6)
+            plt.tight_layout()
             self.logger.log_figure(fig, step=self.round, name=f"{phase}/CM")
             plt.close()
-        self.cm.reset() if phase == "Test (Local)" else self.cm_global.reset()
+            
+            del cm_numpy, classes, fig, ax
+
+        # Restablecer la matriz de confusión
+        if phase == "Test (Local)":
+            self.cm.reset()
+        else:
+            self.cm_global.reset()
+            
+        del cm
 
     def __init__(
         self,
