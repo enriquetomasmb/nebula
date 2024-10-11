@@ -2,7 +2,6 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
-from nebula.core.optimizations.communications.KD.utils.KD import DistillKL
 from nebula.core.optimizations.communications.KD_prototypes.models.cifar10.ProtoTeacherResnet18 import (
     MDProtoTeacherCIFAR10ModelResnet18,
     ProtoTeacherCIFAR10ModelResnet18,
@@ -20,7 +19,7 @@ class ProtoStudentCIFAR10ModelResnet8(ProtoStudentNebulaModel):
         self,
         input_channels=3,
         num_classes=10,
-        learning_rate=0.01,
+        learning_rate=1e-3,
         metrics=None,
         confusion_matrix=None,
         seed=None,
@@ -57,9 +56,6 @@ class ProtoStudentCIFAR10ModelResnet8(ProtoStudentNebulaModel):
         )
         self.embedding_dim = 512
         self.example_input_array = torch.rand(1, 3, 32, 32)
-        self.criterion_mse = torch.nn.MSELoss()
-        self.criterion_cls = torch.nn.CrossEntropyLoss()
-        self.criterion_kd = DistillKL(self.T)
         self.resnet = ResNet8()
         self.resnet.fc_dense = nn.Linear(self.resnet.fc.in_features, self.embedding_dim)
         self.resnet.fc = nn.Linear(self.embedding_dim, num_classes)

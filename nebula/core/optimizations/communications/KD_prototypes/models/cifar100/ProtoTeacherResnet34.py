@@ -2,10 +2,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 from torchvision.models import resnet34
-from nebula.core.optimizations.communications.KD.utils.KD import DistillKL
 from nebula.core.optimizations.communications.KD_prototypes.models.prototeachernebulamodel import ProtoTeacherNebulaModel, MDProtoTeacherNebulaModel
-from nebula.core.optimizations.communications.KD.utils.AT import Attention
-from nebula.core.optimizations.communications.KD_prototypes.utils.GlobalPrototypeDistillationLoss import GlobalPrototypeDistillationLoss
 
 
 class ProtoTeacherCIFAR100ModelResNet34(ProtoTeacherNebulaModel):
@@ -37,9 +34,6 @@ class ProtoTeacherCIFAR100ModelResNet34(ProtoTeacherNebulaModel):
 
         self.example_input_array = torch.rand(1, 3, 32, 32)
         self.embedding_dim = 512
-        self.criterion_cls = nn.CrossEntropyLoss()
-        self.criterion_mse = torch.nn.MSELoss()
-        self.criterion_gpd = GlobalPrototypeDistillationLoss(temperature=2)
         self.resnet = resnet34(num_classes=num_classes)
         self.resnet.fc_dense = nn.Linear(self.resnet.fc.in_features, self.embedding_dim)
         self.resnet.fc = nn.Linear(self.embedding_dim, num_classes)
@@ -164,10 +158,6 @@ class MDProtoTeacherCIFAR100ModelResNet34(MDProtoTeacherNebulaModel):
 
         self.example_input_array = torch.rand(1, 3, 32, 32)
         self.embedding_dim = 512
-        self.criterion_cls = nn.CrossEntropyLoss()
-        self.criterion_mse = torch.nn.MSELoss()
-        self.criterion_feat = Attention(self.p)
-        self.criterion_kd = DistillKL(self.T)
         self.resnet = resnet34()
         self.resnet.fc_dense = nn.Linear(self.resnet.fc.in_features, self.embedding_dim)
         self.resnet.fc = nn.Linear(self.embedding_dim, num_classes)

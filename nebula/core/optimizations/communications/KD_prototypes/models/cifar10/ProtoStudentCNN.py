@@ -1,7 +1,6 @@
 import torch
 import torch.nn.functional as F
 
-from nebula.core.optimizations.communications.KD.utils.KD import DistillKL
 from nebula.core.optimizations.communications.KD_prototypes.models.cifar10.ProtoTeacherCNN import MDProtoTeacherCIFAR10ModelCNN, ProtoTeacherCIFAR10ModelCNN
 from nebula.core.optimizations.communications.KD_prototypes.models.protostudentnebulamodel import ProtoStudentNebulaModel
 
@@ -52,9 +51,6 @@ class ProtoStudentCIFAR10ModelCNN(ProtoStudentNebulaModel):
         )
         self.embedding_dim = 512
         self.example_input_array = torch.rand(1, 3, 32, 32)
-        self.criterion_mse = torch.nn.MSELoss()
-        self.criterion_cls = torch.nn.CrossEntropyLoss()
-        self.criterion_kd = DistillKL(self.T)
 
         # Define layers of the model
         self.layer1 = torch.nn.Sequential(

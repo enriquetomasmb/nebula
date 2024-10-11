@@ -1,7 +1,6 @@
 import torch
 import torch.nn.functional as F
 
-from nebula.core.optimizations.communications.KD.utils.KD import DistillKL
 from nebula.core.optimizations.communications.KD_prototypes.models.mnist.ProtoTeacherCNN import MDProtoTeacherMNISTModelCNN, ProtoTeacherMNISTModelCNN
 from nebula.core.optimizations.communications.KD_prototypes.models.protostudentnebulamodel import ProtoStudentNebulaModel
 
@@ -52,9 +51,6 @@ class ProtoStudentMNISTModelCNN(ProtoStudentNebulaModel):
         )
         self.embedding_dim = 2048
         self.example_input_array = torch.zeros(1, 1, 28, 28)
-        self.criterion_mse = torch.nn.MSELoss()
-        self.criterion_cls = torch.nn.CrossEntropyLoss()
-        self.criterion_kd = DistillKL(self.T)
 
         self.conv1 = torch.nn.Conv2d(
             in_channels=input_channels,

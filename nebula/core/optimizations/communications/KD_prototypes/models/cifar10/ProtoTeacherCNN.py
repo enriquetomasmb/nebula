@@ -1,9 +1,6 @@
 import torch
-from torch import nn
 import torch.nn.functional as F
 
-from nebula.core.optimizations.communications.KD.utils.AT import Attention
-from nebula.core.optimizations.communications.KD.utils.KD import DistillKL
 from nebula.core.optimizations.communications.KD_prototypes.models.prototeachernebulamodel import ProtoTeacherNebulaModel, MDProtoTeacherNebulaModel
 
 
@@ -39,8 +36,6 @@ class ProtoTeacherCIFAR10ModelCNN(ProtoTeacherNebulaModel):
         )
         self.embedding_dim = 512
         self.example_input_array = torch.rand(1, 3, 32, 32)
-        self.criterion_cls = torch.nn.CrossEntropyLoss()
-        self.criterion_mse = torch.nn.MSELoss()
 
         self.layer1 = torch.nn.Sequential(
             torch.nn.Conv2d(input_channels, 64, kernel_size=3, padding=1),
@@ -205,11 +200,7 @@ class MDProtoTeacherCIFAR10ModelCNN(MDProtoTeacherNebulaModel):
         )
         self.embedding_dim = 512
         self.example_input_array = torch.rand(1, 3, 32, 32)
-        self.learning_rate = learning_rate
-        self.criterion_cls = nn.CrossEntropyLoss()
-        self.criterion_mse = torch.nn.MSELoss()
-        self.criterion_feat = Attention(self.p)
-        self.criterion_kd = DistillKL(self.T)
+
         self.layer1 = torch.nn.Sequential(
             torch.nn.Conv2d(input_channels, 64, kernel_size=3, padding=1),
             torch.nn.BatchNorm2d(64),

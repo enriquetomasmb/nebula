@@ -6,6 +6,7 @@ from torchvision.models import resnet18
 from nebula.core.optimizations.communications.KD.utils.AT import Attention
 from nebula.core.optimizations.communications.KD.utils.KD import DistillKL
 from nebula.core.optimizations.communications.KD_prototypes.models.prototeachernebulamodel import ProtoTeacherNebulaModel, MDProtoTeacherNebulaModel
+from nebula.core.optimizations.communications.KD_prototypes.utils.GlobalPrototypeDistillationLoss import GlobalPrototypeDistillationLoss
 
 
 class ProtoTeacherCIFAR10ModelResnet18(ProtoTeacherNebulaModel):
@@ -17,7 +18,7 @@ class ProtoTeacherCIFAR10ModelResnet18(ProtoTeacherNebulaModel):
         self,
         input_channels=3,
         num_classes=10,
-        learning_rate=0.1,
+        learning_rate=1e-3,
         metrics=None,
         confusion_matrix=None,
         seed=None,
@@ -42,6 +43,7 @@ class ProtoTeacherCIFAR10ModelResnet18(ProtoTeacherNebulaModel):
         self.example_input_array = torch.rand(1, 3, 32, 32)
         self.criterion_cls = torch.nn.CrossEntropyLoss()
         self.criterion_mse = torch.nn.MSELoss()
+        self.criterion_gpd = GlobalPrototypeDistillationLoss(temperature=2)
         self.embedding_dim = 512
         self.resnet = resnet18(num_classes=num_classes)
         self.resnet.fc_dense = nn.Linear(self.resnet.fc.in_features, self.embedding_dim)

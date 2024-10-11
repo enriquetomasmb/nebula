@@ -1,17 +1,15 @@
 import torch
-from torchvision.models import resnet18
-import torch.nn.functional as F
 from torch import nn
+import torch.nn.functional as F
+from torchvision.models import resnet18
 
 from nebula.core.optimizations.adaptative_weighted.adaptativeweighting import AdaptiveWeighting
 from nebula.core.optimizations.adaptative_weighted.decreasingweighting import DeacreasingWeighting
-from nebula.core.optimizations.communications.KD.utils.KD import DistillKL
 from nebula.core.optimizations.communications.KD_prototypes.models.cifar100.ProtoTeacherResnet34 import (
     ProtoTeacherCIFAR100ModelResNet34,
     MDProtoTeacherCIFAR100ModelResNet34,
 )
 from nebula.core.optimizations.communications.KD_prototypes.models.protostudentnebulamodel import ProtoStudentNebulaModel
-from nebula.core.optimizations.communications.KD_prototypes.utils.GlobalPrototypeDistillationLoss import GlobalPrototypeDistillationLoss
 
 
 class ProtoStudentCIFAR100ModelResnet18(ProtoStudentNebulaModel):
@@ -65,10 +63,6 @@ class ProtoStudentCIFAR100ModelResnet18(ProtoStudentNebulaModel):
         )
         self.embedding_dim = 512
         self.example_input_array = torch.rand(1, 3, 32, 32)
-        self.criterion_mse = torch.nn.MSELoss()
-        self.criterion_cls = torch.nn.CrossEntropyLoss()
-        self.criterion_kd = DistillKL(self.T)
-        self.criterion_gpd = GlobalPrototypeDistillationLoss(temperature=2)
         self.resnet = resnet18(num_classes=num_classes)
         self.resnet.fc_dense = nn.Linear(self.resnet.fc.in_features, self.embedding_dim)
         self.resnet.fc = nn.Linear(self.embedding_dim, num_classes)

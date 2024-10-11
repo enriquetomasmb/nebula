@@ -6,6 +6,7 @@ from nebula.core.optimizations.adaptative_weighted.decreasingweighting import De
 from nebula.core.optimizations.adaptative_weighted.weighting import Weighting
 from nebula.core.optimizations.communications.KD.models.studentnebulamodel import StudentNebulaModel
 from nebula.core.optimizations.adaptative_weighted.adaptativeweighting import AdaptiveWeighting
+from nebula.core.optimizations.communications.KD.utils.KD import DistillKL
 from nebula.core.optimizations.communications.KD_prototypes.utils.GlobalPrototypeDistillationLoss import GlobalPrototypeDistillationLoss
 
 
@@ -52,12 +53,16 @@ class ProtoStudentNebulaModel(StudentNebulaModel, ABC):
             self.send_logic_method = send_logic
         else:
             self.send_logic_method = None
+
+        self.criterion_mse = torch.nn.MSELoss()
+        self.criterion_cls = torch.nn.CrossEntropyLoss()
+        self.criterion_gpd = GlobalPrototypeDistillationLoss(temperature=2)
+        self.criterion_kd = DistillKL(self.T)
         self.model_updated_flag = False
         self.send_logic_counter = 0
         self.knowledge_distilation = knowledge_distilation
         self.global_protos = dict()
         self.agg_protos_label = dict()
-        self.criterion_gpd = GlobalPrototypeDistillationLoss(temperature=2)
 
     def get_protos(self):
         """

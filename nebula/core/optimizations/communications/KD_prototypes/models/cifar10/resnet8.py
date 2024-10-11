@@ -1,6 +1,5 @@
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
+from torch import nn
 from torchvision.models.resnet import ResNet, BasicBlock
 
 
@@ -11,7 +10,8 @@ class ResNet8(ResNet):
         super(ResNet8, self).__init__(block=BasicBlock, layers=layers)
 
         # Reemplazamos la capa fully connected
-        self.fc = nn.Linear(self.fc.in_features, num_classes)
+        # 256 porque ya no coincide con fc.in_features, ya que falta la layer4
+        self.fc = nn.Linear(256, num_classes)
 
     def _forward_impl(self, x):
         # Implementación forward estándar de ResNet

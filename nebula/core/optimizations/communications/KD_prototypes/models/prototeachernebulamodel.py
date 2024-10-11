@@ -1,9 +1,14 @@
 import copy
 from abc import ABC
 import torch
+from torch import nn
+
 from nebula.core.optimizations.adaptative_weighted.weighting import Weighting
 from nebula.core.optimizations.communications.KD.models.teachernebulamodel import TeacherNebulaModel
 from nebula.core.optimizations.adaptative_weighted.adaptativeweighting import AdaptiveWeighting
+from nebula.core.optimizations.communications.KD.utils.AT import Attention
+from nebula.core.optimizations.communications.KD.utils.KD import DistillKL
+from nebula.core.optimizations.communications.KD_prototypes.utils.GlobalPrototypeDistillationLoss import GlobalPrototypeDistillationLoss
 
 
 class ProtoTeacherNebulaModel(TeacherNebulaModel, ABC):
@@ -32,6 +37,9 @@ class ProtoTeacherNebulaModel(TeacherNebulaModel, ABC):
             self.weighting = Weighting(alpha_value=alpha_kd, beta_value=beta_feat, lambda_value=lambda_proto)
         self.global_protos = dict()
         self.agg_protos_label = dict()
+        self.criterion_cls = nn.CrossEntropyLoss()
+        self.criterion_mse = torch.nn.MSELoss()
+        self.criterion_gpd = GlobalPrototypeDistillationLoss(temperature=2)
 
     def get_protos(self):
         """
@@ -122,6 +130,11 @@ class MDProtoTeacherNebulaModel(ProtoTeacherNebulaModel, ABC):
 
         self.student_model = None
         self.p = p
+        self.criterion_cls = nn.CrossEntropyLoss()
+        self.criterion_mse = torch.nn.MSELoss()
+        self.criterion_feat = Attention(self.p)
+        self.criterion_kd = DistillKL(self.T)
+        self.criterion_gpd = GlobalPrototypeDistillationLoss(temperature=2)
 
     def step(self, batch, batch_idx, phase):
 
