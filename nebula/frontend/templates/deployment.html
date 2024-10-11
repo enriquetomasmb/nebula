@@ -1245,6 +1245,7 @@
 
                 // Step 5
                 document.getElementById("datasetSelect").value = data["dataset"];
+                updateModelOptions();
                 document.getElementById("iidSelect").value = data["iid"];
                 document.getElementById("partitionSelect").value = data["partition_selection"];
                 document.getElementById("partitionParameter").value = data["partition_parameter"];
@@ -1345,7 +1346,7 @@
                         scenarioStorage.actual_scenario = scenarioStorage.scenariosList.length - 1;
                         var last_scenario = scenarioStorage.scenariosList[scenarioStorage.actual_scenario];
                         setScenarioData(last_scenario);
-                        updateModelOptions();
+
 
                         //Show buttons to move through the list
                         if (scenarioStorage.scenariosList.length > 1){

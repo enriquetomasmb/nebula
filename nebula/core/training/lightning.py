@@ -3,7 +3,7 @@ import gc
 import logging
 from collections import OrderedDict
 import asyncio
-from concurrent.futures import ThreadPoolExecutor
+import os
 import traceback
 import hashlib
 import io
@@ -13,6 +13,13 @@ from lightning import Trainer
 from lightning.pytorch.callbacks import ProgressBar, ModelSummary
 from torch.nn import functional as F
 from nebula.core.utils.deterministic import enable_deterministic
+from lightning.pytorch.loggers import CSVLogger
+from nebula.core.utils.nebulalogger_tensorboard import NebulaTensorBoardLogger
+
+try:
+    from nebula.core.utils.nebulalogger import NebulaLogger
+except:
+    pass
 from nebula.config.config import TRAINING_LOGGER
 
 logging_training = logging.getLogger(TRAINING_LOGGER)
@@ -109,15 +116,19 @@ class Lightning:
     DEFAULT_MODEL_WEIGHT = 1
     BYPASS_MODEL_WEIGHT = 0
 
-    def __init__(self, model, data, config=None, logger=None):
+    def __init__(self, model, data, config=None):
         # self.model = torch.compile(model, mode="reduce-overhead")
         self.model = model
         self.data = data
         self.config = config
-        self._logger = logger
         self._trainer = None
         self.epochs = 1
         self.round = 0
+        self.experiment_name = self.config.participant["scenario_args"]["name"]
+        self.idx = self.config.participant["device_args"]["idx"]
+        self.log_dir = os.path.join(self.config.participant["tracking_args"]["log_dir"], self.experiment_name)
+        self._logger = None
+        self.create_logger()
         enable_deterministic(self.config)
 
     @property
@@ -133,7 +144,41 @@ class Lightning:
     def set_data(self, data):
         self.data = data
 
+    def create_logger(self):
+        if self.config.participant["tracking_args"]["local_tracking"] == "csv":
+            nebulalogger = CSVLogger(f"{self.log_dir}", name="metrics", version=f"participant_{self.idx}")
+        elif self.config.participant["tracking_args"]["local_tracking"] == "basic":
+            logger_config = None
+            if self._logger is not None:
+                logger_config = self._logger.get_logger_config()
+            nebulalogger = NebulaTensorBoardLogger(self.config.participant["scenario_args"]["start_time"], f"{self.log_dir}", name="metrics", version=f"participant_{self.idx}", log_graph=False)
+            # Restore logger configuration
+            nebulalogger.set_logger_config(logger_config)
+        elif self.config.participant["tracking_args"]["local_tracking"] == "advanced":
+            nebulalogger = NebulaLogger(
+                config=self.config,
+                engine=self,
+                scenario_start_time=self.config.participant["scenario_args"]["start_time"],
+                repo=f"{self.config.participant['tracking_args']['log_dir']}",
+                experiment=self.experiment_name,
+                run_name=f"participant_{self.idx}",
+                train_metric_prefix="train_",
+                test_metric_prefix="test_",
+                val_metric_prefix="val_",
+                log_system_params=False,
+            )
+            # nebulalogger_aim = NebulaLogger(config=self.config, engine=self, scenario_start_time=self.config.participant["scenario_args"]["start_time"], repo=f"aim://nebula-frontend:8085",
+            #                                     experiment=self.experiment_name, run_name=f"participant_{self.idx}",
+            #                                     train_metric_prefix='train_', test_metric_prefix='test_', val_metric_prefix='val_', log_system_params=False)
+            self.config.participant["tracking_args"]["run_hash"] = nebulalogger.experiment.hash
+        else:
+            nebulalogger = None
+
+        self._logger = nebulalogger
+
     def create_trainer(self):
+        # Create a new trainer and logger for each round
+        self.create_logger()
         num_gpus = torch.cuda.device_count()
         if self.config.participant["device_args"]["accelerator"] == "gpu" and num_gpus > 0:
             gpu_index = self.config.participant["device_args"]["idx"] % num_gpus

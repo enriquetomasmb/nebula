@@ -107,18 +107,25 @@ class NebulaModel(pl.LightningModule, ABC):
             logging_training.info(f"{phase} / Confusion Matrix:\n{cm}")
 
         if plot_cm:
-            # TODO: Improve with strings for class names
-            cm_numpy = cm.numpy()
-            cm_numpy = cm_numpy.astype(int)
+            cm_numpy = cm.numpy().astype(int)
             classes = [i for i in range(self.num_classes)]
-            fig, ax = plt.subplots(figsize=(10, 10))
-            ax = plt.subplot()
-            sns.heatmap(cm_numpy, annot=True, fmt="d", cmap="Blues", ax=ax)
-            ax.set_xlabel("Predicted labels")
-            ax.set_ylabel("True labels")
-            ax.set_title("Confusion Matrix")
-            ax.xaxis.set_ticklabels(classes, rotation=90)
-            ax.yaxis.set_ticklabels(classes, rotation=0)
+            fig, ax = plt.subplots(figsize=(12, 12))
+            sns.heatmap(
+                cm_numpy,
+                annot=False,
+                fmt="",
+                cmap="Blues",
+                ax=ax,
+                xticklabels=classes,
+                yticklabels=classes,
+                square=True
+            )
+            ax.set_xlabel("Predicted labels", fontsize=12)
+            ax.set_ylabel("True labels", fontsize=12)
+            ax.set_title(f"{phase} Confusion Matrix", fontsize=16)
+            plt.xticks(rotation=90, fontsize=6)
+            plt.yticks(rotation=0, fontsize=6)
+            plt.tight_layout()
             self.logger.log_figure(fig, step=self.round, name=f"{phase}/CM")
             plt.close()
             
