@@ -944,8 +944,10 @@
         var datasets = {
             "MNIST": ["MLP", "CNN"],
             "FashionMNIST": ["MLP", "CNN"],
-            "CIFAR10": ["CNN", "CNNv2", "CNNv3"],
-            "MilitarySAR": ["Custom"],
+            "EMNIST": ["MLP", "CNN"],
+            "CIFAR10": ["CNN", "CNNv2", "CNNv3", "ResNet9", "fastermobilenet", "simplemobilenet"],
+            "CIFAR100": ["CNN"],
+            "KITSUN": ["MLP"],
         }
         var datasetSelect = document.getElementById("datasetSelect");
         var modelSelect = document.getElementById("modelSelect");

@@ -5,6 +5,8 @@ import random
 import warnings
 import numpy as np
 import torch
+
+
 torch.multiprocessing.set_start_method("spawn", force=True)
 
 # Ignore CryptographyDeprecationWarning (datatime issues with cryptography library)
@@ -38,6 +40,14 @@ from nebula.core.models.cifar10.cnn import CIFAR10ModelCNN
 from nebula.core.models.cifar10.cnnV2 import CIFAR10ModelCNN_V2
 from nebula.core.models.cifar10.cnnV3 import CIFAR10ModelCNN_V3
 from nebula.core.models.militarysar.cnn import MilitarySARModelCNN
+from nebula.core.datasets.cifar100.cifar100 import CIFAR100Dataset
+from nebula.core.datasets.emnist.emnist import EMNISTDataset
+from nebula.core.datasets.kitsun.kitsun import KITSUNDataset
+from nebula.core.models.cifar100.cnn import CIFAR100ModelCNN
+from nebula.core.models.emnist.cnn import EMNISTModelCNN
+from nebula.core.models.emnist.mlp import EMNISTModelMLP
+from nebula.core.models.kitsun.mlp import KitsunModelMLP
+
 from nebula.core.models.syscall.svm import SyscallModelSGDOneClassSVM
 from nebula.core.engine import MaliciousNode, AggregatorNode, TrainerNode, ServerNode, IdleNode
 from nebula.core.role import Role
@@ -47,7 +57,9 @@ from nebula.core.role import Role
 # os.environ["TORCHDYNAMO_VERBOSE"] = "1"
 
 
-async def main(config):
+async def main():
+    config_path = str(sys.argv[1])
+    config = Config(entity="participant", participant_config_file=config_path)
     n_nodes = config.participant["scenario_args"]["n_nodes"]
     model_name = config.participant["model_args"]["model"]
     idx = config.participant["device_args"]["idx"]
@@ -116,6 +128,14 @@ async def main(config):
             model = FashionMNISTModelCNN()
         else:
             raise ValueError(f"Model {model} not supported for dataset {dataset_str}")
+    elif dataset_str == "EMNIST":
+        dataset = EMNISTDataset(num_classes=10, partition_id=idx, partitions_number=n_nodes, iid=iid, partition=partition_selection, partition_parameter=partition_parameter, seed=42, config=config)
+        if model_name == "MLP":
+            model = EMNISTModelMLP()
+        elif model_name == "CNN":
+            model = EMNISTModelCNN()
+        else:
+            raise ValueError(f"Model {model} not supported for dataset {dataset_str}")
     elif dataset_str == "SYSCALL":
         dataset = SYSCALLDataset(num_classes=10, partition_id=idx, partitions_number=n_nodes, iid=iid, partition=partition_selection, partition_parameter=partition_parameter, seed=42, config=config)
         if model_name == "MLP":
@@ -130,8 +150,6 @@ async def main(config):
         dataset = CIFAR10Dataset(num_classes=10, partition_id=idx, partitions_number=n_nodes, iid=iid, partition=partition_selection, partition_parameter=partition_parameter, seed=42, config=config)
         if model_name == "ResNet9":
             model = CIFAR10ModelResNet(classifier="resnet9")
-        elif model_name == "ResNet18":
-            model = CIFAR10ModelResNet(classifier="resnet18")
         elif model_name == "fastermobilenet":
             model = FasterMobileNet()
         elif model_name == "simplemobilenet":
@@ -142,6 +160,18 @@ async def main(config):
             model = CIFAR10ModelCNN_V2()
         elif model_name == "CNNv3":
             model = CIFAR10ModelCNN_V3()
+        else:
+            raise ValueError(f"Model {model} not supported for dataset {dataset_str}")
+    elif dataset_str == "CIFAR100":
+        dataset = CIFAR100Dataset(num_classes=100, partition_id=idx, partitions_number=n_nodes, iid=iid, partition=partition_selection, partition_parameter=partition_parameter, seed=42, config=config)
+        if model_name == "CNN":
+            model = CIFAR100ModelCNN()
+        else:
+            raise ValueError(f"Model {model} not supported for dataset {dataset_str}")
+    elif dataset_str == "KITSUN":
+        dataset = KITSUNDataset(num_classes=10, partition_id=idx, partitions_number=n_nodes, iid=iid, partition=partition_selection, partition_parameter=partition_parameter, seed=42, config=config)
+        if model_name == "MLP":
+            model = KitsunModelMLP()
         else:
             raise ValueError(f"Model {model} not supported for dataset {dataset_str}")
     elif dataset_str == "MilitarySAR":
@@ -254,16 +284,14 @@ async def main(config):
 
 
 if __name__ == "__main__":
-    config_path = str(sys.argv[1])
-    config = Config(entity="participant", participant_config_file=config_path)
-    if sys.platform == "win32" or config.participant["scenario_args"]["deployment"] == "docker":
+    if sys.platform == "win32":
         import asyncio
-        asyncio.run(main(config), debug=False)
+        asyncio.run(main(), debug=False)
     else:
         try:
-            import uvloop 
-            uvloop.run(main(config), debug=False)
+            import uvloop
+            uvloop.run(main(), debug=False)
         except ImportError:
             logging.warning("uvloop not available, using default loop")
             import asyncio
-            asyncio.run(main(config), debug=False)
+            asyncio.run(main(), debug=False)

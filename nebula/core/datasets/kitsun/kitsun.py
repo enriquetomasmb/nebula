@@ -7,7 +7,7 @@ import zipfile
 import torch
 
 
-class KISTSUN(MNIST):
+class KITSUN(MNIST):
     def __init__(self, train=True):
         self.root = f"{sys.path[0]}/data"
         self.download = True
@@ -61,7 +61,7 @@ class KISTSUN(MNIST):
             shutil.copy(test_raw, test_file)
 
 
-class KISTSUNDataset(NebulaDataset):
+class KITSUNDataset(NebulaDataset):
     def __init__(
         self,
         num_classes=10,
@@ -112,9 +112,8 @@ class KISTSUNDataset(NebulaDataset):
 
     def load_kitsun_dataset(self, train=True):
         if train:
-            return KISTSUN(train=True)
-        else:
-            return KISTSUN(train=False)
+            return KITSUN(train=True)
+        return KITSUN(train=False)
 
     def generate_non_iid_map(self, dataset, partition="dirichlet", partition_parameter=0.5):
         if partition == "dirichlet":
@@ -141,5 +140,5 @@ class KISTSUNDataset(NebulaDataset):
         if self.partition_id == 0:
             self.plot_data_distribution(dataset, partitions_map)
             self.plot_all_data_distribution(dataset, partitions_map)
-            
+
         return partitions_map[self.partition_id]

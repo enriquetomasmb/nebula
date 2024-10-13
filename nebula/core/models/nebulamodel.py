@@ -1,6 +1,5 @@
 from abc import ABC, abstractmethod
 import logging
-import gc
 import torch
 from nebula.addons.functions import print_msg_box
 import lightning as pl
@@ -15,6 +14,7 @@ from torchmetrics import MetricCollection
 import matplotlib
 import matplotlib.pyplot as plt
 import seaborn as sns
+
 matplotlib.use("Agg")
 plt.switch_backend("Agg")
 from nebula.config.config import TRAINING_LOGGER
@@ -55,7 +55,7 @@ class NebulaModel(pl.LightningModule, ABC):
             self.cm_global.update(y_pred_classes, y) if self.cm_global is not None else None
         else:
             raise NotImplementedError
-        
+
         del y_pred_classes, y
 
     def log_metrics_end(self, phase):
@@ -110,16 +110,7 @@ class NebulaModel(pl.LightningModule, ABC):
             cm_numpy = cm.numpy().astype(int)
             classes = [i for i in range(self.num_classes)]
             fig, ax = plt.subplots(figsize=(12, 12))
-            sns.heatmap(
-                cm_numpy,
-                annot=False,
-                fmt="",
-                cmap="Blues",
-                ax=ax,
-                xticklabels=classes,
-                yticklabels=classes,
-                square=True
-            )
+            sns.heatmap(cm_numpy, annot=False, fmt="", cmap="Blues", ax=ax, xticklabels=classes, yticklabels=classes, square=True)
             ax.set_xlabel("Predicted labels", fontsize=12)
             ax.set_ylabel("True labels", fontsize=12)
             ax.set_title(f"{phase} Confusion Matrix", fontsize=16)
@@ -128,7 +119,7 @@ class NebulaModel(pl.LightningModule, ABC):
             plt.tight_layout()
             self.logger.log_figure(fig, step=self.round, name=f"{phase}/CM")
             plt.close()
-            
+
             del cm_numpy, classes, fig, ax
 
         # Restablecer la matriz de confusión
@@ -136,7 +127,7 @@ class NebulaModel(pl.LightningModule, ABC):
             self.cm.reset()
         else:
             self.cm_global.reset()
-            
+
         del cm
 
     def __init__(
