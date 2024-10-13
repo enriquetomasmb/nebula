@@ -57,9 +57,7 @@ from nebula.core.role import Role
 # os.environ["TORCHDYNAMO_VERBOSE"] = "1"
 
 
-async def main():
-    config_path = str(sys.argv[1])
-    config = Config(entity="participant", participant_config_file=config_path)
+async def main(config):
     n_nodes = config.participant["scenario_args"]["n_nodes"]
     model_name = config.participant["model_args"]["model"]
     idx = config.participant["device_args"]["idx"]
@@ -284,14 +282,16 @@ async def main():
 
 
 if __name__ == "__main__":
-    if sys.platform == "win32":
+    config_path = str(sys.argv[1])
+    config = Config(entity="participant", participant_config_file=config_path)
+    if sys.platform == "win32" or config.participant["scenario_args"]["deployment"] == "docker":
         import asyncio
-        asyncio.run(main(), debug=False)
+        asyncio.run(main(config), debug=False)
     else:
         try:
-            import uvloop
-            uvloop.run(main(), debug=False)
+            import uvloop 
+            uvloop.run(main(config), debug=False)
         except ImportError:
             logging.warning("uvloop not available, using default loop")
             import asyncio
-            asyncio.run(main(), debug=False)
+            asyncio.run(main(config), debug=False)
