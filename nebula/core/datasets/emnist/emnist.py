@@ -53,11 +53,11 @@ class EMNISTDataset(NebulaDataset):
         print(f"Length of test indices map (local): {len(self.local_test_indices_map)}")
 
     def load_emnist_dataset(self, train=True):
-        mean = (0.4914, 0.4822, 0.4465)
-        std = (0.2471, 0.2435, 0.2616)
+        mean = (0.5,)  # Adjusted mean for 1 channel
+        std = (0.5,)  # Adjusted std for 1 channel
         apply_transforms = transforms.Compose(
             [
-                transforms.RandomCrop(32, padding=4),
+                transforms.RandomCrop(28, padding=4),  # Crop size changed to 28
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 transforms.Normalize(mean, std),
@@ -96,5 +96,5 @@ class EMNISTDataset(NebulaDataset):
         if self.partition_id == 0:
             self.plot_data_distribution(dataset, partitions_map)
             self.plot_all_data_distribution(dataset, partitions_map)
-            
+
         return partitions_map[self.partition_id]

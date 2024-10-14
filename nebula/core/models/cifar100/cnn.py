@@ -6,7 +6,7 @@ class CIFAR100ModelCNN(NebulaModel):
     def __init__(
         self,
         input_channels=3,
-        num_classes=10,
+        num_classes=100,
         learning_rate=1e-3,
         metrics=None,
         confusion_matrix=None,
@@ -76,7 +76,7 @@ class CIFAR100ModelCNN(NebulaModel):
             ),
         )
 
-        self.classifier = torch.nn.Sequential(torch.nn.MaxPool2d(4), torch.nn.Flatten(), torch.nn.Linear(512, 10))
+        self.classifier = torch.nn.Sequential(torch.nn.MaxPool2d(4), torch.nn.Flatten(), torch.nn.Linear(512, self.num_classes))
 
     def forward(self, x):
         x = self.conv1(x)

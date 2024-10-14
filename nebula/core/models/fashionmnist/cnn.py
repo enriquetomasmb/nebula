@@ -1,4 +1,3 @@
-import lightning as pl
 import torch
 from nebula.core.models.nebulamodel import NebulaModel
 

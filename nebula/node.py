@@ -6,6 +6,8 @@ import warnings
 import numpy as np
 import torch
 
+
+
 torch.multiprocessing.set_start_method("spawn", force=True)
 
 # Ignore CryptographyDeprecationWarning (datatime issues with cryptography library)
@@ -34,6 +36,8 @@ from nebula.core.models.fashionmnist.cnn import FashionMNISTModelCNN
 from nebula.core.models.syscall.mlp import SyscallModelMLP
 from nebula.core.models.syscall.autoencoder import SyscallModelAutoencoder
 from nebula.core.models.militarysar.cnn import MilitarySARModelCNN
+from nebula.core.datasets.cifar100.cifar100 import CIFAR100Dataset
+
 from nebula.core.models.syscall.svm import SyscallModelSGDOneClassSVM
 from nebula.core.engine import MaliciousNode, AggregatorNode, TrainerNode, ServerNode, IdleNode
 from nebula.core.role import Role
@@ -61,7 +65,6 @@ from nebula.core.research.FML.models.cifar10.FMLCombinedResnet8 import FMLCIFAR1
 from nebula.core.research.FML.models.cifar100.FMLCombinedResnet18 import FMLCIFAR100CombinedModelResNet18
 from nebula.core.research.FML.models.fashionmnist.FMLCombinedModel import FMLFashionMNISTCombinedModelCNN
 from nebula.core.research.FML.training.FMLlightning import FMLLightning
-from nebula.core.datasets.cifar100.cifar100 import CIFAR100Dataset
 from nebula.core.optimizations.communications.KD.models.cifar100.StudentResnet18 import StudentCIFAR100ModelResNet18
 from nebula.core.optimizations.communications.KD_prototypes.models.cifar100.ProtoStudentResnet18 import ProtoStudentCIFAR100ModelResnet18
 from nebula.core.research.FedGPD.models.cifar10.FedGPDResnet8 import FedGPDCIFAR10ModelResNet8
@@ -73,10 +76,7 @@ from nebula.core.research.FedProto.models.cifar100.FedProtoResnet18 import FedPr
 # os.environ["TORCHDYNAMO_VERBOSE"] = "1"
 
 
-async def main():
-    config_path = str(sys.argv[1])
-    config = Config(entity="participant", participant_config_file=config_path)
-
+async def main(config):
     n_nodes = config.participant["scenario_args"]["n_nodes"]
     model_name = config.participant["model_args"]["model"]
     idx = config.participant["device_args"]["idx"]
@@ -688,15 +688,17 @@ async def main():
 
 
 if __name__ == "__main__":
-    if sys.platform == "win32":
+    config_path = str(sys.argv[1])
+    config = Config(entity="participant", participant_config_file=config_path)
+    if sys.platform == "win32" or config.participant["scenario_args"]["deployment"] == "docker":
         import asyncio
 
         asyncio.run(main(), debug=False)
     else:
         try:
             import uvloop 
-            uvloop.run(main(), debug=False)
+            uvloop.run(main(config), debug=False)
         except ImportError:
             logging.warning("uvloop not available, using default loop")
             import asyncio
-            asyncio.run(main(), debug=False)
+            asyncio.run(main(config), debug=False)

@@ -6,10 +6,11 @@ from torch import nn
 from torchmetrics import MetricCollection
 import matplotlib
 import matplotlib.pyplot as plt
-import seaborn as sns
+
+from nebula.core.models.nebulamodel import NebulaModel
+
 matplotlib.use("Agg")
 plt.switch_backend("Agg")
-import lightning as pl
 import torch
 from torchmetrics.classification import (
     MulticlassAccuracy,
@@ -31,67 +32,7 @@ classifiers = {
 }
 
 
-class CIFAR10ModelResNet(pl.LightningModule):
-    def process_metrics(self, phase, y_pred, y, loss=None):
-        if loss is not None:
-            self.log(f"{phase}/Loss", loss, prog_bar=True, logger=True)
-
-        y_pred_classes = torch.argmax(y_pred, dim=1)
-        if phase == "Train":
-            output = self.train_metrics(y_pred_classes, y)
-        elif phase == "Validation":
-            output = self.val_metrics(y_pred_classes, y)
-        elif phase == "Test":
-            output = self.test_metrics(y_pred_classes, y)
-        else:
-            raise NotImplementedError
-        output = {f"{phase}/{key.replace('Multiclass', '').split('/')[-1]}": value for key, value in output.items()}
-
-        self.log_dict(output, prog_bar=True, logger=True)
-
-        if self.cm is not None:
-            self.cm.update(y_pred_classes, y)
-
-    def log_metrics_by_epoch(self, phase, print_cm=False, plot_cm=False):
-        print(f"Epoch end: {phase}, epoch number: {self.epoch_global_number[phase]}")
-        if phase == "Train":
-            output = self.train_metrics.compute()
-            self.train_metrics.reset()
-        elif phase == "Validation":
-            output = self.val_metrics.compute()
-            self.val_metrics.reset()
-        elif phase == "Test":
-            output = self.test_metrics.compute()
-            self.test_metrics.reset()
-        else:
-            raise NotImplementedError
-
-        output = {f"{phase}Epoch/{key.replace('Multiclass', '').split('/')[-1]}": value for key, value in output.items()}
-
-        self.log_dict(output, prog_bar=True, logger=True)
-
-        if self.cm is not None:
-            cm = self.cm.compute().cpu()
-            if print_cm:
-                print(f"{phase}Epoch/CM\n", cm)
-            if plot_cm:
-                plt.figure(figsize=(10, 7))
-                ax = sns.heatmap(cm.numpy(), annot=True, fmt="d", cmap="Blues")
-                ax.set_xlabel("Predicted labels")
-                ax.set_ylabel("True labels")
-                ax.set_title("Confusion Matrix")
-                ax.set_xticks(range(10))
-                ax.set_yticks(range(10))
-                ax.xaxis.set_ticklabels(list(range(10)))
-                ax.yaxis.set_ticklabels(list(range(10)))
-                self.logger.experiment.add_figure(
-                    f"{phase}Epoch/CM",
-                    ax.get_figure(),
-                    global_step=self.epoch_global_number[phase],
-                )
-                plt.close()
-
-        self.epoch_global_number[phase] += 1
+class CIFAR10ModelResNet(NebulaModel):
 
     def __init__(
         self,
@@ -163,14 +104,16 @@ class CIFAR10ModelResNet(pl.LightningModule):
 
                 classifier = nn.Sequential(nn.MaxPool2d(4), nn.Flatten(), nn.Linear(512, num_classes))
 
-                return dict(
-                    conv1=conv1,
-                    conv2=conv2,
-                    res1=res1,
-                    conv3=conv3,
-                    conv4=conv4,
-                    res2=res2,
-                    classifier=classifier,
+                return nn.ModuleDict(
+                    {
+                        "conv1": conv1,
+                        "conv2": conv2,
+                        "res1": res1,
+                        "conv3": conv3,
+                        "conv4": conv4,
+                        "res2": res2,
+                        "classifier": classifier,
+                    }
                 )
 
             if self.implementation in classifiers:
@@ -215,31 +158,3 @@ class CIFAR10ModelResNet(pl.LightningModule):
         else:
             optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate, weight_decay=1e-4)
         return optimizer
-
-    def step(self, batch, batch_idx, phase):
-        images, labels = batch
-        images = images.to(self.device)
-        labels = labels.to(self.device)
-        y_pred = self.forward(images)
-        loss = self.criterion(y_pred, labels)
-        self.process_metrics(phase, y_pred, labels, loss)
-
-        return loss
-
-    def training_step(self, batch, batch_id):
-        return self.step(batch, batch_id, "Train")
-
-    def on_train_epoch_end(self):
-        self.log_metrics_by_epoch("Train", print_cm=True, plot_cm=True)
-
-    def validation_step(self, batch, batch_idx):
-        return self.step(batch, batch_idx, "Validation")
-
-    def on_validation_epoch_end(self):
-        self.log_metrics_by_epoch("Validation", print_cm=True, plot_cm=True)
-
-    def test_step(self, batch, batch_idx):
-        return self.step(batch, batch_idx, "Test")
-
-    def on_test_epoch_end(self):
-        self.log_metrics_by_epoch("Test", print_cm=True, plot_cm=True)
