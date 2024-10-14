@@ -20,6 +20,7 @@ logging.basicConfig(level=logging.INFO)
 
 from ansi2html import Ansi2HTMLConverter
 
+from nebula.frontend.utils import Utils
 from nebula.frontend.database import (
     initialize_databases,
     list_users,
@@ -398,7 +399,7 @@ async def nebula_dashboard_monitor(scenario_name: str, request: Request, session
                 nodes_status,  # Status
             )
 
-            topology_path = os.path.join(settings.config_dir, scenario_name, "topology.png")
+            topology_path = Utils.check_path(settings.config_dir, os.path.join(scenario_name, "topology.png"))
             if os.path.exists(topology_path):
                 latest_participant_file_mtime = max([os.path.getmtime(os.path.join(settings.config_dir, scenario_name, f"participant_{node[1]}.json")) for node in nodes_list])
                 if os.path.getmtime(topology_path) < latest_participant_file_mtime:
@@ -602,7 +603,7 @@ async def nebula_wait_nodes(scenario_name: str):
 
 @app.get("/nebula/dashboard/{scenario_name}/node/{id}/infolog")
 async def nebula_monitor_log(scenario_name: str, id: str):
-    logs = os.path.join(settings.log_dir, scenario_name, f"participant_{id}.log")
+    logs = Utils.check_path(settings.log_dir, os.path.join(scenario_name, f"participant_{id}.log"))
     if os.path.exists(logs):
         return FileResponse(logs, media_type="text/plain", filename=f"participant_{id}.log")
     else:
@@ -611,7 +612,7 @@ async def nebula_monitor_log(scenario_name: str, id: str):
 
 @app.get("/nebula/dashboard/{scenario_name}/node/{id}/infolog/{number}", response_class=PlainTextResponse)
 async def nebula_monitor_log_x(scenario_name: str, id: str, number: int):
-    logs = os.path.join(settings.log_dir, scenario_name, f"participant_{id}.log")
+    logs = Utils.check_path(settings.log_dir, os.path.join(scenario_name, f"participant_{id}.log"))
     if os.path.exists(logs):
         with open(logs, "r") as f:
             lines = f.readlines()[-number:]
@@ -625,7 +626,7 @@ async def nebula_monitor_log_x(scenario_name: str, id: str, number: int):
 
 @app.get("/nebula/dashboard/{scenario_name}/node/{id}/debuglog")
 async def nebula_monitor_log_debug(scenario_name: str, id: str):
-    logs = os.path.join(settings.log_dir, scenario_name, f"participant_{id}_debug.log")
+    logs = Utils.check_path(settings.log_dir, os.path.join(scenario_name, f"participant_{id}_debug.log"))
     if os.path.exists(logs):
         return FileResponse(logs, media_type="text/plain", filename=f"participant_{id}_debug.log")
     else:
@@ -634,7 +635,7 @@ async def nebula_monitor_log_debug(scenario_name: str, id: str):
 
 @app.get("/nebula/dashboard/{scenario_name}/node/{id}/errorlog")
 async def nebula_monitor_log_error(scenario_name: str, id: str):
-    logs = os.path.join(settings.log_dir, scenario_name, f"participant_{id}_error.log")
+    logs = Utils.check_path(settings.log_dir, os.path.join(scenario_name, f"participant_{id}_error.log"))
     if os.path.exists(logs):
         return FileResponse(logs, media_type="text/plain", filename=f"participant_{id}_error.log")
     else:
@@ -643,7 +644,7 @@ async def nebula_monitor_log_error(scenario_name: str, id: str):
 
 @app.get("/nebula/dashboard/{scenario_name}/topology/image/")
 async def nebula_monitor_image(scenario_name: str):
-    topology_image = os.path.join(settings.config_dir, scenario_name, "topology.png")
+    topology_image = Utils.check_path(settings.config_dir, os.path.join(scenario_name, "topology.png"))
     if os.path.exists(topology_image):
         return FileResponse(topology_image, media_type="image/png")
     else:
@@ -804,7 +805,7 @@ if settings.advanced_analytics:
 
         if "user" in session.keys():
             # Obtener las métricas del escenario
-            os.makedirs(os.path.join(settings.log_dir, scenario_name, "metrics"), exist_ok=True)
+            os.makedirs(Utils.check_path(settings.log_dir, os.path.join(scenario_name, "metrics")), exist_ok=True)
 
             aim_repo = Repo.from_path("/nebula/nebula/app/logs")
             query = "run.experiment == '{}'".format(scenario_name)
@@ -915,8 +916,8 @@ def zipdir(path, ziph):
 @app.get("/nebula/dashboard/{scenario_name}/download/logs")
 async def nebula_dashboard_download_logs_metrics(scenario_name: str, request: Request, session: Dict = Depends(get_session)):
     if "user" in session.keys():
-        log_folder = os.path.join(settings.log_dir, scenario_name)
-        config_folder = os.path.join(settings.config_dir, scenario_name)
+        log_folder = Utils.check_path(settings.log_dir, scenario_name)
+        config_folder = Utils.check_path(settings.config_dir, scenario_name)
         if os.path.exists(log_folder) and os.path.exists(config_folder):
             # Crear un archivo zip con los logs y los archivos de configuración, enviarlo al usuario
             memory_file = io.BytesIO()
