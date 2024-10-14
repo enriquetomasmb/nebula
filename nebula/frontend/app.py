@@ -881,6 +881,8 @@ else:
             if "text/html" in response.headers["Content-Type"]:
                 content = response.text
                 content = content.replace("url(/", f"url(/nebula/statistics/")
+                content = content.replace("src=\"/", f"src=\"/nebula/statistics/")
+                content = content.replace("href=\"/", f"href=\"/nebula/statistics/")
                 response = Response(content, response.status_code, dict(filtered_headers))
                 return response
 
@@ -889,9 +891,9 @@ else:
         else:
             raise HTTPException(status_code=401)
 
-    @app.get("/nebula/statistics/experiment/{path}")
-    @app.post("/nebula/statistics/experiment/{path}")
-    async def experiment_proxy(path: str = None, request: Request = None):
+    @app.get("/experiment/{path:path}")
+    @app.post("/experiment/{path:path}")
+    async def metrics_proxy(path: str = None, request: Request = None):
         query_params = request.query_params
         new_url = "/nebula/statistics/experiment/" + path
         if query_params:
