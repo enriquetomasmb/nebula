@@ -1,8 +1,7 @@
 import datetime
-import hashlib
 import sqlite3
 import datetime
-import hashlib
+from argon2 import PasswordHasher
 import sqlite3
 import asyncio
 import aiosqlite
@@ -130,14 +129,17 @@ def get_user_info(user):
 
 
 def verify(user, password):
+    ph = PasswordHasher()
     with sqlite3.connect(user_db_file_location) as conn:
         c = conn.cursor()
 
         c.execute("SELECT password FROM users WHERE user = ?", (user,))
         result = c.fetchone()
         if result:
-            return result[0] == hashlib.sha256(password.encode()).hexdigest()
-
+            try:
+                return ph.verify(result[0], password)
+            except:
+                return False
     return False
 
 
@@ -148,16 +150,18 @@ def delete_user_from_db(user):
 
 
 def add_user(user, password, role):
+    ph = PasswordHasher()
     with sqlite3.connect(user_db_file_location) as conn:
         c = conn.cursor()
-        c.execute("INSERT INTO users VALUES (?, ?, ?)", (user.upper(), hashlib.sha256(password.encode()).hexdigest(), role))
+        c.execute("INSERT INTO users VALUES (?, ?, ?)", (user.upper(), ph.hash(password), role))
 
 
 def update_user(user, password, role):
+    ph = PasswordHasher()
     with sqlite3.connect(user_db_file_location) as conn:
         c = conn.cursor()
-        print(f"UPDATE users SET password = {hashlib.sha256(password.encode()).hexdigest()}, role = {role} WHERE user = {user.upper()}")
-        c.execute("UPDATE users SET password = ?, role = ? WHERE user = ?", (hashlib.sha256(password.encode()).hexdigest(), role, user.upper()))
+        print(f"UPDATE users SET password = {ph.hash(password)}, role = {role} WHERE user = {user.upper()}")
+        c.execute("UPDATE users SET password = ?, role = ? WHERE user = ?", (ph.hash(password), role, user.upper()))
 
 
 def list_nodes(scenario_name=None, sort_by="idx"):
