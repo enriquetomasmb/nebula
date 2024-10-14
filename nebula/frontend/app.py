@@ -646,7 +646,7 @@ async def nebula_monitor_log_error(scenario_name: str, id: str):
 
 @app.get("/nebula/dashboard/{scenario_name}/topology/image/")
 async def nebula_monitor_image(scenario_name: str):
-    topology_image = Utils.check_path(settings.config_dir, os.path.join(scenario_name, "topology.png"))
+    topology_image = Utils.check_path(settings.log_dir, os.path.join(scenario_name, "topology.png"))
     if os.path.exists(topology_image):
         return FileResponse(topology_image, media_type="image/png")
     else:
