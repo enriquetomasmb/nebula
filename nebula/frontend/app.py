@@ -134,13 +134,16 @@ templates = Jinja2Templates(directory=settings.templates_dir)
 def datetimeformat(value, format="%B %d, %Y %H:%M"):
     return datetime.datetime.strptime(value, "%Y-%m-%d %H:%M:%S").strftime(format)
 
+
 def add_global_context(request: Request):
     return {
         "is_production": settings.production,
     }
 
+
 templates.env.filters["datetimeformat"] = datetimeformat
 templates.env.globals.update(add_global_context=add_global_context)
+
 
 def get_session(request: Request) -> Dict:
     return request.session
@@ -580,6 +583,7 @@ async def nebula_list_all_scenarios(session: Dict = Depends(get_session)):
 
     return JSONResponse({"scenarios": scenarios, "status": "success"}, status_code=200)
 
+
 @app.get("/nebula/dashboard/scenarios/node/erase")
 async def nebula_erase_all_nodes(session: Dict = Depends(get_session)):
     if "user" not in session.keys() or session["role"] not in ["admin", "user"]:
@@ -881,8 +885,14 @@ else:
             if "text/html" in response.headers["Content-Type"]:
                 content = response.text
                 content = content.replace("url(/", f"url(/nebula/statistics/")
-                content = content.replace("src=\"/", f"src=\"/nebula/statistics/")
-                content = content.replace("href=\"/", f"href=\"/nebula/statistics/")
+                content = content.replace('src="/', f'src="/nebula/statistics/')
+                content = content.replace('href="/', f'href="/nebula/statistics/')
+                response = Response(content, response.status_code, dict(filtered_headers))
+                return response
+
+            if path and path.endswith(".js"):
+                content = response.text
+                content = content.replace("experiment/${s}/data/plugin", "nebula/statistics/experiment/${s}/data/plugin")
                 response = Response(content, response.status_code, dict(filtered_headers))
                 return response
 
@@ -1044,7 +1054,7 @@ async def node_stopped(scenario_name: str, request: Request):
             finish_scenario_event.set()
             return JSONResponse(status_code=200, content={"message": "All nodes finished, scenario marked as completed."})
         else:
-             return JSONResponse(status_code=200, content={"message": "Node marked as finished, waiting for other nodes."})
+            return JSONResponse(status_code=200, content={"message": "Node marked as finished, waiting for other nodes."})
     else:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
 
