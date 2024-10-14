@@ -912,7 +912,7 @@ class ScenarioManagement:
     @classmethod
     def remove_files_by_scenario(cls, scenario_name):
         try:
-            shutil.rmtree(Utils.check_path(os.environ["NEBULA_CONFIG_DIR"], os.path.join(os.environ["NEBULA_CONFIG_DIR"], scenario_name)))
+            shutil.rmtree(Utils.check_path(os.environ["NEBULA_CONFIG_DIR"], scenario_name))
         except FileNotFoundError:
             logging.warning("Files not found, nothing to remove")
         except Exception as e:
@@ -920,21 +920,21 @@ class ScenarioManagement:
             logging.error(e)
             raise e
         try:
-            shutil.rmtree(Utils.check_path(os.environ["NEBULA_LOGS_DIR"], os.path.join(os.environ["NEBULA_LOGS_DIR"], scenario_name)))
+            shutil.rmtree(Utils.check_path(os.environ["NEBULA_LOGS_DIR"], scenario_name))
         except PermissionError:
             # Avoid error if the user does not have enough permissions to remove the tf.events files
             logging.warning("Not enough permissions to remove the files, moving them to tmp folder")
             os.makedirs(
-                Utils.check_path(os.environ["NEBULA_ROOT"], os.path.join(os.environ["NEBULA_ROOT"], "app", "tmp", scenario_name)),
+                Utils.check_path(os.environ["NEBULA_ROOT"], os.path.join("app", "tmp", scenario_name)),
                 exist_ok=True,
             )
             os.chmod(
-                Utils.check_path(os.environ["NEBULA_ROOT"], os.path.join(os.environ["NEBULA_ROOT"], "app", "tmp", scenario_name)),
+                Utils.check_path(os.environ["NEBULA_ROOT"], os.path.join("app", "tmp", scenario_name)),
                 0o777,
             )
             shutil.move(
-                Utils.check_path(os.environ["NEBULA_LOGS_DIR"], os.path.join(os.environ["NEBULA_LOGS_DIR"], scenario_name)),
-                Utils.check_path(os.environ["NEBULA_ROOT"], os.path.join(os.environ["NEBULA_ROOT"], "app", "tmp", scenario_name))
+                Utils.check_path(os.environ["NEBULA_LOGS_DIR"], scenario_name),
+                Utils.check_path(os.environ["NEBULA_ROOT"], os.path.join("app", "tmp", scenario_name))
             )
         except FileNotFoundError:
             logging.warning("Files not found, nothing to remove")
