@@ -152,6 +152,8 @@ def set_default_user():
     password = os.environ.get("NEBULA_DEFAULT_PASSWORD", "admin")
     if not list_users():
         add_user(username, password, "admin")
+    if not verify(username, password):
+        update_user(username, password, "admin")
 
 
 @app.on_event("startup")

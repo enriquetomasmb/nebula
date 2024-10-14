@@ -160,7 +160,6 @@ def update_user(user, password, role):
     ph = PasswordHasher()
     with sqlite3.connect(user_db_file_location) as conn:
         c = conn.cursor()
-        print(f"UPDATE users SET password = {ph.hash(password)}, role = {role} WHERE user = {user.upper()}")
         c.execute("UPDATE users SET password = ?, role = ? WHERE user = ?", (ph.hash(password), role, user.upper()))
 
 
