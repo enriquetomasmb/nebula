@@ -134,15 +134,14 @@ class Aggregator(ABC):
             nodes_added = len(self.get_nodes_pending_models_to_aggregate())
             logging.info(f"🔄  _add_pending_model | nodes_added={nodes_added}")
 
-            if source != self._addr:
-                save_data(self.config.participant["scenario_args"]["name"], 'node_participation', source, self._addr, round=self.engine.get_round())      
+            # if source != self._addr:
+            #     save_data(self.config.participant["scenario_args"]["name"], 'node_participation', source, self._addr, round=self.engine.get_round())      
 
         total_nodes_aggregation = len(self._federation_nodes) - len(self.engine.rejected_nodes)
         logging.info(f"🔄  _add_pending_model | total_nodes_aggregation={total_nodes_aggregation} and len(self.get_nodes_pending_models_to_aggregate())={len(self.get_nodes_pending_models_to_aggregate())}")
-        pending_nodes = self._federation_nodes - self.get_nodes_pending_models_to_aggregate() - set(self.engine.rejected_nodes.keys())
+        pending_nodes = self._federation_nodes - self.get_nodes_pending_models_to_aggregate() - self.engine.rejected_nodes
         models_added = f"{len(self.get_nodes_pending_models_to_aggregate())}/{total_nodes_aggregation}"
         logging.info(f"🔄  _add_pending_model | Model added in aggregation buffer ({models_added}) | Pending nodes: {pending_nodes}")
-
 
         # Check if _future_models_to_aggregate has models in the current round to include in the aggregation buffer
         if self.engine.get_round() in self._future_models_to_aggregate:
@@ -171,15 +170,14 @@ class Aggregator(ABC):
             logging.info(f"🔄  include_model_in_buffer | Reputation of node {source}: {self.engine.get_reputation().get(source)}")
         # Check the reputation of the source node
         if source in self.engine.rejected_nodes:
-            penalization_round, _ = self.engine.rejected_nodes[source]
-            if round - penalization_round < 3:
-                logging.info(f"🔄  include_model_in_buffer | Skipping model from rejected node {source} for round {round}")
-                await self._add_model_lock.release_async()
-                return None
-            else:
-                logging.info(f"🔄  include_model_in_buffer | Node {source} has been unblocked and can contribute again.")
+            # penalization_round, _ = self.engine.rejected_nodes[source]
+            # if round - penalization_round < 3:
+            logging.info(f"🔄  include_model_in_buffer | Skipping model from rejected node {source} for round {round}")
+            await self._add_model_lock.release_async()
+            return
+            # else:
+            #     logging.info(f"🔄  include_model_in_buffer | Node {source} has been unblocked and can contribute again.")
 
-        
         if source in self.engine.change_weight_nodes:
             weight = 0.7 * weight
             logging.info(f"🔄  include_model_in_buffer | change weight from {source} with weight: {weight}")
@@ -202,16 +200,25 @@ class Aggregator(ABC):
             message = self.cm.mm.generate_federation_message(nebula_pb2.FederationMessage.Action.FEDERATION_MODELS_INCLUDED, [self.engine.get_round()])
             await self.cm.send_message_to_neighbors(message)
 
+            await self.engine.manage_message_federation("federation")
+
         return result
 
     async def get_aggregation(self):
-        try:
-            timeout = self.config.participant["aggregator_args"]["aggregation_timeout"]
-            await self._aggregation_done_lock.acquire_async(timeout=timeout)
-        except asyncio.TimeoutError:
-            logging.error(f"🔄  get_aggregation | Timeout reached for aggregation")
-        finally:
-            await self._aggregation_done_lock.release_async()
+        if not self.engine.rejected_nodes:
+            logging.info(f"🔄 get_aggregation | No rejected nodes.")
+            try:
+                timeout = self.config.participant["aggregator_args"]["aggregation_timeout"]
+                await self._aggregation_done_lock.acquire_async(timeout=timeout)
+            except asyncio.TimeoutError:
+                logging.error(f"🔄  get_aggregation | Timeout reached for aggregation")
+            finally:
+                if self._aggregation_done_lock.locked():
+                    logging.info(f"🔄  get_aggregation | Isaac release")
+                    await self._aggregation_done_lock.release_async()
+        else:
+            logging.info(f"🔄 get_aggregation | Nodes rejected: {self.engine.rejected_nodes}")
+            #await self._aggregation_done_lock.release_async()
 
         if self._waiting_global_update and len(self._pending_models_to_aggregate) == 1:
             logging.info(f"🔄  get_aggregation | Received an global model. Overwriting my model with the aggregated model.")
@@ -223,7 +230,7 @@ class Aggregator(ABC):
         total_nodes_aggregation = len(self._federation_nodes) - len(self.engine.rejected_nodes)
 
         if len(unique_nodes_involved) != total_nodes_aggregation:
-            missing_nodes = self._federation_nodes - unique_nodes_involved - set(self.engine.rejected_nodes.keys())
+            missing_nodes = self._federation_nodes - unique_nodes_involved - self.engine.rejected_nodes
             logging.info(f"🔄  get_aggregation | Aggregation incomplete, missing models from: {missing_nodes}")
             logging.info(f"🔄  get_aggregation | missing nodes | nodes_involved: {unique_nodes_involved} and nodes_federation: {self._federation_nodes}")
         else:
@@ -235,7 +242,7 @@ class Aggregator(ABC):
     async def include_next_model_in_buffer(self, model, weight, source=None, round=None):
         logging.info(f"🔄  include_next_model_in_buffer | source={source} | round={round} | weight={weight}")
         if round not in self._future_models_to_aggregate:
-            self._future_models_to_aggregate[round] = []
+             self._future_models_to_aggregate[round] = []
         decoded_model = self.engine.trainer.deserialize_model(model)
         self._future_models_to_aggregate[round].append((decoded_model, weight, source))
 

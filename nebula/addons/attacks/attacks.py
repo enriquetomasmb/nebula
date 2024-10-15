@@ -70,7 +70,7 @@ class NoiseInjectionAttack(Attack):
     def __init__(self, strength=10000, perc=1.0):
         super().__init__()
         self.strength = strength
-        self.perc = perc
+        self.perc = perc       
 
     def attack(self, received_weights):
         logging.info("[NoiseInjectionAttack] Performing noise injection attack")
@@ -145,7 +145,7 @@ class DelayerAttack(Attack):
     def attack(self, received_weights):
         logging.info("[DelayerAttack] Performing delayer attack")
         logging.info("Delaying time from 15 seconds")
-        time.sleep(15)
+        time.sleep(10)
         logging.info("Delaying time finished")
         if self.weights is None:
             self.weights = deepcopy(received_weights)

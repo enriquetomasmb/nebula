@@ -9,6 +9,7 @@ import requests
 import asyncio
 import subprocess
 import time
+import torch
 
 from nebula.addons.mobility import Mobility
 from nebula.core.network.discoverer import Discoverer
@@ -81,8 +82,6 @@ class CommunicationsManager:
         self.stop_network_engine = asyncio.Event()
         self.loop = asyncio.get_event_loop()
 
-        self.start_time_communication = {}
-        self.receive_data_contribution = {}
         reputation_file = f'nebula/core/reputation/reputation.txt'
 
         with open(reputation_file) as f:
@@ -92,6 +91,7 @@ class CommunicationsManager:
             self.reputation_instance = Reputation(self.engine)
             self.reputation_with_all_feedback = {}
             self.total_messages_reputation_received = 0
+            self.message_timestamps = {}
 
     @property
     def engine(self):
@@ -145,6 +145,7 @@ class CommunicationsManager:
             logging.debug(f"📥  handle_incoming_message | Received message from {addr_from} with source {source}")
             if source == self.addr:
                 return
+
             if message_wrapper.HasField("discovery_message"):
                 if await self.include_received_message_hash(hashlib.md5(data).hexdigest()):
                     await self.forwarder.forward(data, addr_from=addr_from)
@@ -199,9 +200,11 @@ class CommunicationsManager:
         logging.info(f"📝  handle_federation_message | Received [Action {message.action}] from {source} with arguments {message.arguments}")
         try:
             await self.engine.event_manager.trigger_event(source, message)
+            self.store_receive_timestamp(source, "federation", message.round)
+            self.calculate_latency(source, "federation")
         except Exception as e:
             logging.error(f"📝  handle_federation_message | Error while processing: {message.action} {message.arguments} | {e}")
-
+    
     async def handle_model_message(self, source, message):
         logging.info(f"🤖  handle_model_message | Received model from {source} with round {message.round}")
         if self.get_round() is not None:
@@ -230,13 +233,13 @@ class CommunicationsManager:
                 # non-starting nodes receive the initialized model from the starting node
                 if not self.engine.get_federation_ready_lock().locked() or self.engine.get_initialization_status():
                     decoded_model = self.engine.trainer.deserialize_model(message.parameters)
-                    if source != self.addr:
-                        contribution_key = (source, message.round)
-                        if contribution_key not in self.receive_data_contribution:
-                            self.receive_data_contribution[contribution_key] = len(message.parameters)
-                            logging.info(f"🤖 handle_model_message | Received model from {source} with round {message.round} | data contribution: {self.receive_data_contribution[contribution_key]}")
-                            save_data(self.config.participant['scenario_args']['name'], 'data_contribution', source, self.addr, message.round, data_contribution=self.receive_data_contribution[contribution_key])
-                    
+                    # if source != self.addr:
+                    #     contribution_key = (source, message.round)
+                    #     if contribution_key not in self.receive_data_contribution:
+                    #         self.receive_data_contribution[contribution_key] = len(message.parameters)
+                    #         logging.info(f"🤖 handle_model_message | Received model from {source} with round {message.round} | data contribution: {self.receive_data_contribution[contribution_key]}")
+                    #         save_data(self.config.participant['scenario_args']['name'], 'data_contribution', source, self.addr, message.round, data_contribution=self.receive_data_contribution[contribution_key])
+
                     #if self.config.participant["adaptive_args"]["model_similarity"]:
                     if current_round >= 0 and message.round >= 0:
                         logging.info(f"🤖  handle_model_message | Checking model similarity")
@@ -252,14 +255,35 @@ class CommunicationsManager:
                                 f.write("timestamp,source_ip,round,current_round,cosine,euclidean,minkowski,manhattan,pearson_correlation,jaccard\n")
                             f.write(f"{datetime.now()}, {source}, {message.round}, {current_round}, {cosine_value}, {euclidean_value}, {minkowski_value}, {manhattan_value}, {pearson_correlation_value}, {jaccard_value}\n")
                         
+                        # Manage communication latency
+                        self.store_receive_timestamp(source, "model", message.round)
+                        self.calculate_latency(source, "model")
+
+                        # Manage parameters of models
+                        parameters_local = self.engine.trainer.get_model_parameters()
+                        self.calculate_rate_of_change(source, parameters_local, decoded_model, current_round) 
+
+                        if cosine_value < 0.5:
+                            logging.info(f"🤖  handle_model_message | Model similarity is below 0.5 {cosine_value} with source {source}")
+                            if source not in self.engine.rejected_nodes:
+                                self.engine.rejected_nodes.add(source) 
+                        else:
+                            logging.info(f"🤖  handle_model_message | Model similarity is above 0.5 {cosine_value} with source {source}")
+                            models_added = await self.engine.aggregator.include_model_in_buffer(
+                                decoded_model,
+                                message.weight,
+                                source=source,
+                                round=message.round,
+                            )
+                       
                         # Manage add model in buffer
-                        models_added = None
+                        """models_added = None
                         reputation = self.engine.get_reputation()  
                         reputation_data = reputation.get(source, None) 
 
+
                         if reputation_data is None:
                             logging.info(f"🤖  handle_model_message | No reputation data for node {source}. Aggregating model.")
-                            start_time_models_aggregated = time.time()
 
                             models_added = await self.engine.aggregator.include_model_in_buffer(
                                 decoded_model,
@@ -269,10 +293,7 @@ class CommunicationsManager:
                             )
 
                             if models_added is not None:
-                                end_time_models_aggregated = time.time()
-                                latency = end_time_models_aggregated - start_time_models_aggregated
-                                logging.info(f"🤖  handle_model_message | Model aggregated in {latency} seconds with node {source}")
-                                save_data(self.config.participant['scenario_args']['name'], 'aggregated_models', source, self.addr, message.round, time=latency)
+                                logging.info(f"🤖  handle_model_message | Model aggregated from {source}")
                             else:
                                 logging.info(f"🤖  handle_model_message | Model not aggregated from {source}")
                         else:
@@ -298,7 +319,6 @@ class CommunicationsManager:
                                     self.engine.get_federation_ready_lock().release_async()
                             else:
                                 logging.info(f"🤖  handle_model_message | Reputation above 0.6. Aggregating model from {source}")
-                                start_time_models_aggregated = time.time()
 
                                 models_added = await self.engine.aggregator.include_model_in_buffer(
                                     decoded_model,
@@ -308,15 +328,13 @@ class CommunicationsManager:
                                 )
 
                                 if models_added is not None:
-                                    end_time_models_aggregated = time.time()
-                                    latency = end_time_models_aggregated - start_time_models_aggregated
-                                    logging.info(f"🤖  handle_model_message | Model aggregated in {latency} seconds with node {source}")
-                                    save_data(self.config.participant['scenario_args']['name'], 'aggregated_models', source, self.addr, message.round, time=latency)
+                                    logging.info(f"🤖  handle_model_message | Model aggregated from {source}")
                                 else:
-                                    logging.info(f"🤖  handle_model_message | Model not aggregated from {source}")
+                                    logging.info(f"🤖  handle_model_message | Model not aggregated from {source}")"""
 
                 else:
                     if message.round != -1:
+                        logging.info(f"Isaac else")
                         # Be sure that the model message is from the initialization round (round = -1)
                         logging.info(f"🤖  handle_model_message | Saving model from {source} for future round {message.round}")
                         await self.engine.aggregator.include_next_model_in_buffer(
@@ -366,23 +384,42 @@ class CommunicationsManager:
     async def handle_reputation_message(self, source, message):
         try:
             logging.info(f"handle_reputation_message | Reputation message received from {source} | Node: {message.node_id} | Score: {message.score} | Round: {message.round}")
-            current_node = self.addr.split(":")[0].strip()
-            source = source.split(":")[0].strip()
-            node_ip = message.node_id.split(":")[0].strip()
+            
+            self.store_receive_timestamp(source, "reputation", message.round)
+            self.calculate_latency(source, "reputation")
+            
+            current_node = self.addr
 
             # Manage reputation 
             if current_node != source:
-                logging.info(f"handle_reputation_message | Current node {current_node} is different from node ip {source}")
                 key = (current_node, source, message.round)
 
                 if key not in self.reputation_with_all_feedback:
-                    logging.info(f"handle_reputation_message | Creating key {key}")
                     self.reputation_with_all_feedback[key] = []
 
                 self.reputation_with_all_feedback[key].append(message.score)
 
         except Exception as e:
             logging.error(f"Error handling reputation message: {e}")
+    
+    def calculate_rate_of_change(self, source, parameters_local, parameters_received, current_round):
+        # logging.info(f"🤖  manage_parameters_models | Managing parameters of models")
+        # logging.info(f"🤖  manage_parameters_models | Parameters local: {parameters_local}")
+        # logging.info(f"🤖  manage_parameters_models | Parameters received: {parameters_received}")
+        changes = []
+        for key in parameters_local.keys():
+            if key in parameters_received:
+                # Calcula la norma de la diferencia entre los parámetros
+                change = torch.norm(parameters_local[key] - parameters_received[key])
+                changes.append(change.item())
+
+        if changes:
+            total_rate_of_change = sum(changes) / len(changes)  # Promedio de los cambios
+        else:
+            total_rate_of_change = 0.0
+
+        logging.info(f"calculate_rate_of_change | Rate of change: {total_rate_of_change} | Source: {source} | Round: {current_round}")
+        save_data(self.config.participant['scenario_args']['name'], 'rate_of_change', source, self.addr, current_round, rate_of_change=total_rate_of_change)
     
     def get_connections_lock(self):
         return self.connections_lock
@@ -698,6 +735,50 @@ class CommunicationsManager:
         if interval > 0:
             await asyncio.sleep(interval)
 
+    def store_send_timestamp(self, dest_addr, round_number, type_message):
+        send_timestamp = datetime.now().strftime("%H:%M:%S")
+        self.message_timestamps[(self.addr, dest_addr, type_message)] = {
+            "send": send_timestamp,
+            "receive": None,
+            "latency": None,
+            "round": round_number,
+            "type": type_message
+        }
+
+    def store_receive_timestamp(self, source, type_message, round=None):
+        current_time = time.time()
+        if current_time:
+            save_data(self.config.participant['scenario_args']['name'], 'time_message', source, self.addr, round=round, time=current_time, type_message=type_message, current_round=self.get_round())
+        
+        receive_timestamp = datetime.now().strftime("%H:%M:%S")
+        if (self.addr, source, type_message) in self.message_timestamps:
+            self.message_timestamps[(self.addr, source, type_message)]["receive"] = receive_timestamp
+
+    def calculate_latency(self, source, type_message):
+        if (self.addr, source, type_message) in self.message_timestamps:
+            range_after = 5
+            range_before = -5
+            send_time = self.message_timestamps[(self.addr, source, type_message)]["send"]
+            receive_time = self.message_timestamps[(self.addr, source, type_message)]["receive"]
+            round_number = self.message_timestamps[(self.addr, source, type_message)]["round"]
+            current_round = self.get_round()
+
+            if send_time and receive_time:
+                send_time = datetime.strptime(send_time, "%H:%M:%S")
+                receive_time = datetime.strptime(receive_time, "%H:%M:%S")
+
+                latency = (receive_time - send_time).total_seconds()
+                self.message_timestamps[(self.addr, source, type_message)]["latency"] = latency
+                save_data(self.config.participant['scenario_args']['name'], 'communication', source, self.addr, round_number, time=latency, type_message=type_message, current_round=current_round)
+                
+                if range_before <= latency <= range_after:
+                    logging.info(f"🕒  Latency from {source} with type message {type_message} in round {round_number}: {latency}")
+                else:
+                    logging.info(f"❗️  Latency from {source} in round {round_number} is out of bounds: {latency}")
+
+                return latency
+        return None
+    
     async def send_model(self, dest_addr, round_number, serialized_model, weight=1):
         try:
             conn = self.connections.get(dest_addr)
@@ -705,6 +786,9 @@ class CommunicationsManager:
                 logging.info(f"❗️  Connection with {dest_addr} not found")
                 return
             
+            if round_number != -1:
+                self.store_send_timestamp(dest_addr, round_number, "model")
+
             logging.info(f"Sending model to {dest_addr} with round {round_number}: weight={weight} | size={sys.getsizeof(serialized_model) / (1024 ** 2) if serialized_model is not None else 0} MB")
             message = self.mm.generate_model_message(round_number, serialized_model, weight)
             await conn.send(data=message, is_compressed=True)
