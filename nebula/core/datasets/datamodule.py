@@ -1,4 +1,5 @@
 import logging
+import torch
 from lightning import LightningDataModule
 from torch.utils.data import DataLoader, random_split, RandomSampler
 from nebula.core.datasets.changeablesubset import ChangeableSubset
@@ -28,6 +29,7 @@ class DataModule(LightningDataModule):
         target_label=0,
         target_changed_label=0,
         noise_type="salt",
+        seed=42
     ):
         super().__init__()
         self.train_set = train_set
@@ -48,9 +50,11 @@ class DataModule(LightningDataModule):
         self.target_label = target_label
         self.target_changed_label = target_changed_label
         self.noise_type = noise_type
+        self.seed = seed
         
         self.model_weight = None
-
+        
+        self.val_indices = None
         # Split train and validation datasets
         self.data_train = None
         self.data_val = None
@@ -71,11 +75,24 @@ class DataModule(LightningDataModule):
                 target_changed_label=self.target_changed_label,
                 noise_type=self.noise_type,
             )
+            
+            if self.val_indices is None:
+                generator = torch.Generator()
+                generator.manual_seed(self.seed)
 
-            train_size = round(len(tr_subset) * (1 - self.val_percent))
-            val_size = len(tr_subset) - train_size
+                train_size = round(len(tr_subset) * (1 - self.val_percent))
+                val_size = len(tr_subset) - train_size
 
-            self.data_train, self.data_val = random_split(tr_subset, [train_size, val_size])
+                self.data_train, self.data_val = random_split(tr_subset, [train_size, val_size], generator=generator)
+                
+                self.val_indices = self.data_val.indices
+            
+            else:
+                train_indices = list(set(range(len(tr_subset))) - set(self.val_indices))
+                val_indices = self.val_indices
+
+                self.data_train = ChangeableSubset(tr_subset, train_indices)
+                self.data_val = ChangeableSubset(tr_subset, val_indices)
             
             self.model_weight = len(self.data_train)
 
