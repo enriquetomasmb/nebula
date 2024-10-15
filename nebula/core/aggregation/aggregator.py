@@ -201,7 +201,9 @@ class Aggregator(ABC):
 
         if self._waiting_global_update and len(self._pending_models_to_aggregate) == 1:
             logging.info(f"🔄  get_aggregation | Received an global model. Overwriting my model with the aggregated model.")
-            return next(iter(self._pending_models_to_aggregate.values()))[0]
+            aggregated_model = next(iter(self._pending_models_to_aggregate.values()))[0]
+            self._pending_models_to_aggregate.clear()
+            return aggregated_model
 
         unique_nodes_involved = set(node for key in self._pending_models_to_aggregate for node in key.split())
 
@@ -210,8 +212,10 @@ class Aggregator(ABC):
             logging.info(f"🔄  get_aggregation | Aggregation incomplete, missing models from: {missing_nodes}")
         else:
             logging.info(f"🔄  get_aggregation | All models accounted for, proceeding with aggregation.")
-
-        return self.run_aggregation(self._pending_models_to_aggregate)
+            
+        aggregated_result = self.run_aggregation(self._pending_models_to_aggregate)
+        self._pending_models_to_aggregate.clear()
+        return aggregated_result
 
     async def include_next_model_in_buffer(self, model, weight, source=None, round=None):
         logging.info(f"🔄  include_next_model_in_buffer | source={source} | round={round} | weight={weight}")
