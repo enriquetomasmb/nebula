@@ -18,6 +18,7 @@ if TYPE_CHECKING:
 
 @dataclass
 class MessageChunk:
+    __slots__ = ['index', 'data', 'is_last']
     index: int
     data: bytes
     is_last: bool
@@ -58,7 +59,7 @@ class Connection:
         self.loop = asyncio.get_event_loop()
         self.read_task = None
         self.process_task = None
-        self.pending_messages_queue = asyncio.Queue()
+        self.pending_messages_queue = asyncio.Queue(maxsize=100)
         self.message_buffers: Dict[bytes, Dict[int, MessageChunk]] = {}
 
         self.EOT_CHAR = b"\x00\x00\x00\x04"
@@ -239,7 +240,7 @@ class Connection:
             self.writer.write(chunk_with_header)
             await self.writer.drain()
 
-            logging.debug(f"Sent message {message_id.hex()} | chunk {chunk_index+1}/{num_chunks} | size: {len(chunk)} bytes")
+            # logging.debug(f"Sent message {message_id.hex()} | chunk {chunk_index+1}/{num_chunks} | size: {len(chunk)} bytes")
 
     def _calculate_chunk_size(self, data_size: int) -> int:
         if data_size <= 1024:  # 1 KB
@@ -250,14 +251,18 @@ class Connection:
             return 1024 * 1024  # 1 MB
 
     async def handle_incoming_message(self) -> None:
+        reusable_buffer = bytearray(self.MAX_CHUNK_SIZE)
         try:
             while True:
+                if self.pending_messages_queue.full():
+                    await asyncio.sleep(0.1)  # Wait a bit if the queue is full to create backpressure
+                    continue
                 header = await self._read_exactly(self.HEADER_SIZE)
                 message_id, chunk_index, is_last_chunk = self._parse_header(header)
 
-                chunk_data = await self._read_chunk()
+                chunk_data = await self._read_chunk(reusable_buffer)
                 self._store_chunk(message_id, chunk_index, chunk_data, is_last_chunk)
-                logging.debug(f"Received chunk {chunk_index} of message {message_id.hex()} | size: {len(chunk_data)} bytes")
+                # logging.debug(f"Received chunk {chunk_index} of message {message_id.hex()} | size: {len(chunk_data)} bytes")
 
                 if is_last_chunk:
                     await self._process_complete_message(message_id)
@@ -293,7 +298,10 @@ class Connection:
         is_last_chunk = header[20] == 1
         return message_id, chunk_index, is_last_chunk
 
-    async def _read_chunk(self) -> bytes:
+    async def _read_chunk(self, buffer: bytearray = None) -> bytes:
+        if buffer is None:
+            buffer = bytearray(self.MAX_CHUNK_SIZE)
+            
         chunk_size_bytes = await self._read_exactly(4)
         chunk_size = int.from_bytes(chunk_size_bytes, "big")
 
@@ -301,24 +309,29 @@ class Connection:
             raise ValueError(f"Chunk size {chunk_size} exceeds MAX_CHUNK_SIZE {self.MAX_CHUNK_SIZE}")
 
         chunk = await self._read_exactly(chunk_size)
+        buffer[:chunk_size] = chunk
         eot = await self._read_exactly(len(self.EOT_CHAR))
 
         if eot != self.EOT_CHAR:
             raise ValueError("Invalid EOT character")
 
-        return chunk
+        return memoryview(buffer)[:chunk_size]
 
-    def _store_chunk(self, message_id: bytes, chunk_index: int, data: bytes, is_last: bool) -> None:
+    def _store_chunk(self, message_id: bytes, chunk_index: int, buffer: memoryview, is_last: bool) -> None:
         if message_id not in self.message_buffers:
             self.message_buffers[message_id] = {}
-        self.message_buffers[message_id][chunk_index] = MessageChunk(chunk_index, data, is_last)
-        logging.debug(f"Stored chunk {chunk_index} of message {message_id.hex()} | size: {len(data)} bytes")
+        try:
+            self.message_buffers[message_id][chunk_index] = MessageChunk(chunk_index, buffer.tobytes(), is_last)
+            # logging.debug(f"Stored chunk {chunk_index} of message {message_id.hex()} | size: {len(data)} bytes")
+        except Exception as e:
+            if message_id in self.message_buffers:
+                del self.message_buffers[message_id]
+            logging.error(f"Error storing chunk {chunk_index} for message {message_id.hex()}: {e}")
 
     async def _process_complete_message(self, message_id: bytes) -> None:
         chunks = sorted(self.message_buffers[message_id].values(), key=lambda x: x.index)
         complete_message = b"".join(chunk.data for chunk in chunks)
         del self.message_buffers[message_id]
-        gc.collect()
 
         data_type_prefix = complete_message[:4]
         message_content = complete_message[4:]
@@ -328,8 +341,8 @@ class Connection:
             if message_content is None:
                 return
 
-        await self.pending_messages_queue.put((data_type_prefix, message_content))
-        logging.debug(f"Processed complete message {message_id.hex()} | total size: {len(complete_message)} bytes")
+        await self.pending_messages_queue.put((data_type_prefix, memoryview(message_content)))
+        # logging.debug(f"Processed complete message {message_id.hex()} | total size: {len(complete_message)} bytes")
 
     def _decompress(self, data: bytes, compression: str) -> Optional[bytes]:
         if compression == "zlib":
@@ -360,7 +373,7 @@ class Connection:
 
     async def _handle_message(self, data_type_prefix: bytes, message: bytes) -> None:
         if data_type_prefix == self.DATA_TYPE_PREFIXES["pb"]:
-            logging.debug("Received a protobuf message")
+            # logging.debug("Received a protobuf message")
             asyncio.create_task(self.cm.handle_incoming_message(message, self.addr), name=f"Connection {self.addr} message handler")
         elif data_type_prefix == self.DATA_TYPE_PREFIXES["string"]:
             logging.debug(f"Received string message: {message.decode('utf-8')}")
