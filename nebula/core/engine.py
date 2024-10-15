@@ -14,13 +14,6 @@ from nebula.core.eventmanager import EventManager, event_handler
 from nebula.core.network.communications import CommunicationsManager
 from nebula.core.pb import nebula_pb2
 from nebula.core.utils.locker import Locker
-from lightning.pytorch.loggers import CSVLogger
-from nebula.core.utils.nebulalogger_tensorboard import NebulaTensorBoardLogger
-
-try:
-    from nebula.core.utils.nebulalogger import NebulaLogger
-except:
-    pass
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -54,12 +47,12 @@ def signal_handler(sig, frame):
 
 def print_banner():
     banner = """
-                    ███╗   ██╗███████╗██████╗ ██╗   ██╗██╗      █████╗ 
+                    ███╗   ██╗███████╗██████╗ ██╗   ██╗██╗      █████╗
                     ████╗  ██║██╔════╝██╔══██╗██║   ██║██║     ██╔══██╗
                     ██╔██╗ ██║█████╗  ██████╔╝██║   ██║██║     ███████║
                     ██║╚██╗██║██╔══╝  ██╔══██╗██║   ██║██║     ██╔══██║
                     ██║ ╚████║███████╗██████╔╝╚██████╔╝███████╗██║  ██║
-                    ╚═╝  ╚═══╝╚══════╝╚═════╝  ╚═════╝ ╚══════╝╚═╝  ╚═╝                 
+                    ╚═╝  ╚═══╝╚══════╝╚═════╝  ╚═════╝ ╚══════╝╚═╝  ╚═╝
                       A Platform for Decentralized Federated Learning
                         Created by Enrique Tomás Martínez Beltrán
                         https://github.com/enriquetomasmb/nebula
@@ -123,30 +116,7 @@ class Engine:
         
         #self.stop_message_reputation = threading.Event()
 
-        if self.config.participant["tracking_args"]["local_tracking"] == "csv":
-            nebulalogger = CSVLogger(f"{self.log_dir}", name="metrics", version=f"participant_{self.idx}")
-        elif self.config.participant["tracking_args"]["local_tracking"] == "basic":
-            nebulalogger = NebulaTensorBoardLogger(self.config.participant["scenario_args"]["start_time"], f"{self.log_dir}", name="metrics", version=f"participant_{self.idx}", log_graph=True)
-        elif self.config.participant["tracking_args"]["local_tracking"] == "advanced":
-            nebulalogger = NebulaLogger(
-                config=self.config,
-                engine=self,
-                scenario_start_time=self.config.participant["scenario_args"]["start_time"],
-                repo=f"{self.config.participant['tracking_args']['log_dir']}",
-                experiment=self.experiment_name,
-                run_name=f"participant_{self.idx}",
-                train_metric_prefix="train_",
-                test_metric_prefix="test_",
-                val_metric_prefix="val_",
-                log_system_params=False,
-            )
-            # nebulalogger_aim = NebulaLogger(config=self.config, engine=self, scenario_start_time=self.config.participant["scenario_args"]["start_time"], repo=f"aim://nebula-frontend:8085",
-            #                                     experiment=self.experiment_name, run_name=f"participant_{self.idx}",
-            #                                     train_metric_prefix='train_', test_metric_prefix='test_', val_metric_prefix='val_', log_system_params=False)
-            self.config.participant["tracking_args"]["run_hash"] = nebulalogger.experiment.hash
-        else:
-            nebulalogger = None
-        self._trainer = trainer(model, dataset, config=self.config, logger=nebulalogger)
+        self._trainer = trainer(model, dataset, config=self.config)
         self._aggregator = create_aggregator(config=self.config, engine=self)
 
         self._secure_neighbors = []
@@ -159,7 +129,7 @@ class Engine:
         msg += f"\nAggregation algorithm: {self._aggregator.__class__.__name__}"
         msg += f"\nNode behavior: {'malicious' if self._is_malicious else 'benign'}"
         print_msg_box(msg=msg, indent=2, title="Scenario information")
-        print_msg_box(msg=f"Logging type: {nebulalogger.__class__.__name__}", indent=2, title="Logging information")
+        print_msg_box(msg=f"Logging type: {self._trainer.logger.__class__.__name__}", indent=2, title="Logging information")
 
         self.with_reputation = self.config.participant["defense_args"]["with_reputation"]
         self.is_dynamic_topology = self.config.participant["defense_args"]["is_dynamic_topology"]
@@ -771,8 +741,8 @@ class AggregatorNode(Engine):
 
     async def _extended_learning_cycle(self):
         # Define the functionality of the aggregator node
-        await self.trainer.train()
         await self.trainer.test()
+        await self.trainer.train()
 
         await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.get_model_weight(), source=self.addr, round=self.round)
 
@@ -803,10 +773,12 @@ class TrainerNode(Engine):
         logging.info(f"Waiting global update | Assign _waiting_global_update = True")
         self.aggregator.set_waiting_global_update()
 
-        await self.trainer.train()
         await self.trainer.test()
+        await self.trainer.train()
 
-        await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.get_model_weight(), source=self.addr, round=self.round, local=True)
+        await self.aggregator.include_model_in_buffer(
+            self.trainer.get_model_parameters(), self.trainer.get_model_weight(), source=self.addr, round=self.round, local=True
+        )
 
         await self.cm.propagator.propagate("stable")
         await self._waiting_model_updates()

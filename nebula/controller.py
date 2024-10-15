@@ -67,7 +67,7 @@ class NebulaEventHandler(PatternMatchingEventHandler):
     def __init__(self):
         super(NebulaEventHandler, self).__init__()
         self.last_processed = {}
-        self.timeout_ns = 10 * 1e9
+        self.timeout_ns = 5 * 1e9
         self.processing_files = set()
         self.lock = threading.Lock()
         

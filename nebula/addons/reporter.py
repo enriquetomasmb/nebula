@@ -44,9 +44,10 @@ class Reporter:
 
     async def run_reporter(self):
         while True:
-            if self.config.participant["scenario_args"]["controller"] != "nebula-test":
-                await self.__report_status_to_controller()
-            await self.__report_data_queue()
+            # NOTE: currently disabled
+            # if self.config.participant["scenario_args"]["controller"] != "nebula-test":
+            #     await self.__report_status_to_controller()
+            # await self.__report_data_queue()
             await self.__report_resources()
             self.counter += 1
             if self.counter % 50 == 0:

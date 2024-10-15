@@ -44,3 +44,16 @@ class NebulaTensorBoardLogger(TensorBoardLogger):
             self.experiment.add_figure(name, figure, step)
         except Exception as e:
             logging.error(f"Error logging figure [{name}] for step [{step}]: {e}")
+
+    def get_logger_config(self):
+        return {"scenario_start_time": self.scenario_start_time, "local_step": self.local_step, "global_step": self.global_step}
+
+    def set_logger_config(self, logger_config):
+        if logger_config is None:
+            return
+        try:
+            self.scenario_start_time = logger_config["scenario_start_time"]
+            self.local_step = logger_config["local_step"]
+            self.global_step = logger_config["global_step"]
+        except Exception as e:
+            logging.error(f"Error setting logger config: {e}")

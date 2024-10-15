@@ -20,6 +20,7 @@ logging.basicConfig(level=logging.INFO)
 
 from ansi2html import Ansi2HTMLConverter
 
+from nebula.frontend.utils import Utils
 from nebula.frontend.database import (
     initialize_databases,
     list_users,
@@ -134,13 +135,16 @@ templates = Jinja2Templates(directory=settings.templates_dir)
 def datetimeformat(value, format="%B %d, %Y %H:%M"):
     return datetime.datetime.strptime(value, "%Y-%m-%d %H:%M:%S").strftime(format)
 
+
 def add_global_context(request: Request):
     return {
         "is_production": settings.production,
     }
 
+
 templates.env.filters["datetimeformat"] = datetimeformat
 templates.env.globals.update(add_global_context=add_global_context)
+
 
 def get_session(request: Request) -> Dict:
     return request.session
@@ -151,6 +155,8 @@ def set_default_user():
     password = os.environ.get("NEBULA_DEFAULT_PASSWORD", "admin")
     if not list_users():
         add_user(username, password, "admin")
+    if not verify(username, password):
+        update_user(username, password, "admin")
 
 
 @app.on_event("startup")
@@ -398,7 +404,7 @@ async def nebula_dashboard_monitor(scenario_name: str, request: Request, session
                 nodes_status,  # Status
             )
 
-            topology_path = os.path.join(settings.config_dir, scenario_name, "topology.png")
+            topology_path = Utils.check_path(settings.config_dir, os.path.join(scenario_name, "topology.png"))
             if os.path.exists(topology_path):
                 latest_participant_file_mtime = max([os.path.getmtime(os.path.join(settings.config_dir, scenario_name, f"participant_{node[1]}.json")) for node in nodes_list])
                 if os.path.getmtime(topology_path) < latest_participant_file_mtime:
@@ -580,6 +586,7 @@ async def nebula_list_all_scenarios(session: Dict = Depends(get_session)):
 
     return JSONResponse({"scenarios": scenarios, "status": "success"}, status_code=200)
 
+
 @app.get("/nebula/dashboard/scenarios/node/erase")
 async def nebula_erase_all_nodes(session: Dict = Depends(get_session)):
     if "user" not in session.keys() or session["role"] not in ["admin", "user"]:
@@ -602,7 +609,7 @@ async def nebula_wait_nodes(scenario_name: str):
 
 @app.get("/nebula/dashboard/{scenario_name}/node/{id}/infolog")
 async def nebula_monitor_log(scenario_name: str, id: str):
-    logs = os.path.join(settings.log_dir, scenario_name, f"participant_{id}.log")
+    logs = Utils.check_path(settings.log_dir, os.path.join(scenario_name, f"participant_{id}.log"))
     if os.path.exists(logs):
         return FileResponse(logs, media_type="text/plain", filename=f"participant_{id}.log")
     else:
@@ -611,7 +618,7 @@ async def nebula_monitor_log(scenario_name: str, id: str):
 
 @app.get("/nebula/dashboard/{scenario_name}/node/{id}/infolog/{number}", response_class=PlainTextResponse)
 async def nebula_monitor_log_x(scenario_name: str, id: str, number: int):
-    logs = os.path.join(settings.log_dir, scenario_name, f"participant_{id}.log")
+    logs = Utils.check_path(settings.log_dir, os.path.join(scenario_name, f"participant_{id}.log"))
     if os.path.exists(logs):
         with open(logs, "r") as f:
             lines = f.readlines()[-number:]
@@ -625,7 +632,7 @@ async def nebula_monitor_log_x(scenario_name: str, id: str, number: int):
 
 @app.get("/nebula/dashboard/{scenario_name}/node/{id}/debuglog")
 async def nebula_monitor_log_debug(scenario_name: str, id: str):
-    logs = os.path.join(settings.log_dir, scenario_name, f"participant_{id}_debug.log")
+    logs = Utils.check_path(settings.log_dir, os.path.join(scenario_name, f"participant_{id}_debug.log"))
     if os.path.exists(logs):
         return FileResponse(logs, media_type="text/plain", filename=f"participant_{id}_debug.log")
     else:
@@ -634,7 +641,7 @@ async def nebula_monitor_log_debug(scenario_name: str, id: str):
 
 @app.get("/nebula/dashboard/{scenario_name}/node/{id}/errorlog")
 async def nebula_monitor_log_error(scenario_name: str, id: str):
-    logs = os.path.join(settings.log_dir, scenario_name, f"participant_{id}_error.log")
+    logs = Utils.check_path(settings.log_dir, os.path.join(scenario_name, f"participant_{id}_error.log"))
     if os.path.exists(logs):
         return FileResponse(logs, media_type="text/plain", filename=f"participant_{id}_error.log")
     else:
@@ -643,7 +650,7 @@ async def nebula_monitor_log_error(scenario_name: str, id: str):
 
 @app.get("/nebula/dashboard/{scenario_name}/topology/image/")
 async def nebula_monitor_image(scenario_name: str):
-    topology_image = os.path.join(settings.config_dir, scenario_name, "topology.png")
+    topology_image = Utils.check_path(settings.log_dir, os.path.join(scenario_name, "topology.png"))
     if os.path.exists(topology_image):
         return FileResponse(topology_image, media_type="image/png")
     else:
@@ -804,7 +811,7 @@ if settings.advanced_analytics:
 
         if "user" in session.keys():
             # Obtener las métricas del escenario
-            os.makedirs(os.path.join(settings.log_dir, scenario_name, "metrics"), exist_ok=True)
+            os.makedirs(Utils.check_path(settings.log_dir, os.path.join(scenario_name, "metrics")), exist_ok=True)
 
             aim_repo = Repo.from_path("/nebula/nebula/app/logs")
             query = "run.experiment == '{}'".format(scenario_name)
@@ -881,6 +888,14 @@ else:
             if "text/html" in response.headers["Content-Type"]:
                 content = response.text
                 content = content.replace("url(/", f"url(/nebula/statistics/")
+                content = content.replace('src="/', f'src="/nebula/statistics/')
+                content = content.replace('href="/', f'href="/nebula/statistics/')
+                response = Response(content, response.status_code, dict(filtered_headers))
+                return response
+
+            if path and path.endswith(".js"):
+                content = response.text
+                content = content.replace("experiment/${s}/data/plugin", "nebula/statistics/experiment/${s}/data/plugin")
                 response = Response(content, response.status_code, dict(filtered_headers))
                 return response
 
@@ -889,9 +904,9 @@ else:
         else:
             raise HTTPException(status_code=401)
 
-    @app.get("/nebula/statistics/experiment/{path}")
-    @app.post("/nebula/statistics/experiment/{path}")
-    async def experiment_proxy(path: str = None, request: Request = None):
+    @app.get("/experiment/{path:path}")
+    @app.post("/experiment/{path:path}")
+    async def metrics_proxy(path: str = None, request: Request = None):
         query_params = request.query_params
         new_url = "/nebula/statistics/experiment/" + path
         if query_params:
@@ -915,8 +930,8 @@ def zipdir(path, ziph):
 @app.get("/nebula/dashboard/{scenario_name}/download/logs")
 async def nebula_dashboard_download_logs_metrics(scenario_name: str, request: Request, session: Dict = Depends(get_session)):
     if "user" in session.keys():
-        log_folder = os.path.join(settings.log_dir, scenario_name)
-        config_folder = os.path.join(settings.config_dir, scenario_name)
+        log_folder = Utils.check_path(settings.log_dir, scenario_name)
+        config_folder = Utils.check_path(settings.config_dir, scenario_name)
         if os.path.exists(log_folder) and os.path.exists(config_folder):
             # Crear un archivo zip con los logs y los archivos de configuración, enviarlo al usuario
             memory_file = io.BytesIO()
@@ -1042,7 +1057,7 @@ async def node_stopped(scenario_name: str, request: Request):
             finish_scenario_event.set()
             return JSONResponse(status_code=200, content={"message": "All nodes finished, scenario marked as completed."})
         else:
-             return JSONResponse(status_code=200, content={"message": "Node marked as finished, waiting for other nodes."})
+            return JSONResponse(status_code=200, content={"message": "Node marked as finished, waiting for other nodes."})
     else:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
 
@@ -1106,7 +1121,7 @@ async def run_scenarios(data, role):
         finish_scenario_event.clear()
         scenarios_finished = scenarios_finished + 1
         stop_scenario(scenario_name)
-        await asyncio.sleep(1)
+        await asyncio.sleep(5)
 
 
 @app.post("/nebula/dashboard/deployment/run")

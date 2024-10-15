@@ -1,3 +1,4 @@
+import gc
 import torch
 from nebula.core.aggregation.aggregator import Aggregator
 
@@ -30,6 +31,9 @@ class FedAvg(Aggregator):
                 normalized_weight = weight / total_samples
                 for layer in accum:
                     accum[layer].add_(model_parameters[layer].to(accum[layer].dtype), alpha=normalized_weight)
+                    
+        del models
+        gc.collect()
 
         # self.print_model_size(accum)
         return accum

@@ -17,6 +17,7 @@ from nebula.addons.blockchain.blockchain_deployer import BlockchainDeployer
 from nebula.addons.topologymanager import TopologyManager
 from nebula.config.config import Config
 from nebula.core.utils.certificate import generate_ca_certificate, generate_certificate
+from nebula.frontend.utils import Utils
 
 
 # Definition of a scenario
@@ -874,9 +875,10 @@ class ScenarioManagement:
 
                     commands += f'Write-Host "Running node {node["device_args"]["idx"]}..."\n'
                     commands += f'$OUT_FILE = "{self.root_path}\\app\\logs\\{self.scenario_name}\\participant_{node["device_args"]["idx"]}.out"\n'
+                    commands += f'$ERROR_FILE = "{self.root_path}\\app\\logs\\{self.scenario_name}\\participant_{node["device_args"]["idx"]}.err"\n'
 
                     # Use Start-Process for executing Python in background and capture PID
-                    commands += f"""$process = Start-Process -FilePath "python" -ArgumentList "{self.root_path}\\nebula\\node.py {self.root_path}\\app\\config\\{self.scenario_name}\\participant_{node["device_args"]["idx"]}.json" -PassThru -NoNewWindow -RedirectStandardOutput $OUT_FILE
+                    commands += f"""$process = Start-Process -FilePath "python" -ArgumentList "{self.root_path}\\nebula\\node.py {self.root_path}\\app\\config\\{self.scenario_name}\\participant_{node["device_args"]["idx"]}.json" -PassThru -NoNewWindow -RedirectStandardOutput $OUT_FILE -RedirectStandardError $ERROR_FILE
                 Add-Content -Path $PID_FILE -Value $process.Id
                 """
 
@@ -910,7 +912,7 @@ class ScenarioManagement:
     @classmethod
     def remove_files_by_scenario(cls, scenario_name):
         try:
-            shutil.rmtree(os.path.join(os.environ["NEBULA_CONFIG_DIR"], scenario_name))
+            shutil.rmtree(Utils.check_path(os.environ["NEBULA_CONFIG_DIR"], scenario_name))
         except FileNotFoundError:
             logging.warning("Files not found, nothing to remove")
         except Exception as e:
@@ -918,21 +920,21 @@ class ScenarioManagement:
             logging.error(e)
             raise e
         try:
-            shutil.rmtree(os.path.join(os.environ["NEBULA_LOGS_DIR"], scenario_name))
+            shutil.rmtree(Utils.check_path(os.environ["NEBULA_LOGS_DIR"], scenario_name))
         except PermissionError:
             # Avoid error if the user does not have enough permissions to remove the tf.events files
             logging.warning("Not enough permissions to remove the files, moving them to tmp folder")
             os.makedirs(
-                os.path.join(os.environ["NEBULA_ROOT"], "app", "tmp", scenario_name),
+                Utils.check_path(os.environ["NEBULA_ROOT"], os.path.join("app", "tmp", scenario_name)),
                 exist_ok=True,
             )
             os.chmod(
-                os.path.join(os.environ["NEBULA_ROOT"], "app", "tmp", scenario_name),
+                Utils.check_path(os.environ["NEBULA_ROOT"], os.path.join("app", "tmp", scenario_name)),
                 0o777,
             )
             shutil.move(
-                os.path.join(os.environ["NEBULA_LOGS_DIR"], scenario_name),
-                os.path.join(os.environ["NEBULA_ROOT"], "app", "tmp", scenario_name),
+                Utils.check_path(os.environ["NEBULA_LOGS_DIR"], scenario_name),
+                Utils.check_path(os.environ["NEBULA_ROOT"], os.path.join("app", "tmp", scenario_name))
             )
         except FileNotFoundError:
             logging.warning("Files not found, nothing to remove")

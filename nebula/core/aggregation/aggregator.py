@@ -143,6 +143,10 @@ class Aggregator(ABC):
         models_added = f"{len(self.get_nodes_pending_models_to_aggregate())}/{total_nodes_aggregation}"
         logging.info(f"🔄  _add_pending_model | Model added in aggregation buffer ({models_added}) | Pending nodes: {pending_nodes}")
 
+        logging.info(
+            f"🔄  _add_pending_model | Model added in aggregation buffer ({str(len(self.get_nodes_pending_models_to_aggregate()))}/{str(len(self._federation_nodes))}) | Pending nodes: {self._federation_nodes - self.get_nodes_pending_models_to_aggregate()}"
+        )
+
         # Check if _future_models_to_aggregate has models in the current round to include in the aggregation buffer
         if self.engine.get_round() in self._future_models_to_aggregate:
             logging.info(f"🔄  _add_pending_model | Including next models in the aggregation buffer for round {self.engine.get_round()}")
@@ -152,7 +156,9 @@ class Aggregator(ABC):
                 future_model, future_weight, future_source = future_model
                 if future_source in self._federation_nodes and future_source not in self.get_nodes_pending_models_to_aggregate():
                     self._pending_models_to_aggregate.update({future_source: (future_model, future_weight)})
-                    logging.info(f"🔄  _add_pending_model | Next model added in aggregation buffer ({str(len(self.get_nodes_pending_models_to_aggregate()))}/{str(len(self._federation_nodes))}) | Pending nodes: {self._federation_nodes - self.get_nodes_pending_models_to_aggregate()}")
+                    logging.info(
+                        f"🔄  _add_pending_model | Next model added in aggregation buffer ({str(len(self.get_nodes_pending_models_to_aggregate()))}/{str(len(self._federation_nodes))}) | Pending nodes: {self._federation_nodes - self.get_nodes_pending_models_to_aggregate()}"
+                    )
             del self._future_models_to_aggregate[self.engine.get_round()]
 
         logging.info(f"🔄  _add_pending_model | get nodes {len(self.get_nodes_pending_models_to_aggregate())} >= total_nodes {total_nodes_aggregation}")
@@ -165,7 +171,9 @@ class Aggregator(ABC):
 
     async def include_model_in_buffer(self, model, weight, source=None, round=None, local=False):
         await self._add_model_lock.acquire_async()
-        logging.info(f"🔄  include_model_in_buffer | source={source} | round={round} | weight={weight} |--| __models={self._pending_models_to_aggregate.keys()} | federation_nodes={self._federation_nodes} | pending_models_to_aggregate={self.get_nodes_pending_models_to_aggregate()}")
+        logging.info(
+            f"🔄  include_model_in_buffer | source={source} | round={round} | weight={weight} |--| __models={self._pending_models_to_aggregate.keys()} | federation_nodes={self._federation_nodes} | pending_models_to_aggregate={self.get_nodes_pending_models_to_aggregate()}"
+        )
         if self.engine.get_reputation() is not None:
             logging.info(f"🔄  include_model_in_buffer | Reputation of node {source}: {self.engine.get_reputation().get(source)}")
         # Check the reputation of the source node
@@ -222,7 +230,9 @@ class Aggregator(ABC):
 
         if self._waiting_global_update and len(self._pending_models_to_aggregate) == 1:
             logging.info(f"🔄  get_aggregation | Received an global model. Overwriting my model with the aggregated model.")
-            return next(iter(self._pending_models_to_aggregate.values()))[0]
+            aggregated_model = next(iter(self._pending_models_to_aggregate.values()))[0]
+            self._pending_models_to_aggregate.clear()
+            return aggregated_model
 
         logging.info(f"🔄  get_aggregation | Nodes rejected: {self.engine.rejected_nodes}")
         unique_nodes_involved = set(node for key in self._pending_models_to_aggregate for node in key.split() if node not in self.engine.rejected_nodes)
@@ -236,8 +246,10 @@ class Aggregator(ABC):
         else:
             logging.info(f"🔄  get_aggregation | nodes_involved: {unique_nodes_involved} and nodes_federation: {self._federation_nodes}")
             logging.info(f"🔄  get_aggregation | All models accounted for, proceeding with aggregation.")
-
-        return self.run_aggregation(self._pending_models_to_aggregate)
+            
+        aggregated_result = self.run_aggregation(self._pending_models_to_aggregate)
+        self._pending_models_to_aggregate.clear()
+        return aggregated_result
 
     async def include_next_model_in_buffer(self, model, weight, source=None, round=None):
         logging.info(f"🔄  include_next_model_in_buffer | source={source} | round={round} | weight={weight}")

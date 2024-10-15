@@ -1,4 +1,3 @@
-import lightning as pl
 import torch
 from nebula.core.models.nebulamodel import NebulaModel
 
@@ -6,7 +5,7 @@ from nebula.core.models.nebulamodel import NebulaModel
 class EMNISTModelCNN(NebulaModel):
     def __init__(
         self,
-        input_channels=3,
+        input_channels=1,
         num_classes=10,
         learning_rate=1e-3,
         metrics=None,
@@ -17,7 +16,7 @@ class EMNISTModelCNN(NebulaModel):
 
         self.config = {"beta1": 0.851436, "beta2": 0.999689, "amsgrad": True}
 
-        self.example_input_array = torch.rand(1, 3, 32, 32)
+        self.example_input_array = torch.rand(1, 1, 28, 28)
         self.learning_rate = learning_rate
         self.criterion = torch.nn.CrossEntropyLoss()
 
@@ -37,7 +36,7 @@ class EMNISTModelCNN(NebulaModel):
         self.epoch_global_number = {"Train": 0, "Validation": 0, "Test": 0}
 
     def forward(self, x):
-        input_layer = x.view(-1, 1, 32, 32)
+        input_layer = x.view(-1, 1, 28, 28)
         conv1 = self.relu(self.conv1(input_layer))
         pool1 = self.pool1(conv1)
         conv2 = self.relu(self.conv2(pool1))

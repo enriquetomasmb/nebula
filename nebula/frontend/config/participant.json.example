@@ -117,7 +117,7 @@
     "device_type": ""
   },
   "message_args": {
-    "max_local_messages": 100000,
+    "max_local_messages": 100,
     "compression": "zlib"
   },
   "reporter_args": {
@@ -145,7 +145,7 @@
     "propagate_interval": 3,
     "propagate_model_interval": 0,
     "propagation_early_stop": 3,
-    "history_size": 50
+    "history_size": 20
   },
   "misc_args": {
     "grace_time_connection": 20,

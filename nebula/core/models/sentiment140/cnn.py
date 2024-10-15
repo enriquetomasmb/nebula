@@ -3,7 +3,7 @@ from nebula.core.models.nebulamodel import NebulaModel
 import math
 
 
-class SentimentModelCNN(NebulaModel):
+class Sentiment140ModelCNN(NebulaModel):
     def __init__(
         self,
         input_channels=3,
