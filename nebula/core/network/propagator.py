@@ -22,7 +22,7 @@ class PropagationStrategy(ABC):
         pass
 
     @abstractmethod
-    def prepare_model_payload(self, node: str) -> Optional[Tuple[Any, List[str], float]]:
+    def prepare_model_payload(self, node: str) -> Optional[Tuple[Any, float]]:
         pass
 
 
@@ -38,7 +38,7 @@ class InitialModelPropagation(PropagationStrategy):
     def is_node_eligible(self, node: str) -> bool:
         return node not in self.engine.cm.get_ready_connections()
 
-    def prepare_model_payload(self, node: str) -> Optional[Tuple[Any, List[str], float]]:
+    def prepare_model_payload(self, node: str) -> Optional[Tuple[Any, float]]:
         return self.trainer.get_model_parameters(initialize=True), self.trainer.DEFAULT_MODEL_WEIGHT
 
 
@@ -55,7 +55,7 @@ class StableModelPropagation(PropagationStrategy):
     def is_node_eligible(self, node: str) -> bool:
         return (node not in self.aggregator.get_nodes_pending_models_to_aggregate()) or (self.engine.cm.connections[node].get_federated_round() < self.get_round())
 
-    def prepare_model_payload(self, node: str) -> Optional[Tuple[Any, List[str], float]]:
+    def prepare_model_payload(self, node: str) -> Optional[Tuple[Any, float]]:
         return self.trainer.get_model_parameters(), self.trainer.get_model_weight()
 
 
@@ -131,22 +131,22 @@ class Propagator:
         if not self.update_and_check_neighbors(strategy, eligible_neighbors):
             logging.info("Exiting propagation due to repeated statuses.")
             return False
+        
+        model_params, weight = strategy.prepare_model_payload(None)
+        if model_params:
+            serialized_model = (
+                model_params if isinstance(model_params, bytes)
+                else self.trainer.serialize_model(model_params)
+            )
+        else:
+            serialized_model = None
 
-        models = []
+        round_number = -1 if strategy_id == "initialization" else self.get_round()
 
         for neighbor_addr in eligible_neighbors:
-            serialized_model, weight = strategy.prepare_model_payload(neighbor_addr)
-            if serialized_model:
-                serialized_model = serialized_model if isinstance(serialized_model, bytes) else self.trainer.serialize_model(serialized_model)
-                models.append((neighbor_addr, serialized_model, weight))
-
-        logging.info(f"Models ready to propagate: num models {len(models)}")
-
-        if strategy_id == "initialization":
-            asyncio.create_task(self.cm.send_models(models, -1))
-            return False
-        else:
-            asyncio.create_task(self.cm.send_models(models, self.get_round()))
+            asyncio.create_task(
+                self.cm.send_model(neighbor_addr, round_number, serialized_model, weight)
+            )
 
         if len(self.aggregator.get_nodes_pending_models_to_aggregate()) >= len(self.aggregator._federation_nodes):
             return False

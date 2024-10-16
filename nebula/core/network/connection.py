@@ -66,8 +66,8 @@ class Connection:
         self.COMPRESSION_CHAR = b"\x00\x00\x00\x01"
         self.DATA_TYPE_PREFIXES = {"pb": b"\x01\x00\x00\x00", "string": b"\x02\x00\x00\x00", "json": b"\x03\x00\x00\x00", "bytes": b"\x04\x00\x00\x00"}
         self.HEADER_SIZE = 21
-        self.MAX_CHUNK_SIZE = 1024 * 1024  # 1 MB
-        self.BUFFER_SIZE = 65536  # 64 KB
+        self.MAX_CHUNK_SIZE = 1024 # 1 KB
+        self.BUFFER_SIZE = 1024 # 1 KB
 
         logging.info(f"Connection [established]: {self.addr} (id: {self.id}) (active: {self.active}) (direct: {self.direct})")
 
@@ -243,12 +243,7 @@ class Connection:
             # logging.debug(f"Sent message {message_id.hex()} | chunk {chunk_index+1}/{num_chunks} | size: {len(chunk)} bytes")
 
     def _calculate_chunk_size(self, data_size: int) -> int:
-        if data_size <= 1024:  # 1 KB
-            return 1024
-        elif data_size <= 1024 * 1024:  # 1 MB
-            return 64 * 1024  # 64 KB
-        else:
-            return 1024 * 1024  # 1 MB
+        return self.BUFFER_SIZE
 
     async def handle_incoming_message(self) -> None:
         reusable_buffer = bytearray(self.MAX_CHUNK_SIZE)

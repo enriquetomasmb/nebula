@@ -75,6 +75,8 @@ class CommunicationsManager:
 
         self.stop_network_engine = asyncio.Event()
         self.loop = asyncio.get_event_loop()
+        max_concurrent_tasks = 5
+        self.semaphore_send_model = asyncio.Semaphore(max_concurrent_tasks)
 
     @property
     def engine(self):
@@ -584,18 +586,19 @@ class CommunicationsManager:
             await asyncio.sleep(interval)
 
     async def send_model(self, dest_addr, round, serialized_model, weight=1):
-        try:
-            conn = self.connections.get(dest_addr)
-            if conn is None:
-                logging.info(f"❗️  Connection with {dest_addr} not found")
-                return
-            logging.info(f"Sending model to {dest_addr} with round {round}: weight={weight} | size={sys.getsizeof(serialized_model) / (1024 ** 2) if serialized_model is not None else 0} MB")
-            message = self.mm.generate_model_message(round, serialized_model, weight)
-            await conn.send(data=message, is_compressed=True)
-            logging.info(f"Model sent to {dest_addr} with round {round}")
-        except Exception as e:
-            logging.error(f"❗️  Cannot send model to {dest_addr}: {str(e)}")
-            await self.disconnect(dest_addr, mutual_disconnection=False)
+        async with self.semaphore_send_model:
+            try:
+                conn = self.connections.get(dest_addr)
+                if conn is None:
+                    logging.info(f"❗️  Connection with {dest_addr} not found")
+                    return
+                logging.info(f"Sending model to {dest_addr} with round {round}: weight={weight} | size={sys.getsizeof(serialized_model) / (1024 ** 2) if serialized_model is not None else 0} MB")
+                message = self.mm.generate_model_message(round, serialized_model, weight)
+                await conn.send(data=message, is_compressed=True)
+                logging.info(f"Model sent to {dest_addr} with round {round}")
+            except Exception as e:
+                logging.error(f"❗️  Cannot send model to {dest_addr}: {str(e)}")
+                await self.disconnect(dest_addr, mutual_disconnection=False)
 
     async def send_models(self, models, round):
         tasks = [self.send_model(dest_addr, round, serialized_model, weight) for dest_addr, serialized_model, weight in models]
