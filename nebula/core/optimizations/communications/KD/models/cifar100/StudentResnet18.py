@@ -58,8 +58,8 @@ class StudentCIFAR100ModelResNet18(StudentNebulaModelV2):
         self.criterion_cls = torch.nn.CrossEntropyLoss()
         self.criterion_div = DistillKL(self.T)
         self.resnet = resnet18(num_classes=num_classes)
-        self.resnet.fc_dense = nn.Linear(self.resnet.fc.in_features, self.embedding_dim)
-        self.resnet.fc = nn.Linear(self.embedding_dim, num_classes)
+        self.resnet.fc_dense = nn.Linear(self.resnet.fc.in_features, 512)
+        self.resnet.fc = nn.Linear(512, num_classes)
 
     def forward(self, x, softmax=True, is_feat=False):
         """Forward pass only for train the model.
