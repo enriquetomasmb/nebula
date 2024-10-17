@@ -568,8 +568,10 @@ class CommunicationsManager:
         else:
             logging.info(f"Sending message to neighbors: {neighbors}")
 
-        messages = [(neighbor, message) for neighbor in neighbors]
-        asyncio.create_task(self.send_messages(messages, interval))
+        for neighbor in neighbors:
+            asyncio.create_task(self.send_message(neighbor, message))
+            if interval > 0:
+                await asyncio.sleep(interval) 
 
     async def send_message(self, dest_addr, message):
         try:
@@ -578,12 +580,6 @@ class CommunicationsManager:
         except Exception as e:
             logging.error(f"❗️  Cannot send message {message} to {dest_addr}. Error: {str(e)}")
             await self.disconnect(dest_addr, mutual_disconnection=False)
-
-    async def send_messages(self, messages, interval=0):
-        tasks = [self.send_message(dest_addr, message) for dest_addr, message in messages]
-        await asyncio.gather(*tasks)
-        if interval > 0:
-            await asyncio.sleep(interval)
 
     async def send_model(self, dest_addr, round, serialized_model, weight=1):
         async with self.semaphore_send_model:
@@ -599,10 +595,6 @@ class CommunicationsManager:
             except Exception as e:
                 logging.error(f"❗️  Cannot send model to {dest_addr}: {str(e)}")
                 await self.disconnect(dest_addr, mutual_disconnection=False)
-
-    async def send_models(self, models, round):
-        tasks = [self.send_model(dest_addr, round, serialized_model, weight) for dest_addr, serialized_model, weight in models]
-        await asyncio.gather(*tasks)
 
     async def establish_connection(self, addr, direct=True, reconnect=False):
         logging.info(f"🔗  [outgoing] Establishing connection with {addr} (direct: {direct})")

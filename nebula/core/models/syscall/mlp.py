@@ -38,7 +38,6 @@ class SyscallModelMLP(NebulaModel):
         x = torch.relu(x)
         x = self.dropout(x)
         x = self.l3(x)
-        x = torch.log_softmax(x, dim=1)
         return x
 
     def configure_optimizers(self):
