@@ -1109,6 +1109,7 @@ async def run_scenario(scenario_data, role):
 async def run_scenarios(data, role):
     global scenarios_finished
     for scenario_data in data:
+        finish_scenario_event.clear()
         logging.info(f"Running scenario {scenario_data['scenario_title']}")
         scenario_name = await run_scenario(scenario_data, role)
         # Waits till the scenario is completed
@@ -1118,7 +1119,6 @@ async def run_scenarios(data, role):
             stop_all_scenarios_event.clear()
             stop_scenario(scenario_name)
             return
-        finish_scenario_event.clear()
         scenarios_finished = scenarios_finished + 1
         stop_scenario(scenario_name)
         await asyncio.sleep(5)
