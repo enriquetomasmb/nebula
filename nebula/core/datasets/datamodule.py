@@ -124,7 +124,7 @@ class DataModule(LightningDataModule):
             shuffle=True,
             num_workers=self.num_workers,
             drop_last=True,
-            pin_memory=True,
+            pin_memory=False,
         )
 
     def val_dataloader(self):
@@ -137,7 +137,7 @@ class DataModule(LightningDataModule):
             shuffle=False,
             num_workers=self.num_workers,
             drop_last=True,
-            pin_memory=True,
+            pin_memory=False,
         )
 
     def test_dataloader(self):
@@ -152,7 +152,7 @@ class DataModule(LightningDataModule):
                 shuffle=False,
                 num_workers=self.num_workers,
                 drop_last=True,
-                pin_memory=True,
+                pin_memory=False,
             ),
             DataLoader(
                 self.global_te_subset,
@@ -160,7 +160,7 @@ class DataModule(LightningDataModule):
                 shuffle=False,
                 num_workers=self.num_workers,
                 drop_last=True,
-                pin_memory=True,
+                pin_memory=False,
             ),
         ]
 
@@ -178,5 +178,5 @@ class DataModule(LightningDataModule):
             sampler=random_sampler,
             num_workers=self.num_workers,
             drop_last=True,
-            pin_memory=True,
+            pin_memory=False,
         )
