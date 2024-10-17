@@ -81,6 +81,8 @@ class CommunicationsManager:
 
         self.stop_network_engine = asyncio.Event()
         self.loop = asyncio.get_event_loop()
+        max_concurrent_tasks = 5
+        self.semaphore_send_model = asyncio.Semaphore(max_concurrent_tasks)
 
         reputation_file = f'nebula/core/reputation/reputation.txt'
 
@@ -718,8 +720,10 @@ class CommunicationsManager:
         else:
             logging.info(f"Sending message to neighbors: {neighbors}")
 
-        messages = [(neighbor, message) for neighbor in neighbors]
-        asyncio.create_task(self.send_messages(messages, interval))
+        for neighbor in neighbors:
+            asyncio.create_task(self.send_message(neighbor, message))
+            if interval > 0:
+                await asyncio.sleep(interval) 
 
     async def send_message(self, dest_addr, message):
         try:
@@ -728,12 +732,6 @@ class CommunicationsManager:
         except Exception as e:
             logging.error(f"❗️  Cannot send message {message} to {dest_addr}. Error: {str(e)}")
             await self.disconnect(dest_addr, mutual_disconnection=False)
-
-    async def send_messages(self, messages, interval=0):
-        tasks = [self.send_message(dest_addr, message) for dest_addr, message in messages]
-        await asyncio.gather(*tasks)
-        if interval > 0:
-            await asyncio.sleep(interval)
 
     def store_send_timestamp(self, dest_addr, round_number, type_message):
         send_timestamp = datetime.now().strftime("%H:%M:%S")
@@ -780,26 +778,23 @@ class CommunicationsManager:
         return None
     
     async def send_model(self, dest_addr, round_number, serialized_model, weight=1):
-        try:
-            conn = self.connections.get(dest_addr)
-            if conn is None:
-                logging.info(f"❗️  Connection with {dest_addr} not found")
-                return
-            
-            if round_number != -1:
-                self.store_send_timestamp(dest_addr, round_number, "model")
+        async with self.semaphore_send_model:
+            try:
+                conn = self.connections.get(dest_addr)
+                if conn is None:
+                    logging.info(f"❗️  Connection with {dest_addr} not found")
+                    return
+                
+                if round_number != -1:
+                    self.store_send_timestamp(dest_addr, round_number, "model")
 
-            logging.info(f"Sending model to {dest_addr} with round {round_number}: weight={weight} | size={sys.getsizeof(serialized_model) / (1024 ** 2) if serialized_model is not None else 0} MB")
-            message = self.mm.generate_model_message(round_number, serialized_model, weight)
-            await conn.send(data=message, is_compressed=True)
-            logging.info(f"Model sent to {dest_addr} with round {round_number}")
-        except Exception as e:
-            logging.error(f"❗️  Cannot send model to {dest_addr}: {str(e)}")
-            await self.disconnect(dest_addr, mutual_disconnection=False)
-
-    async def send_models(self, models, round):
-        tasks = [self.send_model(dest_addr, round, serialized_model, weight) for dest_addr, serialized_model, weight in models]
-        await asyncio.gather(*tasks)
+                logging.info(f"Sending model to {dest_addr} with round {round_number}: weight={weight} | size={sys.getsizeof(serialized_model) / (1024 ** 2) if serialized_model is not None else 0} MB")
+                message = self.mm.generate_model_message(round_number, serialized_model, weight)
+                await conn.send(data=message, is_compressed=True)
+                logging.info(f"Model sent to {dest_addr} with round {round_number}")
+            except Exception as e:
+                logging.error(f"❗️  Cannot send model to {dest_addr}: {str(e)}")
+                await self.disconnect(dest_addr, mutual_disconnection=False)
 
     async def establish_connection(self, addr, direct=True, reconnect=False):
         logging.info(f"🔗  [outgoing] Establishing connection with {addr} (direct: {direct})")

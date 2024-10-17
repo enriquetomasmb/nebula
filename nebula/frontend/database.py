@@ -142,6 +142,20 @@ def verify(user, password):
                 return False
     return False
 
+def verify_hash_algorithm(user):
+    user = user.upper()
+    argon2_prefixes = ('$argon2i$', '$argon2id$')
+    
+    with sqlite3.connect(user_db_file_location) as conn:
+        c = conn.cursor()
+        
+        c.execute("SELECT password FROM users WHERE user = ?", (user,))
+        result = c.fetchone()
+        if result:
+            password_hash = result[0]
+            return password_hash.startswith(argon2_prefixes)
+    
+    return False
 
 def delete_user_from_db(user):
     with sqlite3.connect(user_db_file_location) as conn:
