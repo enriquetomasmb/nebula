@@ -54,7 +54,7 @@ class MNISTDataset(NebulaDataset):
         print(f"Length of test indices map (local): {len(self.local_test_indices_map)}")
 
     def load_mnist_dataset(self, train=True):
-        apply_transforms = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
+        apply_transforms = transforms.Compose([transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,), inplace=True)])
         data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
         os.makedirs(data_dir, exist_ok=True)
         return MNIST(

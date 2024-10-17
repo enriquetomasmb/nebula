@@ -9,8 +9,7 @@ from nebula.addons.attacks.poisoning.labelflipping import labelFlipping
 class ChangeableSubset(Subset):
     def __init__(self, dataset, indices, label_flipping=False, data_poisoning=False, poisoned_persent=0, poisoned_ratio=0, targeted=False, target_label=0, target_changed_label=0, noise_type="salt"):
         super().__init__(dataset, indices)
-        # TODO: Improve the efficiency of the following code
-        new_dataset = copy.copy(dataset)
+        new_dataset = dataset
         self.dataset = new_dataset
         self.indices = indices
         self.label_flipping = label_flipping

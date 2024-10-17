@@ -1,5 +1,4 @@
 import asyncio
-import gc
 import logging
 import time
 from geopy import distance

@@ -4,6 +4,7 @@ import logging
 from collections import OrderedDict
 import asyncio
 import os
+import pickle
 import traceback
 import hashlib
 import io
@@ -30,9 +31,10 @@ class NebulaProgressBar(ProgressBar):
     Logs the percentage of completion of the training process using logging.
     """
 
-    def __init__(self):
+    def __init__(self, log_every_n_steps=100):
         super().__init__()
         self.enable = True
+        self.log_every_n_steps = log_every_n_steps
 
     def enable(self):
         """Enable progress bar logging."""
@@ -52,9 +54,10 @@ class NebulaProgressBar(ProgressBar):
         """Called at the end of each training batch."""
         super().on_train_batch_end(trainer, pl_module, outputs, batch, batch_idx)
         if self.enable:
-            # Calculate percentage complete for the current epoch
-            percent = ((batch_idx + 1) / self.total_train_batches) * 100  # +1 to count current batch
-            logging_training.info(f"Epoch {trainer.current_epoch} - {percent:.01f}% complete")
+            if (batch_idx + 1) % self.log_every_n_steps == 0 or (batch_idx + 1) == self.total_train_batches:
+                # Calculate percentage complete for the current epoch
+                percent = ((batch_idx + 1) / self.total_train_batches) * 100  # +1 to count current batch
+                logging_training.info(f"Epoch {trainer.current_epoch} - {percent:.01f}% complete")
 
     def on_train_epoch_end(self, trainer, pl_module):
         """Called at the end of the training epoch."""
@@ -85,9 +88,10 @@ class NebulaProgressBar(ProgressBar):
             if total_batches == 0:
                 logging_training.warning(f"Total test batches is 0 for dataloader {dataloader_idx}, cannot compute progress.")
                 return
-
-            percent = ((batch_idx + 1) / total_batches) * 100  # +1 to count the current batch
-            logging_training.info(f"Test Epoch {trainer.current_epoch}, Dataloader {dataloader_idx} - {percent:.01f}% complete")
+            
+            if (batch_idx + 1) % self.log_every_n_steps == 0 or (batch_idx + 1) == total_batches:
+                percent = ((batch_idx + 1) / total_batches) * 100  # +1 to count the current batch
+                logging_training.info(f"Test Epoch {trainer.current_epoch}, Dataloader {dataloader_idx} - {percent:.01f}% complete")
 
     def on_test_epoch_start(self, trainer, pl_module):
         super().on_test_epoch_start(trainer, pl_module)
@@ -251,11 +255,10 @@ class Lightning:
         try:
             buffer = io.BytesIO()
             with gzip.GzipFile(fileobj=buffer, mode="wb") as f:
-                torch.save(model, f)
+                torch.save(model, f, pickle_protocol=pickle.HIGHEST_PROTOCOL)
             serialized_data = buffer.getvalue()
             buffer.close()
             del buffer
-            gc.collect()
             return serialized_data
         except Exception as e:
             raise ParameterSerializeError("Error serializing model") from e
@@ -265,10 +268,9 @@ class Lightning:
         try:
             buffer = io.BytesIO(data)
             with gzip.GzipFile(fileobj=buffer, mode="rb") as f:
-                params_dict = torch.load(f, map_location="cpu")
+                params_dict = torch.load(f)
             buffer.close()
             del buffer
-            gc.collect()
             return OrderedDict(params_dict)
         except Exception as e:
             raise ParameterDeserializeError("Error decoding parameters") from e

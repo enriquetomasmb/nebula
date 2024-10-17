@@ -60,7 +60,7 @@ class EMNISTDataset(NebulaDataset):
                 transforms.RandomCrop(28, padding=4),  # Crop size changed to 28
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
-                transforms.Normalize(mean, std),
+                transforms.Normalize(mean, std, inplace=True),
             ]
         )
         return EMNIST(
