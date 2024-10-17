@@ -25,6 +25,7 @@ from nebula.frontend.database import (
     initialize_databases,
     list_users,
     verify,
+    verify_hash_algorithm,
     delete_user_from_db,
     add_user,
     update_user,
@@ -155,7 +156,7 @@ def set_default_user():
     password = os.environ.get("NEBULA_DEFAULT_PASSWORD", "admin")
     if not list_users():
         add_user(username, password, "admin")
-    if not verify(username, password):
+    if not verify_hash_algorithm(username):
         update_user(username, password, "admin")
 
 
