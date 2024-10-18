@@ -508,7 +508,6 @@ class Engine:
 
 
 class MaliciousNode(Engine):
-
     def __init__(self, model, dataset, config=Config, trainer=Lightning, security=False, model_poisoning=False, poisoned_ratio=0, noise_type="gaussian"):
         super().__init__(model, dataset, config, trainer, security, model_poisoning, poisoned_ratio, noise_type)
         self.attack = create_attack(config.participant["adversarial_args"]["attacks"])
@@ -521,14 +520,20 @@ class MaliciousNode(Engine):
         self.aggregator_bening = self._aggregator
 
     async def _extended_learning_cycle(self):
-        if self.round in range(self.round_start_attack, self.round_stop_attack):
-            logging.info(f"Changing aggregation function maliciously...")
-            self._aggregator = create_malicious_aggregator(self._aggregator, self.attack)
-        elif self.round == self.round_stop_attack:
-            logging.info(f"Changing aggregation function benignly...")
-            self._aggregator = self.aggregator_bening
+        if self.attack != None:
+            if self.round in range(self.round_start_attack, self.round_stop_attack):
+                logging.info(f"Changing aggregation function maliciously...")
+                self._aggregator = create_malicious_aggregator(self._aggregator, self.attack)
+            elif self.round == self.round_stop_attack:
+                logging.info(f"Changing aggregation function benignly...")
+                self._aggregator = self.aggregator_bening
 
-        await AggregatorNode._extended_learning_cycle(self)
+        if self.role == "aggregator":
+            await AggregatorNode._extended_learning_cycle(self)
+        if self.role == "trainer":
+            await TrainerNode._extended_learning_cycle(self)
+        if self.role == "server":
+            await ServerNode._extended_learning_cycle(self)
 
 
 class AggregatorNode(Engine):

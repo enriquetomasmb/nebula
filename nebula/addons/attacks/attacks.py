@@ -27,7 +27,7 @@ def create_attack(attack_name):
     elif attack_name == "DelayerAttack":
         return DelayerAttack()
     else:
-        raise ValueError(f"Attack {attack_name} not supported")
+        return None
 
 
 class Attack:

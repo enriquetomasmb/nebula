@@ -214,24 +214,33 @@ class Scenario:
                 if nodes[node]["role"] != "server":
                     nodes_index.append(node)
 
-        n_nodes = len(nodes_index)
-        # Number of attacked nodes, round up
-        num_attacked = int(math.ceil(poisoned_node_percent / 100 * n_nodes))
-        if num_attacked > n_nodes:
-            num_attacked = n_nodes
+        mal_nodes_defined = any(nodes[node]["malicious"] for node in nodes)
 
-        # Get the index of attacked nodes
-        attacked_nodes = random.sample(nodes_index, num_attacked)
+        attacked_nodes = []
+
+        if not mal_nodes_defined:
+
+            n_nodes = len(nodes_index)
+            # Number of attacked nodes, round up
+            num_attacked = int(math.ceil(poisoned_node_percent / 100 * n_nodes))
+            if num_attacked > n_nodes:
+                num_attacked = n_nodes
+
+            # Get the index of attacked nodes
+            attacked_nodes = random.sample(nodes_index, num_attacked)
 
         # Assign the role of each node
         for node in nodes:
             node_att = "No Attack"
+            malicious = False
             attack_sample_percent = 0
             poisoned_ratio = 0
-            if (node in attacked_nodes) or (nodes[node]["malicious"]):
+            if (str(nodes[node]['id']) in attacked_nodes) or (nodes[node]["malicious"]):
+                malicious = True
                 node_att = attack
                 attack_sample_percent = poisoned_sample_percent / 100
                 poisoned_ratio = poisoned_noise_percent / 100
+            nodes[node]["malicious"] = malicious
             nodes[node]["attacks"] = node_att
             nodes[node]["poisoned_sample_percent"] = attack_sample_percent
             nodes[node]["poisoned_ratio"] = poisoned_ratio
