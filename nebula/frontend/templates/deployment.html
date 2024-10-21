@@ -349,15 +349,15 @@
                     <h5 class="step-title">Aggregation algorithm</h5>
                     <div class="form-check form-check-inline">
                         <select class="form-control" id="aggregationSelect" name="aggregation"
-                            style="display: inline; width: 50%">
+                            style="display: inline; width: 75%">
                             <option selected>FedAvg</option>
                             <option>Krum</option>
                             <option>TrimmedMean</option>
                             <option>Median</option>
                             <option>Bulyan</option>
                             <option>BlockchainReputation</option>
-                            <option>DynamicAggregator</option>
-                            <option>ReactiveAggregator</option>
+                            <option disabled value="DynamicAggregator">DynamicAggregator (MTD, Proactive)</option>
+                            <option disabled value="ReactiveAggregator">ReactiveAggregator (MTD)</option>
                         </select>
                     </div>
                 </div>
@@ -702,17 +702,25 @@
                                 Aggregation</label>
                         </div>
                         <div id="target-aggregation" style="display: none; margin-left: 20px">
-                            <h5 class="step-title">Target Aggregation Algorithm</h5>
+                            <h5 class="step-title">Dynamic Aggregation</h5>
                             <div class="form-check form-check-inline">
-                                <select class="form-control" id="targetAggregationSelect" name="targetAggregation"
-                                    style="display: inline; width: 20%">
+                                <select class="form-control" id="dynamicAggregationModeSelect" name="dynamicAggregationModeSelect"
+                                    style="display: inline">
+                                    <option value="DynamicAggregator">Dynamic Aggregator (MTD, Proactive)</option>
+                                    <option value="ReactiveAggregator">Reactive Aggregator (MTD)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="reactiveAggregatorDefaultDiv" style="display: none; margin-left: 20px">
+                            <h5 class="step-title">Reactive Aggregator Default</h5>
+                            <div class="form-check form-check-inline">
+                                <select class="form-control" id="reactiveAggregatorDefault" name="reactiveAggregatorDefault"
+                                    style="display: inline">
                                     <option selected>Krum</option>
                                     <option>FedAvg</option>
                                     <option>TrimmedMean</option>
                                     <option>Median</option>
                                     <option>Bulyan</option>
-                                    <option>DynamicAggregator</option>
-                                    <option>ReactiveAggregator</option>
                                 </select>
                             </div>
                         </div>
@@ -1186,7 +1194,7 @@
             data["model"] = document.getElementById("modelSelect").value
             // Step 7
             data["agg_algorithm"] = document.getElementById("aggregationSelect").value
-            data["reactive_aggregator_default"] = "FedAvg"
+            data["reactive_aggregator_default"] = document.getElementById("reactiveAggregatorDefault").value
             // Step 8
             data["rounds"] = document.getElementById("rounds").value
             data["logginglevel"] = document.getElementById("loggingLevel").value === "true"
@@ -1207,7 +1215,7 @@
             data["with_reputation"] = document.getElementById("with-reputation-btn").checked ? true : false
             data["is_dynamic_topology"] = document.getElementById("dynamic-topology-btn").checked ? true : false
             data["is_dynamic_aggregation"] = document.getElementById("dynamic-aggregation-btn").checked ? true : false
-            data["target_aggregation"] = document.getElementById("dynamic-aggregation-btn").checked ? document.getElementById("targetAggregationSelect").value : false
+            data["target_aggregation"] = document.getElementById("dynamic-aggregation-btn").checked ? document.getElementById("reactiveAggregatorDefault").value : false
             // Step 15
             data["random_geo"] = document.getElementById("random-geo-btn").checked ? true : false
             data["latitude"] = parseFloat(document.getElementById("latitude").value)
@@ -1296,7 +1304,7 @@
                 }
                 document.getElementById("dynamic-topology-btn").checked = data["is_dynamic_topology"];
                 document.getElementById("dynamic-aggregation-btn").checked = data["is_dynamic_aggregation"];
-                document.getElementById("targetAggregationSelect").value = data["target_aggregation"];
+                document.getElementById("reactiveAggregatorDefault").value = data["target_aggregation"];
                 // Step 15
                 document.getElementById("random-geo-btn").checked = data["random_geo"];
                 document.getElementById("latitude").value = data["latitude"];
@@ -1826,7 +1834,7 @@
             if(!document.getElementById("defense-lock").checked){
                 document.getElementById("without-reputation-btn").checked = true;
                 document.getElementById("dynamic-aggregation-btn").checked = false;
-                document.getElementById("targetAggregationSelect").value = "Krum";
+                document.getElementById("reactiveAggregatorDefault").value = "Krum";
                 $('#dynamic-aggregation-btn').change();
                 document.getElementById("without-reputation-btn").click();
                 document.getElementById("dynamic-topology-btn").checked = false;
@@ -2400,8 +2408,23 @@
         targetAggregationSelect.addEventListener("change", function () {
             if (this.checked) {
                 targetAggregation.style.display = "block";
+                document.getElementById("aggregationSelect").value = document.getElementById("dynamicAggregationModeSelect").value
             } else {
                 targetAggregation.style.display = "none";
+            }
+        });
+
+        // When click on "reactive Aggregator" Option of dynamic-aggregation-btn, check input, display default aggregation algorithm dropdown
+        let asdf = document.getElementById("dynamicAggregationModeSelect")
+        asdf.addEventListener("change", function () {
+            if (this.value === "DynamicAggregator") {
+                document.getElementById("aggregationSelect").value = "DynamicAggregator";
+            }
+            if (this.value === "ReactiveAggregator") {
+                document.getElementById("aggregationSelect").value = "ReactiveAggregator";
+                document.getElementById("reactiveAggregatorDefaultDiv").style.display = "block";
+            } else {
+                document.getElementById("reactiveAggregatorDefaultDiv").style.display = "none";
             }
         });
 
