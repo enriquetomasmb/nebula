@@ -17,8 +17,6 @@ class RandomSelector(Selector):
     """
     MIN_AMOUNT_OF_SELECTED_NEIGHBORS = 1
     MAX_PERCENT_SELECTABLE_NEIGHBORS = 0.7
-    #TODO: uniform distribution between minimum and maximum to sample
-    #TODO: make max percent configurable
 
     def __init__(self, config = None):
         super().__init__(config)
@@ -34,10 +32,19 @@ class RandomSelector(Selector):
             self.selected_nodes = [node.addr]
             return self.selected_nodes
         logging.info(f"[RandomSelector] available neighbors: {neighbors}")
-        num_selected = max(
+        # Calculation of the amount of selected Neighbors according to thesis:
+        #num_selected = max(
+        #    self.MIN_AMOUNT_OF_SELECTED_NEIGHBORS,
+        #    math.floor(len(neighbors) * self.MAX_PERCENT_SELECTABLE_NEIGHBORS)
+        #)
+        # Improved way to calculate the amount of selected nodes (randomly distributed, the original implementation
+        # would always select the maximum possible amount of nodes)
+        max_selectable = math.floor(len(neighbors) * self.MAX_PERCENT_SELECTABLE_NEIGHBORS)
+        num_selected = np.random.randint(
             self.MIN_AMOUNT_OF_SELECTED_NEIGHBORS,
-            math.floor(len(neighbors) * self.MAX_PERCENT_SELECTABLE_NEIGHBORS)
+            max(max_selectable, self.MIN_AMOUNT_OF_SELECTED_NEIGHBORS) + 1
         )
+
         selected_nodes = np.random.choice(neighbors, num_selected, replace = False).tolist()
         self.selected_nodes = selected_nodes + [node.addr]
         logging.info(f"[RandomSelector] selection finished, selected_nodes: {self.selected_nodes}")
