@@ -1,6 +1,5 @@
 import logging
 import random
-import torch
 from nebula.core.aggregation.aggregator import Aggregator
 
 
@@ -18,8 +17,8 @@ class DynamicAggregator(Aggregator):
         super().run_aggregation(models)
         available_aggregators = [FedAvg, Krum, Median, TrimmedMean, Bulyan]
         # to check if the random seed is working
-        import time
-        random.seed(int(time.time()) % 2 ** 32)
+        #import time
+        #random.seed(int(time.time()) % 2 ** 32)
         chosen_aggregator_cls = random.choice(available_aggregators)
         logging.info(f"[DynamicAggregator] Chosen Aggregator: {chosen_aggregator_cls}")
         if tensorboard_log:

@@ -46,6 +46,7 @@ class Scenario:
         network_gateway,
         epochs,
         attacks,
+        atk_lie_z,
         label_flipping_config,
         poisoned_node_percent,
         poisoned_sample_percent,
@@ -90,6 +91,7 @@ class Scenario:
         self.network_gateway = network_gateway
         self.epochs = epochs
         self.attacks = attacks
+        self.atk_lie_z = atk_lie_z
         self.label_flipping_config = label_flipping_config
         self.poisoned_node_percent = label_flipping_config['node_percent'] if label_flipping_config else poisoned_node_percent
         self.poisoned_sample_percent = poisoned_sample_percent
@@ -119,7 +121,8 @@ class Scenario:
         poisoned_node_percent,
         poisoned_sample_percent,
         poisoned_noise_percent,
-        label_flipping_config
+        label_flipping_config,
+        atk_lie_z
     ):
         """Identify which nodes will be attacked"""
         import random
@@ -156,6 +159,7 @@ class Scenario:
             nodes[node]["poisoned_sample_percent"] = attack_sample_percent
             nodes[node]["poisoned_ratio"] = poisoned_ratio
             nodes[node]["label_flipping_config"] = label_flipping_config
+            nodes[node]["atk_lie_z"] = atk_lie_z
         return nodes
 
     def mobility_assign(self, nodes, mobile_participants_percent):
@@ -234,7 +238,8 @@ class ScenarioManagement:
             int(self.scenario.poisoned_node_percent),
             int(self.scenario.poisoned_sample_percent),
             int(self.scenario.poisoned_noise_percent),
-            self.scenario.label_flipping_config
+            self.scenario.label_flipping_config,
+            self.scenario.atk_lie_z
         )
 
         if self.scenario.mobility:
@@ -278,6 +283,7 @@ class ScenarioManagement:
             participant_config["adversarial_args"]["poisoned_sample_percent"] = node_config["poisoned_sample_percent"]
             participant_config["adversarial_args"]["poisoned_ratio"] = node_config["poisoned_ratio"]
             participant_config["adversarial_args"]["label_flipping_config"] = node_config["label_flipping_config"]
+            participant_config["adversarial_args"]["atk_lie_z"] = self.scenario.atk_lie_z
             participant_config["defense_args"]["with_reputation"] = self.scenario.with_reputation
             participant_config["defense_args"]["is_dynamic_topology"] = self.scenario.is_dynamic_topology
             participant_config["defense_args"]["is_dynamic_aggregation"] = self.scenario.is_dynamic_aggregation

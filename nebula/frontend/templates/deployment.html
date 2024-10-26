@@ -528,6 +528,7 @@
                             <option value="label_flipping_targeted_unspecific">Label Flipping (targeted, unspecific)</option>
                             <option value="label_flipping_untargeted">Label Flipping (untargeted)</option>
                             <option value="label_flipping_fang">Label Flipping (Fang)</option>
+                            <option value="LIE">Update Manipulation (LIE)</option>
                             <option>Sample Poisoning</option>
                             <option>Model Poisoning</option>
                             <option>GLLNeuronInversionAttack</option>
@@ -544,6 +545,7 @@
                                 "options_label_flipping_targeted_unspecific",
                                 "options_label_flipping_untargeted",
                                 "options_label_flipping_fang",
+                                "options_lie_atk",
                                 "other_attacks_config"
                             ];
                             list_of_attack_config_div_ids.forEach(function (div_id) {
@@ -557,7 +559,12 @@
                                 document.getElementById('options_label_flipping_untargeted').style.display = 'block';
                             } else if (attack === 'label_flipping_fang') {
                                 document.getElementById('options_label_flipping_fang').style.display = 'block';
-                            } else {
+                            } else if (attack === 'LIE') {
+                                document.getElementById('options_lie_atk').style.display = 'block';
+                            } else if (attack === "No Attack") {
+                                list_of_attack_config_div_ids.forEach(function (div_id) {
+                                document.getElementById(div_id).style.display = 'none';
+                            });} else {
                                 document.getElementById('other_attacks_config').style.display = 'block';
                             }
                         });
@@ -646,6 +653,37 @@
                         Run attack on
                         <input type="number" class="form-control" id="options_label_flipping_fang_config_node_percent" step="1" min="0" max="100" value="20" style="display: inline; width: 5%">
                         % of nodes
+                    </div>
+                    <div id="options_lie_atk" style="display: none;">
+
+                        percent of malicious nodes<input type="number" class="form-control" id="options_lie_atk_node_percent" value="20" style="display: inline; width: 5%">
+                        z <input type="number" class="form-control" id="options_lie_atk_z" style="display: inline; width: 5%">
+                                            <button type="button" role="button" class="btn" onclick="calc_z()">Calculate Z</button>
+                    <script>
+                        function calc_z(){
+                            let num_nodes_total = document.getElementById('info-participants-number').innerHTML
+                            let percent_malicious = document.getElementById('options_lie_atk_node_percent').value;
+                            fetch('/nebula/calc_lie_z', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({ percent_malicious: percent_malicious, total_nodes: num_nodes_total })
+                            })
+                              .then(response => response.json())
+                              .then(data => {
+                                alert('Z: ' + data);
+                                document.getElementById("options_lie_atk_z").value = data;
+                              })
+                              .catch(error => {
+                                console.error('Error:', error);
+                              });
+
+                        }
+
+
+                    </script>
+
                     </div>
 
                     <div id="other_attacks_config" style="display: none;">
@@ -1208,7 +1246,12 @@
             // Step 13
             data["attacks"] = document.getElementById("poisoning-attack-select").value
             data["label_flipping_config"] = getLabelFlippingConfig()
-            data["poisoned_node_percent"] = document.getElementById("poisoned-node-percent").value
+            if (document.getElementById('poisoning-attack-select').value === 'LIE') {
+                data["poisoned_node_percent"] = document.getElementById("options_lie_atk_node_percent").value
+                data["atk_lie_z"] = document.getElementById("options_lie_atk_z").value
+            } else {
+                data["poisoned_node_percent"] = document.getElementById("poisoned-node-percent").value
+            }
             data["poisoned_sample_percent"] = document.getElementById("poisoned-sample-percent").value
             data["poisoned_noise_percent"] = document.getElementById("poisoned-noise-percent").value
             // Step 14

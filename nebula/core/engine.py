@@ -115,7 +115,8 @@ class Engine:
         nss_info_msg = f"Enabled: {self.node_selection_strategy_enabled}\n{f'Selector: {self.nss_selector}' if self.node_selection_strategy_enabled else ''}"
         print_msg_box(msg=nss_info_msg, indent=2, title="NSS Info")
 
-
+        self.lie_atk = config.participant["adversarial_args"]["attacks"] == "LIE"
+        self.lie_atk_z = config.participant["adversarial_args"]["atk_lie_z"]
         self.security = security
         self.model_poisoning = model_poisoning
         self.poisoned_ratio = poisoned_ratio
@@ -631,7 +632,11 @@ class AggregatorNode(Engine):
         self.trainer.train()
         logging.info(f"[Training] Finishing...")
 
-        await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.get_model_weight(), source=self.addr, round=self.round)
+        if self.lie_atk:
+            from nebula.addons.attacks.poisoning.update_manipulation import update_manipulation_LIE
+            await self.aggregator.include_model_in_buffer(update_manipulation_LIE(self.trainer.get_model_parameters(),899), self.trainer.get_model_weight(), source=self.addr, round=self.round)
+        else:
+            await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.get_model_weight(), source=self.addr, round=self.round)
 
         await self.cm.propagator.propagate("stable")
         await self._waiting_model_updates()
@@ -648,7 +653,11 @@ class ServerNode(Engine):
         logging.info(f"[Testing] Finishing...")
 
         # In the first round, the server node doest take into account the initial model parameters for the aggregation
-        await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.BYPASS_MODEL_WEIGHT, source=self.addr, round=self.round)
+        if self.lie_atk:
+            from nebula.addons.attacks.poisoning.update_manipulation import update_manipulation_LIE
+            await self.aggregator.include_model_in_buffer(update_manipulation_LIE(self.trainer.get_model_parameters(),899), self.trainer.BYPASS_MODEL_WEIGHT, source=self.addr, round=self.round)
+        else:
+            await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.BYPASS_MODEL_WEIGHT, source=self.addr, round=self.round)
         await self._waiting_model_updates()
         await self.cm.propagator.propagate("stable")
 
@@ -670,7 +679,11 @@ class TrainerNode(Engine):
         self.trainer.train()
         logging.info(f"[Training] Finishing...")
 
-        await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.get_model_weight(), source=self.addr, round=self.round, local=True)
+        if self.lie_atk:
+            from nebula.addons.attacks.poisoning.update_manipulation import update_manipulation_LIE
+            await self.aggregator.include_model_in_buffer(update_manipulation_LIE(self.trainer.get_model_parameters(),899), self.trainer.get_model_weight(), source = self.addr,round = self.round, local = True)
+        else:
+            await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.get_model_weight(), source = self.addr,round = self.round, local = True)
 
         await self.cm.propagator.propagate("stable")
         await self._waiting_model_updates()

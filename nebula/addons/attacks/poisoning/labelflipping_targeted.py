@@ -3,7 +3,6 @@ from typing import Union
 
 import torch
 import random
-from torch.utils.data import Dataset
 import logging
 
 

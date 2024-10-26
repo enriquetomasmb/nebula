@@ -111,7 +111,8 @@
     "target_label": 0,
     "noise_type": "salt",
     "target_changed_label": 0,
-    "label_flipping_config": {}
+    "label_flipping_config": {},
+    "atk_lie_z": 0
   },
   "tracking_args": {
     "enable_remote_tracking": false,

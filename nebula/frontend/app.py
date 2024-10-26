@@ -1127,6 +1127,44 @@ async def nebula_dashboard_deployment_run(request: Request, background_tasks: Ba
     return RedirectResponse(url="/nebula/dashboard", status_code=303)
     # return Response(content="Success", status_code=200)
 
+@app.post("/nebula/calc_lie_z")
+async def calc_lie_z(request: Request):
+    data = await request.json()
+    total_nodes = int(data.get("total_nodes"))
+    percent_malicious = int(data.get("percent_malicious"))
+    malicious_nodes = math.ceil(total_nodes * (percent_malicious / 100))
+    print(percent_malicious, total_nodes, malicious_nodes)
+    if malicious_nodes > total_nodes:
+        # If malicious_nodes > total_nodes, the median is already under control of the attacker,
+        # and convergence of the global model is no longer possible
+        return "0"
+
+    # Calculate the number of nodes needed to control the median (majority)
+    nodes_required_for_majority = math.ceil(((total_nodes / 2) + 1) - malicious_nodes)
+
+    # Calculate the z_max using the percent point function (ppf)
+    # ppf = Percent point function (inverse of cdf — percentiles)
+    #import scipy.stats as sps
+    #z_max = sps.norm().ppf((total_nodes - nodes_required_for_majority) / total_nodes)
+    # no scipy :/ -> https://stackoverflow.com/questions/74817976/alternative-for-scipy-stats-norm-ppf
+
+    def myppf(x):
+        a = -9
+        b = 9
+        v2 = math.sqrt(2)
+        while b - a > 1e-9:
+            c = (a + b) / 2
+            r = 0.5 + 0.5 * math.erf(c / v2)
+            if r > x:
+                b = c
+            else:
+                a = c
+        return c
+
+    z_max = myppf((total_nodes - nodes_required_for_majority) / total_nodes)
+
+    return str(math.floor(z_max * 100) / 100.0)
+
 
 if __name__ == "__main__":
     # Parse args from command line
