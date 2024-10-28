@@ -909,86 +909,6 @@
                         <label class="form-check-label" for="nodesel-strat-priority-btn">Priority Selection</label>
                     </div>
                 </div>
-        <div class="row">
-            <!-- Advanced Robustness (MIA) -->
-            <div class="col-md-12 container-shadow tiny grey">
-                <div class="form-group">
-                    <h4 class="step-number">Privacy <i class="fa fa-camera-retro"></i></h4>
-
-                    <!-- Attack Type Dropdown -->
-                    <h5 class="step-title bold-title">Attack Type</h5>
-                    <select class="form-control" id="mia-attack-select" name="mia-attack"
-                        style="display: inline; width: 80%" onchange="toggleMIAMethodOptions()">
-                        <option selected>No Attack</option>
-                        <option>Shadow Model Based MIA</option>
-                        <option>Metric Based MIAs</option>
-                        <!-- Add other attack types here -->
-                    </select>
-
-                    <div id="common-mia-options" style="display: none;">
-                        <h5>Size of Node Data Samples</h5>
-                        <input type="number" class="form-control" id="size-of-node-data-samples"
-                               placeholder="Enter size of node data samples" min="1" style="display: inline; width: 80%">
-                    </div>
-
-                    <!-- Shadow Model Number Input - Initially hidden -->
-                    <div id="shadow-model-options" style="display: none;">
-                        <h5>Shadow Model Number</h5>
-                        <input type="number" class="form-control" id="shadow-model-number"
-                            placeholder="Enter number of shadow models" min="1" style="display: inline; width: 80%">
-
-                        <!-- Shadow Model Attack Dropdown -->
-                        <h5>Attack Model</h5>
-                        <select class="form-control" id="attack-model-select" name="attack-model"
-                            style="display: inline; width: 80%">
-                            <option selected>Neural Network</option>
-                            <!-- Add other model types here -->
-                        </select>
-                    </div>
-
-                    <!-- Additional options for Metric Based MIA -->
-                    <div id="metric-based-options" style="display: none;">
-                        <h5>Metric Detail</h5>
-                        <select class="form-control" id="metric-based-detail-select" name="metric-based-detail"
-                            style="display: inline; width: 80%">
-                            <option selected>Prediction Correctness</option>
-                            <option>Prediction Loss</option>
-                            <option>Prediction Maximal Confidence</option>
-                            <option>Prediction Entropy</option>
-                            <option>Prediction Class Confidence</option>
-                            <option>Prediction Class Entropy</option>
-                            <option>Prediction Modified Entropy</option>
-                            <option>Prediction Sensitivity (Jacobian Matrix)</option>
-                            <!-- Add other details here -->
-                        </select>
-                    </div>
-
-                    <!-- Defense Method Dropdown -->
-                    <h5 class="step-title bold-title">Defense Method</h5>
-                    <select class="form-control" id="mia-defense-select" name="mia-defense"
-                        style="display: inline; width: 80%" onchange="toggleDefenseOptions()">
-                        <option selected>No Defense</option>
-                        <option>Differential Privacy</option>
-                        <!-- Add other defense methods here -->
-                    </select>
-
-                     <!-- Additional options for Differential Privacy -->
-                    <div id="dp-options" style="display: none;">
-                        <h5>Delta</h5>
-                        <input type="text" class="form-control" id="dp-delta" name="dp-delta"
-                            placeholder="Enter delta value" style="display: inline; width: 80%">
-
-                        <h5>Noise Multiplier</h5>
-                        <input type="text" class="form-control" id="dp-noise-multiplier" name="dp-noise-multiplier"
-                            placeholder="Enter noise multiplier" style="display: inline; width: 80%">
-
-                        <h5>Max Grad Norm</h5>
-                        <input type="text" class="form-control" id="dp-max-grad-norm" name="dp-max-grad-norm"
-                            placeholder="Enter max grad norm" style="display: inline; width: 80%">
-                    </div>
-                </div>
-            </div>
-        </div>
 
             </div>
         </form>
@@ -1262,39 +1182,6 @@
     </script>
 
     <script>
-        function toggleMIAMethodOptions() {
-    var attackSelect = document.getElementById('mia-attack-select');
-    var shadowOptions = document.getElementById('shadow-model-options');
-    var metricOptions = document.getElementById('metric-based-options');
-    var commonMIAOptions = document.getElementById('common-mia-options');
-
-    // Hide all additional options first
-    shadowOptions.style.display = 'none';
-    metricOptions.style.display = 'none';
-    commonMIAOptions.style.display = 'none';  // Add this line
-
-    // Display options based on the attack type selected
-    if (attackSelect.value === 'Shadow Model Based MIA') {
-        shadowOptions.style.display = 'block';
-        commonMIAOptions.style.display = 'block';  // Add this line
-    } else if (attackSelect.value === 'Metric Based MIAs') {
-        metricOptions.style.display = 'block';
-        commonMIAOptions.style.display = 'block';  // Add this line
-    }
-}
-
-function toggleDefenseOptions() {
-    var defenseSelect = document.getElementById('mia-defense-select');
-    var dpOptions = document.getElementById('dp-options');
-
-    // Hide all additional options first
-    dpOptions.style.display = 'none';
-
-    // Conditionally display the relevant additional options
-    if (defenseSelect.value === 'Differential Privacy') {
-        dpOptions.style.display = 'block';
-    }
-}
         function getScenarioData() {
             var nodes = {};
             var n_nodes = document.getElementById("info-participants-number").innerHTML;
@@ -1363,7 +1250,6 @@ function toggleDefenseOptions() {
                 data["poisoned_node_percent"] = document.getElementById("options_lie_atk_node_percent").value
                 data["atk_lie_z"] = document.getElementById("options_lie_atk_z").value
             } else {
-                data["atk_lie_z"] = 0
                 data["poisoned_node_percent"] = document.getElementById("poisoned-node-percent").value
             }
             data["poisoned_sample_percent"] = document.getElementById("poisoned-sample-percent").value
@@ -1387,35 +1273,6 @@ function toggleDefenseOptions() {
             data["schema_additional_participants"] = document.getElementById("schemaAdditionalParticipantsSelect").value
             // Step 16
             data["node_selection_strategy"] = document.querySelector('input[name="nodeSelectionStrategyOptions"]:checked').value
-            // Step 17
-            data["MIA"] = document.getElementById("mia-attack-select").value
-            data["MIA_Defense"] = document.getElementById("mia-defense-select").value
-            if (document.getElementById("shadow-model-options").style.display !== 'none') {
-                data["MIA_data_size"] = document.getElementById("size-of-node-data-samples").value
-                data["Shadow_Model_Number"] = document.getElementById("shadow-model-number").value;
-                data["Attack_Model"] = document.getElementById("attack-model-select").value;}
-            else{
-                data["MIA_data_size"] = 0
-                data["Shadow_Model_Number"] = 1;
-                data["Attack_Model"] = 0;
-            }
-            if (document.getElementById("metric-based-options").style.display !== 'none') {
-                data["Metric_Detail"] = document.getElementById("metric-based-detail-select").value;
-                data["MIA_data_size"] = document.getElementById("size-of-node-data-samples").value
-            } else {
-                data["Metric_Detail"] = null;
-                //data["MIA_data_size"] = 0
-            }
-            if (document.getElementById("dp-options").style.display !== 'none') {
-                data["DP_Delta"] = document.getElementById("dp-delta").value;
-                data["DP_Noise_Multiplier"] = document.getElementById("dp-noise-multiplier").value;
-                data["DP_Max_Grad_Norm"] = document.getElementById("dp-max-grad-norm").value;
-            } else {
-                data["DP_Delta"] = 0;
-                data["DP_Noise_Multiplier"] = 0;
-                data["DP_Max_Grad_Norm"] = 0;
-            }
-
             return data
         }
 

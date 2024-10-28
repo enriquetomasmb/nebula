@@ -103,7 +103,6 @@ async def main():
     num_workers = config.participant["data_args"]["num_workers"]
     model = None
     if dataset_str == "MNIST":
-        logging.info(f"Starting node {idx} with model {model_name} and as {n_nodes} {partition_selection}, {partition_parameter} {config}")
         dataset = MNISTDataset(num_classes=10, partition_id=idx, partitions_number=n_nodes, iid=iid, partition=partition_selection, partition_parameter=partition_parameter, seed=42, config=config)
         if model_name == "MLP":
             model = MNISTModelMLP()
@@ -152,14 +151,6 @@ async def main():
         model = MilitarySARModelCNN()
     else:
         raise ValueError(f"Dataset {dataset_str} not supported")
-    logging.info(f"Dataset {dataset_str} loaded")
-    logging.info(f"Datastet length: {len(dataset.train_set)}")
-    logging.info(f"Datastet length: {len(dataset.train_indices_map)}")
-    logging.info(f"Datastet length: {dataset.train_indices_map}")
-
-    logging.info(f"testetset length: {len(dataset.test_set)}")
-    logging.info(f"testetset ind length: {len(dataset.test_indices_map)}")
-    logging.info(f"testetset ind length: {dataset.test_indices_map}")
 
     dataset = DataModule(
         train_set=dataset.train_set,
@@ -180,12 +171,8 @@ async def main():
         target_label=target_label,
         target_changed_label=target_changed_label,
         noise_type=noise_type,
-        in_eval_indices = dataset.in_eval,
-        out_eval_indices = dataset.out_eval,
-        shadow_train_indices = dataset.shadow_train,
-        shadow_test_indices = dataset.shadow_test,
-        indexing_map = dataset.indexing_map
     )
+
     # - Import MNISTDatasetScikit (not torch component)
     # - Import scikit-learn model
     # - Import ScikitDataModule
