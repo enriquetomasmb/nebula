@@ -66,7 +66,16 @@ class Scenario:
         mobile_participants_percent,
         additional_participants,
         schema_additional_participants,
-        node_selection_strategy
+        node_selection_strategy,
+        MIA,
+        MIA_Defense,
+        Shadow_Model_Number,
+        Attack_Model,
+        Metric_Detail,
+        DP_Delta,
+        DP_Noise_Multiplier,
+        DP_Max_Grad_Norm,
+        MIA_data_size
     ):
         self.scenario_title = scenario_title
         self.scenario_description = scenario_description
@@ -112,6 +121,15 @@ class Scenario:
         self.additional_participants = additional_participants
         self.schema_additional_participants = schema_additional_participants
         self.node_selection_strategy = node_selection_strategy
+        self.MIA = MIA
+        self.MIA_Defense = MIA_Defense
+        self.Shadow_Model_Number = Shadow_Model_Number
+        self.Attack_Model = Attack_Model
+        self.Metric_Detail = Metric_Detail
+        self.DP_Delta = DP_Delta
+        self.DP_Noise_Multiplier = DP_Noise_Multiplier
+        self.DP_Max_Grad_Norm = DP_Max_Grad_Norm
+        self.MIA_data_size = MIA_data_size
 
     def attack_node_assign(
         self,
@@ -302,6 +320,30 @@ class ScenarioManagement:
             participant_config["resource_args"]["resource_constraint_cpu"] = node_config["resourceConstraintCPU"]
             participant_config["resource_args"]["resource_constraint_latency"] = node_config["resourceConstraintLatency"]
 
+            print(self.scenario.Shadow_Model_Number)
+            print(type(self.scenario.Shadow_Model_Number))
+            # Get MIA info
+            mia = self.scenario.MIA
+            mia_defense = self.scenario.MIA_Defense
+            mia_shadow_num = int(self.scenario.Shadow_Model_Number)
+            mia_attack_model = self.scenario.Attack_Model
+            mia_metric = self.scenario.Metric_Detail
+            mia_delta = float(self.scenario.DP_Delta)
+            mia_noise = float(self.scenario.DP_Noise_Multiplier)
+            mia_max_grad = float(self.scenario.DP_Max_Grad_Norm)
+            mia_data_size = self.scenario.MIA_data_size
+
+            if "mia_args" not in participant_config:
+                participant_config["mia_args"] = {}
+            participant_config["mia_args"]["attack_type"] = mia
+            participant_config["mia_args"]["shadow_model_number"] = mia_shadow_num
+            participant_config["mia_args"]["attack_model"] = mia_attack_model
+            participant_config["mia_args"]["metric_detail"] = mia_metric
+            participant_config["mia_args"]["data_size"] = mia_data_size
+            participant_config["mia_args"]["defense"] = mia_defense
+            participant_config["mia_args"]["DP_Delta"] = mia_delta
+            participant_config["mia_args"]["DP_Noise_Multiplier"] = mia_noise
+            participant_config["mia_args"]["DP_Max_Grad_Norm"] = mia_max_grad
 
             with open(participant_file, "w") as f:
                 json.dump(participant_config, f, sort_keys=False, indent=2)

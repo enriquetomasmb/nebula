@@ -6,6 +6,9 @@ import psutil
 import socket
 import time
 
+from nebula.addons.attacks.mia.ClassMetricMIA import ClassMetricBasedAttack
+from nebula.addons.attacks.mia.MetricMIA import MetricBasedAttack
+from nebula.addons.attacks.mia.ShadowModelMIA import ShadowModelBasedAttack
 from nebula.addons.functions import print_msg_box
 from nebula.addons.attacks.attacks import create_attack
 from nebula.addons.reporter import Reporter
@@ -94,7 +97,7 @@ class Engine:
 
         print_banner()
         print_msg_box(msg=f"Name {self.name}\nRole: {self.role}", indent=2, title="Node information")
-
+        self.trainer_cls_mia = trainer
         self._trainer = None
         self._aggregator = None
         self.round = None
@@ -145,9 +148,13 @@ class Engine:
             self.config.participant["tracking_args"]["run_hash"] = nebulalogger.experiment.hash
         else:
             nebulalogger = None
+
         self.nebulalogger = nebulalogger
         self._trainer = trainer(model, dataset, config=self.config, logger=nebulalogger)
         self._aggregator = create_aggregator(config=self.config, engine=self)
+
+        self.trainer_config_mia = self.config
+        self.trainer_logger_mia = nebulalogger
 
         self._secure_neighbors = []
         self._is_malicious = True if self.config.participant["adversarial_args"]["attacks"] != "No Attack" else False
@@ -190,6 +197,8 @@ class Engine:
                 self.__nss_features_message_callback,
             ]
         )
+
+        self.mia_metrics = {"Precision": [], "Recall": [], "F1": []}
 
         # Register additional callbacks
         self._event_manager.register_event((nebula_pb2.FederationMessage, nebula_pb2.FederationMessage.Action.REPUTATION), self._reputation_callback)
@@ -479,6 +488,75 @@ class Engine:
                 selected_nodes = self.node_selection_strategy_selector.node_selection(self)
 
                 self.nebulalogger.log_text("[NSS] Selected nodes", str(selected_nodes), step=self.round)
+
+            ## MIA ATTACK
+            logging.info(self.config.participant["mia_args"]["attack_type"])
+            if self.config.participant["mia_args"]["attack_type"] != "No Attack":
+                logging.info(self.mia_metrics)
+                logging.info("MIA begins:")
+                logging.info(self.trainer.data.train_set[0][0].shape)
+                if self.config.participant["mia_args"]["attack_type"] == "Shadow Model Based MIA":
+                    logging.info("Shadow Attack MIA")
+                    logging.info(self.config.participant["training_args"]["epochs"])
+                    logging.info(self.config.participant["mia_args"]["attack_model"])
+                    s_attack = ShadowModelBasedAttack(model = self.trainer.model,
+                                                      global_dataset = self.trainer.data,
+                                                      in_eval = self.trainer.data.in_eval_loader,
+                                                      out_eval = self.trainer.data.out_eval_loader,
+                                                      indexing_map = self.trainer.data.indexing_map,
+                                                      max_epochs = int(self.config.participant["training_args"]["epochs"]),
+                                                      shadow_train = self.trainer.data.shadow_train_loader,
+                                                      shadow_test = self.trainer.data.shadow_test_loader,
+                                                      num_s = self.config.participant["mia_args"]["shadow_model_number"],
+                                                      attack_model_type = self.config.participant["mia_args"]["attack_model"],
+                                                      trainer=self.trainer_cls_mia,
+                                                      trainerconfig = self.trainer_config_mia,
+                                                      trainerlogger = self.trainer_logger_mia)
+
+                    precision, recall, f1 = s_attack.MIA_shadow_model_attack()
+                elif self.config.participant["mia_args"]["metric_detail"] in {"Prediction Class Confidence",
+                                                                              "Prediction Class Entropy",
+                                                                              "Prediction Modified Entropy"}:
+                    logging.info(self.config.participant["mia_args"]["metric_detail"])
+                    c_attack = ClassMetricBasedAttack(model = self.trainer.model, global_dataset = self.trainer.data,
+                                                      in_eval = self.trainer.data.in_eval_loader,
+                                                      out_eval = self.trainer.data.out_eval_loader,
+                                                      indexing_map = self.trainer.data.indexing_map,
+                                                      max_epochs = int(self.config.participant["training_args"]["epochs"]),
+                                                      shadow_train = self.trainer.data.shadow_train_loader,
+                                                      shadow_test = self.trainer.data.shadow_test_loader,
+                                                      num_s = 1,
+                                                      attack_model_type = self.config.participant["mia_args"]["attack_model"],
+                                                      method_name = self.config.participant["mia_args"]["metric_detail"])
+                    precision, recall, f1 = c_attack.mem_inf_benchmarks()
+                else:
+                    logging.info(self.config.participant["mia_args"]["attack_type"])
+                    logging.info(self.config.participant["mia_args"]["metric_detail"])
+                    m_attack = MetricBasedAttack(model = self.trainer.model, global_dataset = self.trainer.data,
+                                                 in_eval = self.trainer.data.in_eval_loader,
+                                                 out_eval = self.trainer.data.out_eval_loader,
+                                                 indexing_map = self.trainer.data.indexing_map,
+                                                 train_result = 0,
+                                                 method_name = self.config.participant["mia_args"]["metric_detail"])
+                    logging.info(m_attack.in_eval_pre)
+                    logging.info(m_attack.out_eval_pre)
+                    precision, recall, f1 = m_attack.execute_specific_attack()
+
+                logging.info(precision)
+                logging.info(recall)
+                logging.info(f1)
+
+                self.mia_metrics["Precision"].append(precision)
+                self.mia_metrics["Recall"].append(recall)
+                self.mia_metrics["F1"].append(f1)
+
+                logging.info(self.mia_metrics)
+
+                self.trainer.logger.log_metrics_direct(
+                    {"MIA_Evaluation/Attack Precision": self.mia_metrics["Precision"][self.round],
+                     "MIA_Evaluation/Attack Recall": self.mia_metrics["Recall"][self.round],
+                     "MIA_Evaluation/Attack F1-Score": self.mia_metrics["F1"][self.round]}, self.round)
+                logging.info("MIA ends.")
 
             await self.aggregator.update_federation_nodes(self.federation_nodes)
             await self._extended_learning_cycle()

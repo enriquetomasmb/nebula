@@ -26,6 +26,12 @@ class DataModule(LightningDataModule):
         target_label=0,
         target_changed_label=0,
         noise_type="salt",
+        in_eval_indices = None,
+        out_eval_indices = None,
+        shadow_train_indices = None,
+        shadow_test_indices = None,
+        indexing_map = None
+
     ):
         super().__init__()
         self.train_set = train_set
@@ -47,6 +53,12 @@ class DataModule(LightningDataModule):
         self.target_label = target_label
         self.target_changed_label = target_changed_label
         self.noise_type = noise_type
+        # MIA attributes
+        self.in_eval_indices = in_eval_indices
+        self.out_eval_indices = out_eval_indices
+        self.shadow_train_indices = shadow_train_indices
+        self.shadow_test_indices = shadow_test_indices
+        self.indexing_map = indexing_map
 
         logging.debug(f"Train set indices: {train_set_indices}")
         logging.debug(f"Test set indices: {test_set_indices}")
@@ -122,6 +134,43 @@ class DataModule(LightningDataModule):
             drop_last=True,
             pin_memory=False,
         )
+        if self.in_eval_indices is not None and self.in_eval_indices.any():
+            in_eval_subset = ChangeableSubset(train_set, self.in_eval_indices)
+            self.in_eval_loader = DataLoader(
+                in_eval_subset,
+                batch_size=self.batch_size,
+                shuffle=False,
+                num_workers=self.num_workers
+            )
+
+        if self.out_eval_indices is not None and self.out_eval_indices.any():
+            out_eval_subset = ChangeableSubset(train_set, self.out_eval_indices)
+
+            self.out_eval_loader = DataLoader(
+                out_eval_subset,
+                batch_size=self.batch_size,
+                shuffle=False,
+                num_workers=self.num_workers
+            )
+
+        if self.shadow_train_indices is not None and self.shadow_train_indices:
+            shadow_train_subset = [ChangeableSubset(train_set, indices) for indices in self.shadow_train_indices]
+            self.shadow_train_loader = [DataLoader(subset,
+                                                   batch_size=self.batch_size,
+                                                   shuffle=True,
+                                                   num_workers=self.num_workers)
+                                        for subset in shadow_train_subset]
+
+        if self.shadow_test_indices is not None and self.shadow_test_indices:
+            shadow_test_subset = [ChangeableSubset(test_set, indices) for indices in self.shadow_test_indices]
+            self.shadow_test_loader = [DataLoader(subset,
+                                                  batch_size=self.batch_size,
+                                                  shuffle=False,
+                                                  num_workers=self.num_workers)
+                                       for subset in shadow_test_subset]
+
+
+
         random_sampler = RandomSampler(data_source=data_val, replacement=False, num_samples=max(int(len(data_val) / 3), 300))
         self.bootstrap_loader = DataLoader(data_train, batch_size=self.batch_size, shuffle=False, sampler=random_sampler)
         logging.info("Train: {} Val:{} Test:{} Global Test:{}".format(len(data_train), len(data_val), len(local_te_subset), len(global_te_subset)))

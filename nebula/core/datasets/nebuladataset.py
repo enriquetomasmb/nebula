@@ -1,10 +1,11 @@
+import logging
 from abc import ABC, abstractmethod
 import time
 import numpy as np
 from sklearn.manifold import TSNE
-from torch.utils.data import Dataset
+from torch.utils.data import Dataset, ConcatDataset
 from nebula.core.utils.deterministic import enable_deterministic
-
+from torch.utils.data import Subset
 
 class NebulaDataset(Dataset, ABC):
     """
@@ -48,6 +49,14 @@ class NebulaDataset(Dataset, ABC):
         self.test_set = None
         self.test_indices_map = None
 
+
+        # MIA setting
+        self.indexing_map = None  # this is used to decompose the MIA result from micro view for the in eval group.
+        self.shadow_train = None
+        self.shadow_test = None
+        self.in_eval = None
+        self.out_eval = None
+
         enable_deterministic(config)
 
         if self.partition_id == 0:
@@ -61,6 +70,71 @@ class NebulaDataset(Dataset, ABC):
                 except Exception as e:
                     print(f"Error loading dataset: {e}. Retrying {i+1}/{max_tries} in 5 seconds...")
                     time.sleep(5)
+
+    def initialize_eval_dataset(self, in_idxs, out_idxs):
+        """
+            Initializes the evaluation datasets.
+
+            Args:
+                in_idxs (list): List of indices for the in-sample evaluation dataset.
+                out_idxs (list): List of indices for the out-of-sample evaluation dataset.
+
+            This method assigns the provided indices to the class attributes for in-sample and out-sample evaluation datasets.
+        """
+        self.in_eval = in_idxs
+        self.out_eval = out_idxs
+        print(self.out_eval)
+
+    def initialize_shadow_dataset(self, out_idxs, shadow_size, shadow_number):
+        """
+            Initializes the datasets for training and testing shadow models using a combined dataset approach.
+
+            Args:
+                out_idxs (list): List of indices for the out-of-sample training dataset.
+                shadow_size (int): Size of each shadow dataset.
+                shadow_number (int): Number of shadow datasets to create.
+
+            Returns:
+                ConcatDataset: A combined dataset of unused training data and test data.
+
+            Raises:
+                ValueError: If the combined size of the remaining training dataset and the test set is smaller than twice the shadow dataset size.
+
+            This method combines the unused training data and the test data into a single dataset, shuffles the combined dataset,
+            and selects random indices for the shadow training and testing datasets.
+        """
+        test_indices = np.arange(len(self.test_set))
+        if len(out_idxs) + len(test_indices) < 2 * shadow_size:
+            raise ValueError(
+                "The remaining unused training dataset size and the test dataset size is smaller than shadow dataset size!")
+
+        unused_train_subset = Subset(self.train_set, out_idxs)
+        test_subset = Subset(self.test_set, test_indices)
+
+        combined_dataset = ConcatDataset([unused_train_subset, test_subset])
+        total_size = len(combined_dataset)
+
+        np.random.seed(self.seed)
+        combined_indices = np.random.permutation(len(combined_dataset))
+        logging.info(combined_indices)
+        logging.info(len(combined_indices))
+        shadow_train_indices = combined_indices[:total_size // 2]
+        shadow_test_indices = combined_indices[total_size // 2:]
+
+        shadow_train_indices_ls = []
+        shadow_test_indices_ls = []
+
+        for i in range(shadow_number):
+            shadow_train_index = np.random.choice(shadow_train_indices, size=shadow_size, replace=True)
+            shadow_test_index = np.random.choice(shadow_test_indices, size=shadow_size, replace=True)
+
+            shadow_train_indices_ls.append(shadow_train_index)
+            shadow_test_indices_ls.append(shadow_test_index)
+
+        self.shadow_train = shadow_train_indices_ls
+        self.shadow_test = shadow_test_indices_ls
+
+        return combined_dataset
 
     @abstractmethod
     def initialize_dataset(self):
@@ -224,12 +298,21 @@ class NebulaDataset(Dataset, ABC):
             y_train = dataset.targets.numpy()
         else:
             y_train = np.asarray(dataset.targets)
+
         min_size = 0
         K = np.unique(y_train)
         N = y_train.shape[0]
         n_nets = self.partitions_number
         net_dataidx_map = {}
-
+        #  ?  ? ? ? ? ? ? ? ?? ???? ? ? ?? ? ? ? ? ?
+        node_size = int(self.config.participant["mia_args"]["data_size"])
+        if node_size:
+            restricted_size = n_nets * node_size
+            idxs = np.random.permutation(N)[:restricted_size]
+            out_idxs = np.random.permutation(N)[restricted_size:]
+            X_train, y_train = dataset.data, np.array(dataset.targets)
+            X_train, y_train = X_train[idxs], y_train[idxs]
+            N = restricted_size
         while min_size < 10:
             idx_batch = [[] for _ in range(n_nets)]
             for k in K:
@@ -259,6 +342,17 @@ class NebulaDataset(Dataset, ABC):
                 label = dataset.targets[idx]
                 class_counts[label] += 1
             # print(f"Partition {i+1} class distribution: {class_counts}")
+
+        if self.config.participant["mia_args"]["attack_type"] != "No Attack":
+            self.initialize_eval_dataset(idxs, out_idxs)
+            if self.config.participant["mia_args"]["attack_type"] == "Shadow Model Based MIA" \
+                    or self.config.participant["mia_args"]["metric_detail"] in {"Prediction Class Confidence",
+                                                                                "Prediction Class Entropy",
+                                                                                "Prediction Modified Entropy"}:
+                self.initialize_shadow_dataset(out_idxs, node_size * n_nets,
+                                               self.config.participant["mia_args"]["shadow_model_number"])
+
+        self.indexing_map = net_dataidx_map
 
         return net_dataidx_map
 
@@ -296,6 +390,20 @@ class NebulaDataset(Dataset, ABC):
         batch_idxs = np.array_split(idxs, n_nets)
         net_dataidx_map = {i: batch_idxs[i] for i in range(n_nets)}
 
+        node_size = int(self.config.participant["mia_args"]["data_size"])
+        if node_size:
+            restricted_size = n_nets * node_size
+            in_dxs = idxs[:restricted_size]
+            if n_train >= 2 * restricted_size:
+                out_idxs = idxs[restricted_size:2 * restricted_size]
+            else:
+                print("""
+                Warning: The out evaluation dataset is not enough to match the in evaluation dataset size.
+                You may want to reconsider the evaluation of the precision of MIA here.
+                """)
+                out_idxs = idxs[restricted_size:]
+
+
         # partitioned_datasets = []
         for i in range(self.partitions_number):
             # subset = torch.utils.data.Subset(dataset, net_dataidx_map[i])
@@ -307,6 +415,17 @@ class NebulaDataset(Dataset, ABC):
                 label = dataset.targets[idx]
                 class_counts[label] += 1
             print(f"Partition {i+1} class distribution: {class_counts}")
+
+        if self.config.participant["mia_args"]["attack_type"] != "No Attack":
+            self.initialize_eval_dataset(in_dxs, out_idxs)
+            if self.config.participant["mia_args"]["attack_type"] == "Shadow Model Based MIA" \
+                    or self.config.participant["mia_args"]["metric_detail"] in {"Prediction Class Confidence",
+                                                                                "Prediction Class Entropy",
+                                                                                "Prediction Modified Entropy"}:
+                self.initialize_shadow_dataset(out_idxs, node_size * n_nets,
+                                               self.config.participant["mia_args"]["shadow_model_number"])
+
+        self.indexing_map = net_dataidx_map
 
         return net_dataidx_map
 
