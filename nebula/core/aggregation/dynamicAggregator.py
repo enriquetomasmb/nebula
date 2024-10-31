@@ -16,9 +16,10 @@ class DynamicAggregator(Aggregator):
         from nebula.core.aggregation.bulyan import Bulyan
         super().run_aggregation(models)
         available_aggregators = [FedAvg, Krum, Median, TrimmedMean, Bulyan]
-        # to check if the random seed is working
+        # needed to remove fixed seed
         #import time
-        #random.seed(int(time.time()) % 2 ** 32)
+        #random.seed(int(str(time.time_ns())[-8:]))
+
         chosen_aggregator_cls = random.choice(available_aggregators)
         logging.info(f"[DynamicAggregator] Chosen Aggregator: {chosen_aggregator_cls}")
         if tensorboard_log:

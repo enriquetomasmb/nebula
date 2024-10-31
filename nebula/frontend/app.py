@@ -1144,9 +1144,9 @@ async def calc_lie_z(request: Request):
 
     # Calculate the z_max using the percent point function (ppf)
     # ppf = Percent point function (inverse of cdf — percentiles)
-    #import scipy.stats as sps
-    #z_max = sps.norm().ppf((total_nodes - nodes_required_for_majority) / total_nodes)
-    # no scipy :/ -> https://stackoverflow.com/questions/74817976/alternative-for-scipy-stats-norm-ppf
+    # import scipy.stats as sps
+    # z_max = sps.norm().ppf((total_nodes - nodes_required_for_majority) / total_nodes)
+    # myppf() retrieved from https://stackoverflow.com/questions/74817976/alternative-for-scipy-stats-norm-ppf
 
     def myppf(x):
         a = -9

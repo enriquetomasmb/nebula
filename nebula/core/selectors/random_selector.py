@@ -32,6 +32,11 @@ class RandomSelector(Selector):
             self.selected_nodes = [node.addr]
             return self.selected_nodes
         logging.info(f"[RandomSelector] available neighbors: {neighbors}")
+
+        # needed to remove fixed seeds
+        #import time
+        #np.random.seed(int(str(time.time_ns())[-8:]))
+
         # Calculation of the amount of selected Neighbors according to thesis:
         #num_selected = max(
         #    self.MIN_AMOUNT_OF_SELECTED_NEIGHBORS,
