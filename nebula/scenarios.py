@@ -587,7 +587,7 @@ class ScenarioManagement:
                     - /bin/bash
                     - -c
                     - |
-                        {}ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python3.11 /nebula/nebula/node.py {}
+                        ifconfig && echo '{} host.docker.internal' >> /etc/hosts {} && python3.11 /nebula/nebula/node.py {}
                 networks:
                     nebula-net-scenario:
                         ipv4_address: {}
@@ -615,7 +615,7 @@ class ScenarioManagement:
                     - /bin/bash
                     - -c
                     - |
-                        {}ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python3.11 /nebula/nebula/node.py {}
+                        ifconfig && echo '{} host.docker.internal' >> /etc/hosts {} && python3.11 /nebula/nebula/node.py {}
                 deploy:
                     resources:
                         reservations:
@@ -662,7 +662,7 @@ class ScenarioManagement:
 
             tcset_cmd = ""
             if node["resource_args"]["resource_constraint_latency"] != 0:
-                tcset_cmd = f"tcset eth0 --delay {node['resource_args']['resource_constraint_latency']} && "
+                tcset_cmd = f"&& tcset eth1 --delay {node['resource_args']['resource_constraint_latency']} && sleep 2"
             if node["resource_args"]["resource_constraint_cpu"] == 0:
                 # If 0, the node shall have no CPU constraints
                 resource_constraint_cpu = os.cpu_count()
@@ -679,8 +679,8 @@ class ScenarioManagement:
                 services += participant_gpu_template.format(
                     idx,
                     self.root_path,
-                    tcset_cmd,
                     self.scenario.network_gateway,
+                    tcset_cmd,
                     path,
                     resource_constraint_cpu,
                     node["network_args"]["ip"],
@@ -692,8 +692,8 @@ class ScenarioManagement:
                     idx,
                     self.root_path,
                     resource_constraint_cpu,
-                    tcset_cmd,
                     self.scenario.network_gateway,
+                    tcset_cmd,
                     path,
                     node["network_args"]["ip"],
                     "proxy:" if self.scenario.simulation and self.use_blockchain else "",

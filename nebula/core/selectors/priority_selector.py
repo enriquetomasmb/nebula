@@ -24,7 +24,10 @@ class PrioritySelector(Selector):
     """
     MIN_AMOUNT_OF_SELECTED_NEIGHBORS = 1
     MAX_PERCENT_SELECTABLE_NEIGHBORS = 0.8
-    FEATURE_WEIGHTS = [10.0, 10.0, 1.0, 0.5, 0.5, 10.0, 3.0]
+    # Original Feature Weights provided in Report / Thesis
+    FEATURE_WEIGHTS = [1.0, 1.0, 1.0, 0.5, 0.5, 10.0, 3.0]
+    # Feature Weights for Testing (Latency can be changed reliably by virtual constraints)
+    #FEATURE_WEIGHTS = [0, 0, 0, 0, 0, 100, 0]
 
     def __init__(self, config = None):
         super().__init__(config)
@@ -99,11 +102,12 @@ class PrioritySelector(Selector):
         logging.info(f"[PrioritySelector] scores: {scores}")
 
         # Select nodes according to thesis (weighted probability)
-        #selected_nodes = np.random.choice(
-        #    neighbors, num_selected, replace = False, p = p[0]
-        #).tolist()
+        selected_nodes = np.random.choice(
+            neighbors, num_selected, replace = False, p = p[0]
+        ).tolist()
+
         # Select num_selected nodes with the highest score (or the derived probability) for easier evaluation
-        selected_nodes = [neighbors[i] for i in np.argsort(scores)[-num_selected:]]
+        #selected_nodes = [neighbors[i] for i in np.argsort(scores)[-num_selected:]]
 
         # Update ages
         for neighbor in neighbors:
