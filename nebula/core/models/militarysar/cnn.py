@@ -1,6 +1,6 @@
 import torch
 from nebula.core.models.nebulamodel import NebulaModel
-import nebula.core.models.militarysar._blocks as _blocks
+from nebula.core.models.militarysar import _blocks
 
 
 class MilitarySARModelCNN(NebulaModel):
@@ -30,6 +30,7 @@ class MilitarySARModelCNN(NebulaModel):
             torch.nn.Dropout(p=self.dropout_rate),
             _blocks.Conv2DBlock(shape=[3, 3, 128, self.num_classes], stride=1, padding="valid"),
             torch.nn.Flatten(),
+            torch.nn.Linear(360, num_classes),
         )
 
     def forward(self, x):

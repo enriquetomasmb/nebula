@@ -3,9 +3,15 @@ import torch.nn.functional as F
 import lightning as pl
 from torchmetrics.classification import MulticlassAccuracy, MulticlassRecall, MulticlassPrecision, MulticlassF1Score, MulticlassConfusionMatrix
 from torchmetrics import MetricCollection
-import seaborn as sns
+import matplotlib
 import matplotlib.pyplot as plt
+import seaborn as sns
+matplotlib.use("Agg")
+plt.switch_backend("Agg")
 import logging
+from nebula.config.config import TRAINING_LOGGER
+
+logging_training = logging.getLogger(TRAINING_LOGGER)
 
 
 class ContrastiveLoss(torch.nn.Module):
@@ -56,10 +62,10 @@ class ContrastiveLoss(torch.nn.Module):
         # Combined loss
         contrastive_loss = ce_loss + self.mu * 0.5 * (pos_cos_sim + neg_cos_sim)
 
-        logging.debug(f"Contrastive loss (mu={self.mu}) with 0.5 of factor: ce_loss: {ce_loss}, pos_cos_sim_local_historical: {pos_cos_sim}, neg_cos_sim_local_global: {neg_cos_sim}, loss: {contrastive_loss}")
+        logging_training.debug(f"Contrastive loss (mu={self.mu}) with 0.5 of factor: ce_loss: {ce_loss}, pos_cos_sim_local_historical: {pos_cos_sim}, neg_cos_sim_local_global: {neg_cos_sim}, loss: {contrastive_loss}")
         return contrastive_loss
         # else:
-        #    logging.debug(f"Cross-entropy loss (local model): {ce_loss}")
+        #    logging_training.debug(f"Cross-entropy loss (local model): {ce_loss}")
         #    return ce_loss
 
 
@@ -306,7 +312,7 @@ class DualAggModel(pl.LightningModule):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate, betas=(self.config["beta1"], self.config["beta2"]), amsgrad=self.config["amsgrad"])
         return optimizer
 
-    def step(self, batch, phase):
+    def step(self, batch, batch_idx, phase):
         images, labels = batch
         images = images.to(self.device)
         labels = labels.to(self.device)
@@ -334,7 +340,7 @@ class DualAggModel(pl.LightningModule):
 
         Returns:
         """
-        return self.step(batch, "Train")
+        return self.step(batch, batch_id, "Train")
 
     def on_train_epoch_end(self):
         self.log_metrics_by_epoch("Train", print_cm=True, plot_cm=True, mode="local")
@@ -350,7 +356,7 @@ class DualAggModel(pl.LightningModule):
 
         Returns:
         """
-        return self.step(batch, "Validation")
+        return self.step(batch, batch_idx, "Validation")
 
     def on_validation_epoch_end(self):
         self.log_metrics_by_epoch("Validation", print_cm=True, plot_cm=False, mode="local")
@@ -366,7 +372,7 @@ class DualAggModel(pl.LightningModule):
 
         Returns:
         """
-        return self.step(batch, "Test")
+        return self.step(batch, batch_idx, "Test")
 
     def on_test_epoch_end(self):
         self.log_metrics_by_epoch("Test", print_cm=True, plot_cm=True, mode="local")
@@ -377,7 +383,7 @@ class DualAggModel(pl.LightningModule):
         """
         Save the current local model as the historical model.
         """
-        logging.info("Copying local model to historical model.")
+        logging_training.info("Copying local model to historical model.")
         self.historical_model.load_state_dict(self.model.state_dict())
 
     def global_load_state_dict(self, state_dict):
@@ -386,7 +392,7 @@ class DualAggModel(pl.LightningModule):
         Args:
             state_dict (dict): The state dictionary to load into the global model.
         """
-        logging.info("Loading state dict into global model.")
+        logging_training.info("Loading state dict into global model.")
         adapted_state_dict = self.adapt_state_dict_for_model(state_dict, "model")
         self.global_model.load_state_dict(adapted_state_dict)
 
@@ -396,7 +402,7 @@ class DualAggModel(pl.LightningModule):
         Args:
             state_dict (dict): The state dictionary to load into the historical model.
         """
-        logging.info("Loading state dict into historical model.")
+        logging_training.info("Loading state dict into historical model.")
         adapted_state_dict = self.adapt_state_dict_for_model(state_dict, "model")
         self.historical_model.load_state_dict(adapted_state_dict)
 
@@ -423,9 +429,9 @@ class DualAggModel(pl.LightningModule):
         """
         Print a summary of local, historical and global models to check if they are the same.
         """
-        logging.info("Local model summary:")
-        logging.info(self.model)
-        logging.info("Historical model summary:")
-        logging.info(self.historical_model)
-        logging.info("Global model summary:")
-        logging.info(self.global_model)
+        logging_training.info("Local model summary:")
+        logging_training.info(self.model)
+        logging_training.info("Historical model summary:")
+        logging_training.info(self.historical_model)
+        logging_training.info("Global model summary:")
+        logging_training.info(self.global_model)

@@ -1,8 +1,7 @@
 import datetime
-import hashlib
 import sqlite3
 import datetime
-import hashlib
+from argon2 import PasswordHasher
 import sqlite3
 import asyncio
 import aiosqlite
@@ -34,6 +33,75 @@ async def initialize_databases():
     await setup_database(node_db_file_location)
     await setup_database(scenario_db_file_location)
     await setup_database(notes_db_file_location)
+    
+    async with aiosqlite.connect(user_db_file_location) as conn:
+        _c = await conn.cursor()
+        await _c.execute(
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                user TEXT PRIMARY KEY,
+                password TEXT NOT NULL,
+                role TEXT NOT NULL
+            );
+            """
+        )
+        await conn.commit()
+        
+    async with aiosqlite.connect(node_db_file_location) as conn:
+        _c = await conn.cursor()
+        await _c.execute(
+            """
+            CREATE TABLE IF NOT EXISTS nodes (
+                uid TEXT PRIMARY KEY,
+                idx TEXT NOT NULL,
+                ip TEXT NOT NULL,
+                port TEXT NOT NULL,
+                role TEXT NOT NULL,
+                neighbors TEXT NOT NULL,
+                latitude TEXT NOT NULL,
+                longitude TEXT NOT NULL,
+                timestamp TEXT NOT NULL,
+                federation TEXT NOT NULL,
+                round TEXT NOT NULL,
+                scenario TEXT NOT NULL,
+                hash TEXT NOT NULL
+            );
+            """
+        )
+        await conn.commit()
+        
+    async with aiosqlite.connect(scenario_db_file_location) as conn:
+        _c = await conn.cursor()
+        await _c.execute(
+            """
+            CREATE TABLE IF NOT EXISTS scenarios (
+                name TEXT PRIMARY KEY,
+                start_time TEXT NOT NULL,
+                end_time TEXT NOT NULL,
+                title TEXT NOT NULL,
+                description TEXT NOT NULL,
+                status TEXT NOT NULL,
+                network_subnet TEXT NOT NULL,
+                model TEXT NOT NULL,
+                dataset TEXT NOT NULL,
+                rounds TEXT NOT NULL,
+                role TEXT NOT NULL
+            );
+            """
+        )
+        await conn.commit()
+        
+    async with aiosqlite.connect(notes_db_file_location) as conn:
+        _c = await conn.cursor()
+        await _c.execute(
+            """
+            CREATE TABLE IF NOT EXISTS notes (
+                scenario TEXT PRIMARY KEY,
+                scenario_notes TEXT NOT NULL
+            );
+            """
+        )
+        await conn.commit()
 
 def list_users(all_info=False):
     with sqlite3.connect(user_db_file_location) as conn:
@@ -61,16 +129,33 @@ def get_user_info(user):
 
 
 def verify(user, password):
+    ph = PasswordHasher()
     with sqlite3.connect(user_db_file_location) as conn:
         c = conn.cursor()
 
         c.execute("SELECT password FROM users WHERE user = ?", (user,))
         result = c.fetchone()
         if result:
-            return result[0] == hashlib.sha256(password.encode()).hexdigest()
-
+            try:
+                return ph.verify(result[0], password)
+            except:
+                return False
     return False
 
+def verify_hash_algorithm(user):
+    user = user.upper()
+    argon2_prefixes = ('$argon2i$', '$argon2id$')
+    
+    with sqlite3.connect(user_db_file_location) as conn:
+        c = conn.cursor()
+        
+        c.execute("SELECT password FROM users WHERE user = ?", (user,))
+        result = c.fetchone()
+        if result:
+            password_hash = result[0]
+            return password_hash.startswith(argon2_prefixes)
+    
+    return False
 
 def delete_user_from_db(user):
     with sqlite3.connect(user_db_file_location) as conn:
@@ -79,16 +164,17 @@ def delete_user_from_db(user):
 
 
 def add_user(user, password, role):
+    ph = PasswordHasher()
     with sqlite3.connect(user_db_file_location) as conn:
         c = conn.cursor()
-        c.execute("INSERT INTO users VALUES (?, ?, ?)", (user.upper(), hashlib.sha256(password.encode()).hexdigest(), role))
+        c.execute("INSERT INTO users VALUES (?, ?, ?)", (user.upper(), ph.hash(password), role))
 
 
 def update_user(user, password, role):
+    ph = PasswordHasher()
     with sqlite3.connect(user_db_file_location) as conn:
         c = conn.cursor()
-        print(f"UPDATE users SET password = {hashlib.sha256(password.encode()).hexdigest()}, role = {role} WHERE user = {user.upper()}")
-        c.execute("UPDATE users SET password = ?, role = ? WHERE user = ?", (hashlib.sha256(password.encode()).hexdigest(), role, user.upper()))
+        c.execute("UPDATE users SET password = ?, role = ? WHERE user = ?", (ph.hash(password), role, user.upper()))
 
 
 def list_nodes(scenario_name=None, sort_by="idx"):
@@ -181,8 +267,15 @@ def get_all_scenarios(sort_by="start_time"):
     with sqlite3.connect(scenario_db_file_location) as conn:
         conn.row_factory = sqlite3.Row
         c = conn.cursor()
-        command = "SELECT * FROM scenarios ORDER BY ?;"
-        c.execute(command, (sort_by,))
+        if sort_by == "start_time":
+            command = """
+            SELECT * FROM scenarios
+            ORDER BY strftime('%Y-%m-%d %H:%M:%S', substr(start_time, 7, 4) || '-' || substr(start_time, 4, 2) || '-' || substr(start_time, 1, 2) || ' ' || substr(start_time, 12, 8));
+            """
+            c.execute(command)
+        else:
+            command = "SELECT * FROM scenarios ORDER BY ?;"
+            c.execute(command, (sort_by,))
         result = c.fetchall()
 
     return result
@@ -192,7 +285,15 @@ def get_all_scenarios_and_check_completed(sort_by="start_time"):
     with sqlite3.connect(scenario_db_file_location) as _conn:
         _conn.row_factory = sqlite3.Row
         _c = _conn.cursor()
-        command = f"SELECT * FROM scenarios ORDER BY {sort_by};"
+        if sort_by == "start_time":
+            command = """
+            SELECT * FROM scenarios
+            ORDER BY strftime('%Y-%m-%d %H:%M:%S', substr(start_time, 7, 4) || '-' || substr(start_time, 4, 2) || '-' || substr(start_time, 1, 2) || ' ' || substr(start_time, 12, 8));
+            """
+            _c.execute(command)
+        else:
+            command = "SELECT * FROM scenarios ORDER BY ?;"
+            _c.execute(command, (sort_by,))
         _c.execute(command)
         result = _c.fetchall()
 

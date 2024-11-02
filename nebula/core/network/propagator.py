@@ -22,7 +22,7 @@ class PropagationStrategy(ABC):
         pass
 
     @abstractmethod
-    def prepare_model_payload(self, node: str) -> Optional[Tuple[Any, List[str], float]]:
+    def prepare_model_payload(self, node: str) -> Optional[Tuple[Any, float]]:
         pass
 
 
@@ -38,8 +38,8 @@ class InitialModelPropagation(PropagationStrategy):
     def is_node_eligible(self, node: str) -> bool:
         return node not in self.engine.cm.get_ready_connections()
 
-    def prepare_model_payload(self, node: str) -> Optional[Tuple[Any, List[str], float]]:
-        return self.trainer.get_model_parameters(), self.trainer.DEFAULT_MODEL_WEIGHT
+    def prepare_model_payload(self, node: str) -> Optional[Tuple[Any, float]]:
+        return self.trainer.get_model_parameters(initialize=True), self.trainer.DEFAULT_MODEL_WEIGHT
 
 
 class StableModelPropagation(PropagationStrategy):
@@ -55,7 +55,7 @@ class StableModelPropagation(PropagationStrategy):
     def is_node_eligible(self, node: str) -> bool:
         return (node not in self.aggregator.get_nodes_pending_models_to_aggregate()) or (self.engine.cm.connections[node].get_federated_round() < self.get_round())
 
-    def prepare_model_payload(self, node: str) -> Optional[Tuple[Any, List[str], float]]:
+    def prepare_model_payload(self, node: str) -> Optional[Tuple[Any, float]]:
         return self.trainer.get_model_parameters(), self.trainer.get_model_weight()
 
 
@@ -109,6 +109,7 @@ class Propagator:
         self.status_history.clear()
 
     async def propagate(self, strategy_id: str):
+        self.reset_status_history()
         if strategy_id not in self.strategies:
             logging.info(f"Strategy {strategy_id} not found.")
             return False
@@ -119,7 +120,8 @@ class Propagator:
         strategy = self.strategies[strategy_id]
         logging.info(f"Starting model propagation with strategy: {strategy_id}")
 
-        eligible_neighbors = [neighbor_addr for neighbor_addr in self.cm.get_addrs_current_connections(only_direct=True) if strategy.is_node_eligible(neighbor_addr)]
+        current_connections = await self.cm.get_addrs_current_connections(only_direct=True)
+        eligible_neighbors = [neighbor_addr for neighbor_addr in current_connections if strategy.is_node_eligible(neighbor_addr)]
         logging.info(f"Eligible neighbors for model propagation: {eligible_neighbors}")
         if not eligible_neighbors:
             logging.info("Propagation complete: No eligible neighbors.")
@@ -129,52 +131,25 @@ class Propagator:
         if not self.update_and_check_neighbors(strategy, eligible_neighbors):
             logging.info("Exiting propagation due to repeated statuses.")
             return False
+        
+        model_params, weight = strategy.prepare_model_payload(None)
+        if model_params:
+            serialized_model = (
+                model_params if isinstance(model_params, bytes)
+                else self.trainer.serialize_model(model_params)
+            )
+        else:
+            serialized_model = None
+
+        round_number = -1 if strategy_id == "initialization" else self.get_round()
 
         for neighbor_addr in eligible_neighbors:
-            serialized_model, weight = strategy.prepare_model_payload(neighbor_addr)
-            if serialized_model:
-                serialized_model = serialized_model if isinstance(serialized_model, bytes) else self.trainer.serialize_model(serialized_model)
-                if strategy_id == "initialization":
-                    await self.cm.send_model(neighbor_addr, -1, serialized_model, weight)
-                else:
-                    await self.cm.send_model(neighbor_addr, self.get_round(), serialized_model, weight)
-            await asyncio.sleep(self.model_interval)
-            
-        if strategy_id == "initialization":
-            return False
-        
+            asyncio.create_task(
+                self.cm.send_model(neighbor_addr, round_number, serialized_model, weight)
+            )
+
         if len(self.aggregator.get_nodes_pending_models_to_aggregate()) >= len(self.aggregator._federation_nodes):
             return False
 
         await asyncio.sleep(self.interval)
         return True
-
-    async def propagate_continuously(self, strategy_id: str):
-        self.reset_status_history()
-        while True:
-            propagated = await self.propagate(strategy_id)
-            if not propagated:
-                logging.info("Exiting continuous propagation...")
-                return
-            
-    async def get_model_information(self, dest_addr, strategy_id: str):
-        if strategy_id not in self.strategies:
-            logging.info(f"Strategy {strategy_id} not found.")
-            return None
-        if self.get_round() is None:
-            logging.info("Propagation halted: round is not set.")
-            return None
-        
-        strategy = self.strategies[strategy_id]
-        logging.info(f"Preparing model information with strategy to make an offer: {strategy_id}")
-
-        serialized_model, weight = strategy.prepare_model_payload(dest_addr)
-
-        if serialized_model:
-            serialized_model = serialized_model if isinstance(serialized_model, bytes) else self.trainer.serialize_model(serialized_model)
-            if strategy_id == "initialization":
-                return (serialized_model, weight, -1)
-            else:
-                return (serialized_model, weight, self.get_round())
-                
-        return None

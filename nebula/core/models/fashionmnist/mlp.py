@@ -5,7 +5,7 @@ from nebula.core.models.nebulamodel import NebulaModel
 class FashionMNISTModelMLP(NebulaModel):
     def __init__(
         self,
-        input_channels=3,
+        input_channels=1,
         num_classes=10,
         learning_rate=1e-3,
         metrics=None,
@@ -16,11 +16,9 @@ class FashionMNISTModelMLP(NebulaModel):
 
         self.config = {"beta1": 0.851436, "beta2": 0.999689, "amsgrad": True}
 
-        self.example_input_array = torch.rand(1, 3, 32, 32)
+        self.example_input_array = torch.rand(1, 1, 28, 28)
         self.learning_rate = learning_rate
         self.criterion = torch.nn.CrossEntropyLoss()
-
-        self.example_input_array = torch.zeros(1, 1, 28, 28)
 
         self.l1 = torch.nn.Linear(28 * 28, 256)
         self.l2 = torch.nn.Linear(256, 128)
@@ -34,7 +32,6 @@ class FashionMNISTModelMLP(NebulaModel):
         x = self.l2(x)
         x = torch.relu(x)
         x = self.l3(x)
-        x = torch.log_softmax(x, dim=1)
         return x
 
     def configure_optimizers(self):

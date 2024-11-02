@@ -1,4 +1,3 @@
-import lightning as pl
 import torch
 from nebula.core.models.nebulamodel import NebulaModel
 
@@ -6,7 +5,7 @@ from nebula.core.models.nebulamodel import NebulaModel
 class EMNISTModelCNN(NebulaModel):
     def __init__(
         self,
-        input_channels=3,
+        input_channels=1,
         num_classes=10,
         learning_rate=1e-3,
         metrics=None,
@@ -17,19 +16,19 @@ class EMNISTModelCNN(NebulaModel):
 
         self.config = {"beta1": 0.851436, "beta2": 0.999689, "amsgrad": True}
 
-        self.example_input_array = torch.rand(1, 3, 32, 32)
+        self.example_input_array = torch.rand(1, 1, 28, 28)
         self.learning_rate = learning_rate
         self.criterion = torch.nn.CrossEntropyLoss()
 
         self.conv1 = torch.nn.Conv2d(
-            input_channels=input_channels,
-            num_classes=32,
+            in_channels=input_channels,
+            out_channels=32,
             kernel_size=(5, 5),
             padding="same",
         )
         self.relu = torch.nn.ReLU()
         self.pool1 = torch.nn.MaxPool2d(kernel_size=(2, 2), stride=2)
-        self.conv2 = torch.nn.Conv2d(input_channels=32, num_classes=64, kernel_size=(5, 5), padding="same")
+        self.conv2 = torch.nn.Conv2d(in_channels=32, out_channels=64, kernel_size=(5, 5), padding="same")
         self.pool2 = torch.nn.MaxPool2d(kernel_size=(2, 2), stride=2)
         self.l1 = torch.nn.Linear(7 * 7 * 64, 2048)
         self.l2 = torch.nn.Linear(2048, num_classes)
@@ -37,7 +36,7 @@ class EMNISTModelCNN(NebulaModel):
         self.epoch_global_number = {"Train": 0, "Validation": 0, "Test": 0}
 
     def forward(self, x):
-        input_layer = x.view(-1, 1, self.input_channels, self.input_channels)
+        input_layer = x.view(-1, 1, 28, 28)
         conv1 = self.relu(self.conv1(input_layer))
         pool1 = self.pool1(conv1)
         conv2 = self.relu(self.conv2(pool1))
