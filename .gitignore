@@ -123,7 +123,6 @@ poetry.lock
 
 # mkdocs documentation
 /site
-_prebuilt/
 _build/
 
 # mypy
