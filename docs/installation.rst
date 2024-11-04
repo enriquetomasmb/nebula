@@ -128,7 +128,7 @@ To run NEBULA, you can use the following command line::
     python app/main.py [PARAMS]
 
 The first time you run the platform, the nebula-frontend docker image will be built. This process can take a few minutes.
-    
+
 You can show the PARAMS using::
 
     python app/main.py --help
@@ -190,7 +190,7 @@ Solution: Start the docker daemon
 Solution: Enable the following option in Docker Desktop
 
 Settings -> Advanced -> Allow the default Docker socket to be used
-    
+
     .. image:: _static/docker-required-options.png
         :align: center
         :alt: Docker required options

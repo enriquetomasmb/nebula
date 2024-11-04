@@ -149,7 +149,7 @@ We would like to thank the following projects for their contributions which have
 - [PyTorch Lightning](https://github.com/Lightning-AI/pytorch-lightning) for the training loop and model management
 - [Tensorboard](https://github.com/tensorflow/tensorboard) and [Aim](https://github.com/aimhubio/aim) for the visualization tools and monitoring capabilities
 - Different datasets ([nebula/core/datasets](https://github.com/enriquetomasmb/nebula/tree/main/nebula/core/datasets)) and models ([nebula/core/models](https://github.com/enriquetomasmb/nebula/tree/main/nebula/core/models)) for testing and validation purposes
-- [FastAPI](https://github.com/tiangolo/fastapi) for the RESTful API 
+- [FastAPI](https://github.com/tiangolo/fastapi) for the RESTful API
 - [Web3](https://github.com/ethereum/web3.py) for the blockchain integration
 - [Fedstellar](https://github.com/enriquetomasmb/fedstellar) platform and [p2pfl](https://github.com/pguijas/p2pfl/) library
 - [Adversarial Robustness Toolbox (ART)](https://github.com/Trusted-AI/adversarial-robustness-toolbox) for the implementation of adversarial attacks

@@ -1,7 +1,7 @@
 import logging
-from nebula.core.pb import nebula_pb2
-
 from typing import TYPE_CHECKING
+
+from nebula.core.pb import nebula_pb2
 
 if TYPE_CHECKING:
     from nebula.core.network.communications import CommunicationsManager

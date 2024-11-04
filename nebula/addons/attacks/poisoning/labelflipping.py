@@ -4,7 +4,14 @@ import random
 import torch
 
 
-def labelFlipping(dataset, indices, poisoned_persent=0, targeted=False, target_label=4, target_changed_label=7):
+def labelFlipping(
+    dataset,
+    indices,
+    poisoned_persent=0,
+    targeted=False,
+    target_label=4,
+    target_changed_label=7,
+):
     """
     select flipping_persent of labels, and change them to random values.
     Args:

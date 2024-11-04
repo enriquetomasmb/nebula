@@ -1,12 +1,11 @@
-.PHONY: apidoc html clean all
+.PHONY: test
+test: ## Test if documentation can be built without warnings or errors
+	@poetry run mkdocs build -s
 
-apidoc:
-	sphinx-apidoc -f -o . ../nebula
+.PHONY: build
+build: ## Build the documentation
+	@poetry run mkdocs build -d _build
 
-html:
-	sphinx-build -b html . _build
-
-clean:
-	rm -rf _build
-
-all: apidoc html
+.PHONY: serve
+serve: ## Build and serve the documentation
+	@poetry run mkdocs serve

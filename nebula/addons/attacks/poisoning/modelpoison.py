@@ -9,7 +9,7 @@ def modelpoison(model: OrderedDict, poisoned_ratio, noise_type="gaussian"):
     Function to add random noise of various types to the model parameter.
     """
     poisoned_model = OrderedDict()
-    if type(noise_type) != type("salt"):
+    if type(noise_type) != str:
         noise_type = noise_type[0]
 
     for layer in model:
