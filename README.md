@@ -1,7 +1,7 @@
 <br>
 <p align="center">
   <a href="https://github.com/enriquetomasmb/fedstellar">
-    <img src="docs/_static/nebula-logo.jpg" alt="fedstellar">
+    <img src="docs/_prebuilt/static/nebula-logo.jpg" alt="fedstellar">
   </a>
   <h3 align="center">NEBULA: A Platform for Decentralized Federated Learning</h3>
 
@@ -47,20 +47,20 @@ NEBULA boasts a **modular architecture** that consists of three core elements:
 - 🚗 **Vehicular scenarios**: Utilize in vehicles including cars, trucks, and drones.
 
 <p align="center">
-  <img src="docs/_static/nebula-mockup.png" alt="NEBULA Mockup">
+  <img src="docs/_prebuilt/static/nebula-mockup.png" alt="NEBULA Mockup">
 </p>
 
 NEBULA is developed by [Enrique Tomás Martínez Beltrán](https://enriquetomasmb.com) in collaboration with the [University of Murcia](https://www.um.es/en), [armasuisse](https://www.armasuisse.ch/en), and the [University of Zurich (UZH)](https://www.uzh.ch/).
 
 <p align="center">
 	<a href="https://um.es">
-	<img src="docs/_static/umu.jpg" alt="University of Murcia" width="200" height="60">
+	<img src="docs/_prebuilt/static/umu.jpg" alt="University of Murcia" width="200" height="60">
 	</a>
 	<a href="https://www.armasuisse.ch/en">
-	<img src="docs/_static/armasuisse.jpg" alt="armasuisse" width="200" height="60">
+	<img src="docs/_prebuilt/static/armasuisse.jpg" alt="armasuisse" width="200" height="60">
 	</a>
 	<a href="https://www.uzh.ch/">
-	<img src="docs/_static/uzh.jpg" alt="University of Zurich" width="200" height="60">
+	<img src="docs/_prebuilt/static/uzh.jpg" alt="University of Zurich" width="200" height="60">
 	</a>
 </p>
 

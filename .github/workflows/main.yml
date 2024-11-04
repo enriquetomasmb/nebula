@@ -35,4 +35,6 @@ jobs:
         uses: ./.github/actions/setup-env
 
       - name: Check if documentation can be built
-        run: poetry run mkdocs build -s
+        run: |
+          cd docs
+          poetry run mkdocs build -s
