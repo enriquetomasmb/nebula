@@ -78,11 +78,11 @@ the instructions below.
 Obtaining the platform \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
 
 You can obtain the source code from
-<https://github.com/enriquetomasmb/nebula>
+<https://github.com/CyberDataLab/nebula>
 
 Or, if you happen to have git configured, you can clone the repository:
 
-    git clone https://github.com/enriquetomasmb/nebula.git
+    git clone https://github.com/CyberDataLab/nebula.git
 
 Now, you can move to the source directory:
 

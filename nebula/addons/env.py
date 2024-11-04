@@ -10,10 +10,10 @@ from nebula import __version__
 
 
 def check_version():
-    # Check version of NEBULA (__version__ is defined in __init__.py) and compare with __version__ in https://raw.githubusercontent.com/enriquetomasmb/nebula/main/nebula/__init__.py
+    # Check version of NEBULA (__version__ is defined in __init__.py) and compare with __version__ in https://raw.githubusercontent.com/CyberDataLab/nebula/main/nebula/__init__.py
     logging.info("Checking NEBULA version...")
     try:
-        r = requests.get("https://raw.githubusercontent.com/enriquetomasmb/nebula/main/nebula/__init__.py")
+        r = requests.get("https://raw.githubusercontent.com/CyberDataLab/nebula/main/nebula/__init__.py")
         if r.status_code == 200:
             version = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', r.text, re.MULTILINE).group(1)
             if version != __version__:
@@ -21,7 +21,7 @@ def check_version():
                     f"Your NEBULA version is {__version__} and the latest version is {version}. Please update your NEBULA version."
                 )
                 logging.info(
-                    "You can update your NEBULA version downloading the latest version from https://github.com/enriquetomasmb/nebula"
+                    "You can update your NEBULA version downloading the latest version from https://github.com/CyberDataLab/nebula"
                 )
                 sys.exit(0)
             else:

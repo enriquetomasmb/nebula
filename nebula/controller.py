@@ -245,7 +245,7 @@ class Controller:
                         ╚═╝  ╚═══╝╚══════╝╚═════╝  ╚═════╝ ╚══════╝╚═╝  ╚═╝
                           A Platform for Decentralized Federated Learning
                             Created by Enrique Tomás Martínez Beltrán
-                            https://github.com/enriquetomasmb/nebula
+                              https://github.com/CyberDataLab/nebula
                     """
         print("\x1b[0;36m" + banner + "\x1b[0m")
 

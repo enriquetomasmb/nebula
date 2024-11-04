@@ -1,11 +1,11 @@
-site_name: nebula
+site_name: NEBULA
 docs_dir: '_prebuilt'
-repo_url: https://github.com/enriquetomasmb/nebula
+repo_url: https://github.com/CyberDataLab/nebula
 site_url: https://nebula.enriquetomasmb.com
 site_description: "NEBULA: A Platform for Decentralized Federated Learning"
 site_author: Enrique Tomás Martínez Beltrán
 edit_uri: edit/main/docs/
-repo_name: enriquetomasmb/nebula
+repo_name: CyberDataLab/nebula
 copyright: Created by <a href="https://enriquetomasmb.com">Enrique Tomás Martínez Beltrán</a>.
 
 nav:
@@ -63,14 +63,16 @@ theme:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/enriquetomasmb/nebula
+      link: https://github.com/CyberDataLab/nebula
     - icon: fontawesome/brands/python
       link: https://pypi.org/project/nebula
     - icon: material/email
       link: mailto:enriquetomas@um.es
-  analytics:
-    provider: google
-    tracking_id: UA-XXXXX-Y
+  meta:
+    - name: description
+      content: "NEBULA: A Platform for Decentralized Federated Learning"
+    - name: keywords
+      content: "NEBULA, Fedstellar, Federated Learning, Decentralized Federated Learning, Machine Learning, Privacy, Security, Trustworthiness AI"
   generator: false
 
 markdown_extensions:

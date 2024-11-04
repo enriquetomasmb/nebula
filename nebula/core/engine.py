@@ -53,7 +53,7 @@ def print_banner():
                     ╚═╝  ╚═══╝╚══════╝╚═════╝  ╚═════╝ ╚══════╝╚═╝  ╚═╝
                       A Platform for Decentralized Federated Learning
                         Created by Enrique Tomás Martínez Beltrán
-                        https://github.com/enriquetomasmb/nebula
+                          https://github.com/CyberDataLab/nebula
                 """
     logging.info(f"\n{banner}\n")
 
