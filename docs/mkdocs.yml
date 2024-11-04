@@ -90,7 +90,6 @@ markdown_extensions:
       alternate_style: true
   - pymdownx.snippets:
       check_paths: true
-      base_path: '..'
   - admonition
   - footnotes
   - codehilite

@@ -44,6 +44,18 @@ publish: ## publish a release to pypi.
 .PHONY: build-and-publish
 build-and-publish: build publish ## Build and publish.
 
+.PHONY: doc-test
+doc-test: ## Test if documentation can be built without warnings or errors
+	@poetry run mkdocs build -f docs/mkdocs.yml -d _build -s
+
+.PHONY: doc-build
+doc-build: ## Build the documentation
+	@poetry run mkdocs build -f docs/mkdocs.yml -d _build
+
+.PHONY: doc-serve
+doc-serve: ## Build and serve the documentation
+	@poetry run mkdocs serve -f docs/mkdocs.yml
+
 .PHONY: format
 format: ## Format code with black and isort
 	@echo "🎨 Formatting code"
