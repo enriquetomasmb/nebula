@@ -117,7 +117,7 @@
     "device_type": ""
   },
   "message_args": {
-    "max_local_messages": 100,
+    "max_local_messages": 10000,
     "compression": "zlib"
   },
   "reporter_args": {
@@ -148,7 +148,7 @@
     "history_size": 20
   },
   "misc_args": {
-    "grace_time_connection": 20,
-    "grace_time_start_federation": 20
+    "grace_time_connection": 10,
+    "grace_time_start_federation": 10
   } 
 }
