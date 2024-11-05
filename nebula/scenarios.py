@@ -707,7 +707,7 @@ class ScenarioManagement:
                     - /bin/bash
                     - -c
                     - |
-                        {} && ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python3.11 /nebula/nebula/node.py {}
+                        {} && ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python /nebula/nebula/node.py {}
                 networks:
                     nebula-net-scenario:
                         ipv4_address: {}
@@ -735,7 +735,7 @@ class ScenarioManagement:
                     - /bin/bash
                     - -c
                     - |
-                        {} && ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python3.11 /nebula/nebula/node.py {}
+                        {} && ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python /nebula/nebula/node.py {}
                 deploy:
                     resources:
                         reservations:
@@ -958,7 +958,7 @@ class ScenarioManagement:
                         commands += "sleep 2\n"
                     commands += f'echo "Running node {node["device_args"]["idx"]}..."\n'
                     commands += f"OUT_FILE={self.root_path}/app/logs/{self.scenario_name}/participant_{node['device_args']['idx']}.out\n"
-                    commands += f"python3.11 {self.root_path}/nebula/node.py {self.root_path}/app/config/{self.scenario_name}/participant_{node['device_args']['idx']}.json > $OUT_FILE 2>&1 &\n"
+                    commands += f"python {self.root_path}/nebula/node.py {self.root_path}/app/config/{self.scenario_name}/participant_{node['device_args']['idx']}.json > $OUT_FILE 2>&1 &\n"
                     commands += "echo $! >> $PID_FILE\n\n"
 
                 commands += 'echo "All nodes started. PIDs stored in $PID_FILE"\n'
