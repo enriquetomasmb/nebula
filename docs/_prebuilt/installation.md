@@ -1,21 +1,22 @@
 # Installation
 
-NEBULA is a modular, adaptable and extensible platform for creating
-centralized and decentralized architectures using Federated Learning.
-Also, the platform enables the creation of a standard approach for
-developing, deploying, and managing federated learning applications.
+In this section, we will explain how to install the NEBULA platform.
 
-The platform enables developers to create distributed applications that
-use federated learning algorithms to improve user experience, security,
-and privacy. It provides features for managing data, managing models,
-and managing federated learning processes. It also provides a
-comprehensive set of tools to help developers monitor and analyze the
-performance of their applications.
+## Table of contents
+
+-   [Prerequisites](#prerequisites)
+-   [Obtaining NEBULA platform](#obtaining-nebula-platform)
+-   [Installing NEBULA platform](#installing-nebula-platform)
+-   [Checking the installation](#checking-the-installation)
+-   [Building NEBULA core](#building-nebula-core)
+-   [Running NEBULA](#running-nebula)
+-   [NEBULA Frontend](#nebula-frontend)
+-   [Stop NEBULA](#stop-nebula)
+-   [Possible issues during the installation or execution](#possible-issues-during-the-installation-or-execution)
 
 ## Prerequisites
 
--   Python 3.8 or higher (3.11 recommended)
--   pip3
+-   Python 3.10 or higher (3.11 recommended)
 -   Docker Engine 24.0.4 or higher (24.0.7 recommended,
     <https://docs.docker.com/engine/install/>)
 -   Docker Compose 2.19.0 or higher (2.19.1 recommended,
@@ -28,57 +29,10 @@ performance of their applications.
     <https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html>
     (Linux)
 
-## Deploy a virtual environment {#deploy_venv}
+## Obtaining NEBULA platform
 
-Virtualenv is a tool to build isolated Python environments.
 
-It\'s a great way to quickly test new libraries without cluttering your
-global site-packages or run multiple projects on the same machine which
-depend on a particular library but not the same version of the library.
-
-Since Python version 3.3, there is also a module in the standard library
-called [venv]{.title-ref} with roughly the same functionality.
-
-### Create virtual environment
-
-In order to create a virtual environment called e.g. nebula using
-[venv]{.title-ref}, run:
-
-    $ python3 -m venv nebula-venv
-
-### Activate the environment
-
-Once the environment is created, you need to activate it. Just change
-directory into it and source the script [Scripts/activate]{.title-ref}
-or [bin/activate]{.title-ref}.
-
-With bash:
-
-    $ cd nebula-venv
-    $ . Scripts/activate
-    (nebula-venv) $
-
-With csh/tcsh:
-
-    $ cd nebula-venv
-    $ source Scripts/activate
-    (nebula-venv) $
-
-Notice that the prompt changes once you are activate the environment. To
-deactivate it just type deactivate:
-
-    (nebula-venv) $ deactivate
-    $
-
-After you have created the environment, you can install nebula following
-the instructions below.
-
-## Building from source
-
-Obtaining the platform \-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\-\--
-
-You can obtain the source code from
-<https://github.com/CyberDataLab/nebula>
+You can obtain the source code from <https://github.com/CyberDataLab/nebula>
 
 Or, if you happen to have git configured, you can clone the repository:
 
@@ -88,14 +42,17 @@ Now, you can move to the source directory:
 
     cd nebula
 
-### Dependencies
+### Installing NEBULA platform
 
-NEBULA requires the additional packages in order to be able to be
-installed and work properly.
+To install the NEBULA platform, you can use the following command line:
 
-You can install them using pip:
+    make install
 
-    pip3 install -r requirements.txt
+This command will install the required dependencies for the platform and open a shell to start the platform.
+
+If the shell is not opened or you want to reopen the shell, you can use the following command line:
+
+    make shell
 
 ### Checking the installation
 
@@ -104,7 +61,7 @@ of the NEBULA with the following command line:
 
     python app/main.py --version
 
-## Building the nebula node
+## Building NEBULA core
 
 There are two ways to deploy the node in the federation: using Docker
 containers or isolated processes. You can choose the one that best fits
@@ -128,10 +85,7 @@ You can check the docker images using the following command line:
 
 ### 2. Using isolated processes
 
-You need to install the requirements of the node (core) using the
-following command line in the root directory:
-
-    pip3 install -r nebula/requirements.txt
+There is no need additional steps to build the core using isolated processes.
 
 ## Running NEBULA
 

@@ -28,6 +28,11 @@ full-install: pre-install ## Install the poetry environment and install the pre-
 	@echo "🐚 Activating virtual environment"
 	@$(POETRY) shell
 
+.PHONY: shell
+shell: ## Start a shell in the poetry environment
+	@echo "🐚 Activating virtual environment"
+	@$(POETRY) shell
+
 .PHONY: check
 check: ## Run code quality tools.
 	@echo "🛠️ Running code quality checks"
