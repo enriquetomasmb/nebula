@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "nebula"
+name = "nebula-dfl"
 version = "0.0.1"
 description = "NEBULA: A Platform for Decentralized Federated Learning"
 authors = ["Enrique Tomás Martínez Beltrán <enriquetomas@um.es>"]

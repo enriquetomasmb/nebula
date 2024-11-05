@@ -65,7 +65,7 @@ extra:
     - icon: fontawesome/brands/github
       link: https://github.com/CyberDataLab/nebula
     - icon: fontawesome/brands/python
-      link: https://pypi.org/project/nebula
+      link: https://pypi.org/project/nebula-dfl
     - icon: material/email
       link: mailto:enriquetomas@um.es
   meta:

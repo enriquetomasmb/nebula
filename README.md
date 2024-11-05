@@ -1,7 +1,7 @@
 <br>
 <p align="center">
   <a href="https://github.com/CyberDataLab/nebula">
-    <img src="docs/_prebuilt/static/nebula-logo.jpg" alt="nebula">
+    <img src="https://raw.githubusercontent.com/CyberDataLab/nebula/5b44d54eec9186f7c9f6351f26cd92b33bd37fdf/docs/_prebuilt/static/nebula-logo.jpg" alt="nebula">
   </a>
   <h1 align="center">NEBULA: A Platform for Decentralized Federated Learning</h1>
 
@@ -22,13 +22,13 @@
 
 <p align="center">
 	<a href="https://um.es">
-	<img src="docs/_prebuilt/static/umu.jpg" alt="University of Murcia" width="200" height="60">
+	<img src="https://raw.githubusercontent.com/CyberDataLab/nebula/5b44d54eec9186f7c9f6351f26cd92b33bd37fdf/docs/_prebuilt/static/umu.jpg" alt="University of Murcia" width="200" height="60">
 	</a>
 	<a href="https://www.armasuisse.ch/en">
-	<img src="docs/_prebuilt/static/armasuisse.jpg" alt="armasuisse" width="200" height="60">
+	<img src="https://raw.githubusercontent.com/CyberDataLab/nebula/5b44d54eec9186f7c9f6351f26cd92b33bd37fdf/docs/_prebuilt/static/armasuisse.jpg" alt="armasuisse" width="200" height="60">
 	</a>
 	<a href="https://www.uzh.ch/">
-	<img src="docs/_prebuilt/static/uzh.jpg" alt="University of Zurich" width="200" height="60">
+	<img src="https://raw.githubusercontent.com/CyberDataLab/nebula/5b44d54eec9186f7c9f6351f26cd92b33bd37fdf/docs/_prebuilt/static/uzh.jpg" alt="University of Zurich" width="200" height="60">
 	</a>
 </p>
 
@@ -61,7 +61,7 @@ NEBULA boasts a **modular architecture** that consists of three core elements:
 - 🚗 **Vehicular scenarios**: Utilize in vehicles including cars, trucks, and drones.
 
 <p align="center">
-  <img src="docs/_prebuilt/static/nebula-mockup.png" alt="NEBULA Mockup">
+  <img src="https://raw.githubusercontent.com/CyberDataLab/nebula/5b44d54eec9186f7c9f6351f26cd92b33bd37fdf/docs/_prebuilt/static/nebula-mockup.png" alt="NEBULA Mockup">
 </p>
 
 [^1]: Fedstellar was our first version of the platform. We have redesigned the previous functionalities and added new capabilities based on our research. The platform is now called NEBULA and is available as an open-source project.
