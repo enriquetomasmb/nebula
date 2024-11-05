@@ -17,22 +17,14 @@ In this section, we will explain how to install the NEBULA platform.
 ## Prerequisites
 
 -   Python 3.10 or higher (3.11 recommended)
--   Docker Engine 24.0.4 or higher (24.0.7 recommended,
-    <https://docs.docker.com/engine/install/>)
--   Docker Compose 2.19.0 or higher (2.19.1 recommended,
-    <https://docs.docker.com/compose/install/>)
--   For using NVIDIA GPUs, NVIDIA driver version \>=525.60.13 (Linux)
-    \>=528.33 (Windows), and CUDA 12.1 (mandatory). For more
-    information, see
-    <https://docs.nvidia.com/cuda/cuda-installation-guide-microsoft-windows/index.html>
-    (Windows) or
-    <https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html>
-    (Linux)
+-   Docker Engine 24.0.4 or higher (24.0.7 recommended, https://docs.docker.com/engine/install/)
+-   Docker Compose 2.19.0 or higher (2.19.1 recommended, https://docs.docker.com/compose/install/)
+-   For using NVIDIA GPUs, NVIDIA driver version >=525.60.13 (Linux) >=528.33 (Windows), and CUDA 12.1 (mandatory). More information in https://docs.nvidia.com/cuda/cuda-installation-guide-microsoft-windows/index.html (Windows) or https://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html (Linux)
 
 ## Obtaining NEBULA platform
 
 
-You can obtain the source code from <https://github.com/CyberDataLab/nebula>
+You can obtain the source code from https://github.com/CyberDataLab/nebula
 
 Or, if you happen to have git configured, you can clone the repository:
 
@@ -77,7 +69,7 @@ the root directory:
 In case of using GPU in the docker, you have to follow the instructions
 in the following link to install nvidia-container-toolkit:
 
-<https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html>
+https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html
 
 You can check the docker images using the following command line:
 
@@ -100,7 +92,7 @@ You can show the PARAMS using:
 
     python app/main.py --help
 
-The frontend will be available at <http://127.0.0.1:6060> (by default)
+The frontend will be available at http://127.0.0.1:6060 (by default)
 
 To change the default port of the frontend, you can use the following
 command line:
@@ -160,9 +152,9 @@ Solution: Start the docker daemon
 
 Solution: Enable the following option in Docker Desktop
 
-Settings -\> Advanced -\> Allow the default Docker socket to be used
+Settings -> Advanced -> Allow the default Docker socket to be used
 
-> ![Docker required options](static/docker-required-options.png){.align-center}
+> ![Docker required options](static/docker-required-options.png)
 
 ------------------------------------------------------------------------
 
