@@ -1,3 +1,12 @@
+"""
+This module provides a function for label flipping in datasets, allowing for the simulation of label noise
+as a form of data poisoning. The main function modifies the labels of specific samples in a dataset based
+on a specified percentage and target conditions.
+
+Function:
+- labelFlipping: Flips the labels of a specified portion of a dataset to random values or to a specific target label.
+"""
+
 import copy
 import random
 

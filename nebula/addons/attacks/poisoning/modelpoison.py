@@ -1,3 +1,14 @@
+"""
+This module provides a function for adding noise to a machine learning model's parameters, simulating
+data poisoning attacks. The main function allows for the injection of various types of noise into
+the model parameters, effectively altering them to test the model's robustness against malicious
+manipulations.
+
+Function:
+- modelpoison: Modifies the parameters of a model by injecting noise according to a specified ratio
+  and type of noise (e.g., Gaussian, salt, salt-and-pepper).
+"""
+
 from collections import OrderedDict
 
 import torch

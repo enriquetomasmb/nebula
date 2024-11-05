@@ -1,3 +1,15 @@
+"""
+This module contains functions for applying data poisoning techniques,
+including the application of noise to tensors and modification of datasets
+to simulate poisoning attacks.
+
+Functions:
+- apply_noise: Applies noise to a tensor based on the specified noise type and poisoning ratio.
+- datapoison: Adds noise to a specified portion of a dataset for data poisoning purposes.
+- add_x_to_image: Adds an 'X' mark to the top-left corner of an image.
+- poison_to_nlp_rawdata: Poisons NLP data by setting word vectors to zero with a given probability.
+"""
+
 import copy
 import random
 

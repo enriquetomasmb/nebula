@@ -11,7 +11,7 @@ class ChangeableSubset(Subset):
         indices,
         label_flipping=False,
         data_poisoning=False,
-        poisoned_persent=0,
+        poisoned_percent=0,
         poisoned_ratio=0,
         targeted=False,
         target_label=0,
@@ -24,7 +24,7 @@ class ChangeableSubset(Subset):
         self.indices = indices
         self.label_flipping = label_flipping
         self.data_poisoning = data_poisoning
-        self.poisoned_persent = poisoned_persent
+        self.poisoned_percent = poisoned_percent
         self.poisoned_ratio = poisoned_ratio
         self.targeted = targeted
         self.target_label = target_label
@@ -35,7 +35,7 @@ class ChangeableSubset(Subset):
             self.dataset = labelFlipping(
                 self.dataset,
                 self.indices,
-                self.poisoned_persent,
+                self.poisoned_percent,
                 self.targeted,
                 self.target_label,
                 self.target_changed_label,
@@ -44,7 +44,7 @@ class ChangeableSubset(Subset):
             self.dataset = datapoison(
                 self.dataset,
                 self.indices,
-                self.poisoned_persent,
+                self.poisoned_percent,
                 self.poisoned_ratio,
                 self.targeted,
                 self.target_label,
