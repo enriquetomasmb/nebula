@@ -27,7 +27,7 @@ jobs:
       uses: ./.github/actions/setup-env
     - name: Install doc dependencies
       run: |
-        poetry install --with doc --no-interaction
+        poetry install --with docs --no-interaction
     - name: List directories
       run: |
           ls -la
