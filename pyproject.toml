@@ -11,6 +11,9 @@ packages = [
   {include = "nebula"}
 ]
 
+[tool.poetry.config]
+use-keyring = false
+
 [tool.poetry.dependencies]
 python = ">=3.10,<4.0"
 python-dotenv = "1.0.1"
