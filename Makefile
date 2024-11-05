@@ -13,7 +13,7 @@ pre-install:
 .PHONY: install
 install: pre-install ## Install the poetry environment and install the pre-commit hooks
 	@echo "📦 Installing dependencies with Poetry"
-	@$(POETRY) install --with core
+	@PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring $(POETRY) install --with core
 	@echo "🔧 Installing pre-commit hooks"
 	@$(POETRY) run pre-commit install
 	@echo "🐚 Activating virtual environment"
@@ -22,7 +22,7 @@ install: pre-install ## Install the poetry environment and install the pre-commi
 .PHONY: full-install
 full-install: pre-install ## Install the poetry environment and install the pre-commit hooks
 	@echo "📦 Installing dependencies with Poetry"
-	@$(POETRY) install --with core,docs,dev
+	@PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring $(POETRY) install --with core,docs,dev
 	@echo "🔧 Installing pre-commit hooks"
 	@$(POETRY) run pre-commit install
 	@echo "🐚 Activating virtual environment"
