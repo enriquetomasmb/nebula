@@ -4818,12 +4818,179 @@
 
     <div class="doc doc-contents ">
 
-        <p>select flipping_persent of labels, and change them to random values.
-Args:
-    dataset: the dataset of training data, torch.util.data.dataset like.
-    indices: Indices of subsets, list like.
-    flipping_persent: The ratio of labels want to change, float like.</p>
+        <p>Flips the labels of a specified portion of a dataset to random values or to a specific target label.</p>
+<p>This function modifies the labels of selected samples in the dataset based on the specified
+poisoning percentage. Labels can be flipped either randomly or targeted to change from a specific
+label to another specified label.</p>
 
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>dataset</code>
+            </td>
+            <td>
+                  <code>Dataset</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The dataset containing training data, expected to be a PyTorch dataset
+               with a <code>.targets</code> attribute.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>indices</code>
+            </td>
+            <td>
+                  <code>list of int</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The list of indices in the dataset to consider for label flipping.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>poisoned_percent</code>
+            </td>
+            <td>
+                  <code>float</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The ratio of labels to change, expressed as a fraction
+                                (0 &lt;= poisoned_percent &lt;= 1). Default is 0.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>targeted</code>
+            </td>
+            <td>
+                  <code>bool</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, flips only labels matching <code>target_label</code> to <code>target_changed_label</code>.
+                       Default is False.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>target_label</code>
+            </td>
+            <td>
+                  <code>int</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The label to change when <code>targeted</code> is True. Default is 4.</p>
+              </div>
+            </td>
+            <td>
+                  <code>4</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>target_changed_label</code>
+            </td>
+            <td>
+                  <code>int</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The label to which <code>target_label</code> will be changed. Default is 7.</p>
+              </div>
+            </td>
+            <td>
+                  <code>7</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>Dataset</code></td>            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A deep copy of the original dataset with modified labels in <code>.targets</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>ValueError</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>poisoned_percent</code> is not between 0 and 1, or if <code>flipping_percent</code> is invalid.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="notes" open>
+  <summary>Notes</summary>
+  <ul>
+<li>When not in targeted mode, labels are flipped for a random selection of indices based on the specified
+  <code>poisoned_percent</code>. The new label is chosen randomly from the existing classes.</li>
+<li>In targeted mode, labels that match <code>target_label</code> are directly changed to <code>target_changed_label</code>.</li>
+</ul>
+</details>
             <details class="quote">
               <summary>Source code in <code>nebula/addons/attacks/poisoning/labelflipping.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 7</span>
@@ -4867,7 +5034,29 @@ Args:
 <span class="normal">45</span>
 <span class="normal">46</span>
 <span class="normal">47</span>
-<span class="normal">48</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">labelFlipping</span><span class="p">(</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">labelFlipping</span><span class="p">(</span>
     <span class="n">dataset</span><span class="p">,</span>
     <span class="n">indices</span><span class="p">,</span>
     <span class="n">poisoned_persent</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
@@ -4876,11 +5065,33 @@ Args:
     <span class="n">target_changed_label</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    select flipping_persent of labels, and change them to random values.</span>
+<span class="sd">    Flips the labels of a specified portion of a dataset to random values or to a specific target label.</span>
+
+<span class="sd">    This function modifies the labels of selected samples in the dataset based on the specified</span>
+<span class="sd">    poisoning percentage. Labels can be flipped either randomly or targeted to change from a specific</span>
+<span class="sd">    label to another specified label.</span>
+
 <span class="sd">    Args:</span>
-<span class="sd">        dataset: the dataset of training data, torch.util.data.dataset like.</span>
-<span class="sd">        indices: Indices of subsets, list like.</span>
-<span class="sd">        flipping_persent: The ratio of labels want to change, float like.</span>
+<span class="sd">        dataset (Dataset): The dataset containing training data, expected to be a PyTorch dataset</span>
+<span class="sd">                           with a `.targets` attribute.</span>
+<span class="sd">        indices (list of int): The list of indices in the dataset to consider for label flipping.</span>
+<span class="sd">        poisoned_percent (float, optional): The ratio of labels to change, expressed as a fraction</span>
+<span class="sd">                                            (0 &lt;= poisoned_percent &lt;= 1). Default is 0.</span>
+<span class="sd">        targeted (bool, optional): If True, flips only labels matching `target_label` to `target_changed_label`.</span>
+<span class="sd">                                   Default is False.</span>
+<span class="sd">        target_label (int, optional): The label to change when `targeted` is True. Default is 4.</span>
+<span class="sd">        target_changed_label (int, optional): The label to which `target_label` will be changed. Default is 7.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dataset: A deep copy of the original dataset with modified labels in `.targets`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If `poisoned_percent` is not between 0 and 1, or if `flipping_percent` is invalid.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        - When not in targeted mode, labels are flipped for a random selection of indices based on the specified</span>
+<span class="sd">          `poisoned_percent`. The new label is chosen randomly from the existing classes.</span>
+<span class="sd">        - In targeted mode, labels that match `target_label` are directly changed to `target_changed_label`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">new_dataset</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
     <span class="n">targets</span> <span class="o">=</span> <span class="n">new_dataset</span><span class="o">.</span><span class="n">targets</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
@@ -4889,7 +5100,7 @@ Args:
     <span class="c1"># class_to_idx = new_dataset.class_to_idx</span>
     <span class="c1"># class_list = [class_to_idx[i] for i in classes]</span>
     <span class="n">class_list</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">targets</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
-    <span class="k">if</span> <span class="n">targeted</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">targeted</span><span class="p">:</span>
         <span class="n">num_flipped</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">poisoned_persent</span> <span class="o">*</span> <span class="n">num_indices</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">num_indices</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">new_dataset</span>

@@ -749,6 +749,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#nebula.addons.attacks.poisoning.datapoison.apply_noise" class="md-nav__link">
+    <span class="md-ellipsis">
+      apply_noise
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#nebula.addons.attacks.poisoning.datapoison.datapoison" class="md-nav__link">
     <span class="md-ellipsis">
       datapoison
@@ -4782,6 +4791,15 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#nebula.addons.attacks.poisoning.datapoison.apply_noise" class="md-nav__link">
+    <span class="md-ellipsis">
+      apply_noise
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#nebula.addons.attacks.poisoning.datapoison.datapoison" class="md-nav__link">
     <span class="md-ellipsis">
       datapoison
@@ -4854,21 +4872,106 @@
 
     <div class="doc doc-contents ">
 
-        <p>Add a 10*10 pixels X at the top-left of an image</p>
+        <p>Adds a 10x10 pixel 'X' mark to the top-left corner of an image.</p>
+<p>This function modifies the input image by setting specific pixels in the
+top-left 10x10 region to a high intensity value, forming an 'X' shape.
+Pixels on or below the main diagonal and above the secondary diagonal
+are set to 255 (white).</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>img</code>
+            </td>
+            <td>
+                  <code>array - like</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A 2D array or image tensor representing pixel values.
+              It is expected to be in grayscale, where each pixel
+              has a single intensity value.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>torch.Tensor: A tensor representation of the modified image with the 'X' mark.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
 
             <details class="quote">
               <summary>Source code in <code>nebula/addons/attacks/poisoning/datapoison.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">64</span>
-<span class="normal">65</span>
-<span class="normal">66</span>
-<span class="normal">67</span>
-<span class="normal">68</span>
-<span class="normal">69</span>
-<span class="normal">70</span>
-<span class="normal">71</span>
-<span class="normal">72</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">add_x_to_image</span><span class="p">(</span><span class="n">img</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">add_x_to_image</span><span class="p">(</span><span class="n">img</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Add a 10*10 pixels X at the top-left of an image</span>
+<span class="sd">    Adds a 10x10 pixel &#39;X&#39; mark to the top-left corner of an image.</span>
+
+<span class="sd">    This function modifies the input image by setting specific pixels in the</span>
+<span class="sd">    top-left 10x10 region to a high intensity value, forming an &#39;X&#39; shape.</span>
+<span class="sd">    Pixels on or below the main diagonal and above the secondary diagonal</span>
+<span class="sd">    are set to 255 (white).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        img (array-like): A 2D array or image tensor representing pixel values.</span>
+<span class="sd">                          It is expected to be in grayscale, where each pixel</span>
+<span class="sd">                          has a single intensity value.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        torch.Tensor: A tensor representation of the modified image with the &#39;X&#39; mark.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>
@@ -4884,16 +4987,138 @@
 <div class="doc doc-object doc-function">
 
 
-<h2 id="nebula.addons.attacks.poisoning.datapoison.datapoison" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">datapoison</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">poisoned_persent</span><span class="p">,</span> <span class="n">poisoned_ratio</span><span class="p">,</span> <span class="n">targeted</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">target_label</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">noise_type</span><span class="o">=</span><span class="s1">&#39;salt&#39;</span><span class="p">)</span></code>
+<h2 id="nebula.addons.attacks.poisoning.datapoison.apply_noise" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">apply_noise</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">noise_type</span><span class="p">,</span> <span class="n">poisoned_ratio</span><span class="p">)</span></code>
 
-<a href="#nebula.addons.attacks.poisoning.datapoison.datapoison" class="headerlink" title="Permanent link">&para;</a></h2>
+<a href="#nebula.addons.attacks.poisoning.datapoison.apply_noise" class="headerlink" title="Permanent link">&para;</a></h2>
 
 
     <div class="doc doc-contents ">
 
-        <p>Function to add random noise of various types to the dataset.</p>
+        <p>Applies noise to a tensor based on the specified noise type and poisoning ratio.</p>
 
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>t</code>
+            </td>
+            <td>
+                  <code><span title="torch.Tensor">Tensor</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The input tensor to which noise will be applied.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>noise_type</code>
+            </td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The type of noise to apply. Supported types are:
+- "salt": Salt noise (binary salt-and-pepper noise with only 'salt').
+- "gaussian": Gaussian noise with mean 0 and specified variance.
+- "s&amp;p": Salt-and-pepper noise.
+- "nlp_rawdata": Applies a custom NLP raw data poisoning function.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>poisoned_ratio</code>
+            </td>
+            <td>
+                  <code>float</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The ratio or variance of noise to be applied, depending on the noise type.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>torch.Tensor: The tensor with noise applied. If the noise type is not supported,
+          returns the original tensor with an error message printed.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>ValueError</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If the specified noise_type is not supported.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="notes" open>
+  <summary>Notes</summary>
+  <ul>
+<li>The "nlp_rawdata" noise type requires the custom <code>poison_to_nlp_rawdata</code> function.</li>
+<li>Noise for types "salt", "gaussian", and "s&amp;p" is generated using <code>random_noise</code> from
+  the <code>skimage.util</code> package, and returned as a <code>torch.Tensor</code>.</li>
+</ul>
+</details>
             <details class="quote">
               <summary>Source code in <code>nebula/addons/attacks/poisoning/datapoison.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 9</span>
@@ -4931,44 +5156,369 @@
 <span class="normal">41</span>
 <span class="normal">42</span>
 <span class="normal">43</span>
-<span class="normal">44</span>
-<span class="normal">45</span>
-<span class="normal">46</span>
-<span class="normal">47</span>
-<span class="normal">48</span>
-<span class="normal">49</span>
-<span class="normal">50</span>
-<span class="normal">51</span>
-<span class="normal">52</span>
-<span class="normal">53</span>
-<span class="normal">54</span>
-<span class="normal">55</span>
-<span class="normal">56</span>
-<span class="normal">57</span>
-<span class="normal">58</span>
-<span class="normal">59</span>
-<span class="normal">60</span>
-<span class="normal">61</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">datapoison</span><span class="p">(</span>
+<span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">apply_noise</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">noise_type</span><span class="p">,</span> <span class="n">poisoned_ratio</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Applies noise to a tensor based on the specified noise type and poisoning ratio.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        t (torch.Tensor): The input tensor to which noise will be applied.</span>
+<span class="sd">        noise_type (str): The type of noise to apply. Supported types are:</span>
+<span class="sd">            - &quot;salt&quot;: Salt noise (binary salt-and-pepper noise with only &#39;salt&#39;).</span>
+<span class="sd">            - &quot;gaussian&quot;: Gaussian noise with mean 0 and specified variance.</span>
+<span class="sd">            - &quot;s&amp;p&quot;: Salt-and-pepper noise.</span>
+<span class="sd">            - &quot;nlp_rawdata&quot;: Applies a custom NLP raw data poisoning function.</span>
+<span class="sd">        poisoned_ratio (float): The ratio or variance of noise to be applied, depending on the noise type.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        torch.Tensor: The tensor with noise applied. If the noise type is not supported,</span>
+<span class="sd">                      returns the original tensor with an error message printed.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If the specified noise_type is not supported.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">       - The &quot;nlp_rawdata&quot; noise type requires the custom `poison_to_nlp_rawdata` function.</span>
+<span class="sd">       - Noise for types &quot;salt&quot;, &quot;gaussian&quot;, and &quot;s&amp;p&quot; is generated using `random_noise` from</span>
+<span class="sd">         the `skimage.util` package, and returned as a `torch.Tensor`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">noise_type</span> <span class="o">==</span> <span class="s2">&quot;salt&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">random_noise</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">noise_type</span><span class="p">,</span> <span class="n">amount</span><span class="o">=</span><span class="n">poisoned_ratio</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">noise_type</span> <span class="o">==</span> <span class="s2">&quot;gaussian&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">random_noise</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">noise_type</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="n">poisoned_ratio</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">noise_type</span> <span class="o">==</span> <span class="s2">&quot;s&amp;p&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">random_noise</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">noise_type</span><span class="p">,</span> <span class="n">amount</span><span class="o">=</span><span class="n">poisoned_ratio</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="n">noise_type</span> <span class="o">==</span> <span class="s2">&quot;nlp_rawdata&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">poison_to_nlp_rawdata</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">poisoned_ratio</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ERROR: poison attack type not supported.&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">t</span>
+</code></pre></div></td></tr></table></div>
+            </details>
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="nebula.addons.attacks.poisoning.datapoison.datapoison" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">datapoison</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">poisoned_percent</span><span class="p">,</span> <span class="n">poisoned_ratio</span><span class="p">,</span> <span class="n">targeted</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">target_label</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">noise_type</span><span class="o">=</span><span class="s1">&#39;salt&#39;</span><span class="p">)</span></code>
+
+<a href="#nebula.addons.attacks.poisoning.datapoison.datapoison" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Adds noise to a specified portion of a dataset for data poisoning purposes.</p>
+<p>This function applies noise to randomly selected samples within a dataset.
+Noise can be targeted or non-targeted. In non-targeted poisoning, random samples
+are chosen and altered using the specified noise type and ratio. In targeted poisoning,
+only samples with a specified label are altered by adding an 'X' pattern.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>dataset</code>
+            </td>
+            <td>
+                  <code>Dataset</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The dataset to poison, expected to have <code>.data</code> and <code>.targets</code> attributes.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>indices</code>
+            </td>
+            <td>
+                  <code>list of int</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The list of indices in the dataset to consider for poisoning.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>poisoned_percent</code>
+            </td>
+            <td>
+                  <code>float</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The percentage of <code>indices</code> to poison, as a fraction (0 &lt;= poisoned_percent &lt;= 1).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>poisoned_ratio</code>
+            </td>
+            <td>
+                  <code>float</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The intensity or probability parameter for the noise, depending on the noise type.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>targeted</code>
+            </td>
+            <td>
+                  <code>bool</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If True, applies targeted poisoning by adding an 'X' only to samples with <code>target_label</code>.
+                       Default is False.</p>
+              </div>
+            </td>
+            <td>
+                  <code>False</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>target_label</code>
+            </td>
+            <td>
+                  <code>int</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The label to target when <code>targeted</code> is True. Default is 3.</p>
+              </div>
+            </td>
+            <td>
+                  <code>3</code>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>noise_type</code>
+            </td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The type of noise to apply in non-targeted poisoning. Supported types are:
+                        - "salt": Applies salt noise.
+                        - "gaussian": Applies Gaussian noise.
+                        - "s&amp;p": Applies salt-and-pepper noise.
+                        Default is "salt".</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;salt&#39;</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>Dataset</code></td>            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A deep copy of the original dataset with poisoned data in <code>.data</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>ValueError</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>poisoned_percent</code> is not between 0 and 1, or if <code>noise_type</code> is unsupported.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="notes" open>
+  <summary>Notes</summary>
+  <ul>
+<li>Non-targeted poisoning randomly selects samples from <code>indices</code> based on <code>poisoned_percent</code>.</li>
+<li>Targeted poisoning modifies only samples with <code>target_label</code> by adding an 'X' pattern, regardless of <code>poisoned_ratio</code>.</li>
+</ul>
+</details>
+            <details class="quote">
+              <summary>Source code in <code>nebula/addons/attacks/poisoning/datapoison.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">datapoison</span><span class="p">(</span>
     <span class="n">dataset</span><span class="p">,</span>
     <span class="n">indices</span><span class="p">,</span>
-    <span class="n">poisoned_persent</span><span class="p">,</span>
+    <span class="n">poisoned_percent</span><span class="p">,</span>
     <span class="n">poisoned_ratio</span><span class="p">,</span>
     <span class="n">targeted</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">target_label</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
     <span class="n">noise_type</span><span class="o">=</span><span class="s2">&quot;salt&quot;</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Function to add random noise of various types to the dataset.</span>
+<span class="sd">    Adds noise to a specified portion of a dataset for data poisoning purposes.</span>
+
+<span class="sd">    This function applies noise to randomly selected samples within a dataset.</span>
+<span class="sd">    Noise can be targeted or non-targeted. In non-targeted poisoning, random samples</span>
+<span class="sd">    are chosen and altered using the specified noise type and ratio. In targeted poisoning,</span>
+<span class="sd">    only samples with a specified label are altered by adding an &#39;X&#39; pattern.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dataset (Dataset): The dataset to poison, expected to have `.data` and `.targets` attributes.</span>
+<span class="sd">        indices (list of int): The list of indices in the dataset to consider for poisoning.</span>
+<span class="sd">        poisoned_percent (float): The percentage of `indices` to poison, as a fraction (0 &lt;= poisoned_percent &lt;= 1).</span>
+<span class="sd">        poisoned_ratio (float): The intensity or probability parameter for the noise, depending on the noise type.</span>
+<span class="sd">        targeted (bool, optional): If True, applies targeted poisoning by adding an &#39;X&#39; only to samples with `target_label`.</span>
+<span class="sd">                                   Default is False.</span>
+<span class="sd">        target_label (int, optional): The label to target when `targeted` is True. Default is 3.</span>
+<span class="sd">        noise_type (str, optional): The type of noise to apply in non-targeted poisoning. Supported types are:</span>
+<span class="sd">                                    - &quot;salt&quot;: Applies salt noise.</span>
+<span class="sd">                                    - &quot;gaussian&quot;: Applies Gaussian noise.</span>
+<span class="sd">                                    - &quot;s&amp;p&quot;: Applies salt-and-pepper noise.</span>
+<span class="sd">                                    Default is &quot;salt&quot;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dataset: A deep copy of the original dataset with poisoned data in `.data`.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If `poisoned_percent` is not between 0 and 1, or if `noise_type` is unsupported.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        - Non-targeted poisoning randomly selects samples from `indices` based on `poisoned_percent`.</span>
+<span class="sd">        - Targeted poisoning modifies only samples with `target_label` by adding an &#39;X&#39; pattern, regardless of `poisoned_ratio`.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">new_dataset</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
     <span class="n">train_data</span> <span class="o">=</span> <span class="n">new_dataset</span><span class="o">.</span><span class="n">data</span>
     <span class="n">targets</span> <span class="o">=</span> <span class="n">new_dataset</span><span class="o">.</span><span class="n">targets</span>
     <span class="n">num_indices</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">noise_type</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">noise_type</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">noise_type</span> <span class="o">=</span> <span class="n">noise_type</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-    <span class="k">if</span> <span class="n">targeted</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
-        <span class="n">num_poisoned</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">poisoned_persent</span> <span class="o">*</span> <span class="n">num_indices</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">targeted</span><span class="p">:</span>
+        <span class="n">num_poisoned</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">poisoned_percent</span> <span class="o">*</span> <span class="n">num_indices</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">num_indices</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">new_dataset</span>
         <span class="k">if</span> <span class="n">num_poisoned</span> <span class="o">&gt;</span> <span class="n">num_indices</span><span class="p">:</span>
@@ -4977,21 +5527,7 @@
 
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">poisoned_indice</span><span class="p">:</span>
             <span class="n">t</span> <span class="o">=</span> <span class="n">train_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">noise_type</span> <span class="o">==</span> <span class="s2">&quot;salt&quot;</span><span class="p">:</span>
-                <span class="c1"># Replaces random pixels with 1.</span>
-                <span class="n">poisoned</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">random_noise</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">noise_type</span><span class="p">,</span> <span class="n">amount</span><span class="o">=</span><span class="n">poisoned_ratio</span><span class="p">))</span>
-            <span class="k">elif</span> <span class="n">noise_type</span> <span class="o">==</span> <span class="s2">&quot;gaussian&quot;</span><span class="p">:</span>
-                <span class="c1"># Gaussian-distributed additive noise.</span>
-                <span class="n">poisoned</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">random_noise</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">noise_type</span><span class="p">,</span> <span class="n">mean</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="n">poisoned_ratio</span><span class="p">,</span> <span class="n">clip</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-            <span class="k">elif</span> <span class="n">noise_type</span> <span class="o">==</span> <span class="s2">&quot;s&amp;p&quot;</span><span class="p">:</span>
-                <span class="c1"># Replaces random pixels with either 1 or low_val, where low_val is 0 for unsigned images or -1 for signed images.</span>
-                <span class="n">poisoned</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">random_noise</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">noise_type</span><span class="p">,</span> <span class="n">amount</span><span class="o">=</span><span class="n">poisoned_ratio</span><span class="p">))</span>
-            <span class="k">elif</span> <span class="n">noise_type</span> <span class="o">==</span> <span class="s2">&quot;nlp_rawdata&quot;</span><span class="p">:</span>
-                <span class="c1"># for NLP data, change the word vector to 0 with p=poisoned_ratio</span>
-                <span class="n">poisoned</span> <span class="o">=</span> <span class="n">poison_to_nlp_rawdata</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">poisoned_ratio</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ERROR: poison attack type not supported.&quot;</span><span class="p">)</span>
-                <span class="n">poisoned</span> <span class="o">=</span> <span class="n">t</span>
+            <span class="n">poisoned</span> <span class="o">=</span> <span class="n">apply_noise</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">noise_type</span><span class="p">,</span> <span class="n">poisoned_ratio</span><span class="p">)</span>
             <span class="n">train_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">poisoned</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
@@ -5018,30 +5554,181 @@
 
     <div class="doc doc-contents ">
 
-        <p>for NLP data, change the word vector to 0 with p=poisoned_ratio</p>
+        <p>Poisons NLP data by setting word vectors to zero with a given probability.</p>
+<p>This function randomly selects a portion of non-zero word vectors in the
+input text data and sets them to zero vectors based on the specified
+poisoning ratio. This simulates a form of data corruption by partially
+nullifying the information in the input data.</p>
 
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>text_data</code>
+            </td>
+            <td>
+                  <code>list of torch.Tensor</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A list where each entry is a tensor
+representing a word vector. Non-zero vectors are assumed to represent valid words.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>poisoned_ratio</code>
+            </td>
+            <td>
+                  <code>float</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The fraction of non-zero word vectors to set to zero,
+where 0 &lt;= poisoned_ratio &lt;= 1.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>list of torch.Tensor: The modified text data with some word vectors set to zero.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>ValueError</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>poisoned_ratio</code> is greater than 1 or less than 0.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="notes" open>
+  <summary>Notes</summary>
+  <ul>
+<li><code>poisoned_ratio</code> controls the percentage of non-zero vectors to poison.</li>
+<li>If <code>num_poisoned_token</code> is zero or exceeds the number of non-zero vectors,
+  the function returns the original <code>text_data</code> without modification.</li>
+</ul>
+</details>
             <details class="quote">
               <summary>Source code in <code>nebula/addons/attacks/poisoning/datapoison.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">75</span>
-<span class="normal">76</span>
-<span class="normal">77</span>
-<span class="normal">78</span>
-<span class="normal">79</span>
-<span class="normal">80</span>
-<span class="normal">81</span>
-<span class="normal">82</span>
-<span class="normal">83</span>
-<span class="normal">84</span>
-<span class="normal">85</span>
-<span class="normal">86</span>
-<span class="normal">87</span>
-<span class="normal">88</span>
-<span class="normal">89</span>
-<span class="normal">90</span>
-<span class="normal">91</span>
-<span class="normal">92</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">poison_to_nlp_rawdata</span><span class="p">(</span><span class="n">text_data</span><span class="p">,</span> <span class="n">poisoned_ratio</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">poison_to_nlp_rawdata</span><span class="p">(</span><span class="n">text_data</span><span class="p">,</span> <span class="n">poisoned_ratio</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    for NLP data, change the word vector to 0 with p=poisoned_ratio</span>
+<span class="sd">    Poisons NLP data by setting word vectors to zero with a given probability.</span>
+
+<span class="sd">    This function randomly selects a portion of non-zero word vectors in the</span>
+<span class="sd">    input text data and sets them to zero vectors based on the specified</span>
+<span class="sd">    poisoning ratio. This simulates a form of data corruption by partially</span>
+<span class="sd">    nullifying the information in the input data.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        text_data (list of torch.Tensor): A list where each entry is a tensor</span>
+<span class="sd">            representing a word vector. Non-zero vectors are assumed to represent valid words.</span>
+<span class="sd">        poisoned_ratio (float): The fraction of non-zero word vectors to set to zero,</span>
+<span class="sd">            where 0 &lt;= poisoned_ratio &lt;= 1.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        list of torch.Tensor: The modified text data with some word vectors set to zero.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If `poisoned_ratio` is greater than 1 or less than 0.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        - `poisoned_ratio` controls the percentage of non-zero vectors to poison.</span>
+<span class="sd">        - If `num_poisoned_token` is zero or exceeds the number of non-zero vectors,</span>
+<span class="sd">          the function returns the original `text_data` without modification.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">non_zero_vector_indice</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">text_data</span><span class="p">))</span> <span class="k">if</span> <span class="n">text_data</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
     <span class="n">non_zero_vector_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">non_zero_vector_indice</span><span class="p">)</span>

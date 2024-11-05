@@ -4818,8 +4818,132 @@
 
     <div class="doc doc-contents ">
 
-        <p>Function to add random noise of various types to the model parameter.</p>
+        <p>Adds random noise to the parameters of a model for the purpose of data poisoning.</p>
+<p>This function modifies the model's parameters by injecting noise according to the specified
+noise type and ratio. Various types of noise can be applied, including salt noise, Gaussian
+noise, and salt-and-pepper noise.</p>
 
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>model</code>
+            </td>
+            <td>
+                  <code><span title="collections.OrderedDict">OrderedDict</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The model's parameters organized as an <code>OrderedDict</code>. Each key corresponds
+                 to a layer, and each value is a tensor representing the parameters of that layer.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>poisoned_ratio</code>
+            </td>
+            <td>
+                  <code>float</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The proportion of noise to apply, expressed as a fraction (0 &lt;= poisoned_ratio &lt;= 1).</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>noise_type</code>
+            </td>
+            <td>
+                  <code>str</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>The type of noise to apply to the model parameters. Supported types are:
+                        - "salt": Applies salt noise, replacing random elements with 1.
+                        - "gaussian": Applies Gaussian-distributed additive noise.
+                        - "s&amp;p": Applies salt-and-pepper noise, replacing random elements with either 1 or low_val.
+                        Default is "gaussian".</p>
+              </div>
+            </td>
+            <td>
+                  <code>&#39;gaussian&#39;</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+<th>Name</th>          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+<td><code>OrderedDict</code></td>            <td>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>A new <code>OrderedDict</code> containing the model parameters with noise added.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<p><span class="doc-section-title">Raises:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>ValueError</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>If <code>poisoned_ratio</code> is not between 0 and 1, or if <code>noise_type</code> is unsupported.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+<details class="notes" open>
+  <summary>Notes</summary>
+  <ul>
+<li>If a layer's tensor is a single point (0-dimensional), it will be reshaped for processing.</li>
+<li>Unsupported noise types will result in an error message, and the original tensor will be retained.</li>
+</ul>
+</details>
             <details class="quote">
               <summary>Source code in <code>nebula/addons/attacks/poisoning/modelpoison.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 7</span>
@@ -4854,12 +4978,60 @@
 <span class="normal">36</span>
 <span class="normal">37</span>
 <span class="normal">38</span>
-<span class="normal">39</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">modelpoison</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">OrderedDict</span><span class="p">,</span> <span class="n">poisoned_ratio</span><span class="p">,</span> <span class="n">noise_type</span><span class="o">=</span><span class="s2">&quot;gaussian&quot;</span><span class="p">):</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">modelpoison</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">OrderedDict</span><span class="p">,</span> <span class="n">poisoned_ratio</span><span class="p">,</span> <span class="n">noise_type</span><span class="o">=</span><span class="s2">&quot;gaussian&quot;</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Function to add random noise of various types to the model parameter.</span>
+<span class="sd">    Adds random noise to the parameters of a model for the purpose of data poisoning.</span>
+
+<span class="sd">    This function modifies the model&#39;s parameters by injecting noise according to the specified</span>
+<span class="sd">    noise type and ratio. Various types of noise can be applied, including salt noise, Gaussian</span>
+<span class="sd">    noise, and salt-and-pepper noise.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model (OrderedDict): The model&#39;s parameters organized as an `OrderedDict`. Each key corresponds</span>
+<span class="sd">                             to a layer, and each value is a tensor representing the parameters of that layer.</span>
+<span class="sd">        poisoned_ratio (float): The proportion of noise to apply, expressed as a fraction (0 &lt;= poisoned_ratio &lt;= 1).</span>
+<span class="sd">        noise_type (str, optional): The type of noise to apply to the model parameters. Supported types are:</span>
+<span class="sd">                                    - &quot;salt&quot;: Applies salt noise, replacing random elements with 1.</span>
+<span class="sd">                                    - &quot;gaussian&quot;: Applies Gaussian-distributed additive noise.</span>
+<span class="sd">                                    - &quot;s&amp;p&quot;: Applies salt-and-pepper noise, replacing random elements with either 1 or low_val.</span>
+<span class="sd">                                    Default is &quot;gaussian&quot;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        OrderedDict: A new `OrderedDict` containing the model parameters with noise added.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If `poisoned_ratio` is not between 0 and 1, or if `noise_type` is unsupported.</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">        - If a layer&#39;s tensor is a single point (0-dimensional), it will be reshaped for processing.</span>
+<span class="sd">        - Unsupported noise types will result in an error message, and the original tensor will be retained.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">poisoned_model</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">noise_type</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">noise_type</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">noise_type</span> <span class="o">=</span> <span class="n">noise_type</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
     <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="n">model</span><span class="p">:</span>
