@@ -631,8 +631,8 @@ class Controller:
             try:
                 # kill all the docker containers which contain the word "nebula"
                 commands = [
-                    """docker kill $(docker ps -q --filter ancestor=nebula-frontend) | Out-Null""",
-                    """docker rm $(docker ps -a -q --filter ancestor=nebula-frontend) | Out-Null""",
+                    """docker kill $(docker ps -q --filter name=nebula-frontend) | Out-Null""",
+                    """docker rm $(docker ps -a -q --filter name=nebula-frontend) | Out-Null""",
                 ]
 
                 for command in commands:
@@ -645,8 +645,8 @@ class Controller:
         else:
             try:
                 commands = [
-                    """docker kill $(docker ps -q --filter ancestor=nebula-frontend) > /dev/null 2>&1""",
-                    """docker rm $(docker ps -a -q --filter ancestor=nebula-frontend) > /dev/null 2>&1""",
+                    """docker kill $(docker ps -q --filter name=nebula-frontend) > /dev/null 2>&1""",
+                    """docker rm $(docker ps -a -q --filter name=nebula-frontend) > /dev/null 2>&1""",
                 ]
 
                 for command in commands:
