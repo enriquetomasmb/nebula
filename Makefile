@@ -1,17 +1,42 @@
 POETRY_HOME := $(CURDIR)/.poetry
 POETRY := $(POETRY_HOME)/bin/poetry
 
+MIN_PYTHON_VERSION := 3.10
+
+PYTHON_VERSIONS := 3.11 3.10
+
+PYTHON := $(shell \
+    for ver in $(PYTHON_VERSIONS); do \
+        if command -v python$$ver >/dev/null 2>&1; then echo python$$ver; exit 0; fi; \
+    done \
+)
+
+ifndef PYTHON
+$(error "Python version $(MIN_PYTHON_VERSION) or higher is required but not found.")
+endif
+
 .PHONY: pre-install
 pre-install:
+	@echo "🐍 Using Python interpreter: $(PYTHON)"
 	@echo "🐍 Checking if Python is installed"
-	@command -v python3 >/dev/null 2>&1 || { echo >&2 "Python is not installed. Aborting."; exit 1; }
+	@command -v $(PYTHON) >/dev/null 2>&1 || { echo >&2 "$(PYTHON) is not installed. Aborting."; exit 1; }
 	@echo "🐍 Checking Python version"
-	@python3 --version | grep -E "Python 3\.(10|[1-9][1-9])" >/dev/null 2>&1 || { echo >&2 "Python version 3.10 or higher is required. Aborting."; exit 1; }
+	@$(PYTHON) --version | grep -E "Python 3\.(1[0-9]|[2-9][0-9])" >/dev/null 2>&1 || { echo >&2 "Python $(MIN_PYTHON_VERSION) or higher is required. Aborting."; exit 1; }
 	@echo "📦 Checking if Poetry is installed"
 	@if ! command -v poetry >/dev/null 2>&1 || [ ! -d "$(POETRY_HOME)" ]; then \
-        echo "Poetry is not installed or POETRY_HOME does not exist. Installing Poetry."; \
-        curl -sSL https://install.python-poetry.org | POETRY_HOME=$(POETRY_HOME) python3 -; \
-    fi
+	    echo "Poetry is not installed or POETRY_HOME does not exist. Installing Poetry."; \
+	    curl -sSL https://install.python-poetry.org | POETRY_HOME=$(POETRY_HOME) $(PYTHON) -; \
+	fi
+	@echo "📦 Configuring Poetry"
+	@if [ -z "$$CONDA_PREFIX" ] && [ -z "$$VIRTUAL_ENV" ]; then \
+	    echo "Configuring Poetry to create a virtual environment."; \
+	    $(POETRY) config virtualenvs.in-project true; \
+	else \
+	    echo "Configuring Poetry to use the existing environment."; \
+	    $(POETRY) config virtualenvs.create false; \
+	fi
+	@echo "📦 Setting Poetry to use $(PYTHON)"
+	@$(POETRY) env use $(PYTHON) || { echo "Failed to set Python version for Poetry. Aborting."; exit 1; }
 
 .PHONY: install
 install: pre-install ## Install the poetry environment and install the pre-commit hooks
@@ -19,8 +44,7 @@ install: pre-install ## Install the poetry environment and install the pre-commi
 	@PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring $(POETRY) install --with core
 	@echo "🔧 Installing pre-commit hooks"
 	@$(POETRY) run pre-commit install
-	@echo "🐚 Activating virtual environment"
-	@$(POETRY) shell
+	@$(MAKE) shell
 
 .PHONY: full-install
 full-install: pre-install ## Install the poetry environment and install the pre-commit hooks
@@ -28,13 +52,16 @@ full-install: pre-install ## Install the poetry environment and install the pre-
 	@PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring $(POETRY) install --with core,docs,dev
 	@echo "🔧 Installing pre-commit hooks"
 	@$(POETRY) run pre-commit install
-	@echo "🐚 Activating virtual environment"
-	@$(POETRY) shell
+	@$(MAKE) shell
 
 .PHONY: shell
 shell: ## Start a shell in the poetry environment
-	@echo "🐚 Activating virtual environment"
-	@$(POETRY) shell
+	@if [ -z "$$CONDA_PREFIX" ] && [ -z "$$VIRTUAL_ENV" ]; then \
+	    echo "🐚 Activating virtual environment"; \
+	    $(POETRY) shell; \
+	else \
+	    echo "🐚 Conda or virtual environment detected, skipping Poetry shell activation"; \
+	fi
 
 .PHONY: sync
 sync: ## Sync the lock file

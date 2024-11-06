@@ -22,20 +22,18 @@ query_scheduler:
 schema_config:
   configs:
     - from: 2020-10-24
-      store: boltdb-shipper
+      store: tsdb
       object_store: filesystem
-      schema: v11
+      schema: v13
       index:
         prefix: index_
         period: 24h
 
 storage_config:
-  boltdb_shipper:
-    active_index_directory: /loki/boltdb-shipper-active
-    cache_location: /loki/boltdb-shipper-cache
-    cache_ttl: 24h         # Can be increased for faster performance over longer query periods, uses more disk space
-  filesystem:
-    directory: /loki/chunks
+  tsdb:
+    dir: /loki/tsdb
+  wal:
+    dir: /loki/wal
 
 compactor:
   working_directory: /loki/boltdb-shipper-compactor
@@ -45,6 +43,7 @@ limits_config:
   max_query_length: 0h
   max_query_series: 100000
   reject_old_samples_max_age: 168h
+  allow_structured_metadata: false
 
 table_manager:
   retention_deletes_enabled: false
