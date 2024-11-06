@@ -631,8 +631,8 @@ class Controller:
             try:
                 # kill all the docker containers which contain the word "nebula"
                 commands = [
-                    """docker kill $(docker ps -q --filter name=nebula-frontend) | Out-Null""",
-                    """docker rm $(docker ps -a -q --filter name=nebula-frontend) | Out-Null""",
+                    """docker kill $(docker ps -q --filter name=^nebula-frontend$) | Out-Null""",
+                    """docker rm $(docker ps -a -q --filter name=^nebula-frontend$) | Out-Null""",
                 ]
 
                 for command in commands:
@@ -645,8 +645,8 @@ class Controller:
         else:
             try:
                 commands = [
-                    """docker kill $(docker ps -q --filter name=nebula-frontend) > /dev/null 2>&1""",
-                    """docker rm $(docker ps -a -q --filter name=nebula-frontend) > /dev/null 2>&1""",
+                    """docker kill $(docker ps -q --filter name=^nebula-frontend$) > /dev/null 2>&1""",
+                    """docker rm $(docker ps -a -q --filter name=^nebula-frontend$) > /dev/null 2>&1""",
                 ]
 
                 for command in commands:
@@ -663,7 +663,7 @@ class Controller:
             try:
                 # kill all the docker containers which contain the word "nebula"
                 commands = [
-                    r"""docker network rm $(docker network ls | Where-Object { ($_ -split '\s+')[1] -like 'nebula-net-base' } | ForEach-Object { ($_ -split '\s+')[0] }) | Out-Null"""
+                    r"""docker network rm $(docker network ls | Where-Object { ($_ -split '\s+')[1] -eq 'nebula-net-base' } | ForEach-Object { ($_ -split '\s+')[0] }) | Out-Null"""
                 ]
 
                 for command in commands:
@@ -676,7 +676,7 @@ class Controller:
         else:
             try:
                 commands = [
-                    """docker network rm $(docker network ls | grep nebula-net-base | awk '{print $1}') > /dev/null 2>&1"""
+                    """docker network rm $(docker network ls | grep '^nebula-net-base$' | awk '{print $1}') > /dev/null 2>&1"""
                 ]
 
                 for command in commands:
