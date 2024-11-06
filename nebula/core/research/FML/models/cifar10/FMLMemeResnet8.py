@@ -14,12 +14,12 @@ class FMLCIFAR10MemeModelResNet8(FMLMemeNebulaModel):
         self,
         input_channels=3,
         num_classes=10,
-        learning_rate=0.01,
+        learning_rate=1e-3,
         metrics=None,
         confusion_matrix=None,
         seed=None,
         T=2,
-        beta=1,
+        beta=0.2,
     ):
 
         super().__init__(
@@ -41,80 +41,38 @@ class FMLCIFAR10MemeModelResNet8(FMLMemeNebulaModel):
         self.resnet.fc_dense = nn.Linear(self.resnet.fc.in_features, 512)
         self.resnet.fc = nn.Linear(512, num_classes)
 
-    def forward_train(self, x, softmax=True, is_feat=False):
-        """Forward pass only for train the model.
-        is_feat: bool, if True return the features of the model.
-        softmax: bool, if True apply softmax to the logits.
-        """
+    def forward(self, x, softmax=False, is_feat=False):
+        """Forward pass for inference the model, if model have prototypes"""
         x = self.resnet.conv1(x)
         x = self.resnet.bn1(x)
-        x = self.resnet.relu(x)
-        conv1 = x
+        conv1 = self.resnet.relu(x)
 
-        x = self.resnet.maxpool(x)
+        x = self.resnet.maxpool(conv1)
 
-        x = self.resnet.layer1(x)
-        conv2 = x
-        x = self.resnet.layer2(x)
-        conv3 = x
-        x = self.resnet.layer3(x)
-        conv4 = x
+        conv2 = self.resnet.layer1(x)
+        conv3 = self.resnet.layer2(conv2)
+        conv4 = self.resnet.layer3(conv3)
 
-        x = self.resnet.avgpool(x)
+        x = self.resnet.avgpool(conv4)
         x = torch.flatten(x, 1)
         dense = self.resnet.fc_dense(x)
         logits = self.resnet.fc(dense)
 
-        del x
+        del dense
 
         if is_feat:
             if softmax:
-                return (
-                    F.log_softmax(logits, dim=1),
-                    dense,
-                    [conv1, conv2, conv3, conv4],
-                )
-            return logits, dense, [conv1, conv2, conv3, conv4]
+                return F.softmax(logits), [conv1, conv2, conv3, conv4]
+            else:
+                return logits, [conv1, conv2, conv3, conv4]
+        else:
+            del conv1, conv2, conv3, conv4
+            if softmax:
+                return F.softmax(logits)
 
-        del conv1, conv2, conv3, conv4
+        return logits
 
-        if softmax:
-            return F.log_softmax(logits, dim=1), dense
-        return logits, dense
 
-    def forward(self, x):
-        """Forward pass for inference the model, if model have prototypes"""
-        if len(self.global_protos) == 0:
-            logits, _ = self.forward_train(x)
-            return logits
-
-        x = self.resnet.conv1(x)
-        x = self.resnet.bn1(x)
-        x = self.resnet.relu(x)
-
-        x = self.resnet.maxpool(x)
-
-        x = self.resnet.layer1(x)
-        x = self.resnet.layer2(x)
-        x = self.resnet.layer3(x)
-
-        x = self.resnet.avgpool(x)
-        x = torch.flatten(x, 1)
-        dense = self.resnet.fc_dense(x)
-
-        del x
-        # Calculate distances
-        distances = []
-        for key, proto in self.global_protos.items():
-            # Calculate Euclidean distance
-            proto = proto.to(dense.device)
-            dist = torch.norm(dense - proto, dim=1)
-            distances.append(dist.unsqueeze(1))
-        distances = torch.cat(distances, dim=1)
-
-        del dense
-        # Return the predicted class based on the closest prototype
-        return distances.argmin(dim=1)
 
     def configure_optimizers(self):
         """Configure the optimizer for training."""

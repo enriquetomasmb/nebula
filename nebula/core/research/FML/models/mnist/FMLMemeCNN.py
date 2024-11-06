@@ -14,7 +14,7 @@ class FMLMNISTMemeModelCNN(FMLMemeNebulaModel):
         confusion_matrix=None,
         seed=None,
         T=2,
-        beta=1,
+        beta=0.2,
     ):
 
         super().__init__(

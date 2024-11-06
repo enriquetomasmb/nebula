@@ -14,7 +14,7 @@ class FMLMemeNebulaModel(NebulaModel, ABC):
         confusion_matrix=None,
         seed=None,
         T=2,
-        beta=1,
+        beta=0.2,
     ):
 
         super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed)

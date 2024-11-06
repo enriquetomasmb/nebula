@@ -106,6 +106,7 @@ class ProtoTeacherCIFAR100ModelResNet34(ProtoTeacherNebulaModel):
             # Calcular distancia Euclidiana
             proto = proto.to(dense.device)
             dist = torch.norm(dense - proto, dim=1)
+            proto.cpu()
             distances.append(dist.unsqueeze(1))
         distances = torch.cat(distances, dim=1)
 

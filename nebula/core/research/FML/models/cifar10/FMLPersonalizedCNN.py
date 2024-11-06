@@ -18,7 +18,7 @@ class FMLCIFAR10PersonalizedModelCNN(FMLPersonalizedNebulaModel):
         confusion_matrix=None,
         seed=None,
         T=2,
-        beta=1,
+        beta=0.2,
     ):
 
         super().__init__(
@@ -73,10 +73,10 @@ class FMLCIFAR10PersonalizedModelCNN(FMLPersonalizedNebulaModel):
         )
 
         self.fc_layer = torch.nn.Sequential(
-            torch.nn.Linear(128 * 4 * 4, 512),
+            torch.nn.Linear(128 * 4 * 4, 2024),
             torch.nn.ReLU(),
             torch.nn.Dropout(0.5),
-            torch.nn.Linear(512, num_classes),
+            torch.nn.Linear(2024, num_classes),
         )
 
     def forward(self, x, is_feat=False):

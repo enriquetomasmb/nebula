@@ -14,7 +14,7 @@ class FMLMNISTPersonalizedModelCNN(FMLPersonalizedNebulaModel):
         confusion_matrix=None,
         seed=None,
         T=2,
-        alpha=1,
+        alpha=0.2,
     ):
 
         super().__init__(

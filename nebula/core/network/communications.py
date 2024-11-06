@@ -428,7 +428,7 @@ class CommunicationsManager:
         logging.info(f"🌐  Deploying additional services...")
         self._generate_network_conditions()
         await self._forwarder.start()
-        await self._discoverer.start()
+        # await self._discoverer.start()
         # await self._health.start()
         self._propagator.start()
         await self._mobility.start()
@@ -551,7 +551,7 @@ class CommunicationsManager:
                 # logging.info(f"❗️  handle_incoming_message | Ignoring message already received.")
                 return False
             self.received_messages_hashes.append(hash_message)
-            if len(self.received_messages_hashes) % 100 == 0:
+            if len(self.received_messages_hashes) % 10000 == 0:
                 logging.info(f"📥  Received {len(self.received_messages_hashes)} messages")
             return True
         except Exception as e:

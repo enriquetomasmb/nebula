@@ -14,7 +14,7 @@ class FMLPersonalizedNebulaModel(NebulaModel, ABC):
         confusion_matrix=None,
         seed=None,
         T=2,
-        alpha=1,
+        alpha=0.2,
     ):
 
         super().__init__(input_channels, num_classes, learning_rate, metrics, confusion_matrix, seed)

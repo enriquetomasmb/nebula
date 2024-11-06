@@ -113,7 +113,6 @@ class FedGPDCIFAR10ModelResNet8(FedGPDNebulaModel):
         # Return the predicted class based on the closest prototype
         return distances.argmin(dim=1)
 
-
-def configure_optimizers(self):
-    optimizer = torch.optim.SGD(self.parameters(), lr=self.learning_rate, momentum=0.9, weight_decay=0.00001)
-    return optimizer
+    def configure_optimizers(self):
+        optimizer = torch.optim.SGD(self.parameters(), lr=self.learning_rate, momentum=0.9, weight_decay=0.00001)
+        return optimizer

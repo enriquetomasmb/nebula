@@ -113,7 +113,8 @@ class ProtoStudentCIFAR100ModelResnet18(ProtoStudentNebulaModel):
     def forward(self, x):
         """Forward pass for inference the model, if model have prototypes"""
         if len(self.global_protos) == 0:
-            logits, _ = self.forward_train(x)
+            logits, dense = self.forward_train(x)
+            del dense
             return logits
 
         x = self.resnet.conv1(x)
@@ -138,6 +139,7 @@ class ProtoStudentCIFAR100ModelResnet18(ProtoStudentNebulaModel):
             # Calculate Euclidean distance
             proto = proto.to(dense.device)
             dist = torch.norm(dense - proto, dim=1)
+            proto.cpu()
             distances.append(dist.unsqueeze(1))
         distances = torch.cat(distances, dim=1)
 

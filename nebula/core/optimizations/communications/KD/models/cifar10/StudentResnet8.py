@@ -65,77 +65,31 @@ class StudentCIFAR10ModelResNet8(StudentNebulaModelV2):
         self.criterion_cls = torch.torch.nn.CrossEntropyLoss()
 
         self.resnet = ResNet8()
-        self.resnet.fc_dense = nn.Linear(self.resnet.fc.in_features, self.embedding_dim)
-        self.resnet.fc = nn.Linear(self.embedding_dim, num_classes)
+        self.resnet.fc_dense = nn.Linear(self.resnet.fc.in_features, 512)
+        self.resnet.fc = nn.Linear(512, num_classes)
 
-    def forward_train(self, x, softmax=True, is_feat=False):
-        """Forward pass only for train the model.
-        is_feat: bool, if True return the features of the model.
-        softmax: bool, if True apply softmax to the logits.
-        """
+    def forward(self, x):
+        """Forward pass for inference the model, if model have prototypes"""
         x = self.resnet.conv1(x)
         x = self.resnet.bn1(x)
         x = self.resnet.relu(x)
-        conv1 = x
 
         x = self.resnet.maxpool(x)
 
         x = self.resnet.layer1(x)
-        conv2 = x
         x = self.resnet.layer2(x)
-        conv3 = x
         x = self.resnet.layer3(x)
-        conv4 = x
 
         x = self.resnet.avgpool(x)
         x = torch.flatten(x, 1)
         dense = self.resnet.fc_dense(x)
         logits = self.resnet.fc(dense)
 
-        if is_feat:
-            if softmax:
-                return (
-                    F.log_softmax(logits, dim=1),
-                    dense,
-                    [conv1, conv2, conv3, conv4],
-                )
-            return logits, dense, [conv1, conv2, conv3, conv4]
+        del x, dense
 
-        if softmax:
-            return F.log_softmax(logits, dim=1), dense
-        return logits, dense
+        return logits
 
-    def forward(self, x):
-        """Forward pass for inference the model, if model have prototypes"""
-        if len(self.global_protos) == 0:
-            logits, _ = self.forward_train(x)
-            return logits
 
-        x = self.resnet.conv1(x)
-        x = self.resnet.bn1(x)
-        x = self.resnet.relu(x)
-
-        x = self.resnet.maxpool(x)
-
-        x = self.resnet.layer1(x)
-        x = self.resnet.layer2(x)
-        x = self.resnet.layer3(x)
-
-        x = self.resnet.avgpool(x)
-        x = torch.flatten(x, 1)
-        dense = self.resnet.fc_dense(x)
-
-        # Calculate distances
-        distances = []
-        for key, proto in self.global_protos.items():
-            # Calculate Euclidean distance
-            proto = proto.to(dense.device)
-            dist = torch.norm(dense - proto, dim=1)
-            distances.append(dist.unsqueeze(1))
-        distances = torch.cat(distances, dim=1)
-
-        # Return the predicted class based on the closest prototype
-        return distances.argmin(dim=1)
 
     def configure_optimizers(self):
         """Configure the optimizer for training."""

@@ -23,8 +23,8 @@ class FMLCombinedNebulaModel(NebulaModel, ABC):
         confusion_matrix=None,
         seed=None,
         T=2,
-        beta=0.5,
-        alpha=0.5,
+        beta=0.2,
+        alpha=0.2,
         model_meme=None,
         model_local=None,
     ):
@@ -166,8 +166,8 @@ class FMLCombinedNebulaModel(NebulaModel, ABC):
 
         del output_local, output_meme
 
-    def forward(self, x, is_feat=False):
-        return self.model_local(x, is_feat=is_feat)
+    def forward(self, x):
+        return self.model_local(x)
 
     def step(self, batch, batch_idx, phase):
         images, labels = batch

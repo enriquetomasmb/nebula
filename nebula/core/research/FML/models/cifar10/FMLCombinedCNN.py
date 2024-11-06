@@ -15,8 +15,8 @@ class FMLCIFAR10CombinedModelCNN(FMLCombinedNebulaModel):
         confusion_matrix=None,
         seed=None,
         T=2,
-        beta=0.5,  # 2006.16765v3 ("Dynamic alphabeta at different stage of training can improve both global and local performance")
-        alpha=0.5,
+        beta=0.2,  # 2006.16765v3 ("Dynamic alphabeta at different stage of training can improve both global and local performance")
+        alpha=0.2,
         model_meme=None,
         model_local=None,
     ):

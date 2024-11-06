@@ -14,8 +14,8 @@ class FedProtoCIFAR10ModelResNet8(FedProtoNebulaModel):
     def __init__(
         self,
         input_channels=3,
-        num_classes=100,
-        learning_rate=0.01,
+        num_classes=10,
+        learning_rate=1e-3,
         metrics=None,
         confusion_matrix=None,
         seed=None,
@@ -32,6 +32,7 @@ class FedProtoCIFAR10ModelResNet8(FedProtoNebulaModel):
             beta,
         )
 
+        self.embedding_dim = 512
         self.example_input_array = torch.zeros(1, 3, 32, 32)
         self.beta = beta
         self.resnet = ResNet8()

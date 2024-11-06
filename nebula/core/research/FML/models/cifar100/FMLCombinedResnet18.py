@@ -10,13 +10,13 @@ class FMLCIFAR100CombinedModelResNet18(FMLCombinedNebulaModel):
         self,
         input_channels=3,
         num_classes=100,
-        learning_rate=0.1,
+        learning_rate=1e-3,
         metrics=None,
         confusion_matrix=None,
         seed=None,
-        T=2,
-        beta=0.5,  # 2006.16765v3 ("Dynamic alphabeta at different stage of training can improve both global and local performance")
-        alpha=0.5,
+        T=10,
+        beta=0.2,  # 2006.16765v3 ("Dynamic alphabeta at different stage of training can improve both global and local performance")
+        alpha=0.2,
         model_meme=None,
         model_local=None,
     ):

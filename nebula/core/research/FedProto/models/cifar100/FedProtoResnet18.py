@@ -15,7 +15,7 @@ class FedProtoCIFAR100ModelResNet18(FedProtoNebulaModel):
         self,
         input_channels=3,
         num_classes=100,
-        learning_rate=0.1,
+        learning_rate=1e-3,
         metrics=None,
         confusion_matrix=None,
         seed=None,

@@ -1,6 +1,7 @@
 import gzip
 import io
 import logging
+import pickle
 import torch
 from nebula.core.training.lightning import Lightning
 from nebula.config.config import TRAINING_LOGGER
@@ -36,7 +37,7 @@ class QuantizationLightning(Lightning):
         try:
             buffer = io.BytesIO()
             with gzip.GzipFile(fileobj=buffer, mode="wb") as f:
-                torch.save(model, f)
+                torch.save(model, f, pickle_protocol=pickle.HIGHEST_PROTOCOL)
             return buffer.getvalue()
         except Exception as e:
             raise SerializationError("Error serializing model") from e
