@@ -119,6 +119,7 @@ venv.bak/
 .ropeproject
 
 # poetry
+.poetry/
 poetry.lock
 
 # mkdocs documentation

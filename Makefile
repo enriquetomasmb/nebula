@@ -1,4 +1,4 @@
-POETRY_HOME := $(HOME)/.poetry
+POETRY_HOME := $(CURDIR)/.poetry
 POETRY := $(POETRY_HOME)/bin/poetry
 
 .PHONY: pre-install
