@@ -8,7 +8,10 @@ pre-install:
 	@echo "🐍 Checking Python version"
 	@python3 --version | grep -E "Python 3\.(10|[1-9][1-9])" >/dev/null 2>&1 || { echo >&2 "Python version 3.10 or higher is required. Aborting."; exit 1; }
 	@echo "📦 Checking if Poetry is installed"
-	@command -v poetry >/dev/null 2>&1 || { echo >&2 "Poetry is not installed. Installing Poetry."; curl -sSL https://install.python-poetry.org | POETRY_HOME=$(POETRY_HOME) python3 -; }
+	@if ! command -v poetry >/dev/null 2>&1 || [ ! -d "$(POETRY_HOME)" ]; then \
+        echo "Poetry is not installed or POETRY_HOME does not exist. Installing Poetry."; \
+        curl -sSL https://install.python-poetry.org | POETRY_HOME=$(POETRY_HOME) python3 -; \
+    fi
 
 .PHONY: install
 install: pre-install ## Install the poetry environment and install the pre-commit hooks
@@ -32,6 +35,18 @@ full-install: pre-install ## Install the poetry environment and install the pre-
 shell: ## Start a shell in the poetry environment
 	@echo "🐚 Activating virtual environment"
 	@$(POETRY) shell
+
+.PHONY: sync
+sync: ## Sync the lock file
+	@echo "📦 Syncing the lock file"
+	@PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring $(POETRY) lock
+
+.PHONY: update-libs
+update-libs: ## Update libraries to the latest version
+	@echo "🔧 This will override the version of current libraries. Do you want to continue? (y/n)"
+	@read ans && [ $${ans:-N} = y ] || { echo "Update cancelled."; exit 1; }
+	@echo "📦 Updating libraries..."
+	@PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring $(POETRY) update
 
 .PHONY: check
 check: ## Run code quality tools.
