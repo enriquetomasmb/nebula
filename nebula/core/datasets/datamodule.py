@@ -25,7 +25,7 @@ class DataModule(LightningDataModule):
         val_percent=0.1,
         label_flipping=False,
         data_poisoning=False,
-        poisoned_persent=0,
+        poisoned_percent=0,
         poisoned_ratio=0,
         targeted=False,
         target_label=0,
@@ -46,7 +46,7 @@ class DataModule(LightningDataModule):
         self.val_percent = val_percent
         self.label_flipping = label_flipping
         self.data_poisoning = data_poisoning
-        self.poisoned_persent = poisoned_persent
+        self.poisoned_percent = poisoned_percent
         self.poisoned_ratio = poisoned_ratio
         self.targeted = targeted
         self.target_label = target_label
@@ -70,7 +70,7 @@ class DataModule(LightningDataModule):
                 self.train_set_indices,
                 label_flipping=self.label_flipping,
                 data_poisoning=self.data_poisoning,
-                poisoned_persent=self.poisoned_persent,
+                poisoned_percent=self.poisoned_percent,
                 poisoned_ratio=self.poisoned_ratio,
                 targeted=self.targeted,
                 target_label=self.target_label,

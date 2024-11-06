@@ -65,7 +65,7 @@ async def main(config):
     additional_node_round = config.participant["mobility_args"]["additional_node"]["round_start"]
 
     attacks = config.participant["adversarial_args"]["attacks"]
-    poisoned_persent = config.participant["adversarial_args"]["poisoned_sample_percent"]
+    poisoned_percent = config.participant["adversarial_args"]["poisoned_sample_percent"]
     poisoned_ratio = config.participant["adversarial_args"]["poisoned_ratio"]
     targeted = str(config.participant["adversarial_args"]["targeted"])
     target_label = config.participant["adversarial_args"]["target_label"]
@@ -96,7 +96,7 @@ async def main(config):
         label_flipping = False
         data_poisoning = False
         targeted = False
-        poisoned_persent = 0
+        poisoned_percent = 0
         poisoned_ratio = 0
 
     # Adjust the total number of nodes and the index of the current node for CFL, as it doesn't require a specific partition for the server (not used for training)
@@ -261,7 +261,7 @@ async def main(config):
         batch_size=dataset.batch_size,
         label_flipping=label_flipping,
         data_poisoning=data_poisoning,
-        poisoned_persent=poisoned_persent,
+        poisoned_percent=poisoned_percent,
         poisoned_ratio=poisoned_ratio,
         targeted=targeted,
         target_label=target_label,
