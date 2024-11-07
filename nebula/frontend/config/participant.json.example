@@ -122,7 +122,8 @@
   },
   "reporter_args": {
     "grace_time_reporter": 10,
-    "report_frequency": 5
+    "report_frequency": 5,
+    "report_status_data_queue": true
   },
   "discoverer_args": {
     "grace_time_discovery": 0,

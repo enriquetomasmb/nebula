@@ -120,14 +120,13 @@ class Reporter:
             - Reloads the configuration file every 50 cycles to reflect any updates.
 
         Notes:
-            - Status reporting to the controller is currently disabled.
             - The reporting frequency is determined by the 'report_frequency' setting in the config file.
         """
         while True:
-            # NOTE: currently disabled
-            if self.config.participant["scenario_args"]["controller"] != "nebula-test":
-                await self.__report_status_to_controller()
-            await self.__report_data_queue()
+            if self.config.participant["reporter_args"]["report_status_data_queue"]:
+                if self.config.participant["scenario_args"]["controller"] != "nebula-test":
+                    await self.__report_status_to_controller()
+                await self.__report_data_queue()
             await self.__report_resources()
             self.counter += 1
             if self.counter % 50 == 0:
