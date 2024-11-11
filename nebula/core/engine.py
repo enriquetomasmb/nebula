@@ -526,7 +526,7 @@ class Engine:
                 print_msg_box(msg=_nss_features_msg, indent=2, title="NSS features (this node)")
                 selected_nodes = self.node_selection_strategy_selector.node_selection(self)
 
-                self.nebulalogger.log_text("[NSS] Selected nodes", str(selected_nodes), step=self.round)
+                self.trainer._logger.log_text("[NSS] Selected nodes", str(selected_nodes), step=self.round)
 
             await self.aggregator.update_federation_nodes(self.federation_nodes)
             await self._extended_learning_cycle()
