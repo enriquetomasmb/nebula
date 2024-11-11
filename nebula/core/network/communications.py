@@ -376,6 +376,8 @@ class CommunicationsManager:
                 direct = await reader.readline()
                 direct = direct.decode("utf-8").strip()
                 direct = True if direct == "True" else False
+                if not connected_node_id:
+                    return
                 logging.info(
                     f"🔗  [incoming] Connection from {addr} - {connection_addr} [id {connected_node_id} | port {connected_node_port} | direct {direct}] (incoming)"
                 )
