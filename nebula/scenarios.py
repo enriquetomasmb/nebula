@@ -739,7 +739,7 @@ class ScenarioManagement:
                     - /bin/bash
                     - -c
                     - |
-                        {} && ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python /nebula/nebula/node.py {}
+                        {} && ifconfig && echo '{} host.docker.internal' >> /etc/hosts {} && python /nebula/nebula/node.py {}
                 networks:
                     nebula-net-scenario:
                         ipv4_address: {}
@@ -767,7 +767,7 @@ class ScenarioManagement:
                     - /bin/bash
                     - -c
                     - |
-                        {} && ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python /nebula/nebula/node.py {}
+                        {} && ifconfig && echo '{} host.docker.internal' >> /etc/hosts {} && python /nebula/nebula/node.py {}
                 deploy:
                     resources:
                         reservations:
