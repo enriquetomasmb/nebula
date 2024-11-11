@@ -1441,6 +1441,8 @@
                         document.getElementById("roundsAdditionalParticipant" + i).value = data["additional_participants"][i]["round"];
                     }
                 }
+                // Step 16
+                document.querySelector('input[name="nodeSelectionStrategyOptions"][value="' + data["node_selection_strategy"] + '"]').checked = true;
             } catch (error) {
                 console.error(error);
             }
