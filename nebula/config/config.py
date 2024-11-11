@@ -1,7 +1,12 @@
 import json
 import logging
 import os
-from logging import Formatter, FileHandler
+from logging import FileHandler, Formatter
+
+CYAN = "\x1b[0;36m"
+RESET = "\x1b[0m"
+
+TRAINING_LOGGER = "nebula.training"
 
 
 class Config:
@@ -23,6 +28,7 @@ class Config:
         if self.participant != {}:
             self.__default_config()
             self.__set_default_logging()
+            self.__set_training_logging()
 
     def __getstate__(self):
         # Return the attributes of the class that should be serialized
@@ -39,9 +45,17 @@ class Config:
     def get_participant_config(self):
         return json.dumps(self.participant, indent=2)
 
+    def get_train_logging_config(self):
+        # TBD
+        pass
+
     def __default_config(self):
-        self.participant["device_args"]["name"] = f"participant_{self.participant['device_args']['idx']}_{self.participant['network_args']['ip']}_{self.participant['network_args']['port']}"
-        self.participant["network_args"]["addr"] = f"{self.participant['network_args']['ip']}:{self.participant['network_args']['port']}"
+        self.participant["device_args"]["name"] = (
+            f"participant_{self.participant['device_args']['idx']}_{self.participant['network_args']['ip']}_{self.participant['network_args']['port']}"
+        )
+        self.participant["network_args"]["addr"] = (
+            f"{self.participant['network_args']['ip']}:{self.participant['network_args']['port']}"
+        )
 
     def __set_default_logging(self):
         experiment_name = self.participant["scenario_args"]["name"]
@@ -50,36 +64,87 @@ class Config:
             os.makedirs(self.log_dir)
         self.log_filename = f"{self.log_dir}/participant_{self.participant['device_args']['idx']}"
         os.makedirs(os.path.dirname(self.log_filename), exist_ok=True)
-        console_handler, file_handler, file_handler_only_debug, exp_errors_file_handler = self.__setup_logging(self.log_filename)
+        (
+            console_handler,
+            file_handler,
+            file_handler_only_debug,
+            exp_errors_file_handler,
+        ) = self.__setup_logging(self.log_filename)
 
         level = logging.DEBUG if self.participant["device_args"]["logging"] else logging.CRITICAL
-        logging.basicConfig(level=level, handlers=[console_handler, file_handler, file_handler_only_debug, exp_errors_file_handler])
+        logging.basicConfig(
+            level=level,
+            handlers=[
+                console_handler,
+                file_handler,
+                file_handler_only_debug,
+                exp_errors_file_handler,
+            ],
+        )
 
     def __setup_logging(self, log_filename):
-        CYAN = "\x1b[0;36m"
-        RESET = "\x1b[0m"
-        info_file_format = f"%(asctime)s - {self.participant['device_args']['name']} - [%(filename)s:%(lineno)d] %(message)s"
+        info_file_format = (
+            f"%(asctime)s - {self.participant['device_args']['name']} - [%(filename)s:%(lineno)d] %(message)s"
+        )
         debug_file_format = f"%(asctime)s - {self.participant['device_args']['name']} - [%(filename)s:%(lineno)d] %(message)s\n[in %(pathname)s:%(lineno)d]"
         log_console_format = f"{CYAN}%(asctime)s - {self.participant['device_args']['name']} - [%(filename)s:%(lineno)d]{RESET}\n%(message)s"
 
         console_handler = logging.StreamHandler()
-        console_handler.setLevel(logging.INFO if self.participant["device_args"]["logging"] else logging.CRITICAL)
+        console_handler.setLevel(logging.CRITICAL)
         console_handler.setFormatter(Formatter(log_console_format))
 
-        file_handler = FileHandler("{}.log".format(log_filename), mode="w")
+        file_handler = FileHandler(f"{log_filename}.log", mode="w", encoding="utf-8")
         file_handler.setLevel(logging.INFO if self.participant["device_args"]["logging"] else logging.CRITICAL)
         file_handler.setFormatter(Formatter(info_file_format))
 
-        file_handler_only_debug = FileHandler("{}_debug.log".format(log_filename), mode="w")
-        file_handler_only_debug.setLevel(logging.DEBUG if self.participant["device_args"]["logging"] else logging.CRITICAL)
+        file_handler_only_debug = FileHandler(f"{log_filename}_debug.log", mode="w", encoding="utf-8")
+        file_handler_only_debug.setLevel(
+            logging.DEBUG if self.participant["device_args"]["logging"] else logging.CRITICAL
+        )
         file_handler_only_debug.addFilter(lambda record: record.levelno == logging.DEBUG)
         file_handler_only_debug.setFormatter(Formatter(debug_file_format))
 
-        exp_errors_file_handler = FileHandler("{}_error.log".format(log_filename), mode="w")
-        exp_errors_file_handler.setLevel(logging.WARNING if self.participant["device_args"]["logging"] else logging.CRITICAL)
+        exp_errors_file_handler = FileHandler(f"{log_filename}_error.log", mode="w", encoding="utf-8")
+        exp_errors_file_handler.setLevel(
+            logging.WARNING if self.participant["device_args"]["logging"] else logging.CRITICAL
+        )
         exp_errors_file_handler.setFormatter(Formatter(debug_file_format))
 
-        return console_handler, file_handler, file_handler_only_debug, exp_errors_file_handler
+        return (
+            console_handler,
+            file_handler,
+            file_handler_only_debug,
+            exp_errors_file_handler,
+        )
+
+    def __set_training_logging(self):
+        training_log_filename = f"{self.log_filename}_training"
+        info_file_format = (
+            f"%(asctime)s - {self.participant['device_args']['name']} - [%(filename)s:%(lineno)d] %(message)s"
+        )
+        log_console_format = f"{CYAN}%(asctime)s - {self.participant['device_args']['name']} - [%(filename)s:%(lineno)d]{RESET}\n%(message)s"
+        level = logging.DEBUG if self.participant["device_args"]["logging"] else logging.CRITICAL
+
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.CRITICAL)
+        console_handler.setFormatter(Formatter(log_console_format))
+
+        file_handler = FileHandler(f"{training_log_filename}.log", mode="w", encoding="utf-8")
+        file_handler.setLevel(level)
+        file_handler.setFormatter(Formatter(info_file_format))
+
+        logger = logging.getLogger(TRAINING_LOGGER)
+        logger.setLevel(level)
+        logger.addHandler(console_handler)
+        logger.addHandler(file_handler)
+        logger.propagate = False
+
+        pl_logger = logging.getLogger("lightning.pytorch")
+        pl_logger.setLevel(logging.INFO)
+        pl_logger.handlers = []
+        pl_logger.propagate = False
+        pl_logger.addHandler(console_handler)
+        pl_logger.addHandler(file_handler)
 
     def to_json(self):
         # Return participant configuration as a json string
@@ -129,15 +194,24 @@ class Config:
         # Update neighbors
         self.participant["network_args"]["neighbors"] = final_neighbors_string
         # Update neighbors location
-        self.participant["mobility_args"]["neighbors_distance"] = {n: self.participant["mobility_args"]["neighbors_distance"][n] for n in final_neighbors if n in self.participant["mobility_args"]["neighbors_distance"]}
+        self.participant["mobility_args"]["neighbors_distance"] = {
+            n: self.participant["mobility_args"]["neighbors_distance"][n]
+            for n in final_neighbors
+            if n in self.participant["mobility_args"]["neighbors_distance"]
+        }
         logging.info(f"Final neighbors: {final_neighbors_string} (config updated))")
 
     def remove_neighbor_from_config(self, addr):
         if self.participant != {}:
             if self.participant["network_args"]["neighbors"] != "":
-                self.participant["network_args"]["neighbors"] = self.participant["network_args"]["neighbors"].replace(addr, "").replace("  ", " ").strip()
+                self.participant["network_args"]["neighbors"] = (
+                    self.participant["network_args"]["neighbors"].replace(addr, "").replace("  ", " ").strip()
+                )
 
     def reload_config_file(self):
         config_dir = self.participant["tracking_args"]["config_dir"]
-        with open(f"{config_dir}/participant_{self.participant['device_args']['idx']}.json", "w") as f:
+        with open(
+            f"{config_dir}/participant_{self.participant['device_args']['idx']}.json",
+            "w",
+        ) as f:
             f.write(self.to_json())

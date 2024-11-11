@@ -1,11 +1,12 @@
 import torch
+
 from nebula.core.models.nebulamodel import NebulaModel
 
 
 class KitsunModelMLP(NebulaModel):
     def __init__(
         self,
-        input_channels=3,
+        input_channels=356,
         num_classes=10,
         learning_rate=1e-3,
         metrics=None,
@@ -16,13 +17,11 @@ class KitsunModelMLP(NebulaModel):
 
         self.config = {"beta1": 0.851436, "beta2": 0.999689, "amsgrad": True}
 
-        self.example_input_array = torch.rand(1, 3, 32, 32)
+        self.example_input_array = torch.zeros(1, 356)
         self.learning_rate = learning_rate
         self.criterion = torch.nn.CrossEntropyLoss()
 
-        self.example_input_array = torch.zeros(1, 1, 28, 28)
-
-        self.l1 = torch.nn.Linear(356, 1024)
+        self.l1 = torch.nn.Linear(input_channels, 1024)
         self.batchnorm1 = torch.nn.BatchNorm1d(1024)
         self.dropout = torch.nn.Dropout(0.5)
         self.l2 = torch.nn.Linear(1024, 512)
@@ -45,7 +44,6 @@ class KitsunModelMLP(NebulaModel):
         x = torch.relu(x)
         x = self.dropout(x)
         x = self.l5(x)
-        x = torch.log_softmax(x, dim=1)
         return x
 
     def configure_optimizers(self):

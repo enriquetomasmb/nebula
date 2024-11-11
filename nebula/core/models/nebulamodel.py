@@ -1,17 +1,27 @@
+import logging
 from abc import ABC, abstractmethod
-import torch
-from nebula.addons.functions import print_msg_box
+
 import lightning as pl
+import matplotlib
+import matplotlib.pyplot as plt
+import seaborn as sns
+import torch
+from torchmetrics import MetricCollection
 from torchmetrics.classification import (
     MulticlassAccuracy,
-    MulticlassRecall,
-    MulticlassPrecision,
-    MulticlassF1Score,
     MulticlassConfusionMatrix,
+    MulticlassF1Score,
+    MulticlassPrecision,
+    MulticlassRecall,
 )
-from torchmetrics import MetricCollection
-import seaborn as sns
-import matplotlib.pyplot as plt
+
+from nebula.addons.functions import print_msg_box
+
+matplotlib.use("Agg")
+plt.switch_backend("Agg")
+from nebula.config.config import TRAINING_LOGGER
+
+logging_training = logging.getLogger(TRAINING_LOGGER)
 
 
 class NebulaModel(pl.LightningModule, ABC):
@@ -32,10 +42,10 @@ class NebulaModel(pl.LightningModule, ABC):
             loss (torch.Tensor, optional): Loss value
         """
 
-        y_pred_classes = torch.argmax(y_pred, dim=1)
+        y_pred_classes = torch.argmax(y_pred, dim=1).detach()
+        y = y.detach()
         if phase == "Train":
-            # self.log(name=f"{phase}/Loss", value=loss, add_dataloader_idx=False)
-            self.logger.log_data({f"{phase}/Loss": loss.item()}, step=self.global_step)
+            self.logger.log_data({f"{phase}/Loss": loss.detach()})
             self.train_metrics.update(y_pred_classes, y)
         elif phase == "Validation":
             self.val_metrics.update(y_pred_classes, y)
@@ -47,6 +57,8 @@ class NebulaModel(pl.LightningModule, ABC):
             self.cm_global.update(y_pred_classes, y) if self.cm_global is not None else None
         else:
             raise NotImplementedError
+
+        del y_pred_classes, y
 
     def log_metrics_end(self, phase):
         """
@@ -67,23 +79,27 @@ class NebulaModel(pl.LightningModule, ABC):
         else:
             raise NotImplementedError
 
-        output = {f"{phase}/{key.replace('Multiclass', '').split('/')[-1]}": value for key, value in output.items()}
+        output = {
+            f"{phase}/{key.replace('Multiclass', '').split('/')[-1]}": value.detach() for key, value in output.items()
+        }
 
         self.logger.log_data(output, step=self.global_number[phase])
 
         metrics_str = ""
         for key, value in output.items():
             metrics_str += f"{key}: {value:.4f}\n"
-        print_msg_box(metrics_str, indent=2, title=f"{phase} Metrics | Step: {self.global_number[phase]}")
+        print_msg_box(
+            metrics_str,
+            indent=2,
+            title=f"{phase} Metrics | Epoch: {self.global_number[phase]} | Round: {self.round}",
+            logger_name=TRAINING_LOGGER,
+        )
 
     def generate_confusion_matrix(self, phase, print_cm=False, plot_cm=False):
         """
         Generate and plot the confusion matrix for the given phase.
         Args:
             phase (str): One of 'Train', 'Validation', 'Test (Local)', or 'Test (Global)'
-            :param phase:
-            :param print:
-            :param plot:
         """
         if phase == "Test (Local)":
             if self.cm is None:
@@ -96,23 +112,41 @@ class NebulaModel(pl.LightningModule, ABC):
         else:
             raise NotImplementedError
 
-        print(f"\n{phase}/ConfusionMatrix\n", cm) if print_cm else None
+        if print_cm:
+            logging_training.info(f"{phase} / Confusion Matrix:\n{cm}")
+
         if plot_cm:
-            # TODO: Improve with strings for class names
-            cm_numpy = cm.numpy()
-            cm_numpy = cm_numpy.astype(int)
+            cm_numpy = cm.numpy().astype(int)
             classes = [i for i in range(self.num_classes)]
-            fig, ax = plt.subplots(figsize=(10, 10))
-            ax = plt.subplot()
-            sns.heatmap(cm_numpy, annot=True, fmt="d", cmap="Blues", ax=ax)
-            ax.set_xlabel("Predicted labels")
-            ax.set_ylabel("True labels")
-            ax.set_title("Confusion Matrix")
-            ax.xaxis.set_ticklabels(classes, rotation=90)
-            ax.yaxis.set_ticklabels(classes, rotation=0)
-            self.logger.log_figure(fig, step=self.global_number[phase], name=f"{phase}/CM")
+            fig, ax = plt.subplots(figsize=(12, 12))
+            sns.heatmap(
+                cm_numpy,
+                annot=False,
+                fmt="",
+                cmap="Blues",
+                ax=ax,
+                xticklabels=classes,
+                yticklabels=classes,
+                square=True,
+            )
+            ax.set_xlabel("Predicted labels", fontsize=12)
+            ax.set_ylabel("True labels", fontsize=12)
+            ax.set_title(f"{phase} Confusion Matrix", fontsize=16)
+            plt.xticks(rotation=90, fontsize=6)
+            plt.yticks(rotation=0, fontsize=6)
+            plt.tight_layout()
+            self.logger.log_figure(fig, step=self.round, name=f"{phase}/CM")
             plt.close()
-        self.cm.reset() if phase == "Test (Local)" else self.cm_global.reset()
+
+            del cm_numpy, classes, fig, ax
+
+        # Restablecer la matriz de confusión
+        if phase == "Test (Local)":
+            self.cm.reset()
+        else:
+            self.cm_global.reset()
+
+        del cm
 
     def __init__(
         self,
@@ -131,14 +165,12 @@ class NebulaModel(pl.LightningModule, ABC):
         self.loss = -1
 
         if metrics is None:
-            metrics = MetricCollection(
-                [
-                    MulticlassAccuracy(num_classes=num_classes),
-                    MulticlassPrecision(num_classes=num_classes),
-                    MulticlassRecall(num_classes=num_classes),
-                    MulticlassF1Score(num_classes=num_classes),
-                ]
-            )
+            metrics = MetricCollection([
+                MulticlassAccuracy(num_classes=num_classes),
+                MulticlassPrecision(num_classes=num_classes),
+                MulticlassRecall(num_classes=num_classes),
+                MulticlassF1Score(num_classes=num_classes),
+            ])
         self.train_metrics = metrics.clone(prefix="Train/")
         self.val_metrics = metrics.clone(prefix="Validation/")
         self.test_metrics = metrics.clone(prefix="Test (Local)/")
@@ -151,7 +183,28 @@ class NebulaModel(pl.LightningModule, ABC):
             torch.manual_seed(seed)
             torch.cuda.manual_seed_all(seed)
 
-        self.global_number = {"Train": 0, "Validation": 0, "Test (Local)": 0, "Test (Global)": 0}
+        # Round counter (number of training-validation-test rounds)
+        self.round = 0
+
+        # Epochs counter
+        self.global_number = {
+            "Train": 0,
+            "Validation": 0,
+            "Test (Local)": 0,
+            "Test (Global)": 0,
+        }
+
+        # Communication manager for sending messages from the model (e.g., prototypes, gradients)
+        # Model parameters are sent by default using network.propagator
+        self.communication_manager = None
+
+    def set_communication_manager(self, communication_manager):
+        self.communication_manager = communication_manager
+
+    def get_communication_manager(self):
+        if self.communication_manager is None:
+            raise ValueError("Communication manager not set.")
+        return self.communication_manager
 
     @abstractmethod
     def forward(self, x):
@@ -185,12 +238,16 @@ class NebulaModel(pl.LightningModule, ABC):
         self.loss = loss
         return loss
 
+    def on_train_start(self):
+        logging_training.info(f"{'=' * 10} [Training] Started {'=' * 10}")
+
     def on_train_end(self):
-        self.global_number["Train"] += 1
+        logging_training.info(f"{'=' * 10} [Training] Done {'=' * 10}")
 
     def on_train_epoch_end(self):
         self.log_metrics_end("Train")
         self.train_metrics.reset()
+        self.global_number["Train"] += 1
 
     def validation_step(self, batch, batch_idx):
         """
@@ -204,11 +261,13 @@ class NebulaModel(pl.LightningModule, ABC):
         return self.step(batch, batch_idx=batch_idx, phase="Validation")
 
     def on_validation_end(self):
-        self.global_number["Validation"] += 1
+        pass
 
     def on_validation_epoch_end(self):
+        # In general, the validation phase is done in one epoch
         self.log_metrics_end("Validation")
         self.val_metrics.reset()
+        self.global_number["Validation"] += 1
 
     def test_step(self, batch, batch_idx, dataloader_idx=None):
         """
@@ -224,17 +283,25 @@ class NebulaModel(pl.LightningModule, ABC):
         else:
             return self.step(batch, batch_idx=batch_idx, phase="Test (Global)")
 
+    def on_test_start(self):
+        logging_training.info(f"{'=' * 10} [Testing] Started {'=' * 10}")
+
     def on_test_end(self):
-        self.global_number["Test (Local)"] += 1
-        self.global_number["Test (Global)"] += 1
+        logging_training.info(f"{'=' * 10} [Testing] Done {'=' * 10}")
 
     def on_test_epoch_end(self):
+        # In general, the test phase is done in one epoch
         self.log_metrics_end("Test (Local)")
         self.log_metrics_end("Test (Global)")
         self.generate_confusion_matrix("Test (Local)", print_cm=True, plot_cm=True)
         self.generate_confusion_matrix("Test (Global)", print_cm=True, plot_cm=True)
         self.test_metrics.reset()
         self.test_metrics_global.reset()
+        self.global_number["Test (Local)"] += 1
+        self.global_number["Test (Global)"] += 1
+
+    def on_round_end(self):
+        self.round += 1
 
 
 class NebulaModelStandalone(NebulaModel):
@@ -251,7 +318,7 @@ class NebulaModelStandalone(NebulaModel):
         # NebulaModel registers training rounds
         # NebulaModelStandalone register the global number of epochs instead of rounds
         self.global_number["Train"] += 1
-        
+
     def on_validation_end(self):
         pass
 
@@ -259,7 +326,7 @@ class NebulaModelStandalone(NebulaModel):
         self.log_metrics_end("Validation")
         self.global_number["Validation"] += 1
         self.val_metrics.reset()
-        
+
     def on_test_end(self):
         self.global_number["Test (Local)"] += 1
         self.global_number["Test (Global)"] += 1

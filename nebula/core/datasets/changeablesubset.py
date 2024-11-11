@@ -7,16 +7,27 @@ from nebula.addons.attacks.poisoning import *
 
 
 class ChangeableSubset(Subset):
-    def __init__(self, dataset, indices, label_flipping=False, label_flipping_config=None, data_poisoning=False, poisoned_persent=0, poisoned_ratio=0, targeted=False, target_label=0, target_changed_label=0, noise_type="salt"):
+    def __init__(
+        self,
+        dataset,
+        indices,
+        label_flipping=False,
+        label_flipping_config=None, data_poisoning=False,
+        poisoned_percent=0,
+        poisoned_ratio=0,
+        targeted=False,
+        target_label=0,
+        target_changed_label=0,
+        noise_type="salt",
+    ):
         super().__init__(dataset, indices)
-        # TODO: Improve the efficiency of the following code
-        new_dataset = copy.copy(dataset)
+        new_dataset = dataset
         self.dataset = new_dataset
         self.indices = indices
         self.label_flipping = label_flipping
         self.label_flipping_config = label_flipping_config
         self.data_poisoning = data_poisoning
-        self.poisoned_persent = poisoned_persent
+        self.poisoned_percent = poisoned_percent
         self.poisoned_ratio = poisoned_ratio
         self.targeted = targeted if isinstance(targeted, list) else [targeted]
         self.target_label = target_label
@@ -49,7 +60,15 @@ class ChangeableSubset(Subset):
             logging.info("[Labelflipping] Dataset manipulated (attack: {})".format(self.label_flipping_config["attack"]))
 
         if self.data_poisoning:
-            self.dataset = datapoison(self.dataset, self.indices, self.poisoned_persent, self.poisoned_ratio, self.targeted, self.target_label, self.noise_type)
+            self.dataset = datapoison(
+                self.dataset,
+                self.indices,
+                self.poisoned_percent,
+                self.poisoned_ratio,
+                self.targeted,
+                self.target_label,
+                self.noise_type,
+            )
 
     def __getitem__(self, idx):
         if isinstance(idx, list):

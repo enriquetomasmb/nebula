@@ -1,10 +1,10 @@
-from typing import Any
-import torch
-import numpy as np
-from torchmetrics.functional import pairwise_cosine_similarity
-from copy import deepcopy
 import logging
+from copy import deepcopy
+from typing import Any
 
+import numpy as np
+import torch
+from torchmetrics.functional import pairwise_cosine_similarity
 
 # To take into account:
 # - Malicious nodes do not train on their own data
@@ -27,11 +27,10 @@ def create_attack(attack_name):
     elif attack_name == "DelayerAttack":
         return DelayerAttack()
     else:
-        raise ValueError(f"Attack {attack_name} not supported")
+        return None
 
 
 class Attack:
-
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         return self.attack(*args, **kwds)
 

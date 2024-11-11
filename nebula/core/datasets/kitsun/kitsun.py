@@ -1,13 +1,15 @@
 import os
-import sys
-from torchvision.datasets import MNIST, utils
-from nebula.core.datasets.nebuladataset import NebulaDataset
 import shutil
+import sys
 import zipfile
+
 import torch
+from torchvision.datasets import MNIST, utils
+
+from nebula.core.datasets.nebuladataset import NebulaDataset
 
 
-class KISTSUN(MNIST):
+class KITSUN(MNIST):
     def __init__(self, train=True):
         self.root = f"{sys.path[0]}/data"
         self.download = True
@@ -16,7 +18,9 @@ class KISTSUN(MNIST):
         self.training_file = f"{self.root}/kitsun/processed/kitsun_train.pt"
         self.test_file = f"{self.root}/kitsun/processed/kitsun_test.pt"
 
-        if not os.path.exists(f"{self.root}/kitsun/processed/kitsun_test.pt") or not os.path.exists(f"{self.root}/kitsun/processed/kitsun_train.pt"):
+        if not os.path.exists(f"{self.root}/kitsun/processed/kitsun_test.pt") or not os.path.exists(
+            f"{self.root}/kitsun/processed/kitsun_train.pt"
+        ):
             if self.download:
                 self.dataset_download()
             else:
@@ -61,7 +65,7 @@ class KISTSUN(MNIST):
             shutil.copy(test_raw, test_file)
 
 
-class KISTSUNDataset(NebulaDataset):
+class KITSUNDataset(NebulaDataset):
     def __init__(
         self,
         num_classes=10,
@@ -104,7 +108,9 @@ class KISTSUNDataset(NebulaDataset):
             self.local_test_indices_map = self.generate_iid_map(self.test_set, self.partition, self.partition_parameter)
         else:
             self.train_indices_map = self.generate_non_iid_map(self.train_set, self.partition, self.partition_parameter)
-            self.local_test_indices_map = self.generate_non_iid_map(self.test_set, self.partition, self.partition_parameter)
+            self.local_test_indices_map = self.generate_non_iid_map(
+                self.test_set, self.partition, self.partition_parameter
+            )
 
         print(f"Length of train indices map: {len(self.train_indices_map)}")
         print(f"Lenght of test indices map (global): {len(self.test_indices_map)}")
@@ -112,9 +118,8 @@ class KISTSUNDataset(NebulaDataset):
 
     def load_kitsun_dataset(self, train=True):
         if train:
-            return KISTSUN(train=True)
-        else:
-            return KISTSUN(train=False)
+            return KITSUN(train=True)
+        return KITSUN(train=False)
 
     def generate_non_iid_map(self, dataset, partition="dirichlet", partition_parameter=0.5):
         if partition == "dirichlet":
@@ -141,5 +146,5 @@ class KISTSUNDataset(NebulaDataset):
         if self.partition_id == 0:
             self.plot_data_distribution(dataset, partitions_map)
             self.plot_all_data_distribution(dataset, partitions_map)
-            
+
         return partitions_map[self.partition_id]

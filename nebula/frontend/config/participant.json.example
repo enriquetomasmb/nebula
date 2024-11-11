@@ -4,7 +4,7 @@
     "start_time": "",
     "federation": "DFL",
     "rounds": 10,
-    "simulation": true,
+    "deployment": "process",
     "controller": "127.0.0.1:5000",
     "random_seed": 42,
     "n_nodes": 0,
@@ -13,6 +13,7 @@
   "device_args": {
     "uid": "",
     "idx": "",
+    "docker_id": "",
     "name": "",
     "username": "pi",
     "password": "pi",
@@ -127,12 +128,13 @@
     "device_type": ""
   },
   "message_args": {
-    "max_local_messages": 100000,
+    "max_local_messages": 10000,
     "compression": "zlib"
   },
   "reporter_args": {
     "grace_time_reporter": 10,
-    "report_frequency": 5
+    "report_frequency": 5,
+    "report_status_data_queue": true
   },
   "discoverer_args": {
     "grace_time_discovery": 0,
@@ -155,10 +157,10 @@
     "propagate_interval": 3,
     "propagate_model_interval": 0,
     "propagation_early_stop": 3,
-    "history_size": 50
+    "history_size": 20
   },
   "misc_args": {
-    "grace_time_connection": 20,
-    "grace_time_start_federation": 20
-  } 
+    "grace_time_connection": 10,
+    "grace_time_start_federation": 10
+  }
 }

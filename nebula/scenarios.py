@@ -17,6 +17,7 @@ from nebula.addons.blockchain.blockchain_deployer import BlockchainDeployer
 from nebula.addons.topologymanager import TopologyManager
 from nebula.config.config import Config
 from nebula.core.utils.certificate import generate_ca_certificate, generate_certificate
+from nebula.frontend.utils import Utils
 
 
 # Definition of a scenario
@@ -25,7 +26,7 @@ class Scenario:
         self,
         scenario_title,
         scenario_description,
-        simulation,
+        deployment,
         federation,
         topology,
         nodes,
@@ -41,6 +42,7 @@ class Scenario:
         reactive_aggregator_default,
         rounds,
         logginglevel,
+        report_status_data_queue,
         accelerator,
         network_subnet,
         network_gateway,
@@ -68,9 +70,53 @@ class Scenario:
         schema_additional_participants,
         node_selection_strategy
     ):
+        """
+        Initialize the scenario.
+
+        Args:
+            scenario_title (str): Title of the scenario.
+            scenario_description (str): Description of the scenario.
+            deployment (str): Type of deployment (e.g., 'docker', 'process').
+            federation (str): Type of federation.
+            topology (str): Network topology.
+            nodes (dict): Dictionary of nodes.
+            nodes_graph (dict): Graph of nodes.
+            n_nodes (int): Number of nodes.
+            matrix (list): Matrix of connections.
+            dataset (str): Dataset used.
+            iid (bool): Indicator if data is independent and identically distributed.
+            partition_selection (str): Method of partition selection.
+            partition_parameter (float): Parameter for partition selection.
+            model (str): Model used.
+            agg_algorithm (str): Aggregation algorithm.
+            rounds (int): Number of rounds.
+            logginglevel (str): Logging level.
+            report_status_data_queue (bool): Indicator to report information about the nodes of the scenario
+            accelerator (str): Accelerator used.
+            network_subnet (str): Network subnet.
+            network_gateway (str): Network gateway.
+            epochs (int): Number of epochs.
+            attacks (list): List of attacks.
+            poisoned_node_percent (float): Percentage of poisoned nodes.
+            poisoned_sample_percent (float): Percentage of poisoned samples.
+            is_dynamic_topology (bool): Indicator if topology is dynamic.
+            is_dynamic_aggregation (bool): Indicator if aggregation is dynamic.
+            target_aggregation (str): Target aggregation method.
+            random_geo (bool): Indicator if random geo is used.
+            latitude (float): Latitude for mobility.
+            longitude (float): Longitude for mobility.
+            mobility (bool): Indicator if mobility is used.
+            mobility_type (str): Type of mobility.
+            radius_federation (float): Radius of federation.
+            scheme_mobility (str): Scheme of mobility.
+            round_frequency (int): Frequency of rounds.
+            mobile_participants_percent (float): Percentage of mobile participants.
+            additional_participants (list): List of additional participants.
+            schema_additional_participants (str): Schema for additional participants.
+        """
         self.scenario_title = scenario_title
         self.scenario_description = scenario_description
-        self.simulation = simulation
+        self.deployment = deployment
         self.federation = federation
         self.topology = topology
         self.nodes = nodes
@@ -86,6 +132,7 @@ class Scenario:
         self.reactive_aggregator_default = reactive_aggregator_default
         self.rounds = rounds
         self.logginglevel = logginglevel
+        self.report_status_data_queue = report_status_data_queue
         self.accelerator = accelerator
         self.network_subnet = network_subnet
         self.network_gateway = network_gateway
@@ -125,8 +172,8 @@ class Scenario:
         atk_lie_z
     ):
         """Identify which nodes will be attacked"""
-        import random
         import math
+        import random
 
         nodes_index = []
         # Get the nodes index
@@ -137,24 +184,32 @@ class Scenario:
                 if nodes[node]["role"] != "server":
                     nodes_index.append(node)
 
-        n_nodes = len(nodes_index)
-        # Number of attacked nodes, round up
-        num_attacked = int(math.ceil(poisoned_node_percent / 100 * n_nodes))
-        if num_attacked > n_nodes:
-            num_attacked = n_nodes
+        mal_nodes_defined = any(nodes[node]["malicious"] for node in nodes)
 
-        # Get the index of attacked nodes
-        attacked_nodes = random.sample(nodes_index, num_attacked)
+        attacked_nodes = []
+
+        if not mal_nodes_defined:
+            n_nodes = len(nodes_index)
+            # Number of attacked nodes, round up
+            num_attacked = int(math.ceil(poisoned_node_percent / 100 * n_nodes))
+            if num_attacked > n_nodes:
+                num_attacked = n_nodes
+
+            # Get the index of attacked nodes
+            attacked_nodes = random.sample(nodes_index, num_attacked)
 
         # Assign the role of each node
         for node in nodes:
             node_att = "No Attack"
+            malicious = False
             attack_sample_percent = 0
             poisoned_ratio = 0
-            if (node in attacked_nodes) or (nodes[node]["malicious"]):
+            if (str(nodes[node]["id"]) in attacked_nodes) or (nodes[node]["malicious"]):
+                malicious = True
                 node_att = attack
                 attack_sample_percent = poisoned_sample_percent / 100
                 poisoned_ratio = poisoned_noise_percent / 100
+            nodes[node]["malicious"] = malicious
             nodes[node]["attacks"] = node_att
             nodes[node]["poisoned_sample_percent"] = attack_sample_percent
             nodes[node]["poisoned_ratio"] = poisoned_ratio
@@ -189,20 +244,26 @@ class Scenario:
 
 # Class to manage the current scenario
 class ScenarioManagement:
-    def __init__(self, scenario, controller):
+    def __init__(self, scenario):
         # Current scenario
         self.scenario = Scenario.from_dict(scenario)
-
         # Scenario management settings
         self.start_date_scenario = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-        self.scenario_name = f'nebula_{self.scenario.federation}_{datetime.now().strftime("%d_%m_%Y_%H_%M_%S")}'
+        self.scenario_name = f"nebula_{self.scenario.federation}_{datetime.now().strftime('%d_%m_%Y_%H_%M_%S')}"
         self.root_path = os.environ.get("NEBULA_ROOT_HOST")
+        self.host_platform = os.environ.get("NEBULA_HOST_PLATFORM")
         self.config_dir = os.path.join(os.environ.get("NEBULA_CONFIG_DIR"), self.scenario_name)
         self.log_dir = os.environ.get("NEBULA_LOGS_DIR")
         self.cert_dir = os.environ.get("NEBULA_CERTS_DIR")
         self.advanced_analytics = os.environ.get("NEBULA_ADVANCED_ANALYTICS", "False") == "True"
         self.config = Config(entity="scenarioManagement")
-        self.controller = controller
+
+        # Assign the controller endpoint
+        if self.scenario.deployment == "docker":
+            self.controller = "nebula-frontend"
+        else:
+            self.controller = f"127.0.0.1:{os.environ.get('NEBULA_FRONTEND_PORT')}"
+
         self.topologymanager = None
         self.env_path = None
         self.use_blockchain = self.scenario.agg_algorithm == "BlockchainReputation"
@@ -212,10 +273,17 @@ class ScenarioManagement:
         os.makedirs(os.path.join(self.log_dir, self.scenario_name), exist_ok=True)
         os.makedirs(self.cert_dir, exist_ok=True)
 
+        # Give permissions to the directories
+        os.chmod(self.config_dir, 0o777)
+        os.chmod(os.path.join(self.log_dir, self.scenario_name), 0o777)
+        os.chmod(self.cert_dir, 0o777)
+
         # Save the scenario configuration
         scenario_file = os.path.join(self.config_dir, "scenario.json")
         with open(scenario_file, "w") as f:
             json.dump(scenario, f, sort_keys=False, indent=2)
+
+        os.chmod(scenario_file, 0o777)
 
         # Save management settings
         settings = {
@@ -231,6 +299,9 @@ class ScenarioManagement:
         settings_file = os.path.join(self.config_dir, "settings.json")
         with open(settings_file, "w") as f:
             json.dump(settings, f, sort_keys=False, indent=2)
+
+        os.chmod(settings_file, 0o777)
+
         self.scenario.nodes = self.scenario.attack_node_assign(
             self.scenario.nodes,
             self.scenario.federation,
@@ -252,12 +323,16 @@ class ScenarioManagement:
         for node in self.scenario.nodes:
             print(f"Node {node}: {self.scenario.nodes[node]}")
             node_config = self.scenario.nodes[node]
-            participant_file = os.path.join(self.config_dir, f'participant_{node_config["id"]}.json')
+            participant_file = os.path.join(self.config_dir, f"participant_{node_config['id']}.json")
             os.makedirs(os.path.dirname(participant_file), exist_ok=True)
             shutil.copy(
-                os.path.join(os.path.dirname(__file__), "./frontend/config/participant.json.example"),
+                os.path.join(
+                    os.path.dirname(__file__),
+                    "./frontend/config/participant.json.example",
+                ),
                 participant_file,
             )
+            os.chmod(participant_file, 0o777)
             with open(participant_file) as f:
                 participant_config = json.load(f)
 
@@ -302,6 +377,7 @@ class ScenarioManagement:
             participant_config["resource_args"]["resource_constraint_cpu"] = node_config["resourceConstraintCPU"]
             participant_config["resource_args"]["resource_constraint_latency"] = node_config["resourceConstraintLatency"]
 
+            participant_config["reporter_args"]["report_status_data_queue"] = self.scenario.report_status_data_queue
 
             with open(participant_file, "w") as f:
                 json.dump(participant_config, f, sort_keys=False, indent=2)
@@ -314,23 +390,43 @@ class ScenarioManagement:
                 command = "docker ps -a --filter 'label=com.docker.compose.project=blockchain' --format '{{.ID}}' | ForEach-Object { docker rm --force --volumes $_ } | Out-Null"
                 os.system(f'powershell.exe -Command "{command}"')
             except Exception as e:
-                logging.error("Error while killing docker containers: {}".format(e))
+                logging.exception(f"Error while killing docker containers: {e}")
         else:
             try:
-                process = subprocess.Popen("docker ps -a --filter 'label=com.docker.compose.project=blockchain' --format '{{.ID}}' | xargs -n 1 docker rm --force --volumes  >/dev/null 2>&1", shell=True)
+                process = subprocess.Popen(
+                    "docker ps -a --filter 'label=com.docker.compose.project=blockchain' --format '{{.ID}}' | xargs -n 1 docker rm --force --volumes  >/dev/null 2>&1",
+                    shell=True,
+                )
                 process.wait()
             except subprocess.CalledProcessError:
-                logging.error("Docker Compose failed to stop blockchain or blockchain already exited.")
-            
+                logging.exception("Docker Compose failed to stop blockchain or blockchain already exited.")
+
     @staticmethod
     def stop_participants():
+        # When stopping the nodes, we need to remove the current_scenario_commands.sh file -> it will cause the nodes to stop using PIDs
+        try:
+            nebula_config_dir = os.environ.get("NEBULA_CONFIG_DIR")
+            if not nebula_config_dir:
+                current_dir = os.path.dirname(__file__)
+                nebula_base_dir = os.path.abspath(os.path.join(current_dir, ".."))
+                nebula_config_dir = os.path.join(nebula_base_dir, "app", "config")
+                logging.info(f"NEBULA_CONFIG_DIR not found. Using default path: {nebula_config_dir}")
+            if os.environ.get("NEBULA_HOST_PLATFORM") == "windows":
+                scenario_commands_file = os.path.join(nebula_config_dir, "current_scenario_commands.ps1")
+            else:
+                scenario_commands_file = os.path.join(nebula_config_dir, "current_scenario_commands.sh")
+            if os.path.exists(scenario_commands_file):
+                os.remove(scenario_commands_file)
+        except Exception as e:
+            logging.exception(f"Error while removing current_scenario_commands.sh file: {e}")
+
         if sys.platform == "win32":
             try:
                 # kill all the docker containers which contain the word "nebula-core"
                 commands = [
                     """docker kill $(docker ps -q --filter ancestor=nebula-core) | Out-Null""",
                     """docker rm $(docker ps -a -q --filter ancestor=nebula-core) | Out-Null""",
-                    """docker network rm $(docker network ls | Where-Object { ($_ -split '\s+')[1] -like 'nebula-net-scenario' } | ForEach-Object { ($_ -split '\s+')[0] }) | Out-Null""",
+                    r"""docker network rm $(docker network ls | Where-Object { ($_ -split '\s+')[1] -like 'nebula-net-scenario' } | ForEach-Object { ($_ -split '\s+')[0] }) | Out-Null""",
                 ]
 
                 for command in commands:
@@ -339,7 +435,7 @@ class ScenarioManagement:
                     # logging.info(f"Windows Command '{command}' executed with exit code: {exit_code}")
 
             except Exception as e:
-                raise Exception("Error while killing docker containers: {}".format(e))
+                raise Exception(f"Error while killing docker containers: {e}")
         else:
             try:
                 commands = [
@@ -354,7 +450,7 @@ class ScenarioManagement:
                     # logging.info(f"Linux Command '{command}' executed with exit code: {exit_code}")
 
             except Exception as e:
-                raise Exception("Error while killing docker containers: {}".format(e))
+                raise Exception(f"Error while killing docker containers: {e}")
 
     @staticmethod
     def stop_nodes():
@@ -363,22 +459,24 @@ class ScenarioManagement:
         ScenarioManagement.stop_blockchain()
 
     def load_configurations_and_start_nodes(self, additional_participants=None, schema_additional_participants=None):
-        logging.info("Generating the scenario {} at {}".format(self.scenario_name, self.start_date_scenario))
+        logging.info(f"Generating the scenario {self.scenario_name} at {self.start_date_scenario}")
 
         # Generate CA certificate
         generate_ca_certificate(dir_path=self.cert_dir)
 
         # Get participants configurations
-        participant_files = glob.glob("{}/participant_*.json".format(self.config_dir))
+        participant_files = glob.glob(f"{self.config_dir}/participant_*.json")
         participant_files.sort()
         if len(participant_files) == 0:
             raise ValueError("No participant files found in config folder")
 
         self.config.set_participants_config(participant_files)
         self.n_nodes = len(participant_files)
-        logging.info("Number of nodes: {}".format(self.n_nodes))
+        logging.info(f"Number of nodes: {self.n_nodes}")
 
-        self.topologymanager = self.create_topology(matrix=self.scenario.matrix) if self.scenario.matrix else self.create_topology()
+        self.topologymanager = (
+            self.create_topology(matrix=self.scenario.matrix) if self.scenario.matrix else self.create_topology()
+        )
 
         # Update participants configuration
         is_start_node = False
@@ -392,7 +490,13 @@ class ScenarioManagement:
             participant_config["scenario_args"]["name"] = self.scenario_name
             participant_config["scenario_args"]["start_time"] = self.start_date_scenario
             participant_config["device_args"]["idx"] = i
-            participant_config["device_args"]["uid"] = hashlib.sha1((str(participant_config["network_args"]["ip"]) + str(participant_config["network_args"]["port"]) + str(self.scenario_name)).encode()).hexdigest()
+            participant_config["device_args"]["uid"] = hashlib.sha1(
+                (
+                    str(participant_config["network_args"]["ip"])
+                    + str(participant_config["network_args"]["port"])
+                    + str(self.scenario_name)
+                ).encode()
+            ).hexdigest()
             if participant_config["mobility_args"]["random_geo"]:
                 (
                     participant_config["mobility_args"]["latitude"],
@@ -404,7 +508,11 @@ class ScenarioManagement:
             participant_config["tracking_args"]["config_dir"] = self.config_dir
 
             # Generate node certificate
-            keyfile_path, certificate_path = generate_certificate(dir_path=self.cert_dir, node_id=f"participant_{i}", ip=participant_config["network_args"]["ip"])
+            keyfile_path, certificate_path = generate_certificate(
+                dir_path=self.cert_dir,
+                node_id=f"participant_{i}",
+                ip=participant_config["network_args"]["ip"],
+            )
 
             participant_config["security_args"]["certfile"] = certificate_path
             participant_config["security_args"]["keyfile"] = keyfile_path
@@ -417,7 +525,11 @@ class ScenarioManagement:
             with open(f"{self.config_dir}/participant_" + str(i) + ".json", "w") as f:
                 json.dump(participant_config, f, sort_keys=False, indent=2)
 
-            config_participants.append((participant_config["network_args"]["ip"], participant_config["network_args"]["port"], participant_config["device_args"]["role"]))
+            config_participants.append((
+                participant_config["network_args"]["ip"],
+                participant_config["network_args"]["port"],
+                participant_config["device_args"]["role"],
+            ))
         if not is_start_node:
             raise ValueError("No start node found")
         self.config.set_participants_config(participant_files)
@@ -442,8 +554,18 @@ class ScenarioManagement:
                 participant_config["scenario_args"]["n_nodes"] = self.n_nodes + i + 1
                 participant_config["device_args"]["idx"] = last_participant_index + i
                 participant_config["network_args"]["neighbors"] = ""
-                participant_config["network_args"]["ip"] = participant_config["network_args"]["ip"].rsplit(".", 1)[0] + "." + str(int(participant_config["network_args"]["ip"].rsplit(".", 1)[1]) + 1)
-                participant_config["device_args"]["uid"] = hashlib.sha1((str(participant_config["network_args"]["ip"]) + str(participant_config["network_args"]["port"]) + str(self.scenario_name)).encode()).hexdigest()
+                participant_config["network_args"]["ip"] = (
+                    participant_config["network_args"]["ip"].rsplit(".", 1)[0]
+                    + "."
+                    + str(int(participant_config["network_args"]["ip"].rsplit(".", 1)[1]) + 1)
+                )
+                participant_config["device_args"]["uid"] = hashlib.sha1(
+                    (
+                        str(participant_config["network_args"]["ip"])
+                        + str(participant_config["network_args"]["port"])
+                        + str(self.scenario_name)
+                    ).encode()
+                ).hexdigest()
                 participant_config["mobility_args"]["additional_node"]["status"] = True
                 participant_config["mobility_args"]["additional_node"]["round_start"] = additional_participant["round"]
 
@@ -455,12 +577,17 @@ class ScenarioManagement:
         if additional_participants_files:
             self.config.add_participants_config(additional_participants_files)
 
-        if self.scenario.simulation:
+        if self.scenario.deployment in ["docker", "process"]:
             if self.use_blockchain:
                 self.start_blockchain()
-            self.start_nodes_docker()
+            if self.scenario.deployment == "docker":
+                self.start_nodes_docker()
+            else:
+                self.start_nodes_process()
         else:
-            logging.info("Simulation mode is disabled, waiting for nodes to start...")
+            logging.info(
+                f"Virtualization mode is disabled for scenario '{self.scenario_name}' with {self.n_nodes} nodes. Waiting for nodes to start manually..."
+            )
 
     def create_topology(self, matrix=None):
         import numpy as np
@@ -509,30 +636,43 @@ class ScenarioManagement:
             topologymanager = TopologyManager(scenario_name=self.scenario_name, n_nodes=self.n_nodes, b_symmetric=True)
             topologymanager.generate_server_topology()
         else:
-            raise ValueError("Unknown topology type: {}".format(self.scenario.topology))
+            raise ValueError(f"Unknown topology type: {self.scenario.topology}")
 
         # Assign nodes to topology
         nodes_ip_port = []
         self.config.participants.sort(key=lambda x: x["device_args"]["idx"])
         for i, node in enumerate(self.config.participants):
-            nodes_ip_port.append(
-                (
-                    node["network_args"]["ip"],
-                    node["network_args"]["port"],
-                    "undefined",
-                )
-            )
+            nodes_ip_port.append((
+                node["network_args"]["ip"],
+                node["network_args"]["port"],
+                "undefined",
+            ))
 
         topologymanager.add_nodes(nodes_ip_port)
         return topologymanager
 
     def start_blockchain(self):
-        BlockchainDeployer(config_dir=f"{self.config_dir}/blockchain", input_dir="/nebula/nebula/addons/blockchain")
+        BlockchainDeployer(
+            config_dir=f"{self.config_dir}/blockchain",
+            input_dir="/nebula/nebula/addons/blockchain",
+        )
         try:
             logging.info("Blockchain is being deployed")
-            subprocess.check_call(["docker", "compose", "-f", f"{self.config_dir}/blockchain/blockchain-docker-compose.yml", "up", "--remove-orphans", "--force-recreate", "-d", "--build"])
+            subprocess.check_call([
+                "docker",
+                "compose",
+                "-f",
+                f"{self.config_dir}/blockchain/blockchain-docker-compose.yml",
+                "up",
+                "--remove-orphans",
+                "--force-recreate",
+                "-d",
+                "--build",
+            ])
         except subprocess.CalledProcessError as e:
-            logging.error("Docker Compose failed to start Blockchain, please check if Docker Compose is installed (https://docs.docker.com/compose/install/) and Docker Engine is running.")
+            logging.exception(
+                "Docker Compose failed to start Blockchain, please check if Docker Compose is installed (https://docs.docker.com/compose/install/) and Docker Engine is running."
+            )
             raise e
 
     def start_nodes_docker(self):
@@ -540,14 +680,26 @@ class ScenarioManagement:
 
         try:
             # First, get the list of IDs of exited containers
-            result_ps = subprocess.run("docker ps -aq -f status=exited --filter 'name=nebula'", shell=True, check=True, capture_output=True, text=True)
+            result_ps = subprocess.run(
+                "docker ps -aq -f status=exited --filter 'name=nebula'",
+                shell=True,
+                check=True,
+                capture_output=True,
+                text=True,
+            )
 
             # Get the container IDs
             container_ids = result_ps.stdout.strip()
 
             if container_ids:
                 # Run the command to remove the containers
-                result_rm = subprocess.run(f"docker rm $(docker ps -aq -f status=exited --filter 'name=nebula')", shell=True, check=True, capture_output=True, text=True)
+                result_rm = subprocess.run(
+                    "docker rm $(docker ps -aq -f status=exited --filter 'name=nebula')",
+                    shell=True,
+                    check=True,
+                    capture_output=True,
+                    text=True,
+                )
                 print(f"Dangling containers removed successfully: {result_rm.stdout.strip()}.")
             else:
                 print("No dangling containers to remove.")
@@ -558,7 +710,7 @@ class ScenarioManagement:
             print(f"Unexpected error: {e}")
 
         logging.info("Starting nodes using Docker Compose...")
-        logging.info("env path: {}".format(self.env_path))
+        logging.info(f"env path: {self.env_path}")
 
         docker_compose_template = textwrap.dedent(
             """
@@ -587,7 +739,7 @@ class ScenarioManagement:
                     - /bin/bash
                     - -c
                     - |
-                        ifconfig && echo '{} host.docker.internal' >> /etc/hosts {} && python3.11 /nebula/nebula/node.py {}
+                        {} && ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python /nebula/nebula/node.py {}
                 networks:
                     nebula-net-scenario:
                         ipv4_address: {}
@@ -615,7 +767,7 @@ class ScenarioManagement:
                     - /bin/bash
                     - -c
                     - |
-                        ifconfig && echo '{} host.docker.internal' >> /etc/hosts {} && python3.11 /nebula/nebula/node.py {}
+                        {} && ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python /nebula/nebula/node.py {}
                 deploy:
                     resources:
                         reservations:
@@ -643,7 +795,7 @@ class ScenarioManagement:
                     ipam:
                         config:
                             - subnet: {}
-                              gateway: {}     
+                              gateway: {}
                 nebula-net-base:
                     name: nebula-net-base
                     external: true
@@ -671,23 +823,24 @@ class ScenarioManagement:
                 resource_constraint_cpu = node["resource_args"]["resource_constraint_cpu"]
                 logging.info(f"Node has the following Resource Constraint on CPU :{resource_constraint_cpu}")
 
-            logging.info("Starting node {} with configuration {}".format(idx, path))
+            logging.info(f"Starting node {idx} with configuration {path}")
             logging.info("Node {} is listening on ip {}".format(idx, node["network_args"]["ip"]))
             # Add one service for each participant
             if node["device_args"]["accelerator"] == "gpu":
-                logging.info("Node {} is using GPU".format(idx))
+                logging.info(f"Node {idx} is using GPU")
                 services += participant_gpu_template.format(
                     idx,
                     self.root_path,
+                    "sleep 10" if node["device_args"]["start"] else "sleep 0",
                     self.scenario.network_gateway,
                     tcset_cmd,
                     path,
                     resource_constraint_cpu,
                     node["network_args"]["ip"],
-                    "proxy:" if self.scenario.simulation and self.use_blockchain else "",
+                    "proxy:" if self.scenario.deployment and self.use_blockchain else "",
                 )
             else:
-                logging.info("Node {} is using CPU".format(idx))
+                logging.info(f"Node {idx} is using CPU")
                 services += participant_template.format(
                     idx,
                     self.root_path,
@@ -696,94 +849,208 @@ class ScenarioManagement:
                     tcset_cmd,
                     path,
                     node["network_args"]["ip"],
-                    "proxy:" if self.scenario.simulation and self.use_blockchain else "",
+                    "proxy:" if self.scenario.deployment and self.use_blockchain else "",
                 )
         docker_compose_file = docker_compose_template.format(services)
         docker_compose_file += network_template.format(
-            self.scenario.network_subnet, self.scenario.network_gateway, "proxy:" if self.scenario.simulation and self.use_blockchain else "", "name: chainnet" if self.scenario.simulation and self.use_blockchain else "", "external: true" if self.scenario.simulation and self.use_blockchain else ""
+            self.scenario.network_subnet,
+            self.scenario.network_gateway,
+            "proxy:" if self.scenario.deployment and self.use_blockchain else "",
+            "name: chainnet" if self.scenario.deployment and self.use_blockchain else "",
+            "external: true" if self.scenario.deployment and self.use_blockchain else "",
         )
         # Write the Docker Compose file in config directory
         with open(f"{self.config_dir}/docker-compose.yml", "w") as f:
             f.write(docker_compose_file)
 
-        # Start the Docker Compose file, catch error if any
-        try:
-            subprocess.check_call(
-                [
-                    "docker",
-                    "compose",
-                    "-f",
-                    f"{self.config_dir}/docker-compose.yml",
-                    "up",
-                    "--build",
-                    "-d",
-                ]
-            )
-        except subprocess.CalledProcessError as e:
-            raise Exception("Docker Compose failed to start, please check if Docker Compose is installed (https://docs.docker.com/compose/install/) and Docker Engine is running.")
-
-        container_ids = None
-
-        # Obtain container IDs
-        try:
-            # Obtain docker ids
-            result = subprocess.run(["docker", "compose", "-f", f"{self.config_dir}/docker-compose.yml", "ps", "-q"], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-
-            if result.returncode != 0:
-                raise Exception(f"Error obtaining docker IDs: {result.stderr}")
-
-            container_ids = result.stdout.strip().split("\n")
-
-        except subprocess.CalledProcessError as e:
-            raise Exception("Docker Compose failed to start, please check if Docker Compose is installed " "(https://docs.docker.com/compose/install/) and Docker Engine is running.")
-
-        if not container_ids or len(container_ids) != len(self.config.participants):
-            raise Exception("The number of container IDs does not match the number of participants.")
-
-        # Change log and config directory in dockers to /nebula/app, and change controller endpoint
+        # Include additional config to the participants
         for idx, node in enumerate(self.config.participants):
-            # Assign docker ID to node
-            node["device_args"]["docker_id"] = container_ids[idx]
-            # Print the configuration of the node
             node["tracking_args"]["log_dir"] = "/nebula/app/logs"
             node["tracking_args"]["config_dir"] = f"/nebula/app/config/{self.scenario_name}"
             node["scenario_args"]["controller"] = self.controller
             node["security_args"]["certfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_cert.pem"
             node["security_args"]["keyfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_key.pem"
-            node["security_args"]["cafile"] = f"/nebula/app/certs/ca_cert.pem"
+            node["security_args"]["cafile"] = "/nebula/app/certs/ca_cert.pem"
 
             # Write the config file in config directory
             with open(f"{self.config_dir}/participant_{node['device_args']['idx']}.json", "w") as f:
                 json.dump(node, f, indent=4)
 
+        # Start the Docker Compose file, catch error if any
+        try:
+            subprocess.check_call([
+                "docker",
+                "compose",
+                "-f",
+                f"{self.config_dir}/docker-compose.yml",
+                "up",
+                "--build",
+                "-d",
+            ])
+        except subprocess.CalledProcessError:
+            raise Exception(
+                "Docker Compose failed to start, please check if Docker Compose is installed (https://docs.docker.com/compose/install/) and Docker Engine is running."
+            )
+
+        container_ids = None
+        logging.info("Waiting for nodes to start...")
+        # Loop until all containers are running (equivalent to the number of participants)
+        while container_ids is None or len(container_ids) != len(self.config.participants):
+            time.sleep(3)
+            try:
+                # Obtain docker ids
+                result = subprocess.run(
+                    [
+                        "docker",
+                        "compose",
+                        "-f",
+                        f"{self.config_dir}/docker-compose.yml",
+                        "ps",
+                        "-q",
+                    ],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                )
+
+                if result.returncode != 0:
+                    raise Exception(f"Error obtaining docker IDs: {result.stderr}")
+
+                container_ids = result.stdout.strip().split("\n")
+
+            except subprocess.CalledProcessError:
+                raise Exception(
+                    "Docker Compose failed to start, please check if Docker Compose is installed "
+                    "(https://docs.docker.com/compose/install/) and Docker Engine is running."
+                )
+
+        # Change log and config directory in dockers to /nebula/app, and change controller endpoint
+        for idx, node in enumerate(self.config.participants):
+            # Assign docker ID to node
+            node["device_args"]["docker_id"] = container_ids[idx]
+
+            # Write the config file in config directory
+            with open(f"{self.config_dir}/participant_{node['device_args']['idx']}.json", "w") as f:
+                json.dump(node, f, indent=4)
+
+    def start_nodes_process(self):
+        logging.info("Starting nodes as processes...")
+        logging.info(f"env path: {self.env_path}")
+
+        # Include additional config to the participants
+        for idx, node in enumerate(self.config.participants):
+            node["tracking_args"]["log_dir"] = os.path.join(self.root_path, "app", "logs")
+            node["tracking_args"]["config_dir"] = os.path.join(self.root_path, "app", "config", self.scenario_name)
+            node["scenario_args"]["controller"] = self.controller
+            node["security_args"]["certfile"] = os.path.join(
+                self.root_path,
+                "app",
+                "certs",
+                f"participant_{node['device_args']['idx']}_cert.pem",
+            )
+            node["security_args"]["keyfile"] = os.path.join(
+                self.root_path,
+                "app",
+                "certs",
+                f"participant_{node['device_args']['idx']}_key.pem",
+            )
+            node["security_args"]["cafile"] = os.path.join(self.root_path, "app", "certs", "ca_cert.pem")
+
+            # Write the config file in config directory
+            with open(f"{self.config_dir}/participant_{node['device_args']['idx']}.json", "w") as f:
+                json.dump(node, f, indent=4)
+
+        try:
+            if self.host_platform == "windows":
+                commands = """
+                $ParentDir = Split-Path -Parent $PSScriptRoot
+                $PID_FILE = "$PSScriptRoot\\current_scenario_pids.txt"
+                New-Item -Path $PID_FILE -Force -ItemType File
+
+                """
+                sorted_participants = sorted(
+                    self.config.participants,
+                    key=lambda node: node["device_args"]["idx"],
+                    reverse=True,
+                )
+                for node in sorted_participants:
+                    if node["device_args"]["start"]:
+                        commands += "Start-Sleep -Seconds 10\n"
+                    else:
+                        commands += "Start-Sleep -Seconds 2\n"
+
+                    commands += f'Write-Host "Running node {node["device_args"]["idx"]}..."\n'
+                    commands += f'$OUT_FILE = "{self.root_path}\\app\\logs\\{self.scenario_name}\\participant_{node["device_args"]["idx"]}.out"\n'
+                    commands += f'$ERROR_FILE = "{self.root_path}\\app\\logs\\{self.scenario_name}\\participant_{node["device_args"]["idx"]}.err"\n'
+
+                    # Use Start-Process for executing Python in background and capture PID
+                    commands += f"""$process = Start-Process -FilePath "python" -ArgumentList "{self.root_path}\\nebula\\node.py {self.root_path}\\app\\config\\{self.scenario_name}\\participant_{node["device_args"]["idx"]}.json" -PassThru -NoNewWindow -RedirectStandardOutput $OUT_FILE -RedirectStandardError $ERROR_FILE
+                Add-Content -Path $PID_FILE -Value $process.Id
+                """
+
+                commands += 'Write-Host "All nodes started. PIDs stored in $PID_FILE"\n'
+
+                with open("/nebula/app/config/current_scenario_commands.ps1", "w") as f:
+                    f.write(commands)
+                os.chmod("/nebula/app/config/current_scenario_commands.ps1", 0o755)
+            else:
+                commands = '#!/bin/bash\n\nPID_FILE="$(dirname "$0")/current_scenario_pids.txt"\n\n> $PID_FILE\n\n'
+                sorted_participants = sorted(
+                    self.config.participants,
+                    key=lambda node: node["device_args"]["idx"],
+                    reverse=True,
+                )
+                for node in sorted_participants:
+                    if node["device_args"]["start"]:
+                        commands += "sleep 10\n"
+                    else:
+                        commands += "sleep 2\n"
+                    commands += f'echo "Running node {node["device_args"]["idx"]}..."\n'
+                    commands += f"OUT_FILE={self.root_path}/app/logs/{self.scenario_name}/participant_{node['device_args']['idx']}.out\n"
+                    commands += f"python {self.root_path}/nebula/node.py {self.root_path}/app/config/{self.scenario_name}/participant_{node['device_args']['idx']}.json > $OUT_FILE 2>&1 &\n"
+                    commands += "echo $! >> $PID_FILE\n\n"
+
+                commands += 'echo "All nodes started. PIDs stored in $PID_FILE"\n'
+
+                with open("/nebula/app/config/current_scenario_commands.sh", "w") as f:
+                    f.write(commands)
+                os.chmod("/nebula/app/config/current_scenario_commands.sh", 0o755)
+
+        except Exception as e:
+            raise Exception(f"Error starting nodes as processes: {e}")
+
     @classmethod
     def remove_files_by_scenario(cls, scenario_name):
         try:
-            shutil.rmtree(os.path.join(os.environ["NEBULA_CONFIG_DIR"], scenario_name))
+            shutil.rmtree(Utils.check_path(os.environ["NEBULA_CONFIG_DIR"], scenario_name))
         except FileNotFoundError:
             logging.warning("Files not found, nothing to remove")
         except Exception as e:
-            logging.error("Unknown error while removing files")
-            logging.error(e)
+            logging.exception("Unknown error while removing files")
+            logging.exception(e)
             raise e
         try:
-            shutil.rmtree(os.path.join(os.environ["NEBULA_LOGS_DIR"], scenario_name))
+            shutil.rmtree(Utils.check_path(os.environ["NEBULA_LOGS_DIR"], scenario_name))
         except PermissionError:
             # Avoid error if the user does not have enough permissions to remove the tf.events files
             logging.warning("Not enough permissions to remove the files, moving them to tmp folder")
             os.makedirs(
-                os.path.join(os.environ["NEBULA_ROOT"], "app", "tmp", scenario_name),
+                Utils.check_path(os.environ["NEBULA_ROOT"], os.path.join("app", "tmp", scenario_name)),
                 exist_ok=True,
             )
+            os.chmod(
+                Utils.check_path(os.environ["NEBULA_ROOT"], os.path.join("app", "tmp", scenario_name)),
+                0o777,
+            )
             shutil.move(
-                os.path.join(os.environ["NEBULA_LOGS_DIR"], scenario_name),
-                os.path.join(os.environ["NEBULA_ROOT"], "app", "tmp", scenario_name),
+                Utils.check_path(os.environ["NEBULA_LOGS_DIR"], scenario_name),
+                Utils.check_path(os.environ["NEBULA_ROOT"], os.path.join("app", "tmp", scenario_name)),
             )
         except FileNotFoundError:
             logging.warning("Files not found, nothing to remove")
         except Exception as e:
-            logging.error("Unknown error while removing files")
-            logging.error(e)
+            logging.exception("Unknown error while removing files")
+            logging.exception(e)
             raise e
 
     def scenario_finished(self, timeout_seconds):
