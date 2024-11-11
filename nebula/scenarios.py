@@ -41,6 +41,7 @@ class Scenario:
         agg_algorithm,
         rounds,
         logginglevel,
+        report_status_data_queue,
         accelerator,
         network_subnet,
         network_gateway,
@@ -86,6 +87,7 @@ class Scenario:
             agg_algorithm (str): Aggregation algorithm.
             rounds (int): Number of rounds.
             logginglevel (str): Logging level.
+            report_status_data_queue (bool): Indicator to report information about the nodes of the scenario
             accelerator (str): Accelerator used.
             network_subnet (str): Network subnet.
             network_gateway (str): Network gateway.
@@ -125,6 +127,7 @@ class Scenario:
         self.agg_algorithm = agg_algorithm
         self.rounds = rounds
         self.logginglevel = logginglevel
+        self.report_status_data_queue = report_status_data_queue
         self.accelerator = accelerator
         self.network_subnet = network_subnet
         self.network_gateway = network_gateway
@@ -350,6 +353,7 @@ class ScenarioManagement:
             participant_config["mobility_args"]["radius_federation"] = self.scenario.radius_federation
             participant_config["mobility_args"]["scheme_mobility"] = self.scenario.scheme_mobility
             participant_config["mobility_args"]["round_frequency"] = self.scenario.round_frequency
+            participant_config["reporter_args"]["report_status_data_queue"] = self.scenario.report_status_data_queue
 
             with open(participant_file, "w") as f:
                 json.dump(participant_config, f, sort_keys=False, indent=2)

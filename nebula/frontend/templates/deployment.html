@@ -429,7 +429,7 @@
             <div id="expert-container" class="col-md-12 " style="display: none">
                 <div class="form-group row container-shadow tiny grey">
                     <h5 class="step-number">Participants <i class="fa fa-users"></i>
-                        <input type="checkbox" id="participants-lock" onchange="lock('rounds', 'loggingLevel', checked)" style="display: none;">
+                        <input type="checkbox" id="participants-lock" onchange="lock('rounds', 'loggingLevel', 'reportingSwitch', checked)" style="display: none;">
                         <label for="participants-lock" class="icon-container" style="float: right;">
                             <i class="fa fa-lock"></i>
                         </label>
@@ -446,6 +446,10 @@
                             <option value="false">Only alerts</option>
                             <option value="true" selected>Alerts and logs</option>
                         </select>
+                    </div>
+                    <h5 class="step-title">Reporting</h5>
+                    <div class="form-check form-switch" style="margin-left: 23px;">
+                        <input class="form-check-input" type="checkbox" id="reportingSwitch" checked="true" style="display: inline; width: 80px; height: 30px;">
                     </div>
                     <h5 class="step-title">Individual participants</h5>
                     <div id="participant-items" class="row"></div>
@@ -1041,6 +1045,7 @@
             // Step 8
             data["rounds"] = document.getElementById("rounds").value
             data["logginglevel"] = document.getElementById("loggingLevel").value === "true"
+            data["report_status_data_queue"] = document.getElementById("reportingSwitch").checked
             // Step 9
             data["accelerator"] = document.getElementById("resourceUsage").value
             // Step 10-11
@@ -1137,6 +1142,12 @@
                 // Step 8
                 document.getElementById("rounds").value = data["rounds"];
                 document.getElementById("loggingLevel").value = data["logginglevel"] ? "true" : "false";
+                document.getElementById("reportingSwitch").checked = data["report_status_data_queue"] ? true : false;
+                if (data["n_nodes"] > 10) {
+                    document.getElementById("reportingSwitch").disabled = true;
+                } else {
+                    document.getElementById("reportingSwitch").disabled = false;
+                }
                 // Step 9
                 document.getElementById("resourceUsage").value = data["accelerator"];
                 // Step 10-11
@@ -2419,6 +2430,14 @@
                     }
                     gData.links.push({ source: i, target: randomNode });
                 }
+            }
+
+            if (document.getElementById("predefined-topology-nodes").value > 10) {
+                document.getElementById("reportingSwitch").checked = false;
+                document.getElementById("reportingSwitch").disabled = true;
+            } else {
+                document.getElementById("reportingSwitch").checked = true;
+                document.getElementById("reportingSwitch").disabled = false;
             }
 
             // Update the graph
