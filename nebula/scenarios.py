@@ -868,6 +868,7 @@ class ScenarioManagement:
             node["tracking_args"]["log_dir"] = "/nebula/app/logs"
             node["tracking_args"]["config_dir"] = f"/nebula/app/config/{self.scenario_name}"
             node["scenario_args"]["controller"] = self.controller
+            node["scenario_args"]["deployment"] = self.scenario.deployment
             node["security_args"]["certfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_cert.pem"
             node["security_args"]["keyfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_key.pem"
             node["security_args"]["cafile"] = "/nebula/app/certs/ca_cert.pem"
@@ -942,6 +943,7 @@ class ScenarioManagement:
             node["tracking_args"]["log_dir"] = os.path.join(self.root_path, "app", "logs")
             node["tracking_args"]["config_dir"] = os.path.join(self.root_path, "app", "config", self.scenario_name)
             node["scenario_args"]["controller"] = self.controller
+            node["scenario_args"]["deployment"] = self.scenario.deployment
             node["security_args"]["certfile"] = os.path.join(
                 self.root_path,
                 "app",
