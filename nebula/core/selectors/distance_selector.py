@@ -4,7 +4,7 @@ import math
 import numpy as np
 
 from nebula.core.selectors.selector import Selector
-
+from nebula.core.utils.helper import cosine_metric
 
 class DistanceSelector(Selector):
     """
@@ -24,7 +24,11 @@ class DistanceSelector(Selector):
         logging.info("[DistanceSelector] Initialized")
 
     def node_selection(self, node):
+        if self.selected_nodes != []:
+            return self.selected_nodes
+        
         neighbors = self.neighbors_list.copy()
+        
         if len(neighbors) == 0:
             logging.error(
                 "[DistanceSelector] Trying to select neighbors when there are no neighbors - aggregating itself only"
@@ -33,23 +37,29 @@ class DistanceSelector(Selector):
             return self.selected_nodes
         logging.info(f"[DistanceSelector] available neighbors: {neighbors}")
 
-        # needed to remove fixed seeds
-        # import time
-        # np.random.seed(int(str(time.time_ns())[-8:]))
+        distances = {}
 
-        # Calculation of the amount of selected Neighbors according to thesis:
-        # num_selected = max(
-        #    self.MIN_AMOUNT_OF_SELECTED_NEIGHBORS,
-        #    math.floor(len(neighbors) * self.MAX_PERCENT_SELECTABLE_NEIGHBORS)
-        # )
-        # Improved way to calculate the amount of selected nodes (randomly distributed, the original implementation
-        # would always select the maximum possible amount of nodes)
+        pending_models = node.get_nodes_pending_models_to_aggregate()
+        local_model = pending_models[node.addr][0]
+
+        for device,model in pending_models:
+            if device!=node.addr:
+                neighbor_model=model[0]
+                neighbor_distance = cosine_metric(local_model, neighbor_model, similarity=True)
+                distances[device]=neighbor_distance
+
+        for neighbor, distance in distances:
+            if distance >= 0.5:
+                self.selected_nodes.append(neighbor)
+            
+        """
         max_selectable = math.floor(len(neighbors) * self.MAX_PERCENT_SELECTABLE_NEIGHBORS)
         num_selected = np.random.randint(
             self.MIN_AMOUNT_OF_SELECTED_NEIGHBORS, max(max_selectable, self.MIN_AMOUNT_OF_SELECTED_NEIGHBORS) + 1
         )
 
-        selected_nodes = np.random.choice(neighbors, num_selected, replace=False).tolist()
-        self.selected_nodes = selected_nodes + [node.addr]
+        selected_nodes = np.random.choice(neighbors, num_selected, replace=False).tolist()"""
+
+        self.selected_nodes = self.selected_nodes + [node.addr]
         logging.info(f"[DistanceSelector] selection finished, selected_nodes: {self.selected_nodes}")
         return self.selected_nodes
