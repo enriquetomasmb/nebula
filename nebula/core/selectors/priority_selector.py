@@ -25,7 +25,7 @@ class PrioritySelector(Selector):
     MIN_AMOUNT_OF_SELECTED_NEIGHBORS = 1
     MAX_PERCENT_SELECTABLE_NEIGHBORS = 0.8
     # Original Feature Weights provided in Report / Thesis
-    FEATURE_WEIGHTS = [1.0, 1.0, 1.0, 0.5, 0.5, 10.0, 3.0]
+    FEATURE_WEIGHTS = [40.0, 7.0, 1.0, 30, 30, 1.0, 8.0]
     # Feature Weights for Testing (Latency can be changed reliably by virtual constraints)
     # FEATURE_WEIGHTS = [0, 0, 0, 0, 0, 100, 0]
 

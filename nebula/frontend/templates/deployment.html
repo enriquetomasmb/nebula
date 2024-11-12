@@ -167,6 +167,9 @@
                                 <input type="checkbox" id="mod-noiseinjection" value='NoiseInjectionAttack' style="margin-right: 10px;">NoiseInjectionAttack
                             </label>
                             <label>
+                                <input type="checkbox" id="mod-flooding" value='FloodingAttack' style="margin-right: 10px;">FloodingAttack
+                            </label>
+                            <label>
                                 <input type="checkbox" id="mod-swappingweights" value='SwappingWeightsAttack' style="margin-right: 10px;">SwappingWeightsAttack
                             </label>
                             <label>
@@ -553,6 +556,7 @@
                             <option>Model Poisoning</option>
                             <option>GLLNeuronInversionAttack</option>
                             <option>NoiseInjectionAttack</option>
+                            <option>FloodingAttack</option>
                             <option>SwappingWeightsAttack</option>
                             <option>DelayerAttack</option>
                         </select>
@@ -2183,7 +2187,7 @@
         });
         document.getElementById("mod-robustness").addEventListener("change", function() {
             selectALL(['mod-noattack', 'mod-labelflipping', 'mod-samplepoisoning', 'mod-modelpoisoning', 'mod-neuroninversion', 'mod-noiseinjection',
-             'mod-swappingweights', 'mod-delayer'], document.getElementById("mod-robustness").checked);
+             'mod-flooding', 'mod-swappingweights', 'mod-delayer'], document.getElementById("mod-robustness").checked);
         });
 
         //Generate a scenario
@@ -2217,7 +2221,7 @@
             }
 
             var attacks = ['mod-noattack', 'mod-labelflipping', 'mod-samplepoisoning', 'mod-modelpoisoning', 'mod-neuroninversion', 'mod-noiseinjection',
-             'mod-swappingweights', 'mod-delayer'];
+             'mod-flooding', 'mod-swappingweights', 'mod-delayer'];
             if (!atLeastOneChecked(attacks)) {
                 alert("Please, select one robustness option at least.");
                 return;
