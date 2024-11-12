@@ -531,8 +531,11 @@ class Engine:
                 selected_nodes = self.node_selection_strategy_selector.node_selection(self)
 
                 self.trainer._logger.log_text("[NSS] Selected nodes", str(selected_nodes), step=self.round)
+                await self.aggregator.update_federation_nodes(selected_nodes)
 
-            await self.aggregator.update_federation_nodes(self.federation_nodes)
+            else:
+                await self.aggregator.update_federation_nodes(self.federation_nodes)
+            
             await self._extended_learning_cycle()
             await self.get_round_lock().acquire_async()
             print_msg_box(
