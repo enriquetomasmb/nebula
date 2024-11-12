@@ -1,10 +1,11 @@
 import asyncio
 import logging
 import os
-import time
-import psutil
 import socket
+import time
+
 import docker
+import psutil
 
 from nebula.addons.attacks.attacks import create_attack
 from nebula.addons.functions import print_msg_box
@@ -14,6 +15,7 @@ from nebula.core.eventmanager import EventManager, event_handler
 from nebula.core.network.communications import CommunicationsManager
 from nebula.core.pb import nebula_pb2
 from nebula.core.selectors.all_selector import AllSelector
+from nebula.core.selectors.distance_selector import DistanceSelector
 from nebula.core.selectors.priority_selector import PrioritySelector
 from nebula.core.selectors.random_selector import RandomSelector
 from nebula.core.utils.locker import Locker
@@ -111,6 +113,8 @@ class Engine:
                 self.node_selection_strategy_selector = PrioritySelector()
             elif self.nss_selector == "random":
                 self.node_selection_strategy_selector = RandomSelector()
+            elif self.nss_selector == "distance":
+                self.node_selection_strategy_selector = DistanceSelector()
         nss_info_msg = f"Enabled: {self.node_selection_strategy_enabled}\n{f'Selector: {self.nss_selector}' if self.node_selection_strategy_enabled else ''}"
         print_msg_box(msg=nss_info_msg, indent=2, title="NSS Info")
 
@@ -508,7 +512,7 @@ class Engine:
                 title="Round information",
             )
             self.trainer.on_round_start()
-            self.federation_nodes = await self.cm.get_addrs_current_connections(only_direct = True, myself = True)
+            self.federation_nodes = await self.cm.get_addrs_current_connections(only_direct=True, myself=True)
             logging.info(f"Federation nodes: {self.federation_nodes}")
             direct_connections = await self.cm.get_addrs_current_connections(only_direct=True)
             undirected_connections = await self.cm.get_addrs_current_connections(only_undirected=True)
@@ -519,10 +523,10 @@ class Engine:
                 # Extract Features needed for Node Selection Strategy
                 self.__nss_extract_features()
                 # Broadcast Features
-                logging.info(f"Broadcasting NSS features to the rest of the topology ...")
+                logging.info("Broadcasting NSS features to the rest of the topology ...")
                 message = self.cm.mm.generate_nss_features_message(self.nss_features)
                 await self.cm.send_message_to_neighbors(message)
-                _nss_features_msg = f"""NSS features for round {self.round}:\nCPU Usage (%): {self.nss_features['cpu_percent']}%\nBytes Sent: {self.nss_features['bytes_sent']}\nBytes Received: {self.nss_features['bytes_received']}\nLoss: {self.nss_features['loss']}\nData Size: {self.nss_features['data_size']}"""
+                _nss_features_msg = f"""NSS features for round {self.round}:\nCPU Usage (%): {self.nss_features["cpu_percent"]}%\nBytes Sent: {self.nss_features["bytes_sent"]}\nBytes Received: {self.nss_features["bytes_received"]}\nLoss: {self.nss_features["loss"]}\nData Size: {self.nss_features["data_size"]}"""
                 print_msg_box(msg=_nss_features_msg, indent=2, title="NSS features (this node)")
                 selected_nodes = self.node_selection_strategy_selector.node_selection(self)
 
@@ -650,8 +654,9 @@ class Engine:
         self.nss_features = nss_features
 
     async def _get_current_neighbors(self):
-        current_connections = await self.cm.get_all_addrs_current_connections(only_direct = True)
+        current_connections = await self.cm.get_all_addrs_current_connections(only_direct=True)
         return set(current_connections)
+
 
 class MaliciousNode(Engine):
     def __init__(
@@ -731,14 +736,20 @@ class AggregatorNode(Engine):
 
         if self.lie_atk:
             from nebula.addons.attacks.poisoning.update_manipulation import update_manipulation_LIE
-            await self.aggregator.include_model_in_buffer(update_manipulation_LIE(self.trainer.get_model_parameters(),899), self.trainer.get_model_weight(), source=self.addr, round=self.round)
+
+            await self.aggregator.include_model_in_buffer(
+                update_manipulation_LIE(self.trainer.get_model_parameters(), 899),
+                self.trainer.get_model_weight(),
+                source=self.addr,
+                round=self.round,
+            )
         else:
             await self.aggregator.include_model_in_buffer(
-            self.trainer.get_model_parameters(),
-            self.trainer.get_model_weight(),
-            source=self.addr,
-            round=self.round,
-        )
+                self.trainer.get_model_parameters(),
+                self.trainer.get_model_weight(),
+                source=self.addr,
+                round=self.round,
+            )
 
         await self.cm.propagator.propagate("stable")
         await self._waiting_model_updates()
@@ -774,14 +785,20 @@ class ServerNode(Engine):
         # In the first round, the server node doest take into account the initial model parameters for the aggregation
         if self.lie_atk:
             from nebula.addons.attacks.poisoning.update_manipulation import update_manipulation_LIE
-            await self.aggregator.include_model_in_buffer(update_manipulation_LIE(self.trainer.get_model_parameters(),899), self.trainer.BYPASS_MODEL_WEIGHT, source=self.addr, round=self.round)
+
+            await self.aggregator.include_model_in_buffer(
+                update_manipulation_LIE(self.trainer.get_model_parameters(), 899),
+                self.trainer.BYPASS_MODEL_WEIGHT,
+                source=self.addr,
+                round=self.round,
+            )
         else:
             await self.aggregator.include_model_in_buffer(
-            self.trainer.get_model_parameters(),
-            self.trainer.BYPASS_MODEL_WEIGHT,
-            source=self.addr,
-            round=self.round,
-        )
+                self.trainer.get_model_parameters(),
+                self.trainer.BYPASS_MODEL_WEIGHT,
+                source=self.addr,
+                round=self.round,
+            )
         await self._waiting_model_updates()
         await self.cm.propagator.propagate("stable")
 
@@ -819,9 +836,22 @@ class TrainerNode(Engine):
 
         if self.lie_atk:
             from nebula.addons.attacks.poisoning.update_manipulation import update_manipulation_LIE
-            await self.aggregator.include_model_in_buffer(update_manipulation_LIE(self.trainer.get_model_parameters(),899), self.trainer.get_model_weight(), source = self.addr,round = self.round, local = True)
+
+            await self.aggregator.include_model_in_buffer(
+                update_manipulation_LIE(self.trainer.get_model_parameters(), 899),
+                self.trainer.get_model_weight(),
+                source=self.addr,
+                round=self.round,
+                local=True,
+            )
         else:
-            await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.get_model_weight(), source = self.addr,round = self.round, local = True)
+            await self.aggregator.include_model_in_buffer(
+                self.trainer.get_model_parameters(),
+                self.trainer.get_model_weight(),
+                source=self.addr,
+                round=self.round,
+                local=True,
+            )
 
         await self.cm.propagator.propagate("stable")
         await self._waiting_model_updates()
