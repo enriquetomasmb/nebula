@@ -120,6 +120,9 @@ class Aggregator(ABC):
     def get_nodes_pending_models_to_aggregate(self):
         return {node for key in self._pending_models_to_aggregate.keys() for node in key.split()}
 
+    def get_pending_models_to_aggregate(self):
+        return self._pending_models_to_aggregate
+
     async def _handle_global_update(self, model, source):
         logging.info(f"🔄  _handle_global_update | source={source}")
         logging.info(

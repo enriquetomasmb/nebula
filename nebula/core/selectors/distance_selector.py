@@ -39,17 +39,19 @@ class DistanceSelector(Selector):
 
         distances = {}
 
-        pending_models = node.get_nodes_pending_models_to_aggregate()
+        pending_models = node.aggregator.get_pending_models_to_aggregate()
+
         local_model = pending_models[node.addr][0]
 
-        for device,model in pending_models:
+        for device in pending_models:
             if device!=node.addr:
-                neighbor_model=model[0]
+                neighbor_model=pending_models[device][0]
                 neighbor_distance = cosine_metric(local_model, neighbor_model, similarity=True)
                 distances[device]=neighbor_distance
 
-        for neighbor, distance in distances:
-            if distance >= 0.5:
+        for neighbor in distances:
+            if distances[neighbor] <= 0.5:
+                logging.info(f"[DistanceSelector] selection, selected_node: {neighbor}, distance: {distances[neighbor]}")
                 self.selected_nodes.append(neighbor)
             
         """
