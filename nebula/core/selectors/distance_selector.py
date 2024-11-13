@@ -1,5 +1,6 @@
 import logging
 import math
+from statistics import mean, stdev
 
 import numpy as np
 
@@ -17,17 +18,17 @@ class DistanceSelector(Selector):
 
     MIN_AMOUNT_OF_SELECTED_NEIGHBORS = 1
     MAX_PERCENT_SELECTABLE_NEIGHBORS = 0.7
-    
 
     def __init__(self, config=None):
         super().__init__(config)
         self.config = config
+        self.stop_training=False
+        self.already_activated=False
+        self.final_list=False
         logging.info("[DistanceSelector] Initialized")
 
     def node_selection(self, node):
-        #if self.selected_nodes != []:
-        #    return self.selected_nodes
-        
+
         threshold = float(node.node_selection_strategy_parameter)
         neighbors = self.neighbors_list.copy()
         
@@ -51,20 +52,33 @@ class DistanceSelector(Selector):
                 neighbor_distance = cosine_metric(local_model, neighbor_model, similarity=True)
                 distances[device]=neighbor_distance
 
-        for neighbor in distances:
-            #logging.info(f"[DistanceSelector] processed_node: {neighbor}, distance: {distances[neighbor]}")
-            if distances[neighbor] >= threshold:
-                logging.info(f"[DistanceSelector] selection, selected_node: {neighbor}, distance: {distances[neighbor]}")
-                self.selected_nodes.append(neighbor)
-            
-        """
-        max_selectable = math.floor(len(neighbors) * self.MAX_PERCENT_SELECTABLE_NEIGHBORS)
-        num_selected = np.random.randint(
-            self.MIN_AMOUNT_OF_SELECTED_NEIGHBORS, max(max_selectable, self.MIN_AMOUNT_OF_SELECTED_NEIGHBORS) + 1
-        )
+        distance_values = distances.values()
+        avg_distance = mean(distance_values)
+        std_dev_distance = stdev(distance_values)
 
-        selected_nodes = np.random.choice(neighbors, num_selected, replace=False).tolist()"""
+        logging.info(f"[DistanceSelector] average: {avg_distance}, stddev: {std_dev_distance}")
 
-        self.selected_nodes = self.selected_nodes + [node.addr]
+        lower_bound = avg_distance - threshold*std_dev_distance
+        upper_bound = avg_distance + threshold*std_dev_distance
+
+        if mean(distances.values()) < 0.95 and node.round < int(node.total_rounds*0.2):
+            self.selected_nodes=self.neighbors_list + [node.addr]
+        
+        elif not self.already_activated:
+            logging.info(f"[DistanceSelector] DetectorSelector stop training activated")
+            self.stop_training=True
+            self.selected_nodes=self.neighbors_list + [node.addr]
+        
+        elif not self.final_list:
+            self.selected_nodes=[]
+            for neighbor in distances:
+                if avg_distance <= distances[neighbor]:
+                    logging.info(f"[DistanceSelector] selected_node: {neighbor}, distance: {distances[neighbor]}")
+                    self.selected_nodes.append(neighbor)
+                else:
+                    logging.info(f"[DistanceSelector] NOT selected_node: {neighbor}, distance: {distances[neighbor]}")
+            self.selected_nodes = self.selected_nodes + [node.addr]
+            self.final_list=True
+
         logging.info(f"[DistanceSelector] selection finished, selected_nodes: {self.selected_nodes}")
         return self.selected_nodes

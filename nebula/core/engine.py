@@ -732,8 +732,21 @@ class AggregatorNode(Engine):
 
     async def _extended_learning_cycle(self):
         # Define the functionality of the aggregator node
-        await self.trainer.test()
         await self.trainer.train()
+
+        if self.node_selection_strategy_enabled:
+            if self.nss_selector == "distance":
+                if self.node_selection_strategy_selector.stop_training:
+                    self.node_selection_strategy_selector.already_activated = True
+                    self.node_selection_strategy_selector.stop_training = False
+                    logging.info(f"[DistanceSelector] DetectorSelector repeating four training rounds")
+                    await self.trainer.train()
+                    await self.trainer.train()
+                    await self.trainer.train()
+                    await self.trainer.train()
+
+        await self.trainer.test()
+            
 
         if self.lie_atk:
             from nebula.addons.attacks.poisoning.update_manipulation import update_manipulation_LIE
