@@ -278,7 +278,6 @@
                         </select>
                         <input type="number" class="form-control" id="predefined-topology-nodes"
                             placeholder="Number of nodes" min="1" value="3" oninput="greaterthan0(this)" style="display: inline; width: 40%">
-                        <i id="networkTopologyRandom" class="fa fa-refresh"></i>
                     </div>
                 </div>
                 <div class="form-group row container-shadow tiny grey">
@@ -882,13 +881,6 @@
 
         .popover {
             max-width: 800px;
-        }
-
-        #networkTopologyRandom {
-            margin-left: 5px;
-            margin-right: 5px;
-            font-size: 15px;
-            cursor: pointer;
         }
 
         .overlay {
@@ -1692,7 +1684,7 @@
                 document.getElementById("predefined-topology-btn").checked = false;
                 document.getElementById("predefined-topology-select").value = "Fully";
                 document.getElementById("predefined-topology-nodes").value = 3;
-                document.getElementById("networkTopologyRandom").click();
+                updateNodes();
                 document.getElementById("custom-topology-btn").click();
             }
             // Step 5
@@ -2022,7 +2014,7 @@
                                 }
 
                                 document.getElementById("predefined-topology-nodes").value = nodes;
-                                document.getElementById("networkTopologyRandom").click();
+                                updateNodes();
 
                                 //Generate datasets
                                 //Selected dataset
@@ -2367,7 +2359,7 @@
             predefinedTopologyDiv.style.display = "block";
         });
 
-        document.getElementById("networkTopologyRandom").addEventListener("click", function () {
+        function updateNodes(){
             var n_nodes_predefined = document.getElementById("predefined-topology-nodes").value;
             n_nodes_predefined = parseInt(n_nodes_predefined);
 
@@ -2449,9 +2441,11 @@
 
             // Update the graph
             updateGraph();
+        }
 
+        document.getElementById("predefined-topology-nodes").addEventListener("change", function (){
+            updateNodes();
         });
-
     </script>
 
     <script>
@@ -2463,8 +2457,7 @@
                 $('#predefined-topology-select').prop('disabled', true);
                 // Change value of the input "predefined-topology-nodes" to number of nodes
                 $('#predefined-topology-nodes').val(gData.nodes.length);
-                // Click on "networkTopologyRandom" to update the graph
-                $('#networkTopologyRandom').click();
+                updateNodes();
 
                 // Update gData: change the role of the central node to "server"
                 gData.nodes[0].role = "server";
