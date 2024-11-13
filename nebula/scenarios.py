@@ -199,9 +199,12 @@ class Scenario:
             num_attacked = int(math.ceil(poisoned_node_percent / 100 * n_nodes))
             if num_attacked > n_nodes:
                 num_attacked = n_nodes
+                
+            # Filter out 0 from nodes_index
+            filtered_nodes_index = [node for node in nodes_index if node != 0]
 
             # Get the index of attacked nodes
-            attacked_nodes = random.sample(nodes_index, num_attacked)
+            attacked_nodes = random.sample(filtered_nodes_index, num_attacked)
 
         # Assign the role of each node
         for node in nodes:

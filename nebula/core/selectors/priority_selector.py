@@ -25,7 +25,7 @@ class PrioritySelector(Selector):
     MIN_AMOUNT_OF_SELECTED_NEIGHBORS = 1
     MAX_PERCENT_SELECTABLE_NEIGHBORS = 0.8
     # Original Feature Weights provided in Report / Thesis
-    FEATURE_WEIGHTS = [1.0, 1.0, 1.0, 0.5, 0.5, 10.0, 3.0]
+    FEATURE_WEIGHTS = [70.0, 5.0, 1.0, 0.0, 80.0, 2.0, 1.0]
     # Feature Weights for Testing (Latency can be changed reliably by virtual constraints)
     # FEATURE_WEIGHTS = [0, 0, 0, 0, 0, 100, 0]
 
@@ -48,11 +48,6 @@ class PrioritySelector(Selector):
             )
             self.selected_nodes = [node.addr]
             return self.selected_nodes
-
-        num_selected = max(
-            self.MIN_AMOUNT_OF_SELECTED_NEIGHBORS,
-            math.floor(len(neighbors) * self.MAX_PERCENT_SELECTABLE_NEIGHBORS)
-        )
 
         availability = []
         feature_array = np.empty((7, 0))
@@ -82,32 +77,36 @@ class PrioritySelector(Selector):
             feature_array = np.append(feature_array, feature, axis = 1)
 
         # Normalized features
-        feature_array_normed = normalize(feature_array, axis = 1, norm = 'l1')
+        feature_array_normed = normalize(feature_array, axis=1, norm='l1')
 
         # Add weight to features
         weight = np.array(self.FEATURE_WEIGHTS).reshape(-1, 1)
         feature_array_weighted = np.multiply(feature_array_normed, weight)
 
-        # Before availability
-        scores = np.sum(feature_array_weighted, axis = 0)
+        # Compute scores
+        scores = np.sum(feature_array_weighted, axis=0)
 
         print_msg_box(msg=f"Scores: {dict(zip(neighbors, scores))}", title="Final NSS Scores")
 
-        # Add availability
-        final_scores = np.multiply(scores, np.array(availability))
+        # Calculate mean and standard deviation
+        mean_score = np.mean(scores)
+        std_score = np.std(scores)
 
-        # Probability selection
-        p = normalize([final_scores], axis = 1, norm = 'l1')
+        # # Identify non-outlier nodes
+        # non_outlier_indices = [i for i, score in enumerate(scores) if abs(score - mean_score) <= std_score]
+        # logging.info("[PrioritySelector] Non-outlier nodes: {}".format([neighbors[i] for i in non_outlier_indices]))
 
-        logging.info(f"[PrioritySelector] scores: {scores}")
-
-        # Select nodes according to thesis (weighted probability)
-        selected_nodes = np.random.choice(
-            neighbors, num_selected, replace = False, p = p[0]
-        ).tolist()
-
-        # Select num_selected nodes with the highest score (or the derived probability) for easier evaluation
-        #selected_nodes = [neighbors[i] for i in np.argsort(scores)[-num_selected:]]
+        # # Ensure at least num_selected nodes are selected
+        # if len(non_outlier_indices) < num_selected:
+        #     # Sort indices by absolute difference from mean
+        #     sorted_indices = np.argsort([abs(scores[i] - mean_score) for i in range(len(scores))])
+        #     selected_indices = sorted_indices[:num_selected]
+        # else:
+        #     selected_indices = non_outlier_indices[:num_selected]
+            
+        # Identify non-outlier nodes
+        non_outlier_indices = [i for i, score in enumerate(scores) if abs(score - mean_score) <= std_score]
+        selected_nodes = [neighbors[i] for i in non_outlier_indices]
 
         # Update ages
         for neighbor in neighbors:

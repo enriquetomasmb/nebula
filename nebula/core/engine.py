@@ -10,6 +10,7 @@ from nebula.addons.attacks.attacks import create_attack
 from nebula.addons.functions import print_msg_box
 from nebula.addons.reporter import Reporter
 from nebula.core.aggregation.aggregator import create_aggregator, create_malicious_aggregator, create_target_aggregator
+from nebula.addons.attacks.poisoning.modelpoison import modelpoison
 from nebula.core.eventmanager import EventManager, event_handler
 from nebula.core.network.communications import CommunicationsManager
 from nebula.core.pb import nebula_pb2
@@ -576,22 +577,10 @@ class Engine:
             undirected_connections = await self.cm.get_addrs_current_connections(only_undirected=True)
             logging.info(f"Direct connections: {direct_connections} | Undirected connections: {undirected_connections}")
             logging.info(f"[Role {self.role}] Starting learning cycle...")
-
-            if self.node_selection_strategy_enabled:
-                # Extract Features needed for Node Selection Strategy
-                self.__nss_extract_features()
-                # Broadcast Features
-                logging.info(f"Broadcasting NSS features to the rest of the topology ...")
-                message = self.cm.mm.generate_nss_features_message(self.nss_features)
-                await self.cm.send_message_to_neighbors(message)
-                _nss_features_msg = f"""NSS features for round {self.round}:\nCPU Usage (%): {self.nss_features['cpu_percent']}%\nBytes Sent: {self.nss_features['bytes_sent']}\nBytes Received: {self.nss_features['bytes_received']}\nLoss: {self.nss_features['loss']}\nData Size: {self.nss_features['data_size']}"""
-                print_msg_box(msg=_nss_features_msg, indent=2, title="NSS features (this node)")
-                selected_nodes = self.node_selection_strategy_selector.node_selection(self)
-
-                self.trainer._logger.log_text("[NSS] Selected nodes", str(selected_nodes), step=self.round)
-
+            
             await self.aggregator.update_federation_nodes(self.federation_nodes)
             await self._extended_learning_cycle()
+            
             await self.get_round_lock().acquire_async()
              
             # local training and aggregation should be finished here, add the communication sustainability metrics
@@ -652,26 +641,26 @@ class Engine:
             title="End of the experiment",
         )
         # Report
-        if self.config.participant["scenario_args"]["controller"] != "nebula-test":
-            result = await self.reporter.report_scenario_finished()
-            if result:
-                pass
-            else:
-                logging.error("Error reporting scenario finished")
+        # if self.config.participant["scenario_args"]["controller"] != "nebula-test":
+        #     result = await self.reporter.report_scenario_finished()
+        #     if result:
+        #         pass
+        #     else:
+        #         logging.error("Error reporting scenario finished")
 
-        logging.info("Checking if all my connections reached the total rounds...")
-        while not self.cm.check_finished_experiment():
-            await asyncio.sleep(1)
+        # logging.info("Checking if all my connections reached the total rounds...")
+        # while not self.cm.check_finished_experiment():
+        #     await asyncio.sleep(1)
 
-        # Enable loggin info
-        logging.getLogger().disabled = True
+        # # Enable loggin info
+        # logging.getLogger().disabled = True
 
-        # Kill itself
-        if self.config.participant["scenario_args"]["deployment"] == "docker":
-            try:
-                self.client.containers.get(self.docker_id).stop()
-            except Exception as e:
-                print(f"Error stopping Docker container with ID {self.docker_id}: {e}")
+        # # Kill itself
+        # if self.config.participant["scenario_args"]["deployment"] == "docker":
+        #     try:
+        #         self.client.containers.get(self.docker_id).stop()
+        #     except Exception as e:
+        #         print(f"Error stopping Docker container with ID {self.docker_id}: {e}")
 
     async def _extended_learning_cycle(self):
         """
@@ -733,10 +722,11 @@ class Engine:
         s.close()
         return (time.time() - start) * 1000
 
-    def __nss_extract_features(self):
+    def nss_extract_features(self):
         """
         Extract the features necessary for the node selection strategy.
         """
+        logging.info(f"Extracting NSS features for round {self.round}...")
         nss_features = {}
         nss_features["cpu_percent"] = psutil.cpu_percent()
         net_io_counters = psutil.net_io_counters()
@@ -779,17 +769,25 @@ class MaliciousNode(Engine):
         self.round_start_attack = 3
         self.round_stop_attack = 6
 
-        self.aggregator_bening = self._aggregator
-
     async def _extended_learning_cycle(self):
-        if self.attack != None:
-            if self.round in range(self.round_start_attack, self.round_stop_attack):
-                logging.info("Changing aggregation function maliciously...")
-                self._aggregator = create_malicious_aggregator(self._aggregator, self.attack)
-            elif self.round == self.round_stop_attack:
-                logging.info("Changing aggregation function benignly...")
-                self._aggregator = self.aggregator_bening
-
+        
+        if type(self.attack).__name__ == "FloodingAttack":
+            logging.info(f"Running Flooding Attack")
+            await self.attack.attack(self.cm)
+        
+        if self.lie_atk:
+            from nebula.addons.attacks.poisoning.update_manipulation import update_manipulation_LIE
+            await self.aggregator.include_model_in_buffer(update_manipulation_LIE(self.trainer.get_model_parameters(),899), self.trainer.get_model_weight(), source=self.addr, round=self.round)
+        elif self.model_poisoning:
+            logging.info(f"Poisoning the model with {self.poisoned_ratio} of the data and {self.noise_type} noise")
+            poisoned_model = modelpoison(
+                self.trainer.get_model_parameters(),
+                self.poisoned_ratio,
+                self.noise_type,
+            )
+            self.trainer.set_model_parameters(poisoned_model)
+            del poisoned_model
+        
         if self.role == "aggregator":
             await AggregatorNode._extended_learning_cycle(self)
         if self.role == "trainer":
@@ -865,12 +863,18 @@ class AggregatorNode(Engine):
         self.total_energy_consumption = self.total_energy_consumption + train_cpu_energy_consumption + train_gpu_energy_consumption
         self.total_carbon_emission = self.total_carbon_emission + train_cpu_carbon_emission + train_gpu_carbon_emission
     
+        
+        if self.node_selection_strategy_enabled:
+            # Extract Features needed for Node Selection Strategy
+            self.nss_extract_features()
+            # Broadcast Features
+            logging.info(f"Broadcasting NSS features to the rest of the topology ...")
+            message = self.cm.mm.generate_nss_features_message(self.nss_features)
+            await self.cm.send_message_to_neighbors(message)
+            _nss_features_msg = f"""NSS features for round {self.round}:\nCPU Usage (%): {self.nss_features['cpu_percent']}%\nBytes Sent: {self.nss_features['bytes_sent']}\nBytes Received: {self.nss_features['bytes_received']}\nLoss: {self.nss_features['loss']}\nData Size: {self.nss_features['data_size']}"""
+            print_msg_box(msg=_nss_features_msg, indent=2, title="NSS features (this node)")
 
-        if self.lie_atk:
-            from nebula.addons.attacks.poisoning.update_manipulation import update_manipulation_LIE
-            await self.aggregator.include_model_in_buffer(update_manipulation_LIE(self.trainer.get_model_parameters(),899), self.trainer.get_model_weight(), source=self.addr, round=self.round)
-        else:
-            await self.aggregator.include_model_in_buffer(
+        await self.aggregator.include_model_in_buffer(
             self.trainer.get_model_parameters(),
             self.trainer.get_model_weight(),
             source=self.addr,

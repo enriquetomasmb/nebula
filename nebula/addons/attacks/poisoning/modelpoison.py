@@ -56,13 +56,19 @@ def modelpoison(model: OrderedDict, poisoned_ratio, noise_type="gaussian"):
             single_point = True
         # print(t)
         if noise_type == "salt":
-            # Replaces random pixels with 1.
+        #Salt Noise:
+        # Effect: Randomly sets some of the model's parameters to the maximum value (e.g., 1).
+        # Purpose: Simulates sharp, sudden disturbances in the model's parameters. It can be used to test how well the model can handle extreme outliers or unexpected changes in parameter values.
             poisoned = torch.tensor(random_noise(t, mode=noise_type, amount=poisoned_ratio))
         elif noise_type == "gaussian":
-            # Gaussian-distributed additive noise.
+        # Gaussian Noise:
+        # Effect: Adds random values drawn from a Gaussian distribution to the model's parameters.
+        # Purpose: Simulates random variations in the model's parameters, similar to sensor noise or measurement errors. It can help in testing the model's robustness to small, continuous perturbations and can also act as a form of regularization to prevent overfitting.
             poisoned = torch.tensor(random_noise(t, mode=noise_type, mean=0, var=poisoned_ratio, clip=True))
         elif noise_type == "s&p":
-            # Replaces random pixels with either 1 or low_val, where low_val is 0 for unsigned images or -1 for signed images.
+        # Salt-and-Pepper (S&P) Noise:
+        # Effect: Randomly sets some of the model's parameters to either the minimum value (e.g., 0) or the maximum value (e.g., 1).
+        # Purpose: Simulates a combination of sharp disturbances (both high and low) in the model's parameters. It can be used to test the model's robustness to a mix of extreme outliers and can help in understanding how the model handles a wide range of parameter perturbations.
             poisoned = torch.tensor(random_noise(t, mode=noise_type, amount=poisoned_ratio))
         else:
             print("ERROR: poison attack type not supported.")

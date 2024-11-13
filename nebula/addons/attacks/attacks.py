@@ -1,10 +1,14 @@
+import asyncio
 import logging
 from copy import deepcopy
+import random
 from typing import Any
 
 import numpy as np
 import torch
 from torchmetrics.functional import pairwise_cosine_similarity
+
+from nebula.core.network.communications import CommunicationsManager
 
 # To take into account:
 # - Malicious nodes do not train on their own data
@@ -26,6 +30,8 @@ def create_attack(attack_name):
         return SwappingWeightsAttack()
     elif attack_name == "DelayerAttack":
         return DelayerAttack()
+    elif attack_name == "FloodingAttack":
+        return FloodingAttack()
     else:
         return None
 
@@ -34,7 +40,7 @@ class Attack:
     def __call__(self, *args: Any, **kwds: Any) -> Any:
         return self.attack(*args, **kwds)
 
-    def attack(self, received_weights):
+    async def attack(self, received_weights):
         """
         Function to perform the attack on the received weights. It should return the
         attacked weights.
@@ -145,3 +151,31 @@ class DelayerAttack(Attack):
         if self.weights is None:
             self.weights = deepcopy(received_weights)
         return self.weights
+
+
+class FloodingAttack(Attack):
+    """
+    Function to perform flooding attack. It sends a large message to the neighbors.
+    """
+
+    def __init__(self, message_size=100000000, freq=20):
+        super().__init__()
+        self.message_size = message_size
+        self.freq = freq
+        self.target_neighbors = None
+
+    async def attack(self, cm: CommunicationsManager):
+        # Create a dummy message and a random set of neighbors. Then send the message to the neighbors based on the frequency (messages sent in each round).
+        try:
+            logging.info("[FloodingAttack] Performing flooding attack")
+            message = ("a" * self.message_size).encode()  # Encode the message to bytes
+            # neighbors = random.sample(list(cm.connections.keys()), len(cm.connections.keys()))
+            if self.target_neighbors is None:
+                self.target_neighbors = random.sample(list(cm.connections.keys()), 1)
+            logging.info(f"Sending flooding attack to neighbors: {self.target_neighbors}")
+            for i, neighbor in enumerate(self.target_neighbors):
+                for j in range(self.freq):
+                    asyncio.create_task(cm.send_message(neighbor, message))
+        except Exception as e:
+            logging.error(f"[FloodingAttack] Error: {e}")
+            return
