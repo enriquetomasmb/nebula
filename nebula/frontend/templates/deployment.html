@@ -941,6 +941,13 @@
                             id="nodesel-strat-distance-btn" value="distance">
                         <label class="form-check-label" for="nodesel-strat-distance-btn">Distance Selection</label>
                     </div>
+                    <div class="form-check form-check-inline" id="nodeSelectionStrategyParameter">
+                        <input type="number" class="form-control" id="node-selection-parameter"
+                            placeholder="Distance (-1,1)" min="-1" value="0.7"
+                            style="display: inline; width: 80%">
+                    </div>
+
+
                 </div>
 
             </div>
@@ -1316,6 +1323,7 @@
             data["schema_additional_participants"] = document.getElementById("schemaAdditionalParticipantsSelect").value
             // Step 16
             data["node_selection_strategy"] = document.querySelector('input[name="nodeSelectionStrategyOptions"]:checked').value
+            data["node_selection_parameter"] = document.getElementById('input[name="nodeSelectionStrategyParameter"]').value
             return data
         }
 
