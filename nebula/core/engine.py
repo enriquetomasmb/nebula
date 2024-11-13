@@ -544,26 +544,26 @@ class Engine:
             title="End of the experiment",
         )
         # Report
-        if self.config.participant["scenario_args"]["controller"] != "nebula-test":
-            result = await self.reporter.report_scenario_finished()
-            if result:
-                pass
-            else:
-                logging.error("Error reporting scenario finished")
+        # if self.config.participant["scenario_args"]["controller"] != "nebula-test":
+        #     result = await self.reporter.report_scenario_finished()
+        #     if result:
+        #         pass
+        #     else:
+        #         logging.error("Error reporting scenario finished")
 
-        logging.info("Checking if all my connections reached the total rounds...")
-        while not self.cm.check_finished_experiment():
-            await asyncio.sleep(1)
+        # logging.info("Checking if all my connections reached the total rounds...")
+        # while not self.cm.check_finished_experiment():
+        #     await asyncio.sleep(1)
 
-        # Enable loggin info
-        logging.getLogger().disabled = True
+        # # Enable loggin info
+        # logging.getLogger().disabled = True
 
-        # Kill itself
-        if self.config.participant["scenario_args"]["deployment"] == "docker":
-            try:
-                self.client.containers.get(self.docker_id).stop()
-            except Exception as e:
-                print(f"Error stopping Docker container with ID {self.docker_id}: {e}")
+        # # Kill itself
+        # if self.config.participant["scenario_args"]["deployment"] == "docker":
+        #     try:
+        #         self.client.containers.get(self.docker_id).stop()
+        #     except Exception as e:
+        #         print(f"Error stopping Docker container with ID {self.docker_id}: {e}")
 
     async def _extended_learning_cycle(self):
         """
