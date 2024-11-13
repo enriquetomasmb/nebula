@@ -79,3 +79,16 @@ message ConnectionMessage {
 message ResponseMessage {
   string response = 1;      // Outcome of the requested operation.
 }
+
+message ReputationMessage {
+  string node_id = 1; //Id to node thats send the reputation
+  float score = 2; //Score reputation
+  int32 round = 3; //Round to send the reputation
+}
+
+message FloodAttackMessage {
+  string attacker_id = 1; // ID of the attacker node
+  int32 frequency = 2;    // Frequency of message sending in the attack
+  int32 duration = 3;     // Duration of the attack in seconds
+  string target_node = 4; // Optional: ID of the target node (if specified)
+}

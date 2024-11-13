@@ -8,6 +8,7 @@ import uuid
 import zlib
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Any
+from nebula.core.reputation.Reputation import save_data
 
 import lz4.frame
 from geopy import distance
@@ -61,6 +62,7 @@ class Connection:
         self.process_task = None
         self.pending_messages_queue = asyncio.Queue(maxsize=100)
         self.message_buffers: dict[bytes, dict[int, MessageChunk]] = {}
+        self._chunk_data = self.cm.reputation_instance.chunk_data
 
         self.EOT_CHAR = b"\x00\x00\x00\x04"
         self.COMPRESSION_CHAR = b"\x00\x00\x00\x01"
@@ -281,7 +283,39 @@ class Connection:
                 self._store_chunk(message_id, chunk_index, chunk_data, is_last_chunk)
                 # logging.debug(f"Received chunk {chunk_index} of message {message_id.hex()} | size: {len(chunk_data)} bytes")
 
+                message_id_decoded = message_id.hex()
+                if chunk_index == 0:
+                    chunk_bytes = chunk_data.tobytes()
+                    # logging.info(f"chunk data: {chunk_bytes}")
+                    comparation_with = b"\x01\x00\x00\x00x\x9c\x00"
+                    if chunk_bytes[:len(comparation_with)] == comparation_with:
+                        if message_id_decoded not in self._chunk_data:
+                            self._chunk_data[message_id_decoded] = {}
+
+                        self._chunk_data[message_id_decoded]['start_time'] = time.time()
+                        # if message_id_decoded and message_id_decoded in self._chunk_data:
+                        #     logging.info(f"message_id_decoded in start_time: {self._chunk_data}")
+                
                 if is_last_chunk:
+                    if message_id_decoded in self._chunk_data and message_id_decoded and 'start_time' in self._chunk_data[message_id_decoded]:
+                        self._chunk_data[message_id_decoded]['end_time'] = time.time()
+                        # logging.info(f"message_id_decoded in end_time: {self._chunk_data}")
+
+                        if 'start_time' in self._chunk_data[message_id_decoded] and 'end_time' in self._chunk_data[message_id_decoded]:
+                            latency = self._chunk_data[message_id_decoded]['end_time'] - self._chunk_data[message_id_decoded]['start_time']
+                            # logging.info(f"message_id_decoded in latency: {latency}")
+                            source = self.addr
+
+                            if source != self.cm.get_addr():
+                                # logging.info(f"SAVE DATA CHUNK")
+                                save_data(self.config.participant['scenario_args']['name'],
+                                                                    "chunk_latency",
+                                                                    source,
+                                                                    self.cm.get_addr(),
+                                                                    self.cm.get_round(),
+                                                                    message_id_decoded=message_id_decoded,
+                                                                    latency=latency)
+
                     await self._process_complete_message(message_id)
         except asyncio.CancelledError:
             logging.info("Message handling cancelled")

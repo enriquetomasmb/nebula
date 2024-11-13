@@ -27,6 +27,10 @@ from nebula.core.utils.helper import (
     pearson_correlation_metric,
 )
 from nebula.core.utils.locker import Locker
+from nebula.core.reputation.Reputation import (
+    Reputation,
+    save_data,
+)
 
 if TYPE_CHECKING:
     from nebula.core.engine import Engine
@@ -77,6 +81,12 @@ class CommunicationsManager:
         self.loop = asyncio.get_event_loop()
         max_concurrent_tasks = 5
         self.semaphore_send_model = asyncio.Semaphore(max_concurrent_tasks)
+
+        # Reputation
+        self.reputation_instance = Reputation(self.engine)
+        self.reputation_with_all_feedback = {}
+        self.message_timestamps = {}
+        self.fraction_of_params_changed = {}
 
     @property
     def engine(self):
@@ -152,6 +162,12 @@ class CommunicationsManager:
                     if self.config.participant["device_args"]["proxy"] or message_wrapper.model_message.round == -1:
                         await self.forwarder.forward(data, addr_from=addr_from)
                     await self.handle_model_message(source, message_wrapper.model_message)
+            elif message_wrapper.HasField("reputation_message"):
+                if await self.include_received_message_hash(hashlib.md5(data).hexdigest()):
+                    self.forwarder.forward(data, addr_from=addr_from)
+                    await self.handle_reputation_message(source, message_wrapper.reputation_message)
+            elif message_wrapper.HasField("flood_attack_message"):
+                await self.handle_flooding_attack_message(source, message_wrapper.flood_attack_message)
             elif message_wrapper.HasField("connection_message"):
                 await self.handle_connection_message(source, message_wrapper.connection_message)
             else:
@@ -186,6 +202,7 @@ class CommunicationsManager:
         )
         try:
             await self.engine.event_manager.trigger_event(source, message)
+            self.store_receive_timestamp(source, "federation", message.round)
         except Exception as e:
             logging.exception(
                 f"📝  handle_federation_message | Error while processing: {message.action} {message.arguments} | {e}"
@@ -256,17 +273,20 @@ class CommunicationsManager:
                             decoded_model,
                             similarity=True,
                         )
-                        with open(
-                            f"{self.log_dir}/participant_{self.idx}_similarity.csv",
-                            "a+",
-                        ) as f:
-                            if os.stat(f"{self.log_dir}/participant_{self.idx}_similarity.csv").st_size == 0:
-                                f.write(
-                                    "timestamp,source_ip,nodes,round,current_round,cosine,euclidean,minkowski,manhattan,pearson_correlation,jaccard\n"
-                                )
+                        with open(f"{self.engine.log_dir}/participant_{self.idx}_similarity.csv", "a+") as f:
+                            if os.stat(f"{self.engine.log_dir}/participant_{self.idx}_similarity.csv").st_size == 0:
+                                f.write("timestamp,source_ip,nodes,round,current_round,cosine,euclidean,minkowski,manhattan,pearson_correlation,jaccard\n")
                             f.write(
                                 f"{datetime.now()}, {source}, {message.round}, {current_round}, {cosine_value}, {euclidean_value}, {minkowski_value}, {manhattan_value}, {pearson_correlation_value}, {jaccard_value}\n"
                             )
+
+                    # Manage communication latency
+                    self.store_receive_timestamp(source, "model", message.round)
+                    self.calculate_latency(source, "model")
+                    
+                    # Manage parameters of models
+                    parameters_local = self.engine.trainer.get_model_parameters()
+                    self.fraction_of_parameters_changed(source, parameters_local, decoded_model, current_round)
 
                     await self.engine.aggregator.include_model_in_buffer(
                         decoded_model,
@@ -328,6 +348,97 @@ class CommunicationsManager:
             await self.engine.event_manager.trigger_event(source, message)
         except Exception as e:
             logging.exception(f"🔗  handle_connection_message | Error while processing: {message.action} | {e}")
+
+    async def handle_reputation_message(self, source, message):
+        try:
+            logging.info(f"handle_reputation_message | Reputation message received from {source} | Node: {message.node_id} | Score: {message.score} | Round: {message.round}")
+            
+            self.store_receive_timestamp(source, "reputation", message.round)
+            #self.calculate_latency(source, "reputation")
+            
+            current_node = self.addr
+
+            # Manage reputation 
+            if current_node != source:
+                key = (current_node, source, message.round)
+
+                if key not in self.reputation_with_all_feedback:
+                    self.reputation_with_all_feedback[key] = []
+
+                self.reputation_with_all_feedback[key].append(message.score)
+
+        except Exception as e:
+            logging.error(f"Error handling reputation message: {e}")
+    
+    async def handle_flooding_attack_message(self, source, message):
+        try:
+            logging.info(f"🔥  handle_flooding_attack_message | Received flooding attack message from {source} | Attacker: {message.attacker_id} | Frequency: {message.frequency} | Duration: {message.duration} | Target node: {message.target_node}")
+            current_round = self.engine.get_round()
+            self.store_receive_timestamp(source, "flooding_attack", current_round)
+        except Exception as e:
+            logging.error(f"🔥  handle_flooding_attack_message | Error while processing: {e}")
+
+    def fraction_of_parameters_changed(self, source, parameters_local, parameters_received, current_round):
+        # logging.info(f"🤖  fraction_of_parameters_changed | Managing parameters of models")
+        # logging.info(f"🤖  fraction_of_parameters_changed | Parameters local: {parameters_local}")
+        # logging.info(f"🤖  fraction_of_parameters_changed | Parameters received: {parameters_received}")
+        differences = []
+        total_params = 0
+        changed_params = 0
+        changes_record = {}
+        prev_threshold = None
+
+        if source in self.fraction_of_params_changed and current_round - 1 in self.fraction_of_params_changed[source]:
+            prev_threshold = self.fraction_of_params_changed[source][current_round - 1][-1]["threshold"]
+
+        for key in parameters_local.keys():
+            #logging.info(f"🤖  fraction_of_parameters_changed | Key: {key}")
+            if key in parameters_received:
+                diff = torch.abs(parameters_local[key] - parameters_received[key])
+                differences.extend(diff.flatten().tolist())
+                total_params += diff.numel()
+                #logging.info(f"🤖  fraction_of_parameters_changed | Total params: {total_params}")
+
+        if differences:
+            mean_threshold = torch.mean(torch.tensor(differences)).item()
+            current_threshold = (prev_threshold + mean_threshold) / 2 if prev_threshold is not None else mean_threshold
+        else:
+            current_threshold = 0
+
+
+        for key in  parameters_local.keys():
+            if key in parameters_received:
+                diff = torch.abs(parameters_local[key] - parameters_received[key])
+                num_changed = torch.sum(diff > current_threshold).item()
+                changed_params += num_changed
+                if num_changed > 0:
+                    changes_record[key] = num_changed
+
+        fraction_changed = changed_params / total_params if total_params > 0 else 0.0
+
+        if source not in self.fraction_of_params_changed:
+            self.fraction_of_params_changed[source] = {}
+        if current_round not in self.fraction_of_params_changed[source]:
+            self.fraction_of_params_changed[source][current_round] = []
+
+        self.fraction_of_params_changed[source][current_round].append({
+            "fraction_changed": fraction_changed,
+            "total_params": total_params,
+            "changed_params": changed_params,
+            "threshold": current_threshold,
+            "changes_record": changes_record
+        })
+
+        save_data(self.config.participant['scenario_args']['name'], 
+                  'fraction_of_params_changed', 
+                  source, 
+                  self.addr, 
+                  current_round, 
+                  fraction_changed=fraction_changed, 
+                  total_params=total_params, 
+                  changed_params=changed_params, 
+                  threshold=current_threshold, 
+                  changes_record=changes_record)
 
     def get_connections_lock(self):
         return self.connections_lock
@@ -650,6 +761,45 @@ class CommunicationsManager:
             logging.exception(f"❗️  Cannot send message {message} to {dest_addr}. Error: {e!s}")
             await self.disconnect(dest_addr, mutual_disconnection=False)
 
+    def store_send_timestamp(self, dest_addr, round_number, type_message):
+        send_timestamp = datetime.now().strftime("%H:%M:%S")
+        self.message_timestamps[(self.addr, dest_addr, type_message)] = {
+            "send": send_timestamp,
+            "receive": None,
+            "latency": None,
+            "round": round_number,
+            "type": type_message
+        }
+
+    def store_receive_timestamp(self, source, type_message, round=None):
+        current_time = time.time()
+        if current_time:
+            save_data(self.config.participant['scenario_args']['name'], 'time_message', source, self.addr, round=round, time=current_time, type_message=type_message, current_round=self.get_round())
+        
+        receive_timestamp = datetime.now().strftime("%H:%M:%S")
+        if (self.addr, source, type_message) in self.message_timestamps:
+            self.message_timestamps[(self.addr, source, type_message)]["receive"] = receive_timestamp
+
+    def calculate_latency(self, source, type_message):
+        if (self.addr, source, type_message) in self.message_timestamps:
+            send_time = self.message_timestamps[(self.addr, source, type_message)]["send"]
+            receive_time = self.message_timestamps[(self.addr, source, type_message)]["receive"]
+            round_number = self.message_timestamps[(self.addr, source, type_message)]["round"]
+            current_round = self.get_round()
+
+            if send_time and receive_time and type_message == "model":
+                send_time = datetime.strptime(send_time, "%H:%M:%S")
+                receive_time = datetime.strptime(receive_time, "%H:%M:%S")
+
+                latency = (receive_time - send_time).total_seconds()
+                logging.info(f"🕒  Latency from {source} with type message {type_message} in round {round_number}: {latency}")
+
+                self.message_timestamps[(self.addr, source, type_message)]["latency"] = latency
+                save_data(self.config.participant['scenario_args']['name'], 'communication', source, self.addr, round_number, time=latency, type_message=type_message, current_round=current_round)
+                
+                return latency
+        return None
+
     async def send_model(self, dest_addr, round, serialized_model, weight=1):
         async with self.semaphore_send_model:
             try:
@@ -657,6 +807,10 @@ class CommunicationsManager:
                 if conn is None:
                     logging.info(f"❗️  Connection with {dest_addr} not found")
                     return
+                
+                if round != -1:
+                    self.store_send_timestamp(dest_addr, round, "model")
+
                 logging.info(
                     f"Sending model to {dest_addr} with round {round}: weight={weight} | size={sys.getsizeof(serialized_model) / (1024** 2) if serialized_model is not None else 0} MB"
                 )
