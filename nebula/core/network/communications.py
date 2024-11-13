@@ -657,6 +657,9 @@ class CommunicationsManager:
             conn = self.connections[dest_addr]
             await conn.send(data=message)
         except Exception as e:
+            # If message size is too big, no need to log the message
+            if sys.getsizeof(message) > 1000:
+                message = "message too big"
             logging.exception(f"❗️  Cannot send message {message} to {dest_addr}. Error: {e!s}")
             await self.disconnect(dest_addr, mutual_disconnection=False)
 

@@ -166,12 +166,16 @@ class FloodingAttack(Attack):
 
     async def attack(self, cm: CommunicationsManager):
         # Create a dummy message and a random set of neighbors. Then send the message to the neighbors based on the frequency (messages sent in each round).
-        logging.info("[FloodingAttack] Performing flooding attack")
-        message = ("a" * self.message_size).encode()  # Encode the message to bytes
-        # neighbors = random.sample(list(cm.connections.keys()), len(cm.connections.keys()))
-        if self.target_neighbors is None:
-            self.target_neighbors = random.sample(list(cm.connections.keys()), 1)
-        logging.info(f"Sending flooding attack to neighbors: {self.target_neighbors}")
-        for i, neighbor in enumerate(self.target_neighbors):
-            for j in range(self.freq):
-                asyncio.create_task(cm.send_message(neighbor, message))
+        try:
+            logging.info("[FloodingAttack] Performing flooding attack")
+            message = ("a" * self.message_size).encode()  # Encode the message to bytes
+            # neighbors = random.sample(list(cm.connections.keys()), len(cm.connections.keys()))
+            if self.target_neighbors is None:
+                self.target_neighbors = random.sample(list(cm.connections.keys()), 1)
+            logging.info(f"Sending flooding attack to neighbors: {self.target_neighbors}")
+            for i, neighbor in enumerate(self.target_neighbors):
+                for j in range(self.freq):
+                    asyncio.create_task(cm.send_message(neighbor, message))
+        except Exception as e:
+            logging.error(f"[FloodingAttack] Error: {e}")
+            return
