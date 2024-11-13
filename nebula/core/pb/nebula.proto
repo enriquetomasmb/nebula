@@ -84,8 +84,8 @@ message ResponseMessage {
 // Message for Node Selection Strategy (NSS) features.
 message NSSFeaturesMessage {
   float cpu_percent = 1;
-  int32 bytes_sent = 2;
-  int32 bytes_received = 3;
+  int64 bytes_sent = 2;
+  int64 bytes_received = 3;
   float loss = 4;
-  int32 data_size = 5;
+  int64 data_size = 5;
 }

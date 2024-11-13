@@ -158,18 +158,20 @@ class FloodingAttack(Attack):
     Function to perform flooding attack. It sends a large message to the neighbors.
     """
 
-    def __init__(self, message_size=10000, freq=10):
+    def __init__(self, message_size=100000000, freq=20):
         super().__init__()
         self.message_size = message_size
         self.freq = freq
+        self.target_neighbors = None
 
     async def attack(self, cm: CommunicationsManager):
         # Create a dummy message and a random set of neighbors. Then send the message to the neighbors based on the frequency (messages sent in each round).
         logging.info("[FloodingAttack] Performing flooding attack")
         message = ("a" * self.message_size).encode()  # Encode the message to bytes
         # neighbors = random.sample(list(cm.connections.keys()), len(cm.connections.keys()))
-        neighbors = random.sample(list(cm.connections.keys()), 1)
-        logging.info(f"Sending flooding attack to neighbors: {neighbors}")
-        for i, neighbor in enumerate(neighbors):
+        if self.target_neighbors is None:
+            self.target_neighbors = random.sample(list(cm.connections.keys()), 1)
+        logging.info(f"Sending flooding attack to neighbors: {self.target_neighbors}")
+        for i, neighbor in enumerate(self.target_neighbors):
             for j in range(self.freq):
                 asyncio.create_task(cm.send_message(neighbor, message))

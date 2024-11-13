@@ -159,7 +159,7 @@ class CommunicationsManager:
             else:
                 logging.info(f"Unknown handler for message: {message_wrapper}")
         except Exception as e:
-            logging.exception(f"📥  handle_incoming_message | {addr_from} | Error while processing: {e}")
+            logging.exception(f"📥  handle_incoming_message | {addr_from} | Size of the message: {sys.getsizeof(data)} bytes | Error while processing: {e}")
 
     async def handle_discovery_message(self, source, message):
         logging.info(
