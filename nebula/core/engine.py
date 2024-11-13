@@ -515,25 +515,10 @@ class Engine:
             undirected_connections = await self.cm.get_addrs_current_connections(only_undirected=True)
             logging.info(f"Direct connections: {direct_connections} | Undirected connections: {undirected_connections}")
             logging.info(f"[Role {self.role}] Starting learning cycle...")
-
-            if self.node_selection_strategy_enabled:
-                # Extract Features needed for Node Selection Strategy
-                self.__nss_extract_features()
-                # Broadcast Features
-                logging.info(f"Broadcasting NSS features to the rest of the topology ...")
-                message = self.cm.mm.generate_nss_features_message(self.nss_features)
-                await self.cm.send_message_to_neighbors(message)
-                _nss_features_msg = f"""NSS features for round {self.round}:\nCPU Usage (%): {self.nss_features['cpu_percent']}%\nBytes Sent: {self.nss_features['bytes_sent']}\nBytes Received: {self.nss_features['bytes_received']}\nLoss: {self.nss_features['loss']}\nData Size: {self.nss_features['data_size']}"""
-                print_msg_box(msg=_nss_features_msg, indent=2, title="NSS features (this node)")
-                selected_nodes = self.node_selection_strategy_selector.node_selection(self)
-
-                self.trainer._logger.log_text("[NSS] Selected nodes", str(selected_nodes), step=self.round)
-                logging.info(f"Selected nodes: {selected_nodes} at round {self.round} --> Including them in the aggregation")
-            else:
-                selected_nodes = self.federation_nodes
             
             await self.aggregator.update_federation_nodes(self.federation_nodes)
             await self._extended_learning_cycle()
+            
             await self.get_round_lock().acquire_async()
             print_msg_box(
                 msg=f"Round {self.round} of {self.total_rounds} finished.",
@@ -640,10 +625,11 @@ class Engine:
         s.close()
         return (time.time() - start) * 1000
 
-    def __nss_extract_features(self):
+    def nss_extract_features(self):
         """
         Extract the features necessary for the node selection strategy.
         """
+        logging.info(f"Extracting NSS features for round {self.round}...")
         nss_features = {}
         nss_features["cpu_percent"] = psutil.cpu_percent()
         net_io_counters = psutil.net_io_counters()
@@ -740,6 +726,16 @@ class AggregatorNode(Engine):
         # Define the functionality of the aggregator node
         await self.trainer.test()
         await self.trainer.train()
+        
+        if self.node_selection_strategy_enabled:
+            # Extract Features needed for Node Selection Strategy
+            self.nss_extract_features()
+            # Broadcast Features
+            logging.info(f"Broadcasting NSS features to the rest of the topology ...")
+            message = self.cm.mm.generate_nss_features_message(self.nss_features)
+            await self.cm.send_message_to_neighbors(message)
+            _nss_features_msg = f"""NSS features for round {self.round}:\nCPU Usage (%): {self.nss_features['cpu_percent']}%\nBytes Sent: {self.nss_features['bytes_sent']}\nBytes Received: {self.nss_features['bytes_received']}\nLoss: {self.nss_features['loss']}\nData Size: {self.nss_features['data_size']}"""
+            print_msg_box(msg=_nss_features_msg, indent=2, title="NSS features (this node)")
 
         await self.aggregator.include_model_in_buffer(
             self.trainer.get_model_parameters(),

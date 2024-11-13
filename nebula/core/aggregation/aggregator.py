@@ -242,6 +242,8 @@ class Aggregator(ABC):
 
         if self.engine.node_selection_strategy_enabled:
             logging.info(f"🔄  get_aggregation | Removing pending models not selected by the NSS Selector...")
+            selected_nodes = self.engine.node_selection_strategy_selector.node_selection(self.engine)
+            self.engine.trainer._logger.log_text("[NSS] Selected nodes", str(selected_nodes), step=self.engine.round)
             for node in list(self._pending_models_to_aggregate.keys()):
                 if node not in self.engine.node_selection_strategy_selector.selected_nodes:
                     logging.info(f"🔄  get_aggregation | Removing model from {node} as it was not selected by the NSS Selector.")

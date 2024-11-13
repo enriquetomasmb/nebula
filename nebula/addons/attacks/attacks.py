@@ -158,7 +158,7 @@ class FloodingAttack(Attack):
     Function to perform flooding attack. It sends a large message to the neighbors.
     """
 
-    def __init__(self, message_size=1000, freq=30):
+    def __init__(self, message_size=10000, freq=10):
         super().__init__()
         self.message_size = message_size
         self.freq = freq
@@ -167,7 +167,8 @@ class FloodingAttack(Attack):
         # Create a dummy message and a random set of neighbors. Then send the message to the neighbors based on the frequency (messages sent in each round).
         logging.info("[FloodingAttack] Performing flooding attack")
         message = ("a" * self.message_size).encode()  # Encode the message to bytes
-        neighbors = random.sample(list(cm.connections.keys()), len(cm.connections.keys()))
+        # neighbors = random.sample(list(cm.connections.keys()), len(cm.connections.keys()))
+        neighbors = random.sample(list(cm.connections.keys()), 1)
         logging.info(f"Sending flooding attack to neighbors: {neighbors}")
         for i, neighbor in enumerate(neighbors):
             for j in range(self.freq):
