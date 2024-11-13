@@ -22,13 +22,13 @@ class DistanceSelector(Selector):
     def __init__(self, config=None):
         super().__init__(config)
         self.config = config
-        self.threshold=threshold
         logging.info("[DistanceSelector] Initialized")
 
     def node_selection(self, node):
         #if self.selected_nodes != []:
         #    return self.selected_nodes
-        threshold = node.node_selection_strategy_parameter
+        
+        threshold = float(node.node_selection_strategy_parameter)
         neighbors = self.neighbors_list.copy()
         
         if len(neighbors) == 0:
@@ -52,7 +52,7 @@ class DistanceSelector(Selector):
                 distances[device]=neighbor_distance
 
         for neighbor in distances:
-            logging.info(f"[DistanceSelector] processed_node: {neighbor}, distance: {distances[neighbor]}")
+            #logging.info(f"[DistanceSelector] processed_node: {neighbor}, distance: {distances[neighbor]}")
             if distances[neighbor] >= threshold:
                 logging.info(f"[DistanceSelector] selection, selected_node: {neighbor}, distance: {distances[neighbor]}")
                 self.selected_nodes.append(neighbor)

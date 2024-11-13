@@ -68,7 +68,8 @@ class Scenario:
         mobile_participants_percent,
         additional_participants,
         schema_additional_participants,
-        node_selection_strategy
+        node_selection_strategy,
+        node_selection_parameter
     ):
         """
         Initialize the scenario.
@@ -159,6 +160,7 @@ class Scenario:
         self.additional_participants = additional_participants
         self.schema_additional_participants = schema_additional_participants
         self.node_selection_strategy = node_selection_strategy
+        self.node_selection_parameter = node_selection_parameter
         
     def attack_node_assign(
         self,
@@ -373,7 +375,7 @@ class ScenarioManagement:
             participant_config["mobility_args"]["round_frequency"] = self.scenario.round_frequency
             participant_config["node_selection_strategy_args"]["enabled"] = False if self.scenario.node_selection_strategy == "default" else True
             participant_config["node_selection_strategy_args"]["strategy"] = self.scenario.node_selection_strategy
-            participant_config["node_selection_strategy_args"]["parameter"] = self.node_selection_parameter
+            participant_config["node_selection_strategy_args"]["parameter"] = self.scenario.node_selection_parameter
 
             participant_config["resource_args"]["resource_constricted"] = node_config["resourceConstricted"]
             participant_config["resource_args"]["resource_constraint_cpu"] = node_config["resourceConstraintCPU"]
