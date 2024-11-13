@@ -68,7 +68,8 @@ class Scenario:
         mobile_participants_percent,
         additional_participants,
         schema_additional_participants,
-        node_selection_strategy
+        node_selection_strategy,
+        communication_method
     ):
         """
         Initialize the scenario.
@@ -113,6 +114,8 @@ class Scenario:
             mobile_participants_percent (float): Percentage of mobile participants.
             additional_participants (list): List of additional participants.
             schema_additional_participants (str): Schema for additional participants.
+            node_selection_strategy (str): Strategy for select models to aggergate.
+            communication_method (float): Enengy comsuption for Communication approach, e.g. wifi=0.0005506.
         """
         self.scenario_title = scenario_title
         self.scenario_description = scenario_description
@@ -159,6 +162,8 @@ class Scenario:
         self.additional_participants = additional_participants
         self.schema_additional_participants = schema_additional_participants
         self.node_selection_strategy = node_selection_strategy
+        # Sustainability related
+        self.communication_method = communication_method
 
     def attack_node_assign(
         self,
@@ -378,6 +383,11 @@ class ScenarioManagement:
             participant_config["resource_args"]["resource_constraint_latency"] = node_config["resourceConstraintLatency"]
 
             participant_config["reporter_args"]["report_status_data_queue"] = self.scenario.report_status_data_queue
+            
+            # Sustainability related config
+            participant_config["sustainability_args"]["pue"]=node_config["pue"]
+            participant_config["sustainability_args"]["renewable_energy"]=node_config["renewable_energy"]
+            participant_config["sustainability_args"]["communication_method"]=self.scenario.communication_method
 
             with open(participant_file, "w") as f:
                 json.dump(participant_config, f, sort_keys=False, indent=2)
@@ -731,15 +741,15 @@ class ScenarioManagement:
                     - "host.docker.internal:host-gateway"
                 ipc: host
                 privileged: true
-                deploy:
-                    resources:
-                        limits:
-                            cpus: '{}'
                 command:
                     - /bin/bash
                     - -c
                     - |
                         {} && ifconfig && echo '{} host.docker.internal' >> /etc/hosts {} && python /nebula/nebula/node.py {}
+                deploy:
+                    resources:
+                        limits:
+                            cpus: '{}'                
                 networks:
                     nebula-net-scenario:
                         ipv4_address: {}
@@ -844,10 +854,11 @@ class ScenarioManagement:
                 services += participant_template.format(
                     idx,
                     self.root_path,
-                    resource_constraint_cpu,
+                    "sleep 10" if node["device_args"]["start"] else "sleep 0",
                     self.scenario.network_gateway,
                     tcset_cmd,
                     path,
+                    resource_constraint_cpu,
                     node["network_args"]["ip"],
                     "proxy:" if self.scenario.deployment and self.use_blockchain else "",
                 )

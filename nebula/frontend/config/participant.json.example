@@ -75,6 +75,11 @@
     "enabled": false,
     "strategy": "default"
   },
+  "sustainability_args" : {
+    "pue": 100,
+    "renewable_energy": 0,
+    "communication_method": 0.0005506
+  },
   "resource_args": {
     "resource_constricted": false,
     "resource_constraint_cpu": 0,

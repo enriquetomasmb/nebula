@@ -5,6 +5,8 @@ from functools import partial
 from nebula.core.pb import nebula_pb2
 from nebula.core.utils.locker import Locker
 
+import time
+import psutil
 
 class AggregatorException(Exception):
     pass
@@ -247,9 +249,13 @@ class Aggregator(ABC):
                     logging.info(f"🔄  get_aggregation | Removing model from {node} as it was not selected by the NSS Selector.")
                     del self._pending_models_to_aggregate[node]
         logging.info(f"🔄  get_aggregation | Final nodes for aggregation: {self._pending_models_to_aggregate.keys()}")
+        agg_start_timestamp = time.time()
         aggregated_result = self.run_aggregation(self._pending_models_to_aggregate)
+        agg_end_timestamp = time.time()
+        agg_time = agg_end_timestamp - agg_start_timestamp
+        agg_cpu_percents = psutil.cpu_percent(percpu=True) 
         self._pending_models_to_aggregate.clear()
-        return aggregated_result
+        return aggregated_result, agg_time, agg_cpu_percents
 
     async def include_next_model_in_buffer(self, model, weight, source=None, round=None):
         logging.info(f"🔄  include_next_model_in_buffer | source={source} | round={round} | weight={weight}")

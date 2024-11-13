@@ -516,6 +516,14 @@
                         <input type="text" class="form-control" id="network-gateway" style="width: 80%"
                             value="192.168.50.1">
                     </div>
+                    <!-- Communication method-->
+                    <h5 class="step-title">Communication method</h5>
+                    <div class="form-check form-check-inline">
+                        <select class="form-control" id="communication-method" name="communication-method"
+                            style="display: inline; width: 80%">
+                            <option value="0.0005506">WiFi [Energy_consumption_per_byte = 0.0005506J]</option>
+                        </select>
+                    </div>
                 </div>
                 <!-- Advanced Training -->
                 <div class="form-group row container-shadow tiny grey">
@@ -938,6 +946,11 @@
                     </div>
                 </div>
 
+                <div class="form-group row container-shadow tiny grey">
+                    <h5 class="step-number">Environmental Sustainability <i class="fa fa-leaf"></i></h5>
+                    <div id="participant-sustainability-items"></div>
+                </div>    
+
             </div>
         </form>
     </div>
@@ -1008,6 +1021,19 @@
         .participant-not-started {
             background-color: #cecece !important;
             font-weight: bold !important;
+        }
+
+        .participant-card {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+        margin-bottom: 10px;
+        background-color: #f9f9f9;
+        }
+
+        .participant-card h5 {
+            margin-top: 0;
+            font-weight: bold;
         }
 
         .btn-info-participant {
@@ -1216,6 +1242,9 @@
             var nodes = {};
             var n_nodes = document.getElementById("info-participants-number").innerHTML;
             for (var i = 0; i < n_nodes; i++) {
+                Graph.graphData().nodes[i].renewable_energy = Number(document.getElementById("renewable-energy-" + i).value);
+                Graph.graphData().nodes[i].pue = Number(document.getElementById("pue-" + i).value);
+                
                 nodes[i] = {
                     "id": i,
                     "ip": Graph.graphData().nodes[i].ip,
@@ -1227,6 +1256,8 @@
                     "resourceConstricted": Graph.graphData().nodes[i].resourceConstricted,
                     "resourceConstraintCPU": Graph.graphData().nodes[i].resourceConstraintCPU,
                     "resourceConstraintLatency": Graph.graphData().nodes[i].resourceConstraintLatency,
+                    "renewable_energy": Graph.graphData().nodes[i].renewable_energy,
+                    "pue": Graph.graphData().nodes[i].pue,
                 }
             }
             var nodesGraph = Graph.graphData().nodes
@@ -1278,6 +1309,7 @@
             // Step 10-11
             data["network_subnet"] = document.getElementById("network-subnet").value
             data["network_gateway"] = document.getElementById("network-gateway").value
+            data["communication_method"] = document.getElementById("communication-method").value
             // Step 12
             data["epochs"] = document.getElementById("epochs").value
             // Step 13
@@ -1311,6 +1343,14 @@
             data["schema_additional_participants"] = document.getElementById("schemaAdditionalParticipantsSelect").value
             // Step 16
             data["node_selection_strategy"] = document.querySelector('input[name="nodeSelectionStrategyOptions"]:checked').value
+
+            // // Step 17 Environmental Sustainability
+            // for (var i = 0; i < n_nodes; i++) {
+            //     var pue = Number(document.getElementById("pue-" + i).value);
+            //     var renewable_energy = Number(document.getElementById("renewable-energy-" + i).value);
+            //     Graph.graphData().nodes[i].pue = pue;
+            //     Graph.graphData().nodes[i].renewable_energy = renewable_energy;
+            // }
             return data
         }
 
@@ -1389,6 +1429,7 @@
                 // Step 10-11
                 document.getElementById("network-subnet").value = data["network_subnet"];
                 document.getElementById("network-gateway").value = data["network_gateway"];
+                document.getElementById("communication-method").value = data["communication_method"];
                 // Step 12
                 document.getElementById("epochs").value = data["epochs"];
                 // Step 13
@@ -1431,6 +1472,13 @@
                 document.getElementById("roundFrequency").value = data["round_frequency"];
                 document.getElementById("mobileParticipantsPercent").value = data["mobile_participants_percent"];
                 document.getElementById("schemaAdditionalParticipantsSelect").value = data["schema_additional_participants"];
+                
+                // Step 16 - Environmental Sustainability
+                for (var i = 0; i < data["n_nodes"]; i++) {
+                    document.getElementById("renewable-energy-" + i).value = Graph.graphData().nodes[i].renewable_energy;
+                    document.getElementById("pue-" + i).value = Graph.graphData().nodes[i].pue;
+                }
+
                 // Additional Participants
                 console.log(data["additional_participants"])
                 var additionalParticipants = document.getElementById("additionalParticipants");
@@ -1683,6 +1731,131 @@
         dockerIcon.addEventListener("click", function () {
             window.open("#", "_blank");
         });
+    </script>
+
+    
+    <!-- <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const datasetSelect = document.getElementById("datasetSelect");
+            const modelSelect = document.getElementById("modelSelect");
+
+            const modelOptions = {
+                MNIST: ["MLP", "CNN"],
+                FashionMNIST: ["MLP", "CNN"],
+                CIFAR10: ["CNN", "CNN_V2", "CNN_V3", "fastermobilenet", "ResNet9", "ResNet18", "simplemobilenet"],
+                SYSCALL: ["Autoencoder", "MLP", "SVM"]
+            };
+
+            function updateModelOptions() {
+                const selectedDataset = datasetSelect.value;
+                const options = modelOptions[selectedDataset];
+
+                modelSelect.innerHTML = "";
+                options.forEach(option => {
+                    const opt = document.createElement("option");
+                    opt.value = option;
+                    opt.innerText = option;
+                    modelSelect.appendChild(opt);
+                });
+            }
+
+            datasetSelect.addEventListener("change", updateModelOptions);
+
+            // Initial population of model options based on the default dataset selection
+            updateModelOptions();
+        });
+    </script> -->
+    
+
+    <script>
+        function generateParticipantSustainabilityInputs() {
+        var participantItems = document.getElementById("participant-sustainability-items");
+        participantItems.innerHTML = ""; // Clear previous items
+        var n_nodes = document.getElementById("info-participants-number").innerHTML;
+        for (var i = 0; i < n_nodes; i++) {
+            var participantItem = document.createElement("div");
+            participantItem.classList.add("participant-card");
+
+            participantItem.style.display = "grid";
+            participantItem.style.gridTemplateColumns = "repeat(auto-fit, minmax(100px, 1fr))";
+            participantItem.style.gridGap = "10px";
+        //    participantItem.classList.add("participant-item");
+
+            //var renewableLabel = document.createElement("h5");
+            //renewableLabel.innerHTML = "Participant " + i + " - Percent of local renewable energy";
+            //participantItem.appendChild(renewableLabel);
+
+            var participantTitle = document.createElement("h6");
+            participantTitle.innerHTML = "Participant " + i;
+            participantItem.appendChild(participantTitle);
+
+            var renewableLabel = document.createElement("h6");
+            renewableLabel.innerHTML = "Percent of local renewable energy";
+            participantItem.appendChild(renewableLabel);
+
+            var renewableInput = document.createElement("input");
+            renewableInput.type = "number";
+            renewableInput.classList.add("form-control");
+            renewableInput.id = "renewable-energy-" + i;
+            renewableInput.placeholder = "Percent of local renewable energy";
+            renewableInput.min = "0";
+            renewableInput.max = "100";
+            renewableInput.value = "0";
+            renewableInput.style.display = "inline";
+            renewableInput.style.width = "100%";
+            participantItem.appendChild(renewableInput);
+
+            var renewableSmall = document.createElement("small");
+            renewableSmall.classList.add("form-text");
+            renewableSmall.classList.add("text-muted");
+            renewableSmall.innerHTML = "%";
+            renewableSmall.style.lineHeight = "3em"; 
+            participantItem.appendChild(renewableSmall);
+
+            var pueLabel = document.createElement("h6");
+            pueLabel.innerHTML = "Power usage effectiveness (PUE)";
+            participantItem.appendChild(pueLabel);
+
+            var pueInput = document.createElement("input");
+            pueInput.type = "number";
+            pueInput.classList.add("form-control");
+            pueInput.id = "pue-" + i;
+            pueInput.placeholder = "Power usage effectiveness (PUE)";
+            pueInput.min = "1.0";
+            pueInput.min = "0";
+            pueInput.max = "100";
+            pueInput.value = "80";
+            pueInput.style.display = "inline";
+            pueInput.style.width = "100%";            
+            participantItem.appendChild(pueInput);
+
+            var pueInputSmall = document.createElement("small");
+            pueInputSmall.classList.add("form-text");
+            pueInputSmall.classList.add("text-muted");
+            pueInputSmall.innerHTML = "%";
+            pueInputSmall.style.lineHeight = "3em"; 
+            participantItem.appendChild(pueInputSmall);
+            participantItems.appendChild(participantItem);
+        }        
+    }
+
+    generateParticipantSustainabilityInputs(); // Call this function to generate the inputs initially
+
+    // MutationObserver to monitor changes in the number of participants
+    var observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'childList' || mutation.type === 'characterData' || mutation.type === 'subtree') {
+                generateParticipantSustainabilityInputs(); // Regenerate inputs when the number of participants changes
+            }
+        });
+    });
+
+    var targetNode = document.getElementById('info-participants-number');
+    var config = { childList: true, characterData: true, subtree: true };
+
+    // Start observing the target node for configured mutations
+    observer.observe(targetNode, config);
+
     </script>
 
     <script>
@@ -2638,7 +2811,10 @@
                     resourceConstraintCPU: 0,
                     resourceConstraintLatency: 0,
                     neighbors: [],
-                    links: []
+                    links: [],
+                    renewable_energy: 0,
+                    pue: 80
+
                 })),
                 links: []
             };
@@ -2832,7 +3008,7 @@
 
         function getNumberOfNodes() {
             return Graph.graphData().nodes.length;
-        }
+    }
 
         function getNumberOfNodesAndUpdate() {
             // Update the label of info-participants
@@ -2902,7 +3078,14 @@
                     portInput.id = "participant-" + i + "-port";
                     portInput.type = "text";
                     portInput.defaultValue = participant.port;
+                    
+                    var pue = Number(document.getElementById("pue-" + i).value);
+                    var renewable_energy = Number(document.getElementById("renewable-energy-" + i).value);
+                    participant.pue = pue;
+                    participant.renewable_energy = renewable_energy;
 
+                    Graph.graphData().nodes[i].pue = pue;
+                    Graph.graphData().nodes[i].renewable_energy = renewable_energy;
 
                     document.getElementById("participant-modal-content").appendChild(portLabel);
                     document.getElementById("participant-modal-content").appendChild(document.createElement("br"));
@@ -2910,7 +3093,9 @@
 
                     document.getElementById("participant-modal-content").innerHTML += "<br><b>Neighbors:</b> " +
                         participant.neighbors.length + "<br><b>Role:</b> " +
-                        participant.role + "<br><b>Start:</b> " +
+                        participant.role + "<br><b>PUE:</b> " +
+                        participant.pue + "<br><b>Renewable Energy:</b> " +
+                        participant.renewable_energy + "<br><b>Start:</b> " +
                         participant.start;
                     const resourceConstraintsDiv = document.createElement("div");
                     resourceConstraintsDiv.innerHTML = `<br><h4>Add Resource Constraints to the node <small id="modelHelp" class="form-text text-muted"><i id="resourceConstraintsHelpIcon" class="fa fa-info-circle"></i>
@@ -3159,6 +3344,9 @@
                 start: (i === 0),
                 neighbors: [],
                 links: [],
+                pue: 80,
+                renewable_energy:0,
+
             })),
             // Default links between nodes (fully connected)
             links: [...Array(N).keys()].map(i => ({
@@ -3315,7 +3503,9 @@
                         resourceConstricted: false,
                         resourceConstraintCPU: 0,
                         resourceConstraintLatency: 0,
-                        start: false
+                        start: false,
+                        pue: 80,
+                        renewable_energy:0,
                     };
                     newNode.neighbors = [node];
                     node.neighbors.push(newNode.id);
