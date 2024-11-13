@@ -4,7 +4,7 @@ import os
 
 import docker
 
-from nebula.addons.attacks.attacks import create_attack
+from nebula.addons.attacks.attacks import BehaviourAttack, DatasetAttack, ModelAttack, create_attack
 from nebula.addons.functions import print_msg_box
 from nebula.addons.reporter import Reporter
 from nebula.core.aggregation.aggregator import create_aggregator, create_malicious_aggregator, create_target_aggregator
@@ -68,6 +68,7 @@ class Engine:
         security=False,
         model_poisoning=False,
         poisoned_ratio=0,
+        poisoned_percent=0,
         noise_type="gaussian",
     ):
         self.config = config
@@ -100,6 +101,7 @@ class Engine:
         self.security = security
         self.model_poisoning = model_poisoning
         self.poisoned_ratio = poisoned_ratio
+        self.poisoned_percent = poisoned_percent
         self.noise_type = noise_type
 
         self._trainer = trainer(model, dataset, config=self.config)
@@ -591,6 +593,7 @@ class MaliciousNode(Engine):
         security=False,
         model_poisoning=False,
         poisoned_ratio=0,
+        poisoned_percent=0,
         noise_type="gaussian",
     ):
         super().__init__(
@@ -601,9 +604,17 @@ class MaliciousNode(Engine):
             security,
             model_poisoning,
             poisoned_ratio,
+            poisoned_percent,
             noise_type,
         )
         self.attack = create_attack(config.participant["adversarial_args"]["attacks"])
+
+        if isinstance(self.attack, DatasetAttack):
+            self.trainer.set_data(self.attack.maliciousDataset(dataset, poisoned_ratio, poisoned_percent))
+
+        if isinstance(self.attack, ModelAttack):
+            self.trainer.set_model(self.attack.maliciousModel(model, poisoned_ratio, noise_type))
+
         self.fit_time = 0.0
         self.extra_time = 0.0
 
@@ -613,7 +624,7 @@ class MaliciousNode(Engine):
         self.aggregator_bening = self._aggregator
 
     async def _extended_learning_cycle(self):
-        if self.attack != None:
+        if isinstance(self.attack, BehaviourAttack):
             if self.round in range(self.round_start_attack, self.round_stop_attack):
                 logging.info("Changing aggregation function maliciously...")
                 self._aggregator = create_malicious_aggregator(self._aggregator, self.attack)
@@ -639,6 +650,7 @@ class AggregatorNode(Engine):
         security=False,
         model_poisoning=False,
         poisoned_ratio=0,
+        poisoned_percent=0,
         noise_type="gaussian",
     ):
         super().__init__(
@@ -649,6 +661,7 @@ class AggregatorNode(Engine):
             security,
             model_poisoning,
             poisoned_ratio,
+            poisoned_percent,
             noise_type,
         )
 
@@ -678,6 +691,7 @@ class ServerNode(Engine):
         security=False,
         model_poisoning=False,
         poisoned_ratio=0,
+        poisoned_percent=0,
         noise_type="gaussian",
     ):
         super().__init__(
@@ -688,6 +702,7 @@ class ServerNode(Engine):
             security,
             model_poisoning,
             poisoned_ratio,
+            poisoned_percent,
             noise_type,
         )
 
@@ -716,6 +731,7 @@ class TrainerNode(Engine):
         security=False,
         model_poisoning=False,
         poisoned_ratio=0,
+        poisoned_percent=0,
         noise_type="gaussian",
     ):
         super().__init__(
@@ -726,6 +742,7 @@ class TrainerNode(Engine):
             security,
             model_poisoning,
             poisoned_ratio,
+            poisoned_percent,
             noise_type,
         )
 
@@ -759,6 +776,7 @@ class IdleNode(Engine):
         security=False,
         model_poisoning=False,
         poisoned_ratio=0,
+        poisoned_percent=0,
         noise_type="gaussian",
     ):
         super().__init__(
@@ -769,6 +787,7 @@ class IdleNode(Engine):
             security,
             model_poisoning,
             poisoned_ratio,
+            poisoned_percent,
             noise_type,
         )
 

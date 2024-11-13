@@ -77,27 +77,27 @@ async def main(config):
     label_flipping = False
     data_poisoning = False
     model_poisoning = False
-    if attacks == "Label Flipping":
-        label_flipping = True
-        poisoned_ratio = 0
-        if targeted == "true" or targeted == "True":
-            targeted = True
-        else:
-            targeted = False
-    elif attacks == "Sample Poisoning":
-        data_poisoning = True
-        if targeted == "true" or targeted == "True":
-            targeted = True
-        else:
-            targeted = False
-    elif attacks == "Model Poisoning":
-        model_poisoning = True
-    else:
-        label_flipping = False
-        data_poisoning = False
-        targeted = False
-        poisoned_percent = 0
-        poisoned_ratio = 0
+    # if attacks == "Label Flipping":
+    #     label_flipping = True
+    #     poisoned_ratio = 0
+    #     if targeted == "true" or targeted == "True":
+    #         targeted = True
+    #     else:
+    #         targeted = False
+    # if attacks == "Sample Poisoning":
+    #     data_poisoning = True
+    #     if targeted == "true" or targeted == "True":
+    #         targeted = True
+    #     else:
+    #         targeted = False
+    # elif attacks == "Model Poisoning":
+    #     model_poisoning = True
+    # else:
+    #     label_flipping = False
+    #     data_poisoning = False
+    #     targeted = False
+    #     poisoned_percent = 0
+    #     poisoned_ratio = 0
 
     # Adjust the total number of nodes and the index of the current node for CFL, as it doesn't require a specific partition for the server (not used for training)
     if config.participant["scenario_args"]["federation"] == "CFL":
@@ -338,6 +338,7 @@ async def main(config):
         security=False,
         model_poisoning=model_poisoning,
         poisoned_ratio=poisoned_ratio,
+        poisoned_percent=poisoned_percent,
         noise_type=noise_type,
     )
     await node.start_communications()

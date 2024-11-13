@@ -15,7 +15,7 @@ import torch
 from skimage.util import random_noise
 
 
-def modelpoison(model: OrderedDict, poisoned_ratio, noise_type="gaussian"):
+def modelPoison(model: OrderedDict, poisoned_ratio, noise_type="gaussian"):
     """
     Adds random noise to the parameters of a model for the purpose of data poisoning.
 
