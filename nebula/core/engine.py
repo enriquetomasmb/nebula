@@ -738,13 +738,13 @@ class AggregatorNode(Engine):
         if self.node_selection_strategy_enabled:
             if self.nss_selector == "distance":
                 if self.node_selection_strategy_selector.stop_training:
-                    self.node_selection_strategy_selector.already_activated = True
                     self.node_selection_strategy_selector.stop_training = False
                     logging.info(f"[DistanceSelector] DetectorSelector repeating four training rounds")
                     await self.trainer.train()
                     await self.trainer.train()
                     await self.trainer.train()
                     await self.trainer.train()
+                    self.node_selection_strategy_selector.already_activated = True
             
 
         if self.lie_atk:

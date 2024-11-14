@@ -29,6 +29,9 @@ class DistanceSelector(Selector):
 
     def node_selection(self, node):
 
+        if self.final_list:
+            return self.selected_nodes
+
         threshold = float(node.node_selection_strategy_parameter)
         neighbors = self.neighbors_list.copy() #node.cm.get_all_addrs_current_connections(only_direct=True)
         
@@ -60,7 +63,7 @@ class DistanceSelector(Selector):
 
         limit = avg_distance + threshold*std_dev_distance
 
-        if mean(distances.values()) < 0.95 and node.round < int(node.total_rounds*0.2):
+        if mean(distances.values()) < 0.95 and node.round < int(node.total_rounds*0.2) and not self.already_activated:
             self.selected_nodes=self.neighbors_list + [node.addr]
         
         elif not self.already_activated:
