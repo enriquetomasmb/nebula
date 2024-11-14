@@ -25,12 +25,25 @@ class DistanceSelector(Selector):
         self.final_list = False
         self.number_votes = 100000
         self.threshold = 0
+        self.rounds_without_training = 0
         logging.info("[DistanceSelector] Initialized")
 
     def should_train(self):
-        train = self.number_votes > len(self.neighbors_list) * (0.3 - 0.1 * self.threshold)
-        logging.info(f"[DistanceSelector] Vote Check {self.number_votes} {len(self.neighbors_list)} {train}")
-        #comprobar rondas sin entrenar
+        logging.info(f"[DistanceSelector] Rounds without training: {self.rounds_without_training}")
+    
+        # Base threshold
+        base_threshold = 0.3 - 0.1 * self.threshold
+        # Increase threshold by 10% for each round without training
+        adjusted_threshold = base_threshold + 0.1 * self.rounds_without_training
+        adjusted_threshold = min(max(adjusted_threshold, 0), 1)
+    
+        # Calculate vote ratio
+        vote_ratio = self.number_votes / len(self.neighbors_list)
+        
+        logging.info(f"[DistanceSelector] Vote ratio: {vote_ratio}, Threshold: {adjusted_threshold}")
+    
+        train = vote_ratio > adjusted_threshold
+    
         return train
 
     def reset_votes(self):
