@@ -147,6 +147,8 @@
                                 class="label btn btn-dark">Real-time metrics</a>
                             <a id="note-btn-{{ name }}" data-scenario-name="{{ name }}" class="label btn btn-dark"><i
                                     class="fa fa-sticky-note" style="color: white;"></i></a>
+                            <a id="config-btn-{{ name }}" data-scenario-name="{{ name }}" class="label btn btn-dark"><i
+                                class="fa fa-sliders" style="color: white;"></i></a>
                             {% if status == "running" %}
                             <a href="{{ url_for('nebula_stop_scenario', scenario_name=name, stop_all=False) }}"
                                 class="label btn btn-danger">Stop scenario</a>
@@ -167,6 +169,12 @@
                                 style="font-size: small; width: 100%;"></textarea>
                             <button id="save-note-{{ name }}" data-scenario-name="{{ name }}"
                                 class="btn btn-dark mt-2 save-note-btn" style="float: right;">Save</button>
+                        </td>
+                    </tr>
+                    <tr id="config-row-{{ name }}" class="config-row" style="display: none;">
+                        <td colspan="4">
+                            <textarea id="config-text-{{ name }}" class="form-control" rows="20"
+                                style="font-size: small; width: 100%;"></textarea>
                         </td>
                     </tr>
                     {% endfor %}
@@ -238,6 +246,12 @@
                 saveNotes(this.dataset.scenarioName);
             });
         });
+
+        document.querySelectorAll('[id^=config-btn]').forEach(button => {
+            button.addEventListener('click', function () {
+                toggleConfigRow(this.dataset.scenarioName);
+            });
+        });
     });
 
     async function toggleNotesRow(scenarioName) {
@@ -263,6 +277,31 @@
         }
 
         notesRow.style.display = notesRow.style.display === 'none' ? '' : 'none';
+    }
+
+    async function toggleConfigRow(scenarioName) {
+        const configRow = document.getElementById('config-row-' + scenarioName);
+        const configTextElement = document.getElementById('config-text-' + scenarioName);
+
+        if (configRow.style.display === 'none') {
+            try {
+                const response = await fetch(`/nebula/dashboard/${scenarioName}/config`);
+                const data = await response.json();
+
+                console.log("[FER] ", data.config)
+
+                if (data.status === 'success') {
+                    configTextElement.value = JSON.stringify(data.config, null, 2);
+                } else {
+                    configTextElement.value = 'No configuration available.';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while retrieving the configuration.');
+                return;
+            }
+        }
+        configRow.style.display = configRow.style.display === 'none' ? '' : 'none';
     }
 
     async function saveNotes(scenarioName) {

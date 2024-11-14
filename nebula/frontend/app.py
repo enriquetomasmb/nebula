@@ -284,6 +284,26 @@ async def get_notes_for_scenario(scenario_name: str):
         return JSONResponse({"status": "error", "message": "Notes not found for the specified scenario"})
 
 
+@app.get("/nebula/dashboard/{scenario_name}/config")
+async def get_config_for_scenario(scenario_name: str):
+    json_path = os.path.join(os.environ.get("NEBULA_CONFIG_DIR"), scenario_name, "scenario.json")
+    logging.info(f"[FER] json_path: {json_path}")
+
+    try:
+        with open(json_path) as file:
+            scenarios_data = json.load(file)
+
+        if scenarios_data:
+            return JSONResponse({"status": "success", "config": scenarios_data})
+        else:
+            return JSONResponse({"status": "error", "message": "Configuration not found for the specified scenario"})
+
+    except FileNotFoundError:
+        return JSONResponse({"status": "error", "message": "scenario.json file not found"})
+    except json.JSONDecodeError:
+        return JSONResponse({"status": "error", "message": "Error decoding JSON file"})
+
+
 @app.post("/nebula/login")
 async def nebula_login(
     request: Request,
