@@ -84,14 +84,22 @@ class MessagesManager:
 
     def generate_nss_features_message(self, nss_features):
         message = nebula_pb2.NSSFeaturesMessage(
-            cpu_percent = nss_features["cpu_percent"],
-            bytes_sent = nss_features["bytes_sent"],
-            bytes_received = nss_features["bytes_received"],
-            loss = nss_features["loss"],
-            data_size = nss_features["data_size"],
+            cpu_percent=nss_features["cpu_percent"],
+            bytes_sent=nss_features["bytes_sent"],
+            bytes_received=nss_features["bytes_received"],
+            loss=nss_features["loss"],
+            data_size=nss_features["data_size"],
         )
         message_wrapper = nebula_pb2.Wrapper()
         message_wrapper.source = self.addr
         message_wrapper.nss_features_message.CopyFrom(message)
+        data = message_wrapper.SerializeToString()
+        return data
+
+    def generate_vote_message(self):
+        message = nebula_pb2.VoteMessage(vote=0)
+        message_wrapper = nebula_pb2.Wrapper()
+        message_wrapper.source = self.addr
+        message_wrapper.vote_message.CopyFrom(message)
         data = message_wrapper.SerializeToString()
         return data

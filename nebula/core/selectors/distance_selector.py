@@ -1,11 +1,9 @@
 import logging
-import math
 from statistics import mean, stdev
-
-import numpy as np
 
 from nebula.core.selectors.selector import Selector
 from nebula.core.utils.helper import cosine_metric
+
 
 class DistanceSelector(Selector):
     """
@@ -22,19 +20,32 @@ class DistanceSelector(Selector):
     def __init__(self, config=None):
         super().__init__(config)
         self.config = config
-        self.stop_training=False
-        self.already_activated=False
-        self.final_list=False
+        self.stop_training = False
+        self.already_activated = False
+        self.final_list = False
+        self.number_votes = 100000
+        self.threshold = 0
         logging.info("[DistanceSelector] Initialized")
 
-    def node_selection(self, node):
+    def should_train(self):
+        return self.number_votes > len(self.neighbors_list) * (0.3 - 0.1 * self.threshold)
 
+    def reset_votes(self):
+        self.number_votes = 0
+
+    def add_vote(self):
+        self.number_votes = self.number_votes + 1
+
+    async def node_selection(self, node):
         if self.final_list:
+            # mandar voto
+            message = self.cm.mm.generate_vote_message()
+            await self.cm.send_message_to_neighbors(message, neighbors=self.selected_nodes)
             return self.selected_nodes
 
-        threshold = float(node.node_selection_strategy_parameter)
-        neighbors = self.neighbors_list.copy() #node.cm.get_all_addrs_current_connections(only_direct=True)
-        
+        self.threshold = float(node.node_selection_strategy_parameter)
+        neighbors = self.neighbors_list.copy()  # node.cm.get_all_addrs_current_connections(only_direct=True)
+
         if len(neighbors) == 0:
             logging.error(
                 "[DistanceSelector] Trying to select neighbors when there are no neighbors - aggregating itself only"
@@ -50,10 +61,10 @@ class DistanceSelector(Selector):
         local_model = pending_models[node.addr][0]
 
         for device in pending_models:
-            if device!=node.addr:
-                neighbor_model=pending_models[device][0]
+            if device != node.addr:
+                neighbor_model = pending_models[device][0]
                 neighbor_distance = cosine_metric(local_model, neighbor_model, similarity=True)
-                distances[device]=neighbor_distance
+                distances[device] = neighbor_distance
 
         distance_values = distances.values()
         avg_distance = mean(distance_values)
@@ -61,18 +72,19 @@ class DistanceSelector(Selector):
 
         logging.info(f"[DistanceSelector] average: {avg_distance}, stddev: {std_dev_distance}")
 
-        limit = avg_distance + threshold*std_dev_distance
+        limit = avg_distance + self.threshold * std_dev_distance
 
-        if mean(distances.values()) < 0.95 and node.round < int(node.total_rounds*0.2) and not self.already_activated:
-            self.selected_nodes=self.neighbors_list + [node.addr]
-        
+        if mean(distances.values()) < 0.95 and node.round < int(node.total_rounds * 0.2) and not self.already_activated:
+            self.selected_nodes = self.neighbors_list + [node.addr]
+
         elif not self.already_activated:
-            logging.info(f"[DistanceSelector] DetectorSelector stop training activated")
-            self.stop_training=True
-            self.selected_nodes=self.neighbors_list + [node.addr]
-        
+            logging.info("[DistanceSelector] DetectorSelector stop training activated")
+            self.stop_training = True
+            self.selected_nodes = self.neighbors_list + [node.addr]
+
         elif not self.final_list:
-            self.selected_nodes=[]
+            self.number_votes = 0
+            self.selected_nodes = []
             for neighbor in distances:
                 if limit <= distances[neighbor]:
                     logging.info(f"[DistanceSelector] selected_node: {neighbor}, distance: {distances[neighbor]}")
@@ -80,7 +92,12 @@ class DistanceSelector(Selector):
                 else:
                     logging.info(f"[DistanceSelector] NOT selected_node: {neighbor}, distance: {distances[neighbor]}")
             self.selected_nodes = self.selected_nodes + [node.addr]
-            self.final_list=True
+            self.final_list = True
+
+        # mandar voto
+
+        message = self.cm.mm.generate_vote_message()
+        await self.cm.send_message_to_neighbors(message, neighbors=self.selected_nodes)
 
         logging.info(f"[DistanceSelector] selection finished, selected_nodes: {self.selected_nodes}")
         return self.selected_nodes

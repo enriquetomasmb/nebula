@@ -23,6 +23,7 @@ message Wrapper {
     ConnectionMessage connection_message = 6;
     ResponseMessage response_message = 7;
     NSSFeaturesMessage nss_features_message = 8;
+    VoteMessage vote_message = 9;
   }
 }
 
@@ -88,4 +89,8 @@ message NSSFeaturesMessage {
   int32 bytes_received = 3;
   float loss = 4;
   int32 data_size = 5;
+}
+
+message VoteMessage {
+  int32 vote = 1;
 }

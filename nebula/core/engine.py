@@ -115,7 +115,7 @@ class Engine:
                 self.node_selection_strategy_selector = RandomSelector()
             elif self.nss_selector == "distance":
                 self.node_selection_strategy_selector = DistanceSelector()
-                self.node_selection_strategy_parameter=config.participant["node_selection_strategy_args"]["parameter"]
+                self.node_selection_strategy_parameter = config.participant["node_selection_strategy_args"]["parameter"]
         nss_info_msg = f"Enabled: {self.node_selection_strategy_enabled}\n{f'Selector: {self.nss_selector}' if self.node_selection_strategy_enabled else ''}"
         print_msg_box(msg=nss_info_msg, indent=2, title="NSS Info")
 
@@ -180,6 +180,7 @@ class Engine:
                 self._start_federation_callback,
                 self._federation_models_included_callback,
                 self.__nss_features_message_callback,
+                self.__vote_message_callback,
             ]
         )
 
@@ -346,6 +347,12 @@ class Engine:
             logging.exception(f"Error updating round in connection: {e}")
         finally:
             await self.cm.get_connections_lock().release_async()
+
+    @event_handler(nebula_pb2.VoteMessage, None)
+    async def __vote_message_callback(self, source, message):
+        if message is not None:
+            logging.info(f"📝  handle_vote_message | Trigger | Received Vote message from {source}")
+            self.node_selection_strategy_selector.add_vote()
 
     @event_handler(nebula_pb2.NSSFeaturesMessage, None)
     async def __nss_features_message_callback(self, source, message):
@@ -529,9 +536,9 @@ class Engine:
                 await self.cm.send_message_to_neighbors(message)
                 _nss_features_msg = f"""NSS features for round {self.round}:\nCPU Usage (%): {self.nss_features["cpu_percent"]}%\nBytes Sent: {self.nss_features["bytes_sent"]}\nBytes Received: {self.nss_features["bytes_received"]}\nLoss: {self.nss_features["loss"]}\nData Size: {self.nss_features["data_size"]}"""
                 print_msg_box(msg=_nss_features_msg, indent=2, title="NSS features (this node)")
-                #selected_nodes = self.node_selection_strategy_selector.node_selection(self)
+                # selected_nodes = self.node_selection_strategy_selector.node_selection(self)
 
-                #self.trainer._logger.log_text("[NSS] Selected nodes", str(selected_nodes), step=self.round)
+                # self.trainer._logger.log_text("[NSS] Selected nodes", str(selected_nodes), step=self.round)
 
             await self.aggregator.update_federation_nodes(self.federation_nodes)
             await self._extended_learning_cycle()
@@ -733,19 +740,25 @@ class AggregatorNode(Engine):
     async def _extended_learning_cycle(self):
         # Define the functionality of the aggregator node
         await self.trainer.test()
-        await self.trainer.train()
+
+        if self.node_selection_strategy_enabled:
+            if self.nss_selector == "distance":
+                if self.node_selection_strategy_selector.should_train():
+                    await self.trainer.train()
+                    self.node_selection_strategy_selector.reset_votes()
+        else:
+            await self.trainer.train()
 
         if self.node_selection_strategy_enabled:
             if self.nss_selector == "distance":
                 if self.node_selection_strategy_selector.stop_training:
                     self.node_selection_strategy_selector.stop_training = False
-                    logging.info(f"[DistanceSelector] DetectorSelector repeating four training rounds")
+                    logging.info("[DistanceSelector] DetectorSelector repeating four training rounds")
                     await self.trainer.train()
                     await self.trainer.train()
                     await self.trainer.train()
                     await self.trainer.train()
                     self.node_selection_strategy_selector.already_activated = True
-            
 
         if self.lie_atk:
             from nebula.addons.attacks.poisoning.update_manipulation import update_manipulation_LIE
