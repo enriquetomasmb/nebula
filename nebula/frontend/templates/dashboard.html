@@ -158,6 +158,8 @@
                             <a href="{{ url_for('nebula_stop_scenario', scenario_name='all', stop_all=True) }}"
                                 class="label btn btn-danger">Stop scenario queue</a>
                             {% else %}
+                            <a id="relaunch-btn" data-scenario-name="{{ name }}" data-scenario-title="{{ title }}" class="label btn btn-dark"><i
+                                class="fa fa-rotate-right" style="color: white;"></i></a>
                             <a id="remove-btn" data-scenario-name="{{ name }}" class="label btn btn-danger"><i
                                     class="fa fa-trash"></i></a>
                             {% endif %}
@@ -203,6 +205,35 @@
             })
             .catch(error => console.error('Error:', error));
     }, 10000);
+</script>
+
+<script>
+    $(document).on('click', '#relaunch-btn', function () {
+        var scenario_name = $(this).data('scenario-name');
+        var scenario_title = $(this).data('scenario-title');
+        $('#confirm-modal').modal('show');
+        $('#confirm-modal .modal-title').text('Relaunch scenario');
+        $('#confirm-modal #confirm-modal-body').html('Are you sure you want to relaunch the scenario ' + scenario_title + '?');
+
+        $('#confirm-modal #yes-button').off('click').on('click', function () {
+            const response = fetch('/nebula/dashboard/' + scenario_name + '/relaunch', {
+                method: 'GET'
+            })
+                .then(response => {
+                    console.log(response)
+                    if (response.redirected) {
+                        window.location.href = response.url; // Manually redirect to the URL provided by the server
+                    } else {
+                        $('#confirm-modal').modal('hide');
+                        $('#confirm-modal').on('hidden.bs.modal', function () {
+                            $('#info-modal-body').html('You are not allowed to relaunch a scenario with demo role.');
+                            $('#info-modal').modal('show');
+                        });
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    });
 </script>
 
 <script>
