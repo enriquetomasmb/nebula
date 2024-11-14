@@ -732,6 +732,7 @@ class AggregatorNode(Engine):
 
     async def _extended_learning_cycle(self):
         # Define the functionality of the aggregator node
+        await self.trainer.test()
         await self.trainer.train()
 
         if self.node_selection_strategy_enabled:
@@ -744,8 +745,6 @@ class AggregatorNode(Engine):
                     await self.trainer.train()
                     await self.trainer.train()
                     await self.trainer.train()
-
-        await self.trainer.test()
             
 
         if self.lie_atk:

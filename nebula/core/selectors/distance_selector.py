@@ -30,7 +30,7 @@ class DistanceSelector(Selector):
     def node_selection(self, node):
 
         threshold = float(node.node_selection_strategy_parameter)
-        neighbors = self.neighbors_list.copy()
+        neighbors = self.neighbors_list.copy() #node.cm.get_all_addrs_current_connections(only_direct=True)
         
         if len(neighbors) == 0:
             logging.error(
