@@ -909,7 +909,7 @@
                 <!-- Node Selection Strategy -->
                 <div class="form-group row container-shadow tiny grey">
                     <h5 class="step-number">Node Selection Strategy <i class="fa fa-bullseye"></i>
-                        <input type="checkbox" id="nodesel-strat-lock" onchange="lock('nodesel-strat-default-btn', 'nodesel-strat-all-btn', 'nodesel-strat-random-btn', 'nodesel-strat-priority-btn', checked)" style="display: none;">
+                        <input type="checkbox" id="nodesel-strat-lock" onchange="lock('nodesel-strat-default-btn', 'nodesel-strat-all-btn', 'nodesel-strat-random-btn', 'nodesel-strat-priority-btn', 'nodesel-strat-distance-btn', checked)" style="display: none;">
                         <label for="nodesel-strat-lock" class="icon-container" style="float: right;">
                             <i class="fa fa-lock"></i>
                         </label>
@@ -1454,6 +1454,8 @@
                         document.getElementById("roundsAdditionalParticipant" + i).value = data["additional_participants"][i]["round"];
                     }
                 }
+                // Step 16
+                document.querySelector('input[name="nodeSelectionStrategyOptions"][value="' + data["node_selection_strategy"] + '"]').checked = true;
             } catch (error) {
                 console.error(error);
             }

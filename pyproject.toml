@@ -116,6 +116,8 @@ web3 = "6.20.0"
 aiosqlite = "0.20.0"
 docker = "7.1.0"
 argon2-cffi = "23.1.0"
+torch = "2.4.1"
+tensorboard-reducer = "0.3.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
