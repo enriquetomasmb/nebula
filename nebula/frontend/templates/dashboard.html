@@ -288,8 +288,6 @@
                 const response = await fetch(`/nebula/dashboard/${scenarioName}/config`);
                 const data = await response.json();
 
-                console.log("[FER] ", data.config)
-
                 if (data.status === 'success') {
                     configTextElement.value = JSON.stringify(data.config, null, 2);
                 } else {

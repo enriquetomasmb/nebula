@@ -287,7 +287,6 @@ async def get_notes_for_scenario(scenario_name: str):
 @app.get("/nebula/dashboard/{scenario_name}/config")
 async def get_config_for_scenario(scenario_name: str):
     json_path = os.path.join(os.environ.get("NEBULA_CONFIG_DIR"), scenario_name, "scenario.json")
-    logging.info(f"[FER] json_path: {json_path}")
 
     try:
         with open(json_path) as file:
