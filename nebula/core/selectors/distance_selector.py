@@ -58,8 +58,7 @@ class DistanceSelector(Selector):
 
         logging.info(f"[DistanceSelector] average: {avg_distance}, stddev: {std_dev_distance}")
 
-        lower_bound = avg_distance - threshold*std_dev_distance
-        upper_bound = avg_distance + threshold*std_dev_distance
+        limit = avg_distance + threshold*std_dev_distance
 
         if mean(distances.values()) < 0.95 and node.round < int(node.total_rounds*0.2):
             self.selected_nodes=self.neighbors_list + [node.addr]
@@ -72,7 +71,7 @@ class DistanceSelector(Selector):
         elif not self.final_list:
             self.selected_nodes=[]
             for neighbor in distances:
-                if avg_distance <= distances[neighbor]:
+                if limit <= distances[neighbor]:
                     logging.info(f"[DistanceSelector] selected_node: {neighbor}, distance: {distances[neighbor]}")
                     self.selected_nodes.append(neighbor)
                 else:
