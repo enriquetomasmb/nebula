@@ -410,27 +410,27 @@
                 </div>
                 <button id="next-btn" type="button" class="btn btn-dark" style="margin-top: 10px; display: none;">&gt;
                 </button>
-                <button id="new-btn" type="button" class="btn btn-dark" style="margin-top: 10px; display: none;">
+                <button id="new-btn" title="Add new Scenario" type="button" class="btn btn-dark" style="margin-top: 10px; display: none;">
                     <i class="fa fa-plus" aria-hidden="true"></i>
                 </button>
-                <button id="add-btn" type="button" class="btn btn-dark" style="margin-top: 10px;">
+                <button id="add-btn" title="Save scenario" type="button" class="btn btn-dark" style="margin-top: 10px;">
                     <i class="fa fa-floppy-o" aria-hidden="true"></i>
                 </button>
                 <button id="del-btn" type="button" class="btn btn-dark" style="margin-top: 10px; background-color: red; border-color: red; display: none;">
                     <i class="fa fa-trash" aria-hidden="true"></i>
                 </button>
-                <button id="run-btn" type="button" class="btn btn-dark"
-                    style="margin-top: 10px; margin-left: 15px; float: right" disabled="true">Run
-                    NEBULA
+                <button id="run-btn" type="button" class="btn btn-dark" style="margin-top: 10px; margin-left: 15px; float: right" disabled="true">
+                    Run NEBULA
                 </button>
-                <button id="load-config-btn" type="button" class="btn btn-dark" style="margin-top: 10px; margin-left: 5px; float: right">
+                <button id="load-config-btn" title="Load config button" type="button" class="btn btn-dark" style="margin-top: 10px; margin-left: 5px; float: right">
                     <i class="fa fa-upload" aria-hidden="true"></i>
                 </button>
-                <button id="save-config-btn" type="button" class="btn btn-dark" style="margin-top: 10px; margin-left: 5px; float: right">
+                <button id="save-config-btn" title="Save config button" type="button" class="btn btn-dark" style="margin-top: 10px; margin-left: 5px; float: right">
                     <i class="fa fa-download" aria-hidden="true"></i>
                 </button>
-                <button id="open-gen-modal-btn" type="button" class="btn btn-dark"
-                    style="margin-top: 10px; margin-left: 5px; float: right;"><i class="fa fa-list-ul" aria-hidden="true"></i></button>
+                <button id="open-gen-modal-btn" title="Scenario generation" type="button" class="btn btn-dark" style="margin-top: 10px; margin-left: 5px; float: right;">
+                    <i class="fa fa-list-ul" aria-hidden="true"></i>
+                </button>
             </div>
             <div id="expert-container" class="col-md-12 " style="display: none">
                 <div class="form-group row container-shadow tiny grey">
@@ -771,6 +771,35 @@
 
         input[type="checkbox"][id$="-lock"]:not(:checked) + .icon-container i::before {
             content: "\f09c";
+        }
+
+        /* Tooltips */
+        button[title] {
+            position: relative;
+        }
+
+        button[title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            white-space: nowrap;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease, top 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button[title]:hover::after {
+            opacity: 1;
+            top: -50px;
         }
 
         #expert-container .step-number::before {
