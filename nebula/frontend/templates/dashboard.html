@@ -116,7 +116,7 @@
                 <table id="table-scenarios" class="table small">
                     <thead>
                         <tr>
-                            <th>Name</th>
+                            <th>Title</th>
                             <th>Start time</th>
                             <th>Model</th>
                             <th>Dataset</th>
@@ -128,7 +128,7 @@
                     {% for name, start_time, end_time, title, description, status, network_subnet, model, dataset,
                     rounds, role in scenarios %}
                     <tr id="scenario-vars">
-                        <td id="name">{{ name }}</td>
+                        <td id="title">{{ title }}</td>
                         <td id="start_time">{{ start_time }}</td>
                         <td id="model">{{ model }}</td>
                         <td id="dataset">{{ dataset }}</td>
