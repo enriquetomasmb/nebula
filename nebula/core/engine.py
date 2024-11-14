@@ -745,12 +745,11 @@ class AggregatorNode(Engine):
             if self.nss_selector == "distance":
                 if self.node_selection_strategy_selector.should_train():
                     logging.info("[DistanceSelector] I am training this round")
-                    self.node_selection_strategy_selector.rounds_without_training = 0
-                    await self.trainer.train()
                     self.node_selection_strategy_selector.reset_votes()
+                    await self.trainer.train()
                 else:
+                    self.node_selection_strategy_selector.reset_votes()
                     logging.info("[DistanceSelector] I am not training this round")
-                    self.node_selection_strategy_selector.rounds_without_training += 1
         else:
             await self.trainer.train()
 
