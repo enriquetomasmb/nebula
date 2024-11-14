@@ -28,9 +28,13 @@ class DistanceSelector(Selector):
         logging.info("[DistanceSelector] Initialized")
 
     def should_train(self):
-        return self.number_votes > len(self.neighbors_list) * (0.3 - 0.1 * self.threshold)
+        train = self.number_votes > len(self.neighbors_list) * (0.3 - 0.1 * self.threshold)
+        logging.info(f"[DistanceSelector] Vote Check {self.number_votes} {len(self.neighbors_list)} {train}")
+        #comprobar rondas sin entrenar
+        return train
 
     def reset_votes(self):
+        logging.info(f"[DistanceSelector] Reseting Votes {self.number_votes}")
         self.number_votes = 0
 
     def add_vote(self):
@@ -39,8 +43,9 @@ class DistanceSelector(Selector):
     async def node_selection(self, node):
         if self.final_list:
             # mandar voto
-            message = self.cm.mm.generate_vote_message()
-            await self.cm.send_message_to_neighbors(message, neighbors=self.selected_nodes)
+            message = node.cm.mm.generate_vote_message()
+            await node.cm.send_message_to_neighbors(message, neighbors=self.selected_nodes)
+            logging.info(f"[DistanceSelector] Sending Votes {self.selected_nodes}")
             return self.selected_nodes
 
         self.threshold = float(node.node_selection_strategy_parameter)
@@ -96,8 +101,8 @@ class DistanceSelector(Selector):
 
         # mandar voto
 
-        message = self.cm.mm.generate_vote_message()
-        await self.cm.send_message_to_neighbors(message, neighbors=self.selected_nodes)
+        message = node.cm.mm.generate_vote_message()
+        await node.cm.send_message_to_neighbors(message, neighbors=self.selected_nodes)
 
         logging.info(f"[DistanceSelector] selection finished, selected_nodes: {self.selected_nodes}")
         return self.selected_nodes
