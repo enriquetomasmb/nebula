@@ -17,6 +17,7 @@ from lightning.pytorch.loggers import CSVLogger
 from torch.nn import functional as F
 
 from nebula.core.utils.deterministic import enable_deterministic
+from nebula.core.utils.helper import reset_parameters
 from nebula.core.utils.nebulalogger_tensorboard import NebulaTensorBoardLogger
 
 try:
@@ -290,6 +291,8 @@ class Lightning:
     def set_model_parameters(self, params, initialize=False):
         try:
             self.model.load_state_dict(params)
+            if initialize:
+                reset_parameters(self.model)
         except Exception as e:
             raise ParameterSettingError("Error setting parameters") from e
 

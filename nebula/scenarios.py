@@ -70,6 +70,7 @@ class Scenario:
         schema_additional_participants,
         node_selection_strategy,
         communication_method,
+        node_selection_parameter,
     ):
         """
         Initialize the scenario.
@@ -164,6 +165,8 @@ class Scenario:
         self.additional_participants = additional_participants
         self.schema_additional_participants = schema_additional_participants
         self.node_selection_strategy = node_selection_strategy
+        self.node_selection_parameter = node_selection_parameter
+
         # Sustainability related
         self.communication_method = communication_method
 
@@ -387,6 +390,8 @@ class ScenarioManagement:
                 False if self.scenario.node_selection_strategy == "default" else True
             )
             participant_config["node_selection_strategy_args"]["strategy"] = self.scenario.node_selection_strategy
+            participant_config["node_selection_strategy_args"]["parameter"] = self.scenario.node_selection_parameter
+
             participant_config["resource_args"]["resource_constricted"] = node_config["resourceConstricted"]
             participant_config["resource_args"]["resource_constraint_cpu"] = node_config["resourceConstraintCPU"]
             participant_config["resource_args"]["resource_constraint_latency"] = node_config[

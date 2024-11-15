@@ -159,7 +159,9 @@ class CommunicationsManager:
             else:
                 logging.info(f"Unknown handler for message: {message_wrapper}")
         except Exception as e:
-            logging.exception(f"📥  handle_incoming_message | {addr_from} | Size of the message: {sys.getsizeof(data)} bytes | Error while processing: {e}")
+            logging.exception(
+                f"📥  handle_incoming_message | {addr_from} | Size of the message: {sys.getsizeof(data)} bytes | Error while processing: {e}"
+            )
 
     async def handle_discovery_message(self, source, message):
         logging.info(
@@ -293,6 +295,7 @@ class CommunicationsManager:
                     try:
                         model = self.engine.trainer.deserialize_model(message.parameters)
                         self.engine.trainer.set_model_parameters(model, initialize=True)
+
                         logging.info("🤖  handle_model_message | Model Parameters Initialized")
                         self.engine.set_initialization_status(True)
                         await (
@@ -335,7 +338,7 @@ class CommunicationsManager:
             logging.error(f"🔍  handle_nss_features_message | Received Message from: {source}")
             await self.engine.event_manager.trigger_event(source, message)
         except Exception as e:
-            logging.error(f"🔍  handle_nss_features_message | Error while processing: {message} | {e}")
+            logging.exception(f"🔍  handle_nss_features_message | Error while processing: {message} | {e}")
 
     def get_connections_lock(self):
         return self.connections_lock

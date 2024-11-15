@@ -3,6 +3,7 @@ import logging
 from collections import OrderedDict
 
 import torch
+import torch.nn as nn
 
 
 def cosine_metric2(
@@ -241,3 +242,11 @@ def normalise_layers(untrusted_params, trusted_params):
         normalised_params[layer] = normalised_layer
 
     return normalised_params
+
+
+def reset_parameters(model):
+    for layer in model.children():
+        if hasattr(layer, "reset_parameters"):
+            layer.reset_parameters()
+        elif isinstance(layer, nn.Sequential):
+            reset_parameters(layer)

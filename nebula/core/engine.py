@@ -16,6 +16,7 @@ from nebula.core.eventmanager import EventManager, event_handler
 from nebula.core.network.communications import CommunicationsManager
 from nebula.core.pb import nebula_pb2
 from nebula.core.selectors.all_selector import AllSelector
+from nebula.core.selectors.distance_selector import DistanceSelector
 from nebula.core.selectors.priority_selector import PrioritySelector
 from nebula.core.selectors.random_selector import RandomSelector
 from nebula.core.utils.locker import Locker
@@ -121,6 +122,9 @@ class Engine:
                 self.node_selection_strategy_selector = PrioritySelector()
             elif self.nss_selector == "random":
                 self.node_selection_strategy_selector = RandomSelector()
+            elif self.nss_selector == "distance":
+                self.node_selection_strategy_selector = DistanceSelector()
+                self.node_selection_strategy_parameter = config.participant["node_selection_strategy_args"]["parameter"]
         nss_info_msg = f"Enabled: {self.node_selection_strategy_enabled}\n{f'Selector: {self.nss_selector}' if self.node_selection_strategy_enabled else ''}"
         print_msg_box(msg=nss_info_msg, indent=2, title="NSS Info")
 
@@ -588,6 +592,19 @@ class Engine:
             logging.info(f"Direct connections: {direct_connections} | Undirected connections: {undirected_connections}")
             logging.info(f"[Role {self.role}] Starting learning cycle...")
 
+            if self.node_selection_strategy_enabled:
+                # Extract Features needed for Node Selection Strategy
+                self.__nss_extract_features()
+                # Broadcast Features
+                logging.info("Broadcasting NSS features to the rest of the topology ...")
+                message = self.cm.mm.generate_nss_features_message(self.nss_features)
+                await self.cm.send_message_to_neighbors(message)
+                _nss_features_msg = f"""NSS features for round {self.round}:\nCPU Usage (%): {self.nss_features["cpu_percent"]}%\nBytes Sent: {self.nss_features["bytes_sent"]}\nBytes Received: {self.nss_features["bytes_received"]}\nLoss: {self.nss_features["loss"]}\nData Size: {self.nss_features["data_size"]}\nSustainability: {self.nss_features["sustainability"]}"""
+                print_msg_box(msg=_nss_features_msg, indent=2, title="NSS features (this node)")
+                # selected_nodes = self.node_selection_strategy_selector.node_selection(self)
+
+                # self.trainer._logger.log_text("[NSS] Selected nodes", str(selected_nodes), step=self.round)
+
             await self.aggregator.update_federation_nodes(self.federation_nodes)
             await self._extended_learning_cycle()
 
@@ -865,6 +882,34 @@ class AggregatorNode(Engine):
         start_time = time.time()
         await self.trainer.test()
         await self.trainer.train()
+
+        if self.node_selection_strategy_enabled:
+            if self.nss_selector == "distance":
+                if self.node_selection_strategy_selector.stop_training:
+                    self.node_selection_strategy_selector.already_activated = True
+                    self.node_selection_strategy_selector.stop_training = False
+                    logging.info("[DistanceSelector] DetectorSelector repeating four training rounds")
+                    await self.trainer.train()
+                    await self.trainer.train()
+                    await self.trainer.train()
+                    await self.trainer.train()
+
+        if self.lie_atk:
+            from nebula.addons.attacks.poisoning.update_manipulation import update_manipulation_LIE
+
+            await self.aggregator.include_model_in_buffer(
+                update_manipulation_LIE(self.trainer.get_model_parameters(), 899),
+                self.trainer.get_model_weight(),
+                source=self.addr,
+                round=self.round,
+            )
+        else:
+            await self.aggregator.include_model_in_buffer(
+                self.trainer.get_model_parameters(),
+                self.trainer.get_model_weight(),
+                source=self.addr,
+                round=self.round,
+            )
         end_time = time.time()
 
         train_last_time = end_time - start_time
@@ -1022,6 +1067,7 @@ class ServerNode(Engine):
                 source=self.addr,
                 round=self.round,
             )
+
         else:
             await self.aggregator.include_model_in_buffer(
                 self.trainer.get_model_parameters(),
@@ -1029,6 +1075,7 @@ class ServerNode(Engine):
                 source=self.addr,
                 round=self.round,
             )
+
         await self._waiting_model_updates()
         await self.cm.propagator.propagate("stable")
 
@@ -1120,6 +1167,7 @@ class TrainerNode(Engine):
                 round=self.round,
                 local=True,
             )
+
         else:
             await self.aggregator.include_model_in_buffer(
                 self.trainer.get_model_parameters(),
