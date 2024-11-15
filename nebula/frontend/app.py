@@ -810,8 +810,8 @@ def remove_scenario(scenario_name=None):
 
 
 @app.get("/nebula/dashboard/{scenario_name}/relaunch")
-async def nebula_relaunch_scenario(scenario_name: str, request: Request, session: dict = Depends(get_session)):
-    global scenarios_list, scenarios_list_length
+async def nebula_relaunch_scenario(scenario_name: str, background_tasks: BackgroundTasks, session: dict = Depends(get_session)):
+    global scenarios_list, scenarios_list_length, scenarios_finished
 
     if "user" in session:
         if session["role"] == "demo":
@@ -826,6 +826,11 @@ async def nebula_relaunch_scenario(scenario_name: str, request: Request, session
 
         scenarios_list.append(scenario)
         scenarios_list_length = scenarios_list_length + 1
+
+        if(scenarios_list_length == 1):
+            scenarios_finished = 0
+            background_tasks.add_task(run_scenarios, scenarios_list, session["role"])
+
         return RedirectResponse(url="/nebula/dashboard")
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
@@ -1262,22 +1267,26 @@ async def run_scenario(scenario_data, role):
 
 # Deploy the list of scenarios
 async def run_scenarios(data, role):
-    global scenarios_finished, scenarios_list
-    scenarios_list = data
-    for scenario_data in scenarios_list:
-        finish_scenario_event.clear()
-        logging.info(f"Running scenario {scenario_data['scenario_title']}")
-        scenario_name = await run_scenario(scenario_data, role)
-        # Waits till the scenario is completed
-        while not finish_scenario_event.is_set() and not stop_all_scenarios_event.is_set():
-            await asyncio.sleep(1)
-        if stop_all_scenarios_event.is_set():
-            stop_all_scenarios_event.clear()
+    try:
+        global scenarios_finished, scenarios_list, scenarios_list_length
+        scenarios_list = data
+        for scenario_data in scenarios_list:
+            finish_scenario_event.clear()
+            logging.info(f"Running scenario {scenario_data['scenario_title']}")
+            scenario_name = await run_scenario(scenario_data, role)
+            # Waits till the scenario is completed
+            while not finish_scenario_event.is_set() and not stop_all_scenarios_event.is_set():
+                await asyncio.sleep(1)
+            if stop_all_scenarios_event.is_set():
+                stop_all_scenarios_event.clear()
+                scenarios_list_length = 0
+                stop_scenario(scenario_name)
+                return
+            scenarios_finished = scenarios_finished + 1
             stop_scenario(scenario_name)
-            return
-        scenarios_finished = scenarios_finished + 1
-        stop_scenario(scenario_name)
-        await asyncio.sleep(5)
+            await asyncio.sleep(5)
+    finally:
+        scenarios_list_length = 0
 
 
 @app.post("/nebula/dashboard/deployment/run")
