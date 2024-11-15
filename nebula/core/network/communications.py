@@ -295,7 +295,6 @@ class CommunicationsManager:
                     try:
                         model = self.engine.trainer.deserialize_model(message.parameters)
                         self.engine.trainer.set_model_parameters(model, initialize=True)
-
                         logging.info("🤖  handle_model_message | Model Parameters Initialized")
                         self.engine.set_initialization_status(True)
                         await (
