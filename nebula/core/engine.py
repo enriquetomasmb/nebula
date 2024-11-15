@@ -746,7 +746,7 @@ class AggregatorNode(Engine):
         await self.trainer.test()
 
         if self.node_selection_strategy_enabled:
-            if self.nss_selector == "distance":
+            if self.nss_selector == "distance" or self.nss_selector == "distance-voting":
                 if self.node_selection_strategy_selector.should_train():
                     logging.info("[DistanceSelector] I am training this round")
                     self.node_selection_strategy_selector.reset_votes()
@@ -758,7 +758,7 @@ class AggregatorNode(Engine):
             await self.trainer.train()
 
         if self.node_selection_strategy_enabled:
-            if self.nss_selector == "distance":
+            if self.nss_selector == "distance" or self.nss_selector == "distance-voting":
                 if self.node_selection_strategy_selector.stop_training:
                     self.node_selection_strategy_selector.stop_training = False
                     logging.info("[DistanceSelector] DetectorSelector repeating four training rounds")
