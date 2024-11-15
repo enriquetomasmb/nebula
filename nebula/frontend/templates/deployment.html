@@ -259,7 +259,7 @@
                     <h5 class="step-title">Topology generation</h5>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="inlineNetworkTopology"
-                            id="custom-topology-btn" checked>
+                            id="custom-topology-btn">
                         <label class="form-check-label" for="custom-topology-btn">Custom topology</label>
                         <small id="topologyCustomHelp" class="form-text text-muted">
                             <i id="topologyCustomIcon" class="fa fa-info-circle"></i>
@@ -267,13 +267,13 @@
                     </div>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="inlineNetworkTopology"
-                            id="predefined-topology-btn">
+                            id="predefined-topology-btn" checked>
                         <label class="form-check-label" for="predefined-topology-btn">Predefined topology</label>
                         <small id="topologyPredefinedHelp" class="form-text text-muted">
                             <i id="topologyPredefinedIcon" class="fa fa-info-circle"></i>
                         </small>
                     </div>
-                    <div id="predefined-topology" style="display: none">
+                    <div id="predefined-topology">
                         <select class="form-control" id="predefined-topology-select" name="predefined-topology"
                             style="display: inline; width: 40%">
                             <option selected>Fully</option>
@@ -2473,6 +2473,10 @@
         }
 
         document.getElementById("predefined-topology-nodes").addEventListener("change", function (){
+            updateNodes();
+        });
+
+        document.getElementById("predefined-topology-select").addEventListener("change", function (){
             updateNodes();
         });
     </script>
