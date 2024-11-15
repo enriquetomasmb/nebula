@@ -353,7 +353,7 @@ class Lightning:
 
     def on_round_start(self):
         self.data.setup()
-        self._logger.log_data({"1Round": self.round})
+        self._logger.log_data({"A-Round": self.round})
         # self.reporter.enqueue_data("Round", self.round)
 
     def on_round_end(self):
@@ -365,5 +365,5 @@ class Lightning:
         self.cleanup()
 
     def on_learning_cycle_end(self):
-        self._logger.log_data({"1Round": self.round})
+        self._logger.log_data({"A-Round": self.round})
         # self.reporter.enqueue_data("Round", self.round)
