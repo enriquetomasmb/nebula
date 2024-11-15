@@ -532,15 +532,15 @@ class Engine:
             logging.info(f"[Role {self.role}] Starting learning cycle...")
 
             if self.node_selection_strategy_enabled:
-                if "distance" not in self.nss_selector:
-                    # Extract Features needed for Node Selection Strategy
-                    self.__nss_extract_features()
-                    # Broadcast Features
-                    logging.info("Broadcasting NSS features to the rest of the topology ...")
-                    message = self.cm.mm.generate_nss_features_message(self.nss_features)
-                    await self.cm.send_message_to_neighbors(message)
-                    _nss_features_msg = f"""NSS features for round {self.round}:\nCPU Usage (%): {self.nss_features["cpu_percent"]}%\nBytes Sent: {self.nss_features["bytes_sent"]}\nBytes Received: {self.nss_features["bytes_received"]}\nLoss: {self.nss_features["loss"]}\nData Size: {self.nss_features["data_size"]}"""
-                    print_msg_box(msg=_nss_features_msg, indent=2, title="NSS features (this node)")
+                #if "distance" not in self.nss_selector:
+                # Extract Features needed for Node Selection Strategy
+                self.__nss_extract_features()
+                # Broadcast Features
+                logging.info("Broadcasting NSS features to the rest of the topology ...")
+                message = self.cm.mm.generate_nss_features_message(self.nss_features)
+                await self.cm.send_message_to_neighbors(message)
+                _nss_features_msg = f"""NSS features for round {self.round}:\nCPU Usage (%): {self.nss_features["cpu_percent"]}%\nBytes Sent: {self.nss_features["bytes_sent"]}\nBytes Received: {self.nss_features["bytes_received"]}\nLoss: {self.nss_features["loss"]}\nData Size: {self.nss_features["data_size"]}"""
+                print_msg_box(msg=_nss_features_msg, indent=2, title="NSS features (this node)")
                     # selected_nodes = self.node_selection_strategy_selector.node_selection(self)
 
                     # self.trainer._logger.log_text("[NSS] Selected nodes", str(selected_nodes), step=self.round)
