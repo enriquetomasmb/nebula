@@ -88,4 +88,5 @@ message NSSFeaturesMessage {
   int64 bytes_received = 3;
   float loss = 4;
   int64 data_size = 5;
+  float sustainability = 6;
 }

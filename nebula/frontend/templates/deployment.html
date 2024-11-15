@@ -524,7 +524,9 @@
                     <div class="form-check form-check-inline">
                         <select class="form-control" id="communication-method" name="communication-method"
                             style="display: inline; width: 80%">
-                            <option value="0.0005506">WiFi [Energy_consumption_per_byte = 0.0005506J]</option>
+                            <option value="0.0000008">WiFi</option>
+                            <option value="0.00000008" selected>ETHERNET</option>
+                            <option value="0.000000008">FIBER OPTIC</option>
                         </select>
                     </div>
                 </div>
@@ -835,12 +837,12 @@
                     <h5 class="step-title">Select the default location for the participants</h5>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="locationRadioOptions" id="random-geo-btn"
-                            checked>
+                            >
                         <label class="form-check-label" for="random-geo-btn">Random location</label>
                     </div>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="locationRadioOptions"
-                            id="custom-location-btn">
+                            id="custom-location-btn" checked>
                         <label class="form-check-label" for="custom-location-btn">Custom location</label>
                     </div>
                     <div id="mobility-custom-location" style="display: none; margin-left: 20px">
@@ -921,7 +923,7 @@
                 <!-- Node Selection Strategy -->
                 <div class="form-group row container-shadow tiny grey">
                     <h5 class="step-number">Node Selection Strategy <i class="fa fa-bullseye"></i>
-                        <input type="checkbox" id="nodesel-strat-lock" onchange="lock('nodesel-strat-default-btn', 'nodesel-strat-all-btn', 'nodesel-strat-random-btn', 'nodesel-strat-priority-btn', checked)" style="display: none;">
+                        <input type="checkbox" id="nodesel-strat-lock" onchange="lock('nodesel-strat-default-btn', 'nodesel-strat-all-btn', 'nodesel-strat-random-btn', 'nodesel-strat-priority-btn', 'nodesel-strat-distance-btn', checked)" style="display: none;">
                         <label for="nodesel-strat-lock" class="icon-container" style="float: right;">
                             <i class="fa fa-lock"></i>
                         </label>
@@ -930,7 +932,7 @@
                     <h5 class="step-title">Select the Node Selection Strategy to be used - <a href="https://files.ifi.uzh.ch/CSG/staff/feng/external/theses/MA-Chenfei-Ma.pdf" target="_blank">for more details see here</a></h5>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="nodeSelectionStrategyOptions"
-                           id="nodesel-strat-default-btn" value="default" checked>
+                           id="nodesel-strat-default-btn" value="default" >
                         <label class="form-check-label" for="nodesel-strat-default-btn">Default (No Strategy / Selector)</label>
                     </div>
                     <div class="form-check form-check-inline">
@@ -945,7 +947,7 @@
                     </div>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="nodeSelectionStrategyOptions"
-                            id="nodesel-strat-priority-btn" value="priority">
+                            id="nodesel-strat-priority-btn" value="priority" checked>
                         <label class="form-check-label" for="nodesel-strat-priority-btn">Priority Selection</label>
                     </div>
                 </div>

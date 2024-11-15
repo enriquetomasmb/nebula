@@ -89,6 +89,7 @@ class MessagesManager:
             bytes_received = nss_features["bytes_received"],
             loss = nss_features["loss"],
             data_size = nss_features["data_size"],
+            sustainability = nss_features["sustainability"],
         )
         message_wrapper = nebula_pb2.Wrapper()
         message_wrapper.source = self.addr

@@ -250,9 +250,9 @@ class Aggregator(ABC):
                 if node not in self.engine.node_selection_strategy_selector.selected_nodes:
                     logging.info(f"🔄  get_aggregation | Removing model from {node} as it was not selected by the NSS Selector.")
                     del self._pending_models_to_aggregate[node]
-                    if not self.engine.node_selection_strategy_selector.__class__.__name__ == "RandomSelector":
-                        logging.info(f"🔄  get_aggregation | Removing connection from {node} as it was not selected by the NSS Selector.")
-                        await self.engine.cm.disconnect(node)
+                    # if not self.engine.node_selection_strategy_selector.__class__.__name__ == "RandomSelector":
+                    #     logging.info(f"🔄  get_aggregation | Removing connection from {node} as it was not selected by the NSS Selector.")
+                        # await self.engine.cm.disconnect(node)
         logging.info(f"🔄  get_aggregation | Final nodes for aggregation: {self._pending_models_to_aggregate.keys()}")
         agg_start_timestamp = time.time()
         aggregated_result = self.run_aggregation(self._pending_models_to_aggregate)

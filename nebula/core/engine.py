@@ -212,6 +212,8 @@ class Engine:
         self.communication_carbon_emission = 0
         self.total_carbon_emission = 0
         
+        self.sustainability_score = 0
+        
         
         self.cpu_models_tdp = get_cpu_tdp(get_cpu_models())/psutil.cpu_count()
         n_nodes=self.config.participant["scenario_args"]["n_nodes"]
@@ -402,6 +404,7 @@ class Engine:
             features["loss"] = message.loss
             features["data_size"] = message.data_size
             features["latency"] = latency
+            features["sustainability"] = message.sustainability
             self.node_selection_strategy_selector.add_neighbor(source)
             self.node_selection_strategy_selector.add_node_features(source, features)
 
@@ -553,7 +556,7 @@ class Engine:
         total_tdp_all_cpus = sum(self.cpu_models_tdp * cpu_percent * 0.01 for  cpu_percent in  agg_cpu_percents)
         gpu_power = 0
         aggregation_energy_consumption, gpu_energy_consumption = get_sustain_energy_consumption(gpu_power, self.cpu_models_tdp, agg_cpu_percents, agg_time, self.pue)
-        aggregation_carbon_emission, _ = get_sustain_carbon_emission(self.carbon_intensity, self.renewable_energy, self.aggregation_energy_consumption, gpu_energy_consumption)
+        aggregation_carbon_emission, _ = get_sustain_carbon_emission(self.carbon_intensity, self.renewable_energy, aggregation_energy_consumption, gpu_energy_consumption)
         
         self.aggregation_energy_consumption += aggregation_energy_consumption
         self.aggregation_carbon_emission += aggregation_carbon_emission
@@ -594,13 +597,25 @@ class Engine:
             
             self.total_energy_consumption += self.communication_energy_consumption
             self.total_carbon_emission += self.communication_carbon_emission
+            self.sustainability_score = self.get_sustainability_score(self.total_carbon_emission)
             
-            step = int((datetime.now() - datetime.strptime(self.config.participant["scenario_args"]["start_time"],
-                                                        "%d/%m/%Y %H:%M:%S")).total_seconds())
+            # step = int((datetime.now() - datetime.strptime(self.config.participant["scenario_args"]["start_time"],
+            #                                             "%d/%m/%Y %H:%M:%S")).total_seconds())
             
             logging.info(f"gpu_carbon_emission    {self.train_gpu_energy_consumption}")
-            logging.info(f"carbon intensity   {self.carbon_intensity}" )
-            print((f"carbon intensity   {self.carbon_intensity}" ))
+            logging.info(f"sustainability_score    {self.sustainability_score}")
+            
+            logging.info(f"""round : {self.round},  
+                Sustainability/Training_cpu_energy_consumption: {self.train_cpu_energy_consumption}, 
+                Sustainability/Training_cpu_carbon_emission: {self.train_cpu_carbon_emission}, 
+                Sustainability/Training_gpu_energy_consumption: {self.train_gpu_energy_consumption}, 
+                Sustainability/Training_gpu_carbon_emission:{self.train_gpu_carbon_emission}, 
+                Sustainability/Aggregation_energy_consumption: {self.aggregation_energy_consumption}, 
+                Sustainability/Aggregation_carbon_emission: {self.aggregation_carbon_emission}, 
+                Sustainability/Communication_energy_consumption: {self.communication_energy_consumption}, 
+                Sustainability/Communication_carbon_emission:{self.communication_carbon_emission}, 
+                Sustainability/Total_energy_consumption: {self.total_energy_consumption}, 
+                Sustainability/Total_carbon_emission:{self.total_carbon_emission}""")
             
             self.trainer.logger.log_metrics({
             "Sustainability/Training_cpu_energy_consumption": self.train_cpu_energy_consumption,
@@ -613,7 +628,9 @@ class Engine:
             "Sustainability/Communication_carbon_emission":self.communication_carbon_emission,
             "Sustainability/Total_energy_consumption": self.total_energy_consumption,
             "Sustainability/Total_carbon_emission":self.total_carbon_emission},
-            step=step)
+            step=self.round)
+            
+            
             
             self.global_logger.aggregate_nodes_data()
 
@@ -640,27 +657,28 @@ class Engine:
             indent=2,
             title="End of the experiment",
         )
+        
         # Report
-        # if self.config.participant["scenario_args"]["controller"] != "nebula-test":
-        #     result = await self.reporter.report_scenario_finished()
-        #     if result:
-        #         pass
-        #     else:
-        #         logging.error("Error reporting scenario finished")
+        if self.config.participant["scenario_args"]["controller"] != "nebula-test":
+            result = await self.reporter.report_scenario_finished()
+            if result:
+                pass
+            else:
+                logging.error("Error reporting scenario finished")
 
-        # logging.info("Checking if all my connections reached the total rounds...")
-        # while not self.cm.check_finished_experiment():
-        #     await asyncio.sleep(1)
+        logging.info("Checking if all my connections reached the total rounds...")
+        while not self.cm.check_finished_experiment():
+            await asyncio.sleep(1)
 
-        # # Enable loggin info
-        # logging.getLogger().disabled = True
+        # Enable loggin info
+        logging.getLogger().disabled = True
 
-        # # Kill itself
-        # if self.config.participant["scenario_args"]["deployment"] == "docker":
-        #     try:
-        #         self.client.containers.get(self.docker_id).stop()
-        #     except Exception as e:
-        #         print(f"Error stopping Docker container with ID {self.docker_id}: {e}")
+        # Kill itself
+        if self.config.participant["scenario_args"]["deployment"] == "docker":
+            try:
+                self.client.containers.get(self.docker_id).stop()
+            except Exception as e:
+                print(f"Error stopping Docker container with ID {self.docker_id}: {e}")
 
     async def _extended_learning_cycle(self):
         """
@@ -668,6 +686,10 @@ class Engine:
         functionalities. The method is called in the _learning_cycle method.
         """
         pass
+    
+    def get_sustainability_score(self, carbon_emission):
+        sustainability_score =  1/(carbon_emission+0.001)*100
+        return sustainability_score
 
     def reputation_calculation(self, aggregated_models_weights):
         cossim_threshold = 0.5
@@ -734,6 +756,7 @@ class Engine:
         nss_features["bytes_received"] = net_io_counters.bytes_recv
         nss_features["loss"] = self.trainer.model.loss
         nss_features["data_size"] = self.trainer.get_model_weight()
+        nss_features["sustainability"] = self.sustainability_score
         self.nss_features = nss_features
 
     async def _get_current_neighbors(self):
@@ -854,6 +877,13 @@ class AggregatorNode(Engine):
         train_cpu_energy_consumption, train_gpu_energy_consumption = get_sustain_energy_consumption(gpu_powers, self.cpu_models_tdp, cpu_util, train_last_time, self.pue)
         train_cpu_carbon_emission, train_gpu_carbon_emission = get_sustain_carbon_emission(self.carbon_intensity, self.renewable_energy, train_cpu_energy_consumption, train_gpu_energy_consumption)
         
+        logging.info(f""" round{self.round}, 
+                     train_cpu_energy_consumption {train_cpu_energy_consumption},
+                     train_gpu_energy_consumption {train_gpu_energy_consumption}, 
+                     train_cpu_carbon_emission {train_cpu_carbon_emission},
+                     train_gpu_carbon_emission {train_gpu_carbon_emission}, 
+                     """)
+        
         self.train_cpu_energy_consumption += train_cpu_energy_consumption
         self.train_gpu_energy_consumption += train_gpu_energy_consumption
         self.train_cpu_carbon_emission += train_cpu_carbon_emission
@@ -871,7 +901,7 @@ class AggregatorNode(Engine):
             logging.info(f"Broadcasting NSS features to the rest of the topology ...")
             message = self.cm.mm.generate_nss_features_message(self.nss_features)
             await self.cm.send_message_to_neighbors(message)
-            _nss_features_msg = f"""NSS features for round {self.round}:\nCPU Usage (%): {self.nss_features['cpu_percent']}%\nBytes Sent: {self.nss_features['bytes_sent']}\nBytes Received: {self.nss_features['bytes_received']}\nLoss: {self.nss_features['loss']}\nData Size: {self.nss_features['data_size']}"""
+            _nss_features_msg = f"""NSS features for round {self.round}:\nCPU Usage (%): {self.nss_features['cpu_percent']}%\nBytes Sent: {self.nss_features['bytes_sent']}\nBytes Received: {self.nss_features['bytes_received']}\nLoss: {self.nss_features['loss']}\nData Size: {self.nss_features['data_size']}\nSustainability: {self.nss_features['sustainability']}"""
             print_msg_box(msg=_nss_features_msg, indent=2, title="NSS features (this node)")
 
         await self.aggregator.include_model_in_buffer(

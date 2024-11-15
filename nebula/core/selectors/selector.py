@@ -33,7 +33,8 @@ class Selector():
                                      "Loss: {}\n"
                                      "Data Size: {}\n"
                                      "Latency (ms): {}\n"
-                                     "Availability: {}")
+                                     "Availability: {}\n"
+                                     "Sustainability: {}")
         print_msg_box(selector_received_nss_msg.format(
             node,
             round(features["cpu_percent"], 2),
@@ -42,7 +43,8 @@ class Selector():
             features["loss"],
             features["data_size"],
             round(features["latency"], 2),
-            features["availability"]
+            features["availability"],
+            features["sustainability"],
         ), indent = 2, title="Selector: Received NSS Features")
 
     def get_neighbors(self):

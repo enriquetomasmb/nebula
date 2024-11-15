@@ -100,6 +100,6 @@ def get_sustain_energy_consumption(gpu_powers, cpu_models_tdp, cpu_util, last_ti
 
 
 def get_sustain_carbon_emission(carbon_intensity, renewable_energy, cpu_energy_consumption, gpu_energy_consumption):
-    cpu_carbon_emission = cpu_energy_consumption * carbon_intensity * renewable_energy
-    gpu_carbon_emission = gpu_energy_consumption * carbon_intensity * renewable_energy
+    cpu_carbon_emission = cpu_energy_consumption * carbon_intensity * (100 - renewable_energy)  * 0.01
+    gpu_carbon_emission = gpu_energy_consumption * carbon_intensity * (100 - renewable_energy)  * 0.01
     return cpu_carbon_emission, gpu_carbon_emission

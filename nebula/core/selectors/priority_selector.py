@@ -25,7 +25,7 @@ class PrioritySelector(Selector):
     MIN_AMOUNT_OF_SELECTED_NEIGHBORS = 1
     MAX_PERCENT_SELECTABLE_NEIGHBORS = 0.8
     # Original Feature Weights provided in Report / Thesis
-    FEATURE_WEIGHTS = [70.0, 5.0, 1.0, 0.0, 80.0, 2.0, 1.0]
+    FEATURE_WEIGHTS = [70.0, 5.0, 1.0, 0.0, 80.0, 2.0, 1.0, 10.0]
     # Feature Weights for Testing (Latency can be changed reliably by virtual constraints)
     # FEATURE_WEIGHTS = [0, 0, 0, 0, 0, 100, 0]
 
@@ -34,7 +34,7 @@ class PrioritySelector(Selector):
         self.config = config
         FeatureWeights = namedtuple(
             'FeatureWeights',
-            ['loss', 'cpu_percent', 'data_size', 'bytes_received', 'bytes_sent', 'latency', 'age']
+            ['loss', 'cpu_percent', 'data_size', 'bytes_received', 'bytes_sent', 'latency', 'age', 'sustainability']
         )
         self.feature_weights = FeatureWeights(*self.FEATURE_WEIGHTS)
         logging.info("[PrioritySelector] Initialized")
@@ -50,7 +50,8 @@ class PrioritySelector(Selector):
             return self.selected_nodes
 
         availability = []
-        feature_array = np.empty((7, 0))
+        #add the sustainability metric
+        feature_array = np.empty((8, 0))
 
         for neighbor in neighbors:
             if neighbor not in self.ages.keys():
@@ -63,7 +64,9 @@ class PrioritySelector(Selector):
                                  self.features[neighbor]["bytes_received"],
                                  self.features[neighbor]["bytes_sent"],
                                  1/(self.features[neighbor]["latency"] + 0.000001),
-                                 self.ages[neighbor]))
+                                 self.ages[neighbor],
+                                 self.features[neighbor]['sustainability'])
+                                )
 
             # Set loss to 100 if loss metric is unavailable
             if feature_list[0] == -1:
