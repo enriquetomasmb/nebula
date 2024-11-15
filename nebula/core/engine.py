@@ -1,16 +1,17 @@
 import asyncio
 import logging
 import os
-import time
-import psutil
 import socket
+import time
+
 import docker
+import psutil
 
 from nebula.addons.attacks.attacks import create_attack
+from nebula.addons.attacks.poisoning.modelpoison import modelpoison
 from nebula.addons.functions import print_msg_box
 from nebula.addons.reporter import Reporter
-from nebula.core.aggregation.aggregator import create_aggregator, create_malicious_aggregator, create_target_aggregator
-from nebula.addons.attacks.poisoning.modelpoison import modelpoison
+from nebula.core.aggregation.aggregator import create_aggregator, create_target_aggregator
 from nebula.core.eventmanager import EventManager, event_handler
 from nebula.core.network.communications import CommunicationsManager
 from nebula.core.pb import nebula_pb2
@@ -29,16 +30,18 @@ logging.getLogger("plotly").setLevel(logging.ERROR)
 import pdb
 import sys
 
+from nebula.addons.sustainability.sustain_util import (
+    get_carbon_intensity,
+    get_cpu_models,
+    get_cpu_tdp,
+    get_sustain_carbon_emission,
+    get_sustain_energy_consumption,
+)
 from nebula.config.config import Config
 from nebula.core.training.lightning import Lightning
+from nebula.core.utils.accumlatedlogger import AccumaltedLogger
 from nebula.core.utils.helper import cosine_metric
 
-
-import re
-from datetime import datetime
-from nebula.addons.sustainability.sustain_util import get_cpu_tdp, get_cpu_models, get_carbon_intensity
-from nebula.addons.sustainability.sustain_util import get_sustain_energy_consumption, get_sustain_carbon_emission
-from nebula.core.utils.accumlatedlogger import AccumaltedLogger
 
 def handle_exception(exc_type, exc_value, exc_traceback):
     logging.error("Uncaught exception", exc_info=(exc_type, exc_value, exc_traceback))
@@ -194,7 +197,7 @@ class Engine:
             self._reputation_callback,
         )
         # ... add more callbacks here
-        
+
         # sustainability related params
         self.get_global_logger(self.log_dir)
         self.cpu_energy_consumption = 0
@@ -202,42 +205,43 @@ class Engine:
         # energy consumption
         self.train_cpu_energy_consumption = 0
         self.train_gpu_energy_consumption = 0
-        self.aggregation_energy_consumption = 0        
+        self.aggregation_energy_consumption = 0
         self.communication_energy_consumption = 0
         self.total_energy_consumption = 0
         # carbon emssion
         self.train_cpu_carbon_emission = 0
         self.train_gpu_carbon_emission = 0
-        self.aggregation_carbon_emission = 0        
+        self.aggregation_carbon_emission = 0
         self.communication_carbon_emission = 0
         self.total_carbon_emission = 0
-        
+
         self.sustainability_score = 0
-        
-        
-        self.cpu_models_tdp = get_cpu_tdp(get_cpu_models())/psutil.cpu_count()
-        n_nodes=self.config.participant["scenario_args"]["n_nodes"]
+
+        self.cpu_models_tdp = get_cpu_tdp(get_cpu_models()) / psutil.cpu_count()
+        n_nodes = self.config.participant["scenario_args"]["n_nodes"]
         self.process = psutil.Process()
-        devicecount=psutil.cpu_count()//n_nodes
-        self.cpu_index=[i for i in range(self.idx*devicecount,self.idx*devicecount+devicecount)]
+        devicecount = psutil.cpu_count() // n_nodes
+        self.cpu_index = [i for i in range(self.idx * devicecount, self.idx * devicecount + devicecount)]
         self.process.cpu_affinity(self.cpu_index)
-        
+
         self.Energy_consumption_per_byte = float(self.config.participant["sustainability_args"]["communication_method"])
         self.pue = float(self.config.participant["sustainability_args"]["pue"])
         self.renewable_energy = float(self.config.participant["sustainability_args"]["renewable_energy"])
-        
-        self.carbon_intensity = get_carbon_intensity(float(self.config.participant["mobility_args"]["longitude"]),float(self.config.participant["mobility_args"]["latitude"]))
 
-        
-    #add a static log to aggregate all nodes infomation
-    global_logger =None
+        self.carbon_intensity = get_carbon_intensity(
+            float(self.config.participant["mobility_args"]["longitude"]),
+            float(self.config.participant["mobility_args"]["latitude"]),
+        )
+
+    # add a static log to aggregate all nodes infomation
+    global_logger = None
+
     @classmethod
     def get_global_logger(cls, log_dir):
         # Initialize the global logger if it has not already been created
         if cls.global_logger is None:
             cls.global_logger = AccumaltedLogger(log_dir, name="metrics", version="global", log_graph=True)
- 
- 
+
     @property
     def cm(self):
         return self._cm
@@ -551,20 +555,23 @@ class Engine:
             self.trainer.set_model_parameters(params)
         else:
             logging.error("Aggregation finished with no parameters")
-            
+
         # calculate sustainability metrics
-        total_tdp_all_cpus = sum(self.cpu_models_tdp * cpu_percent * 0.01 for  cpu_percent in  agg_cpu_percents)
+        total_tdp_all_cpus = sum(self.cpu_models_tdp * cpu_percent * 0.01 for cpu_percent in agg_cpu_percents)
         gpu_power = 0
-        aggregation_energy_consumption, gpu_energy_consumption = get_sustain_energy_consumption(gpu_power, self.cpu_models_tdp, agg_cpu_percents, agg_time, self.pue)
-        aggregation_carbon_emission, _ = get_sustain_carbon_emission(self.carbon_intensity, self.renewable_energy, aggregation_energy_consumption, gpu_energy_consumption)
-        
+        aggregation_energy_consumption, gpu_energy_consumption = get_sustain_energy_consumption(
+            gpu_power, self.cpu_models_tdp, agg_cpu_percents, agg_time, self.pue
+        )
+        aggregation_carbon_emission, _ = get_sustain_carbon_emission(
+            self.carbon_intensity, self.renewable_energy, aggregation_energy_consumption, gpu_energy_consumption
+        )
+
         self.aggregation_energy_consumption += aggregation_energy_consumption
         self.aggregation_carbon_emission += aggregation_carbon_emission
-        
+
         # add to the total energy and carbon
         self.total_energy_consumption += aggregation_energy_consumption
         self.total_carbon_emission += aggregation_carbon_emission
-        
 
     async def _learning_cycle(self):
         while self.round is not None and self.round < self.total_rounds:
@@ -574,64 +581,67 @@ class Engine:
                 title="Round information",
             )
             self.trainer.on_round_start()
-            self.federation_nodes = await self.cm.get_addrs_current_connections(only_direct = True, myself = True)
+            self.federation_nodes = await self.cm.get_addrs_current_connections(only_direct=True, myself=True)
             logging.info(f"Federation nodes: {self.federation_nodes}")
             direct_connections = await self.cm.get_addrs_current_connections(only_direct=True)
             undirected_connections = await self.cm.get_addrs_current_connections(only_undirected=True)
             logging.info(f"Direct connections: {direct_connections} | Undirected connections: {undirected_connections}")
             logging.info(f"[Role {self.role}] Starting learning cycle...")
-            
+
             await self.aggregator.update_federation_nodes(self.federation_nodes)
             await self._extended_learning_cycle()
-            
+
             await self.get_round_lock().acquire_async()
-             
+
             # local training and aggregation should be finished here, add the communication sustainability metrics
             # and log all sustain metrics to tensorboard
-            
+
             net_io_counters = psutil.net_io_counters()
             bytes_sent = net_io_counters.bytes_sent
             bytes_recv = net_io_counters.bytes_recv
-            self.communication_energy_consumption = (bytes_sent + bytes_recv) * self.Energy_consumption_per_byte / 3600000
+            self.communication_energy_consumption = (
+                (bytes_sent + bytes_recv) * self.Energy_consumption_per_byte / 3600000
+            )
             self.communication_carbon_emission = self.communication_energy_consumption * self.carbon_intensity
-            
+
             self.total_energy_consumption += self.communication_energy_consumption
             self.total_carbon_emission += self.communication_carbon_emission
             self.sustainability_score = self.get_sustainability_score(self.total_carbon_emission)
-            
+
             # step = int((datetime.now() - datetime.strptime(self.config.participant["scenario_args"]["start_time"],
             #                                             "%d/%m/%Y %H:%M:%S")).total_seconds())
-            
+
             logging.info(f"gpu_carbon_emission    {self.train_gpu_energy_consumption}")
             logging.info(f"sustainability_score    {self.sustainability_score}")
-            
-            logging.info(f"""round : {self.round},  
-                Sustainability/Training_cpu_energy_consumption: {self.train_cpu_energy_consumption}, 
-                Sustainability/Training_cpu_carbon_emission: {self.train_cpu_carbon_emission}, 
-                Sustainability/Training_gpu_energy_consumption: {self.train_gpu_energy_consumption}, 
-                Sustainability/Training_gpu_carbon_emission:{self.train_gpu_carbon_emission}, 
-                Sustainability/Aggregation_energy_consumption: {self.aggregation_energy_consumption}, 
-                Sustainability/Aggregation_carbon_emission: {self.aggregation_carbon_emission}, 
-                Sustainability/Communication_energy_consumption: {self.communication_energy_consumption}, 
-                Sustainability/Communication_carbon_emission:{self.communication_carbon_emission}, 
-                Sustainability/Total_energy_consumption: {self.total_energy_consumption}, 
+
+            logging.info(f"""round : {self.round},
+                Sustainability/Training_cpu_energy_consumption: {self.train_cpu_energy_consumption},
+                Sustainability/Training_cpu_carbon_emission: {self.train_cpu_carbon_emission},
+                Sustainability/Training_gpu_energy_consumption: {self.train_gpu_energy_consumption},
+                Sustainability/Training_gpu_carbon_emission:{self.train_gpu_carbon_emission},
+                Sustainability/Aggregation_energy_consumption: {self.aggregation_energy_consumption},
+                Sustainability/Aggregation_carbon_emission: {self.aggregation_carbon_emission},
+                Sustainability/Communication_energy_consumption: {self.communication_energy_consumption},
+                Sustainability/Communication_carbon_emission:{self.communication_carbon_emission},
+                Sustainability/Total_energy_consumption: {self.total_energy_consumption},
                 Sustainability/Total_carbon_emission:{self.total_carbon_emission}""")
-            
-            self.trainer.logger.log_metrics({
-            "Sustainability/Training_cpu_energy_consumption": self.train_cpu_energy_consumption,
-            "Sustainability/Training_cpu_carbon_emission": self.train_cpu_carbon_emission,
-            "Sustainability/Training_gpu_energy_consumption": self.train_gpu_energy_consumption,
-            "Sustainability/Training_gpu_carbon_emission":self.train_gpu_carbon_emission,
-            "Sustainability/Aggregation_energy_consumption": self.aggregation_energy_consumption,
-            "Sustainability/Aggregation_carbon_emission": self.aggregation_carbon_emission,
-            "Sustainability/Communication_energy_consumption": self.communication_energy_consumption,
-            "Sustainability/Communication_carbon_emission":self.communication_carbon_emission,
-            "Sustainability/Total_energy_consumption": self.total_energy_consumption,
-            "Sustainability/Total_carbon_emission":self.total_carbon_emission},
-            step=self.round)
-            
-            
-            
+
+            self.trainer.logger.log_metrics(
+                {
+                    "Sustainability/Training_cpu_energy_consumption": self.train_cpu_energy_consumption,
+                    "Sustainability/Training_cpu_carbon_emission": self.train_cpu_carbon_emission,
+                    "Sustainability/Training_gpu_energy_consumption": self.train_gpu_energy_consumption,
+                    "Sustainability/Training_gpu_carbon_emission": self.train_gpu_carbon_emission,
+                    "Sustainability/Aggregation_energy_consumption": self.aggregation_energy_consumption,
+                    "Sustainability/Aggregation_carbon_emission": self.aggregation_carbon_emission,
+                    "Sustainability/Communication_energy_consumption": self.communication_energy_consumption,
+                    "Sustainability/Communication_carbon_emission": self.communication_carbon_emission,
+                    "Sustainability/Total_energy_consumption": self.total_energy_consumption,
+                    "Sustainability/Total_carbon_emission": self.total_carbon_emission,
+                },
+                step=self.round,
+            )
+
             self.global_logger.aggregate_nodes_data()
 
             print_msg_box(
@@ -657,7 +667,7 @@ class Engine:
             indent=2,
             title="End of the experiment",
         )
-        
+
         # Report
         if self.config.participant["scenario_args"]["controller"] != "nebula-test":
             result = await self.reporter.report_scenario_finished()
@@ -686,9 +696,11 @@ class Engine:
         functionalities. The method is called in the _learning_cycle method.
         """
         pass
-    
+
     def get_sustainability_score(self, carbon_emission):
-        sustainability_score =  1/(carbon_emission+0.001)*100
+        # use 1/carbon_emission * 100 to generate the sustainability score, the less carbon means a greater sustainability value
+        # + 0.0001 to avoid the devide 0 problem
+        sustainability_score = 1 / (carbon_emission + 0.0001) * 100
         return sustainability_score
 
     def reputation_calculation(self, aggregated_models_weights):
@@ -760,8 +772,9 @@ class Engine:
         self.nss_features = nss_features
 
     async def _get_current_neighbors(self):
-        current_connections = await self.cm.get_all_addrs_current_connections(only_direct = True)
+        current_connections = await self.cm.get_all_addrs_current_connections(only_direct=True)
         return set(current_connections)
+
 
 class MaliciousNode(Engine):
     def __init__(
@@ -793,14 +806,19 @@ class MaliciousNode(Engine):
         self.round_stop_attack = 6
 
     async def _extended_learning_cycle(self):
-        
         if type(self.attack).__name__ == "FloodingAttack":
-            logging.info(f"Running Flooding Attack")
+            logging.info("Running Flooding Attack")
             await self.attack.attack(self.cm)
-        
+
         if self.lie_atk:
             from nebula.addons.attacks.poisoning.update_manipulation import update_manipulation_LIE
-            await self.aggregator.include_model_in_buffer(update_manipulation_LIE(self.trainer.get_model_parameters(),899), self.trainer.get_model_weight(), source=self.addr, round=self.round)
+
+            await self.aggregator.include_model_in_buffer(
+                update_manipulation_LIE(self.trainer.get_model_parameters(), 899),
+                self.trainer.get_model_weight(),
+                source=self.addr,
+                round=self.round,
+            )
         elif self.model_poisoning:
             logging.info(f"Poisoning the model with {self.poisoned_ratio} of the data and {self.noise_type} noise")
             poisoned_model = modelpoison(
@@ -810,7 +828,7 @@ class MaliciousNode(Engine):
             )
             self.trainer.set_model_parameters(poisoned_model)
             del poisoned_model
-        
+
         if self.role == "aggregator":
             await AggregatorNode._extended_learning_cycle(self)
         if self.role == "trainer":
@@ -848,60 +866,66 @@ class AggregatorNode(Engine):
         await self.trainer.test()
         await self.trainer.train()
         end_time = time.time()
-        
+
         train_last_time = end_time - start_time
-        isgpu=False
+        isgpu = False
         gpu_powers = 0
-        
+
         try:
             import pynvml
+
             pynvml.nvmlInit()
             devices = pynvml.nvmlDeviceGetCount()
-            isgpu=True
+            isgpu = True
         except Exception:
-            logging.error("errror")
-            
+            logging.exception("errror")
+
         if isgpu:
-            gpu_powers=0
+            gpu_powers = 0
             for i in range(devices):
                 handle = pynvml.nvmlDeviceGetHandleByIndex(i)
                 # gpu_percent = pynvml.nvmlDeviceGetUtilizationRates(handle).gpu
                 gpu_power = pynvml.nvmlDeviceGetPowerUsage(handle) / 1000.0
-                gpu_powers+=gpu_power
-            logging.info("gpu powers ",gpu_powers)
-            
-        cpu_percents = psutil.cpu_percent(percpu=True) 
-        cpu_util=[cpu_percents[i] for i in self.cpu_index]
-    
-        # calculate sustainability metrics       
-        train_cpu_energy_consumption, train_gpu_energy_consumption = get_sustain_energy_consumption(gpu_powers, self.cpu_models_tdp, cpu_util, train_last_time, self.pue)
-        train_cpu_carbon_emission, train_gpu_carbon_emission = get_sustain_carbon_emission(self.carbon_intensity, self.renewable_energy, train_cpu_energy_consumption, train_gpu_energy_consumption)
-        
-        logging.info(f""" round{self.round}, 
+                gpu_powers += gpu_power
+            logging.info("gpu powers ", gpu_powers)
+
+        cpu_percents = psutil.cpu_percent(percpu=True)
+        cpu_util = [cpu_percents[i] for i in self.cpu_index]
+
+        # calculate sustainability metrics
+        train_cpu_energy_consumption, train_gpu_energy_consumption = get_sustain_energy_consumption(
+            gpu_powers, self.cpu_models_tdp, cpu_util, train_last_time, self.pue
+        )
+        train_cpu_carbon_emission, train_gpu_carbon_emission = get_sustain_carbon_emission(
+            self.carbon_intensity, self.renewable_energy, train_cpu_energy_consumption, train_gpu_energy_consumption
+        )
+
+        logging.info(f""" round{self.round},
                      train_cpu_energy_consumption {train_cpu_energy_consumption},
-                     train_gpu_energy_consumption {train_gpu_energy_consumption}, 
+                     train_gpu_energy_consumption {train_gpu_energy_consumption},
                      train_cpu_carbon_emission {train_cpu_carbon_emission},
-                     train_gpu_carbon_emission {train_gpu_carbon_emission}, 
+                     train_gpu_carbon_emission {train_gpu_carbon_emission},
                      """)
-        
+
         self.train_cpu_energy_consumption += train_cpu_energy_consumption
         self.train_gpu_energy_consumption += train_gpu_energy_consumption
         self.train_cpu_carbon_emission += train_cpu_carbon_emission
         self.train_gpu_carbon_emission += train_gpu_carbon_emission
-        
+
         # add to the total energy and carbon
-        self.total_energy_consumption = self.total_energy_consumption + train_cpu_energy_consumption + train_gpu_energy_consumption
+        self.total_energy_consumption = (
+            self.total_energy_consumption + train_cpu_energy_consumption + train_gpu_energy_consumption
+        )
         self.total_carbon_emission = self.total_carbon_emission + train_cpu_carbon_emission + train_gpu_carbon_emission
-    
-        
+
         if self.node_selection_strategy_enabled:
             # Extract Features needed for Node Selection Strategy
             self.nss_extract_features()
             # Broadcast Features
-            logging.info(f"Broadcasting NSS features to the rest of the topology ...")
+            logging.info("Broadcasting NSS features to the rest of the topology ...")
             message = self.cm.mm.generate_nss_features_message(self.nss_features)
             await self.cm.send_message_to_neighbors(message)
-            _nss_features_msg = f"""NSS features for round {self.round}:\nCPU Usage (%): {self.nss_features['cpu_percent']}%\nBytes Sent: {self.nss_features['bytes_sent']}\nBytes Received: {self.nss_features['bytes_received']}\nLoss: {self.nss_features['loss']}\nData Size: {self.nss_features['data_size']}\nSustainability: {self.nss_features['sustainability']}"""
+            _nss_features_msg = f"""NSS features for round {self.round}:\nCPU Usage (%): {self.nss_features["cpu_percent"]}%\nBytes Sent: {self.nss_features["bytes_sent"]}\nBytes Received: {self.nss_features["bytes_received"]}\nLoss: {self.nss_features["loss"]}\nData Size: {self.nss_features["data_size"]}\nSustainability: {self.nss_features["sustainability"]}"""
             print_msg_box(msg=_nss_features_msg, indent=2, title="NSS features (this node)")
 
         await self.aggregator.include_model_in_buffer(
@@ -943,55 +967,68 @@ class ServerNode(Engine):
         start_time = time.time()
         await self.trainer.test()
         end_time = time.time()
-        
+
         train_last_time = end_time - start_time
-        isgpu=False
+        isgpu = False
         gpu_powers = 0
-        
+
         try:
             import pynvml
+
             pynvml.nvmlInit()
             devices = pynvml.nvmlDeviceGetCount()
-            isgpu=True
+            isgpu = True
         except Exception:
-            logging.error("errror")
-            
+            logging.exception("errror")
+
         if isgpu:
-            gpu_powers=0
+            gpu_powers = 0
             for i in range(devices):
                 handle = pynvml.nvmlDeviceGetHandleByIndex(i)
                 # gpu_percent = pynvml.nvmlDeviceGetUtilizationRates(handle).gpu
                 gpu_power = pynvml.nvmlDeviceGetPowerUsage(handle) / 1000.0
-                gpu_powers+=gpu_power
-            logging.info("gpu powers ",gpu_powers)
-            
-        cpu_percents = psutil.cpu_percent(percpu=True) 
-        cpu_util=[cpu_percents[i] for i in self.cpu_index]
-    
-        # calculate sustainability metrics       
-        train_cpu_energy_consumption, train_gpu_energy_consumption = get_sustain_energy_consumption(gpu_powers, self.cpu_models_tdp, cpu_util, train_last_time, self.pue)
-        train_cpu_carbon_emission, train_gpu_carbon_emission = get_sustain_carbon_emission(self.carbon_intensity, self.renewable_energy, train_cpu_energy_consumption, train_gpu_energy_consumption)
-        
+                gpu_powers += gpu_power
+            logging.info("gpu powers ", gpu_powers)
+
+        cpu_percents = psutil.cpu_percent(percpu=True)
+        cpu_util = [cpu_percents[i] for i in self.cpu_index]
+
+        # calculate sustainability metrics
+        train_cpu_energy_consumption, train_gpu_energy_consumption = get_sustain_energy_consumption(
+            gpu_powers, self.cpu_models_tdp, cpu_util, train_last_time, self.pue
+        )
+        train_cpu_carbon_emission, train_gpu_carbon_emission = get_sustain_carbon_emission(
+            self.carbon_intensity, self.renewable_energy, train_cpu_energy_consumption, train_gpu_energy_consumption
+        )
+
         self.train_cpu_energy_consumption += train_cpu_energy_consumption
         self.train_gpu_energy_consumption += train_gpu_energy_consumption
         self.train_cpu_carbon_emission += train_cpu_carbon_emission
         self.train_gpu_carbon_emission += train_gpu_carbon_emission
-        
+
         # add to the total energy and carbon
-        self.total_energy_consumption = self.total_energy_consumption + train_cpu_energy_consumption + train_gpu_energy_consumption
+        self.total_energy_consumption = (
+            self.total_energy_consumption + train_cpu_energy_consumption + train_gpu_energy_consumption
+        )
         self.total_carbon_emission = self.total_carbon_emission + train_cpu_carbon_emission + train_gpu_carbon_emission
 
         # In the first round, the server node doest take into account the initial model parameters for the aggregation
         if self.lie_atk:
             from nebula.addons.attacks.poisoning.update_manipulation import update_manipulation_LIE
-            await self.aggregator.include_model_in_buffer(update_manipulation_LIE(self.trainer.get_model_parameters(),899), self.trainer.BYPASS_MODEL_WEIGHT, source=self.addr, round=self.round)
+
+            await self.aggregator.include_model_in_buffer(
+                update_manipulation_LIE(self.trainer.get_model_parameters(), 899),
+                self.trainer.BYPASS_MODEL_WEIGHT,
+                source=self.addr,
+                round=self.round,
+            )
         else:
             await self.aggregator.include_model_in_buffer(
-            self.trainer.get_model_parameters(),
-            self.trainer.BYPASS_MODEL_WEIGHT,
-            source=self.addr,
-            round=self.round,
-        )
+                self.trainer.get_model_parameters(),
+                self.trainer.BYPASS_MODEL_WEIGHT,
+                source=self.addr,
+                round=self.round,
+            )
         await self._waiting_model_updates()
         await self.cm.propagator.propagate("stable")
 
@@ -1028,49 +1065,69 @@ class TrainerNode(Engine):
         await self.trainer.test()
         await self.trainer.train()
         end_time = time.time()
-        
+
         train_last_time = end_time - start_time
-        isgpu=False
+        isgpu = False
         gpu_powers = 0
-        
+
         try:
             import pynvml
+
             pynvml.nvmlInit()
             devices = pynvml.nvmlDeviceGetCount()
-            isgpu=True
+            isgpu = True
         except Exception:
-            logging.error("errror")
-            
+            logging.exception("errror")
+
         if isgpu:
-            gpu_powers=0
+            gpu_powers = 0
             for i in range(devices):
                 handle = pynvml.nvmlDeviceGetHandleByIndex(i)
                 # gpu_percent = pynvml.nvmlDeviceGetUtilizationRates(handle).gpu
                 gpu_power = pynvml.nvmlDeviceGetPowerUsage(handle) / 1000.0
-                gpu_powers+=gpu_power
-            logging.info("gpu powers ",gpu_powers)
-            
-        cpu_percents = psutil.cpu_percent(percpu=True) 
-        cpu_util=[cpu_percents[i] for i in self.cpu_index]
-    
-        # calculate sustainability metrics       
-        train_cpu_energy_consumption, train_gpu_energy_consumption = get_sustain_energy_consumption(gpu_powers, self.cpu_models_tdp, cpu_util, train_last_time, self.pue)
-        train_cpu_carbon_emission, train_gpu_carbon_emission = get_sustain_carbon_emission(self.carbon_intensity, self.renewable_energy, train_cpu_energy_consumption, train_gpu_energy_consumption)
-        
+                gpu_powers += gpu_power
+            logging.info("gpu powers ", gpu_powers)
+
+        cpu_percents = psutil.cpu_percent(percpu=True)
+        cpu_util = [cpu_percents[i] for i in self.cpu_index]
+
+        # calculate sustainability metrics
+        train_cpu_energy_consumption, train_gpu_energy_consumption = get_sustain_energy_consumption(
+            gpu_powers, self.cpu_models_tdp, cpu_util, train_last_time, self.pue
+        )
+        train_cpu_carbon_emission, train_gpu_carbon_emission = get_sustain_carbon_emission(
+            self.carbon_intensity, self.renewable_energy, train_cpu_energy_consumption, train_gpu_energy_consumption
+        )
+
         self.train_cpu_energy_consumption += train_cpu_energy_consumption
         self.train_gpu_energy_consumption += train_gpu_energy_consumption
         self.train_cpu_carbon_emission += train_cpu_carbon_emission
         self.train_gpu_carbon_emission += train_gpu_carbon_emission
-        
+
         # add to the total energy and carbon
-        self.total_energy_consumption = self.total_energy_consumption + train_cpu_energy_consumption + train_gpu_energy_consumption
+        self.total_energy_consumption = (
+            self.total_energy_consumption + train_cpu_energy_consumption + train_gpu_energy_consumption
+        )
         self.total_carbon_emission = self.total_carbon_emission + train_cpu_carbon_emission + train_gpu_carbon_emission
 
         if self.lie_atk:
             from nebula.addons.attacks.poisoning.update_manipulation import update_manipulation_LIE
-            await self.aggregator.include_model_in_buffer(update_manipulation_LIE(self.trainer.get_model_parameters(),899), self.trainer.get_model_weight(), source = self.addr,round = self.round, local = True)
+
+            await self.aggregator.include_model_in_buffer(
+                update_manipulation_LIE(self.trainer.get_model_parameters(), 899),
+                self.trainer.get_model_weight(),
+                source=self.addr,
+                round=self.round,
+                local=True,
+            )
         else:
-            await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.get_model_weight(), source = self.addr,round = self.round, local = True)
+            await self.aggregator.include_model_in_buffer(
+                self.trainer.get_model_parameters(),
+                self.trainer.get_model_weight(),
+                source=self.addr,
+                round=self.round,
+                local=True,
+            )
 
         await self.cm.propagator.propagate("stable")
         await self._waiting_model_updates()

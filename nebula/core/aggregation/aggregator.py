@@ -1,12 +1,13 @@
 import logging
+import time
 from abc import ABC, abstractmethod
 from functools import partial
+
+import psutil
 
 from nebula.core.pb import nebula_pb2
 from nebula.core.utils.locker import Locker
 
-import time
-import psutil
 
 class AggregatorException(Exception):
     pass
@@ -14,14 +15,13 @@ class AggregatorException(Exception):
 
 def create_aggregator(config, engine):
     from nebula.core.aggregation.blockchainReputation import BlockchainReputation
+    from nebula.core.aggregation.bulyan import Bulyan
+    from nebula.core.aggregation.dynamicAggregator import DynamicAggregator
     from nebula.core.aggregation.fedavg import FedAvg
     from nebula.core.aggregation.krum import Krum
     from nebula.core.aggregation.median import Median
-    from nebula.core.aggregation.trimmedmean import TrimmedMean
-    from nebula.core.aggregation.bulyan import Bulyan
-    from nebula.core.aggregation.blockchainReputation import BlockchainReputation
-    from nebula.core.aggregation.dynamicAggregator import DynamicAggregator
     from nebula.core.aggregation.reactiveAggregator import ReactiveAggregator
+    from nebula.core.aggregation.trimmedmean import TrimmedMean
 
     ALGORITHM_MAP = {
         "FedAvg": FedAvg,
@@ -42,13 +42,13 @@ def create_aggregator(config, engine):
 
 
 def create_target_aggregator(config, engine):
+    from nebula.core.aggregation.bulyan import Bulyan
+    from nebula.core.aggregation.dynamicAggregator import DynamicAggregator
     from nebula.core.aggregation.fedavg import FedAvg
     from nebula.core.aggregation.krum import Krum
     from nebula.core.aggregation.median import Median
-    from nebula.core.aggregation.trimmedmean import TrimmedMean
-    from nebula.core.aggregation.bulyan import Bulyan
-    from nebula.core.aggregation.dynamicAggregator import DynamicAggregator
     from nebula.core.aggregation.reactiveAggregator import ReactiveAggregator
+    from nebula.core.aggregation.trimmedmean import TrimmedMean
 
     ALGORITHM_MAP = {
         "FedAvg": FedAvg,
@@ -243,22 +243,24 @@ class Aggregator(ABC):
             logging.info("🔄  get_aggregation | All models accounted for, proceeding with aggregation.")
 
         if self.engine.node_selection_strategy_enabled:
-            logging.info(f"🔄  get_aggregation | Removing pending models not selected by the NSS Selector...")
+            logging.info("🔄  get_aggregation | Removing pending models not selected by the NSS Selector...")
             selected_nodes = self.engine.node_selection_strategy_selector.node_selection(self.engine)
             self.engine.trainer._logger.log_text("[NSS] Selected nodes", str(selected_nodes), step=self.engine.round)
             for node in list(self._pending_models_to_aggregate.keys()):
                 if node not in self.engine.node_selection_strategy_selector.selected_nodes:
-                    logging.info(f"🔄  get_aggregation | Removing model from {node} as it was not selected by the NSS Selector.")
+                    logging.info(
+                        f"🔄  get_aggregation | Removing model from {node} as it was not selected by the NSS Selector."
+                    )
                     del self._pending_models_to_aggregate[node]
                     # if not self.engine.node_selection_strategy_selector.__class__.__name__ == "RandomSelector":
                     #     logging.info(f"🔄  get_aggregation | Removing connection from {node} as it was not selected by the NSS Selector.")
-                        # await self.engine.cm.disconnect(node)
+                    # await self.engine.cm.disconnect(node)
         logging.info(f"🔄  get_aggregation | Final nodes for aggregation: {self._pending_models_to_aggregate.keys()}")
         agg_start_timestamp = time.time()
         aggregated_result = self.run_aggregation(self._pending_models_to_aggregate)
         agg_end_timestamp = time.time()
         agg_time = agg_end_timestamp - agg_start_timestamp
-        agg_cpu_percents = psutil.cpu_percent(percpu=True) 
+        agg_cpu_percents = psutil.cpu_percent(percpu=True)
         self._pending_models_to_aggregate.clear()
         return aggregated_result, agg_time, agg_cpu_percents
 

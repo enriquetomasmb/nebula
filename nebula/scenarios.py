@@ -10,7 +10,6 @@ import sys
 import textwrap
 import time
 from datetime import datetime
-import tensorboard_reducer as tbr
 
 import docker
 
@@ -70,7 +69,7 @@ class Scenario:
         additional_participants,
         schema_additional_participants,
         node_selection_strategy,
-        communication_method
+        communication_method,
     ):
         """
         Initialize the scenario.
@@ -144,7 +143,9 @@ class Scenario:
         self.attacks = attacks
         self.atk_lie_z = atk_lie_z
         self.label_flipping_config = label_flipping_config
-        self.poisoned_node_percent = label_flipping_config['node_percent'] if label_flipping_config else poisoned_node_percent
+        self.poisoned_node_percent = (
+            label_flipping_config["node_percent"] if label_flipping_config else poisoned_node_percent
+        )
         self.poisoned_sample_percent = poisoned_sample_percent
         self.poisoned_noise_percent = poisoned_noise_percent
         self.with_reputation = with_reputation
@@ -175,7 +176,7 @@ class Scenario:
         poisoned_sample_percent,
         poisoned_noise_percent,
         label_flipping_config,
-        atk_lie_z
+        atk_lie_z,
     ):
         """Identify which nodes will be attacked"""
         import math
@@ -200,7 +201,7 @@ class Scenario:
             num_attacked = int(math.ceil(poisoned_node_percent / 100 * n_nodes))
             if num_attacked > n_nodes:
                 num_attacked = n_nodes
-                
+
             # Filter out 0 from nodes_index
             filtered_nodes_index = [node for node in nodes_index if node != 0]
 
@@ -319,7 +320,7 @@ class ScenarioManagement:
             int(self.scenario.poisoned_sample_percent),
             int(self.scenario.poisoned_noise_percent),
             self.scenario.label_flipping_config,
-            self.scenario.atk_lie_z
+            self.scenario.atk_lie_z,
         )
 
         if self.scenario.mobility:
@@ -362,7 +363,9 @@ class ScenarioManagement:
             participant_config["device_args"]["accelerator"] = self.scenario.accelerator
             participant_config["device_args"]["logging"] = self.scenario.logginglevel
             participant_config["aggregator_args"]["algorithm"] = self.scenario.agg_algorithm
-            participant_config["aggregator_args"]["reactive_aggregator_default"] = self.scenario.reactive_aggregator_default
+            participant_config["aggregator_args"]["reactive_aggregator_default"] = (
+                self.scenario.reactive_aggregator_default
+            )
             participant_config["adversarial_args"]["attacks"] = node_config["attacks"]
             participant_config["adversarial_args"]["poisoned_sample_percent"] = node_config["poisoned_sample_percent"]
             participant_config["adversarial_args"]["poisoned_ratio"] = node_config["poisoned_ratio"]
@@ -380,18 +383,22 @@ class ScenarioManagement:
             participant_config["mobility_args"]["radius_federation"] = self.scenario.radius_federation
             participant_config["mobility_args"]["scheme_mobility"] = self.scenario.scheme_mobility
             participant_config["mobility_args"]["round_frequency"] = self.scenario.round_frequency
-            participant_config["node_selection_strategy_args"]["enabled"] = False if self.scenario.node_selection_strategy == "default" else True
+            participant_config["node_selection_strategy_args"]["enabled"] = (
+                False if self.scenario.node_selection_strategy == "default" else True
+            )
             participant_config["node_selection_strategy_args"]["strategy"] = self.scenario.node_selection_strategy
             participant_config["resource_args"]["resource_constricted"] = node_config["resourceConstricted"]
             participant_config["resource_args"]["resource_constraint_cpu"] = node_config["resourceConstraintCPU"]
-            participant_config["resource_args"]["resource_constraint_latency"] = node_config["resourceConstraintLatency"]
+            participant_config["resource_args"]["resource_constraint_latency"] = node_config[
+                "resourceConstraintLatency"
+            ]
 
             participant_config["reporter_args"]["report_status_data_queue"] = self.scenario.report_status_data_queue
-            
+
             # Sustainability related config
-            participant_config["sustainability_args"]["pue"]=node_config["pue"]
-            participant_config["sustainability_args"]["renewable_energy"]=node_config["renewable_energy"]
-            participant_config["sustainability_args"]["communication_method"]=self.scenario.communication_method
+            participant_config["sustainability_args"]["pue"] = node_config["pue"]
+            participant_config["sustainability_args"]["renewable_energy"] = node_config["renewable_energy"]
+            participant_config["sustainability_args"]["communication_method"] = self.scenario.communication_method
 
             with open(participant_file, "w") as f:
                 json.dump(participant_config, f, sort_keys=False, indent=2)
@@ -753,7 +760,7 @@ class ScenarioManagement:
                 deploy:
                     resources:
                         limits:
-                            cpus: '{}'                
+                            cpus: '{}'
                 networks:
                     nebula-net-scenario:
                         ipv4_address: {}
@@ -1094,13 +1101,13 @@ class ScenarioManagement:
                 return False
 
             time.sleep(5)
-            
+
     # @classmethod
     # def generate_statistics(cls, path):
     #     try:
     #         # Generate statistics
     #         logging.info(f"Generating statistics for scenario {path}")
-    
+
     #         # Define input directories
     #         input_event_dirs = sorted(glob.glob(os.path.join(path, "metrics/*")))
     #         # Where to write reduced TB events
@@ -1109,31 +1116,31 @@ class ScenarioManagement:
     #         # Whether to abort or overwrite when csv_out_path already exists
     #         overwrite = False
     #         reduce_ops = ("mean", "min", "max", "median", "std", "var")
-    
+
     #         events_dict = tbr.load_tb_events(input_event_dirs)
-    
+
     #         # Number of recorded tags. e.g. would be 3 if you recorded loss, MAE and R^2
     #         n_scalars = len(events_dict)
     #         n_steps, n_events = list(events_dict.values())[0].shape
-    
+
     #         logging.info(
     #             f"Loaded {n_events} TensorBoard runs with {n_scalars} scalars and {n_steps} steps each"
     #         )
     #         logging.info(f"Events dict keys: {events_dict.keys()}")
-    
+
     #         reduced_events = tbr.reduce_events(events_dict, reduce_ops)
-    
+
     #         for op in reduce_ops:
     #             logging.info(f"Writing '{op}' reduction to '{tb_events_output_dir}-{op}'")
-    
+
     #         tbr.write_tb_events(reduced_events, tb_events_output_dir, overwrite)
-    
+
     #         logging.info(f"Writing results to '{csv_out_path}'")
-    
+
     #         tbr.write_data_file(reduced_events, csv_out_path, overwrite)
-    
+
     #         logging.info("Reduction complete")
-            
+
     #     except Exception as e:
     #         logging.exception(f"Error generating statistics: {e}")
     #         return False

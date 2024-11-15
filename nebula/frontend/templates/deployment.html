@@ -955,7 +955,7 @@
                 <div class="form-group row container-shadow tiny grey">
                     <h5 class="step-number">Environmental Sustainability <i class="fa fa-leaf"></i></h5>
                     <div id="participant-sustainability-items"></div>
-                </div>    
+                </div>
 
             </div>
         </form>
@@ -1250,7 +1250,7 @@
             for (var i = 0; i < n_nodes; i++) {
                 Graph.graphData().nodes[i].renewable_energy = Number(document.getElementById("renewable-energy-" + i).value);
                 Graph.graphData().nodes[i].pue = Number(document.getElementById("pue-" + i).value);
-                
+
                 nodes[i] = {
                     "id": i,
                     "ip": Graph.graphData().nodes[i].ip,
@@ -1478,7 +1478,7 @@
                 document.getElementById("roundFrequency").value = data["round_frequency"];
                 document.getElementById("mobileParticipantsPercent").value = data["mobile_participants_percent"];
                 document.getElementById("schemaAdditionalParticipantsSelect").value = data["schema_additional_participants"];
-                
+
                 // Step 16 - Environmental Sustainability
                 for (var i = 0; i < data["n_nodes"]; i++) {
                     document.getElementById("renewable-energy-" + i).value = Graph.graphData().nodes[i].renewable_energy;
@@ -1741,7 +1741,7 @@
         });
     </script>
 
-    
+
     <!-- <script>
         document.addEventListener("DOMContentLoaded", function() {
             const datasetSelect = document.getElementById("datasetSelect");
@@ -1773,7 +1773,7 @@
             updateModelOptions();
         });
     </script> -->
-    
+
 
     <script>
         function generateParticipantSustainabilityInputs() {
@@ -1817,7 +1817,7 @@
             renewableSmall.classList.add("form-text");
             renewableSmall.classList.add("text-muted");
             renewableSmall.innerHTML = "%";
-            renewableSmall.style.lineHeight = "3em"; 
+            renewableSmall.style.lineHeight = "3em";
             participantItem.appendChild(renewableSmall);
 
             var pueLabel = document.createElement("h6");
@@ -1834,17 +1834,17 @@
             pueInput.max = "100";
             pueInput.value = "80";
             pueInput.style.display = "inline";
-            pueInput.style.width = "100%";            
+            pueInput.style.width = "100%";
             participantItem.appendChild(pueInput);
 
             var pueInputSmall = document.createElement("small");
             pueInputSmall.classList.add("form-text");
             pueInputSmall.classList.add("text-muted");
             pueInputSmall.innerHTML = "%";
-            pueInputSmall.style.lineHeight = "3em"; 
+            pueInputSmall.style.lineHeight = "3em";
             participantItem.appendChild(pueInputSmall);
             participantItems.appendChild(participantItem);
-        }        
+        }
     }
 
     generateParticipantSustainabilityInputs(); // Call this function to generate the inputs initially
@@ -3086,7 +3086,7 @@
                     portInput.id = "participant-" + i + "-port";
                     portInput.type = "text";
                     portInput.defaultValue = participant.port;
-                    
+
                     var pue = Number(document.getElementById("pue-" + i).value);
                     var renewable_energy = Number(document.getElementById("renewable-energy-" + i).value);
                     participant.pue = pue;
