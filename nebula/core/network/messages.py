@@ -96,3 +96,13 @@ class MessagesManager:
         message_wrapper.nss_features_message.CopyFrom(message)
         data = message_wrapper.SerializeToString()
         return data
+
+    def generate_vote_message(self):
+        message = nebula_pb2.VoteMessage(
+            vote = 0,
+        )
+        message_wrapper = nebula_pb2.Wrapper()
+        message_wrapper.source = self.addr
+        message_wrapper.vote_message.CopyFrom(message)
+        data = message_wrapper.SerializeToString()
+        return data

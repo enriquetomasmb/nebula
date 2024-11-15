@@ -246,7 +246,7 @@ class Aggregator(ABC):
             logging.info("🔄  get_aggregation | All models accounted for, proceeding with aggregation.")
 
         if self.engine.node_selection_strategy_enabled:
-            self.engine.node_selection_strategy_selector.node_selection(self.engine)
+            await self.engine.node_selection_strategy_selector.node_selection(self.engine)
             logging.info("🔄  get_aggregation | Removing pending models not selected by the NSS Selector...")
             for node in list(self._pending_models_to_aggregate.keys()):
                 if node not in self.engine.node_selection_strategy_selector.selected_nodes:
@@ -254,9 +254,7 @@ class Aggregator(ABC):
                         f"🔄  get_aggregation | Removing model from {node} as it was not selected by the NSS Selector."
                     )
                     del self._pending_models_to_aggregate[node]
-                    # if not self.engine.node_selection_strategy_selector.__class__.__name__ == "RandomSelector":
-                    #     logging.info(f"🔄  get_aggregation | Removing connection from {node} as it was not selected by the NSS Selector.")
-                    # await self.engine.cm.disconnect(node)
+            
         logging.info(f"🔄  get_aggregation | Final nodes for aggregation: {self._pending_models_to_aggregate.keys()}")
 
         aggregated_result = self.run_aggregation(self._pending_models_to_aggregate)

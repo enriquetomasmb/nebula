@@ -123,8 +123,12 @@ class Engine:
             elif self.nss_selector == "random":
                 self.node_selection_strategy_selector = RandomSelector()
             elif self.nss_selector == "distance":
-                self.node_selection_strategy_selector = DistanceSelector()
-                self.node_selection_strategy_parameter = config.participant["node_selection_strategy_args"]["parameter"]
+                threshold = float(config.participant["node_selection_strategy_args"]["parameter"])
+                self.node_selection_strategy_selector = DistanceSelector(threshold=threshold)
+            elif self.nss_selector == "distance-voting":
+                threshold = float(config.participant["node_selection_strategy_args"]["parameter"])
+                self.node_selection_strategy_selector = DistanceSelector(voting=True, threshold=threshold)
+
         nss_info_msg = f"Enabled: {self.node_selection_strategy_enabled}\n{f'Selector: {self.nss_selector}' if self.node_selection_strategy_enabled else ''}"
         print_msg_box(msg=nss_info_msg, indent=2, title="NSS Info")
 
@@ -189,6 +193,7 @@ class Engine:
                 self._start_federation_callback,
                 self._federation_models_included_callback,
                 self.__nss_features_message_callback,
+                self.__vote_message_callback,
             ]
         )
 
@@ -399,6 +404,12 @@ class Engine:
             logging.exception(f"Error updating round in connection: {e}")
         finally:
             await self.cm.get_connections_lock().release_async()
+
+    @event_handler(nebula_pb2.VoteMessage, None)
+    async def __vote_message_callback(self, source, message):
+        if message is not None:
+            logging.info(f"📝  handle_vote_message | Trigger | Received Vote message from {source}")
+            self.node_selection_strategy_selector.add_vote()
 
     @event_handler(nebula_pb2.NSSFeaturesMessage, None)
     async def __nss_features_message_callback(self, source, message):
@@ -883,81 +894,28 @@ class AggregatorNode(Engine):
         # Define the functionality of the aggregator node
         start_time = time.time()
         await self.trainer.test()
-        await self.trainer.train()
+
+        if self.node_selection_strategy_enabled and (self.nss_selector == "distance" or self.nss_selector == "distance-voting"):
+            if self.node_selection_strategy_selector.should_train():
+                logging.info("[DistanceSelector] I am training this round")
+                self.node_selection_strategy_selector.reset_votes()
+                await self.trainer.train()
+            else:
+                self.node_selection_strategy_selector.reset_votes()
+                logging.info("[DistanceSelector] I am not training this round")
+        else:
+            await self.trainer.train()
 
         if self.node_selection_strategy_enabled:
-            if self.nss_selector == "distance":
+            if self.nss_selector == "distance" or self.nss_selector == "distance-voting":
                 if self.node_selection_strategy_selector.stop_training:
-                    self.node_selection_strategy_selector.already_activated = True
                     self.node_selection_strategy_selector.stop_training = False
                     logging.info("[DistanceSelector] DetectorSelector repeating four training rounds")
                     await self.trainer.train()
                     await self.trainer.train()
                     await self.trainer.train()
                     await self.trainer.train()
-
-        end_time = time.time()
-
-        train_last_time = end_time - start_time
-        isgpu = False
-        gpu_powers = 0
-
-        try:
-            import pynvml
-
-            pynvml.nvmlInit()
-            devices = pynvml.nvmlDeviceGetCount()
-            isgpu = True
-        except Exception:
-            logging.exception("errror")
-
-        if isgpu:
-            gpu_powers = 0
-            for i in range(devices):
-                handle = pynvml.nvmlDeviceGetHandleByIndex(i)
-                # gpu_percent = pynvml.nvmlDeviceGetUtilizationRates(handle).gpu
-                gpu_power = pynvml.nvmlDeviceGetPowerUsage(handle) / 1000.0
-                gpu_powers += gpu_power
-            logging.info("gpu powers ", gpu_powers)
-
-        cpu_percents = psutil.cpu_percent(percpu=True)
-        cpu_util = [cpu_percents[i] for i in self.cpu_index]
-
-        # calculate sustainability metrics
-        train_cpu_energy_consumption, train_gpu_energy_consumption = get_sustain_energy_consumption(
-            gpu_powers, self.cpu_models_tdp, cpu_util, train_last_time, self.pue
-        )
-        train_cpu_carbon_emission, train_gpu_carbon_emission = get_sustain_carbon_emission(
-            self.carbon_intensity, self.renewable_energy, train_cpu_energy_consumption, train_gpu_energy_consumption
-        )
-
-        logging.info(f""" round{self.round},
-                     train_cpu_energy_consumption {train_cpu_energy_consumption},
-                     train_gpu_energy_consumption {train_gpu_energy_consumption},
-                     train_cpu_carbon_emission {train_cpu_carbon_emission},
-                     train_gpu_carbon_emission {train_gpu_carbon_emission},
-                     """)
-
-        self.train_cpu_energy_consumption += train_cpu_energy_consumption
-        self.train_gpu_energy_consumption += train_gpu_energy_consumption
-        self.train_cpu_carbon_emission += train_cpu_carbon_emission
-        self.train_gpu_carbon_emission += train_gpu_carbon_emission
-
-        # add to the total energy and carbon
-        self.total_energy_consumption = (
-            self.total_energy_consumption + train_cpu_energy_consumption + train_gpu_energy_consumption
-        )
-        self.total_carbon_emission = self.total_carbon_emission + train_cpu_carbon_emission + train_gpu_carbon_emission
-
-        if self.node_selection_strategy_enabled:
-            # Extract Features needed for Node Selection Strategy
-            self.nss_extract_features()
-            # Broadcast Features
-            logging.info("Broadcasting NSS features to the rest of the topology ...")
-            message = self.cm.mm.generate_nss_features_message(self.nss_features)
-            await self.cm.send_message_to_neighbors(message)
-            _nss_features_msg = f"""NSS features for round {self.round}:\nCPU Usage (%): {self.nss_features["cpu_percent"]}%\nBytes Sent: {self.nss_features["bytes_sent"]}\nBytes Received: {self.nss_features["bytes_received"]}\nLoss: {self.nss_features["loss"]}\nData Size: {self.nss_features["data_size"]}\nSustainability: {self.nss_features["sustainability"]}"""
-            print_msg_box(msg=_nss_features_msg, indent=2, title="NSS features (this node)")
+                    self.node_selection_strategy_selector.already_activated = True
 
         if self.lie_atk:
             from nebula.addons.attacks.poisoning.update_manipulation import update_manipulation_LIE

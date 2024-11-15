@@ -3,6 +3,7 @@ from collections import namedtuple
 
 import numpy as np
 from sklearn.preprocessing import normalize
+from sklearn.preprocessing import normalize
 
 from nebula.addons.functions import print_msg_box
 from nebula.core.selectors.selector import Selector
@@ -22,6 +23,7 @@ class PrioritySelector(Selector):
         [loss, cpu_percent, data_size, bytes_received, bytes_sent, latency, age]
     """
 
+
     MIN_AMOUNT_OF_SELECTED_NEIGHBORS = 1
     MAX_PERCENT_SELECTABLE_NEIGHBORS = 0.8
     # Original Feature Weights provided in Report / Thesis
@@ -40,7 +42,7 @@ class PrioritySelector(Selector):
         self.feature_weights = FeatureWeights(*self.FEATURE_WEIGHTS)
         logging.info("[PrioritySelector] Initialized")
 
-    def node_selection(self, node):
+    async def node_selection(self, node):
         neighbors = self.neighbors_list.copy()
 
         if len(neighbors) == 0:
