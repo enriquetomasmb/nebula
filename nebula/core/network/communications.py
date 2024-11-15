@@ -239,6 +239,7 @@ class CommunicationsManager:
                                 f.write("timestamp,source_ip,nodes,round,current_round,cosine,euclidean,minkowski,manhattan,pearson_correlation,jaccard\n")
                             f.write(f"{datetime.now()}, {source}, {message.round}, {current_round}, {cosine_value}, {euclidean_value}, {minkowski_value}, {manhattan_value}, {pearson_correlation_value}, {jaccard_value}\n")
                     
+                    # getting modifier weight for update 
                     if self.engine.still_waiting_for_updates():
                         model_weight = message.weight * self.engine.get_weight_modifier(source)
                         rt = time.time()

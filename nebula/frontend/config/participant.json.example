@@ -72,7 +72,7 @@
     },
     "model_handler": "std",
     "late_creation": false,
-    "sleeping_time": 0,
+    "sleeping_time": 10,
     "weight_distance": 0.2,
     "weight_het": 0.8
   },  

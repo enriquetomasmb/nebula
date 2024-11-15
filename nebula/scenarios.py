@@ -552,6 +552,9 @@ class ScenarioManagement:
                 participant_config["device_args"]["uid"] = hashlib.sha1((str(participant_config["network_args"]["ip"]) + str(participant_config["network_args"]["port"]) + str(self.scenario_name)).encode()).hexdigest()
                 participant_config["mobility_args"]["additional_node"]["status"] = True
                 participant_config["mobility_args"]["additional_node"]["round_start"] = additional_participant["round"]
+                
+                # used for late creation nodes
+                participant_config["mobility_args"]["late_creation"] = True
 
                 with open(additional_participant_file, "w") as f:
                     json.dump(participant_config, f, sort_keys=False, indent=2)
