@@ -68,7 +68,7 @@ class DistanceSelector(Selector):
             logging.info(f"[DistanceSelector] Sending Votes {self.selected_nodes}")
             return self.selected_nodes
 
-        neighbors = self.neighbors_list.copy()  # node.cm.get_all_addrs_current_connections(only_direct=True)
+        neighbors = node.cm.get_all_addrs_current_connections(only_direct=True)
 
         if len(neighbors) == 0:
             logging.error(
