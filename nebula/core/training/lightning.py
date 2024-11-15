@@ -1,20 +1,22 @@
+import asyncio
 import copy
 import gc
+import gzip
+import hashlib
+import io
 import logging
-from collections import OrderedDict
-import asyncio
 import os
 import pickle
 import traceback
-import hashlib
-import io
-import gzip
+from collections import OrderedDict
+
 import torch
 from lightning import Trainer
-from lightning.pytorch.callbacks import ProgressBar, ModelSummary
-from torch.nn import functional as F
-from nebula.core.utils.deterministic import enable_deterministic
+from lightning.pytorch.callbacks import ModelSummary, ProgressBar
 from lightning.pytorch.loggers import CSVLogger
+from torch.nn import functional as F
+
+from nebula.core.utils.deterministic import enable_deterministic
 from nebula.core.utils.nebulalogger_tensorboard import NebulaTensorBoardLogger
 
 try:
@@ -86,12 +88,16 @@ class NebulaProgressBar(ProgressBar):
         if self.enable:
             total_batches = self.total_test_batches_current_dataloader
             if total_batches == 0:
-                logging_training.warning(f"Total test batches is 0 for dataloader {dataloader_idx}, cannot compute progress.")
+                logging_training.warning(
+                    f"Total test batches is 0 for dataloader {dataloader_idx}, cannot compute progress."
+                )
                 return
-            
+
             if (batch_idx + 1) % self.log_every_n_steps == 0 or (batch_idx + 1) == total_batches:
                 percent = ((batch_idx + 1) / total_batches) * 100  # +1 to count the current batch
-                logging_training.info(f"Test Epoch {trainer.current_epoch}, Dataloader {dataloader_idx} - {percent:.01f}% complete")
+                logging_training.info(
+                    f"Test Epoch {trainer.current_epoch}, Dataloader {dataloader_idx} - {percent:.01f}% complete"
+                )
 
     def on_test_epoch_start(self, trainer, pl_module):
         super().on_test_epoch_start(trainer, pl_module)
@@ -155,7 +161,13 @@ class Lightning:
             logger_config = None
             if self._logger is not None:
                 logger_config = self._logger.get_logger_config()
-            nebulalogger = NebulaTensorBoardLogger(self.config.participant["scenario_args"]["start_time"], f"{self.log_dir}", name="metrics", version=f"participant_{self.idx}", log_graph=False)
+            nebulalogger = NebulaTensorBoardLogger(
+                self.config.participant["scenario_args"]["start_time"],
+                f"{self.log_dir}",
+                name="metrics",
+                version=f"participant_{self.idx}",
+                log_graph=False,
+            )
             # Restore logger configuration
             nebulalogger.set_logger_config(logger_config)
         elif self.config.participant["tracking_args"]["local_tracking"] == "advanced":
@@ -186,7 +198,7 @@ class Lightning:
         num_gpus = torch.cuda.device_count()
         if self.config.participant["device_args"]["accelerator"] == "gpu" and num_gpus > 0:
             gpu_index = self.config.participant["device_args"]["idx"] % num_gpus
-            logging_training.info("Creating trainer with accelerator GPU ({})".format(gpu_index))
+            logging_training.info(f"Creating trainer with accelerator GPU ({gpu_index})")
             self._trainer = Trainer(
                 callbacks=[ModelSummary(max_depth=1), NebulaProgressBar()],
                 max_epochs=self.epochs,
@@ -237,7 +249,7 @@ class Lightning:
                 num_samples += inputs.size(0)
 
         avg_loss = running_loss / len(bootstrap_dataloader)
-        logging_training.info("Computed neighbor loss over {} data samples".format(num_samples))
+        logging_training.info(f"Computed neighbor loss over {num_samples} data samples")
         return avg_loss
 
     def get_hash_model(self):
@@ -289,9 +301,9 @@ class Lightning:
     async def train(self):
         try:
             self.create_trainer()
-            logging.info(f"{'='*10} [Training] Started (check training logs for progress) {'='*10}")
+            logging.info(f"{'=' * 10} [Training] Started (check training logs for progress) {'=' * 10}")
             await asyncio.to_thread(self._train_sync)
-            logging.info(f"{'='*10} [Training] Finished (check training logs for progress) {'='*10}")
+            logging.info(f"{'=' * 10} [Training] Finished (check training logs for progress) {'=' * 10}")
         except Exception as e:
             logging_training.error(f"Error training model: {e}")
             logging_training.error(traceback.format_exc())
@@ -308,9 +320,9 @@ class Lightning:
     async def test(self):
         try:
             self.create_trainer()
-            logging.info(f"{'='*10} [Testing] Started (check training logs for progress) {'='*10}")
+            logging.info(f"{'=' * 10} [Testing] Started (check training logs for progress) {'=' * 10}")
             await asyncio.to_thread(self._test_sync)
-            logging.info(f"{'='*10} [Testing] Finished (check training logs for progress) {'='*10}")
+            logging.info(f"{'=' * 10} [Testing] Finished (check training logs for progress) {'=' * 10}")
         except Exception as e:
             logging_training.error(f"Error testing model: {e}")
             logging_training.error(traceback.format_exc())
@@ -341,7 +353,7 @@ class Lightning:
 
     def on_round_start(self):
         self.data.setup()
-        self._logger.log_data({"Round": self.round})
+        self._logger.log_data({"1Round": self.round})
         # self.reporter.enqueue_data("Round", self.round)
 
     def on_round_end(self):
@@ -353,5 +365,5 @@ class Lightning:
         self.cleanup()
 
     def on_learning_cycle_end(self):
-        self._logger.log_data({"Round": self.round})
+        self._logger.log_data({"1Round": self.round})
         # self.reporter.enqueue_data("Round", self.round)
