@@ -810,7 +810,9 @@ def remove_scenario(scenario_name=None):
 
 
 @app.get("/nebula/dashboard/{scenario_name}/relaunch")
-async def nebula_relaunch_scenario(scenario_name: str, background_tasks: BackgroundTasks, session: dict = Depends(get_session)):
+async def nebula_relaunch_scenario(
+    scenario_name: str, background_tasks: BackgroundTasks, session: dict = Depends(get_session)
+):
     global scenarios_list, scenarios_list_length, scenarios_finished
 
     if "user" in session:
@@ -824,14 +826,17 @@ async def nebula_relaunch_scenario(scenario_name: str, background_tasks: Backgro
         with open(scenario_path) as scenario_file:
             scenario = json.load(scenario_file)
 
-        scenarios_list.append(scenario)
         scenarios_list_length = scenarios_list_length + 1
 
-        if(scenarios_list_length == 1):
+        if scenarios_list_length == 1:
             scenarios_finished = 0
+            scenarios_list.clear()
+            scenarios_list.append(scenario)
             background_tasks.add_task(run_scenarios, scenarios_list, session["role"])
+        else:
+            scenarios_list.append(scenario)
 
-        return RedirectResponse(url="/nebula/dashboard")
+        return RedirectResponse(url="/nebula/dashboard", status_code=303)
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
@@ -1269,6 +1274,7 @@ async def run_scenario(scenario_data, role):
 async def run_scenarios(data, role):
     try:
         global scenarios_finished, scenarios_list, scenarios_list_length
+        logging.info(f"[FER] run_sceenarios, scenarios_list: {data}")
         scenarios_list = data
         for scenario_data in scenarios_list:
             finish_scenario_event.clear()
