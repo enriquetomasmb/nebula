@@ -114,11 +114,12 @@ class Engine:
             elif self.nss_selector == "random":
                 self.node_selection_strategy_selector = RandomSelector()
             elif self.nss_selector == "distance":
-                self.node_selection_strategy_selector = DistanceSelector()
-                self.node_selection_strategy_parameter = config.participant["node_selection_strategy_args"]["parameter"]
+                threshold = float(config.participant["node_selection_strategy_args"]["parameter"])
+                self.node_selection_strategy_selector = DistanceSelector(threshold=threshold)
             elif self.nss_selector == "distance-voting":
-                self.node_selection_strategy_selector = DistanceSelector(voting=True)
-                self.node_selection_strategy_parameter = config.participant["node_selection_strategy_args"]["parameter"]
+                threshold = float(config.participant["node_selection_strategy_args"]["parameter"])
+                self.node_selection_strategy_selector = DistanceSelector(voting=True, threshold=threshold)
+
         nss_info_msg = f"Enabled: {self.node_selection_strategy_enabled}\n{f'Selector: {self.nss_selector}' if self.node_selection_strategy_enabled else ''}"
         print_msg_box(msg=nss_info_msg, indent=2, title="NSS Info")
 

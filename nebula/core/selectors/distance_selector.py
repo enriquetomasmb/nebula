@@ -18,14 +18,14 @@ class DistanceSelector(Selector):
     MIN_AMOUNT_OF_SELECTED_NEIGHBORS = 1
     MAX_PERCENT_SELECTABLE_NEIGHBORS = 0.7
 
-    def __init__(self, config=None, voting=False):
+    def __init__(self, config=None, voting=False, threshold=0):
         super().__init__(config)
         self.config = config
         self.stop_training = False
         self.already_activated = False
         self.final_list = False
         self.number_votes = 100000
-        self.threshold = 0
+        self.threshold = threshold
         self.rounds_without_training = 0
         self.voting_enabled = voting
         logging.info("[DistanceSelector] Initialized")
@@ -68,7 +68,6 @@ class DistanceSelector(Selector):
             logging.info(f"[DistanceSelector] Sending Votes {self.selected_nodes}")
             return self.selected_nodes
 
-        self.threshold = float(node.node_selection_strategy_parameter)
         neighbors = self.neighbors_list.copy()  # node.cm.get_all_addrs_current_connections(only_direct=True)
 
         if len(neighbors) == 0:
