@@ -18,7 +18,7 @@ class DistanceSelector(Selector):
     MIN_AMOUNT_OF_SELECTED_NEIGHBORS = 1
     MAX_PERCENT_SELECTABLE_NEIGHBORS = 0.7
 
-    def __init__(self, config=None):
+    def __init__(self, config=None, voting=False):
         super().__init__(config)
         self.config = config
         self.stop_training = False
@@ -27,9 +27,13 @@ class DistanceSelector(Selector):
         self.number_votes = 100000
         self.threshold = 0
         self.rounds_without_training = 0
+        self.voting_enabled = voting
         logging.info("[DistanceSelector] Initialized")
 
     def should_train(self):
+        if not self.voting_enabled:
+            return True
+
         logging.info(f"[DistanceSelector] Rounds without training: {self.rounds_without_training}")
     
         # Increase probability by 10% for each round without training
