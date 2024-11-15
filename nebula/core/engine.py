@@ -745,15 +745,14 @@ class AggregatorNode(Engine):
         # Define the functionality of the aggregator node
         await self.trainer.test()
 
-        if self.node_selection_strategy_enabled:
-            if self.nss_selector == "distance" or self.nss_selector == "distance-voting":
-                if self.node_selection_strategy_selector.should_train():
-                    logging.info("[DistanceSelector] I am training this round")
-                    self.node_selection_strategy_selector.reset_votes()
-                    await self.trainer.train()
-                else:
-                    self.node_selection_strategy_selector.reset_votes()
-                    logging.info("[DistanceSelector] I am not training this round")
+        if self.node_selection_strategy_enabled and (self.nss_selector == "distance" or self.nss_selector == "distance-voting"):
+            if self.node_selection_strategy_selector.should_train():
+                logging.info("[DistanceSelector] I am training this round")
+                self.node_selection_strategy_selector.reset_votes()
+                await self.trainer.train()
+            else:
+                self.node_selection_strategy_selector.reset_votes()
+                logging.info("[DistanceSelector] I am not training this round")
         else:
             await self.trainer.train()
 
