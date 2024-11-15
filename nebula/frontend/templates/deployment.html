@@ -410,16 +410,13 @@
                 </div>
                 <button id="next-btn" type="button" class="btn btn-dark" style="margin-top: 10px; display: none;">&gt;
                 </button>
-                <button id="new-btn" title="Add new Scenario" type="button" class="btn btn-dark" style="margin-top: 10px; display: none;">
-                    <i class="fa fa-plus" aria-hidden="true"></i>
-                </button>
                 <button id="add-btn" title="Save scenario" type="button" class="btn btn-dark" style="margin-top: 10px;">
-                    <i class="fa fa-floppy-o" aria-hidden="true"></i>
+                    <i class="fa fa-plus" aria-hidden="true"></i>
                 </button>
                 <button id="del-btn" type="button" class="btn btn-dark" style="margin-top: 10px; background-color: red; border-color: red; display: none;">
                     <i class="fa fa-trash" aria-hidden="true"></i>
                 </button>
-                <button id="run-btn" type="button" class="btn btn-dark" style="margin-top: 10px; margin-left: 15px; float: right" disabled="true">
+                <button id="run-btn" type="button" class="btn btn-dark" style="margin-top: 10px; margin-left: 15px; float: right">
                     Run NEBULA
                 </button>
                 <button id="load-config-btn" title="Load config button" type="button" class="btn btn-dark" style="margin-top: 10px; margin-left: 5px; float: right">
@@ -1291,8 +1288,7 @@
                             document.getElementById("del-btn").style.display = "inline-block";
                         }
 
-                        document.getElementById("new-btn").style.display = "inline-block";
-                        document.getElementById("add-btn").style.display = "none";
+                        document.getElementById("add-btn").style.display = "inline-block";
                         updateScenariosPosition();
                         showAlert('info', 'Configuration file loaded successfully');
                     } catch (error) {
@@ -1800,22 +1796,6 @@
             }
         }
 
-        //When click "new-btn" button, clear fields to define new Scenario
-        document.getElementById("new-btn").addEventListener("click", function(){
-            //Save actual scenario in the list
-            scenarioStorage.replaceScenario();
-
-            //clearFields();
-            updateModelOptions();
-            updateScenariosPosition(true);
-
-            document.getElementById("new-btn").style.display = "none";
-            document.getElementById("prev-btn").style.display = "none";
-            document.getElementById("next-btn").style.display = "none";
-            document.getElementById("del-btn").style.display = "none";
-            document.getElementById("add-btn").style.display = "inline-block";
-        });
-
         //When click "add-btn" button, save actual scenario in the list of scenarios
         document.getElementById("add-btn").addEventListener("click", function(){
             scenarioStorage.saveScenario();
@@ -1828,7 +1808,6 @@
             var actual_scenario = scenarioStorage.scenariosList[scenarioStorage.actual_scenario];
             setScenarioData(actual_scenario);
 
-            document.getElementById("add-btn").style.display = "none";
             if(scenarioStorage.scenariosList.length == 1){
                 document.getElementById("prev-btn").style.display = "none";
                 document.getElementById("next-btn").style.display = "none";
@@ -1836,7 +1815,6 @@
             else{
                 document.getElementById("prev-btn").style.display = "inline-block";
             }
-            document.getElementById("new-btn").style.display = "inline-block";
             document.getElementById("del-btn").style.display = "inline-block";
 
             //Enable run
@@ -1861,7 +1839,6 @@
 
                 updateScenariosPosition(true);
                 document.getElementById("add-btn").style.display = "inline-block";
-                document.getElementById("new-btn").style.display = "none";
                 document.getElementById("del-btn").style.display = "none";
                 document.getElementById("run-btn").disabled = true;
             }
@@ -1870,7 +1847,7 @@
                 setScenarioData(scenarioStorage.scenariosList[0]);
 
                 updateScenariosPosition();
-                document.getElementById("new-btn").style.display = "inline-block";
+                document.getElementById("add-btn").style.display = "inline-block";
                 document.getElementById("next-btn").style.display = "none";
                 document.getElementById("prev-btn").style.display = "none";
             }
@@ -1882,7 +1859,7 @@
                 //Last scenario in the list is displayed
                 if(!(scenarioStorage.actual_scenario < scenarioStorage.scenariosList.length -1)){
                     document.getElementById("prev-btn").style.display = "inline-block";
-                    document.getElementById("new-btn").style.display = "inline-block";
+                    document.getElementById("add-btn").style.display = "inline-block";
                     document.getElementById("next-btn").style.display = "none";
                 }
             }
@@ -1900,7 +1877,7 @@
 
             if(scenarioStorage.actual_scenario == scenarioStorage.scenariosList.length - 1){
                 document.getElementById("next-btn").style.display = "none";
-                document.getElementById("new-btn").style.display = "inline-block";
+                document.getElementById("add-btn").style.display = "inline-block";
             }
             document.getElementById("prev-btn").style.display = "inline-block";
         });
@@ -1919,7 +1896,7 @@
             if(scenarioStorage.actual_scenario == 0){
                 document.getElementById("prev-btn").style.display = "none";
             }
-            document.getElementById("new-btn").style.display = "none";
+            document.getElementById("add-btn").style.display = "none";
             document.getElementById("next-btn").style.display = "inline-block";
         });
     </script>
@@ -2093,9 +2070,8 @@
                 document.getElementById("prev-btn").style.display = "inline-block";
             }
             document.getElementById("run-btn").disabled = false;
-            document.getElementById("new-btn").style.display = "inline-block";
+            document.getElementById("add-btn").style.display = "inline-block";
             document.getElementById("del-btn").style.display = "inline-block";
-            document.getElementById("add-btn").style.display = "none";
         }
 
         //Generate and save scenarios
@@ -2125,6 +2101,10 @@
                 document.getElementById("yes-button").disabled = false;
 
                 document.getElementById("yes-button").addEventListener("click", function () {
+
+                    if(scenarioStorage.scenariosList < 1) {
+                        document.getElementById("scenario-title").value = "scenario"
+                    }
 
                     scenarioStorage.replaceScenario();
                     var data = scenarioStorage.scenariosList;
