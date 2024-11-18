@@ -525,7 +525,7 @@ class Controller:
                     - NEBULA_PRODUCTION={production}
                     - NEBULA_GPU_AVAILABLE={gpu_available}
                     - NEBULA_ADVANCED_ANALYTICS={advanced_analytics}
-                    - SERVER_LOG=/nebula/app/logs/server.log
+                    - NEBULA_SERVER_LOG=/nebula/app/logs/server.log
                     - NEBULA_LOGS_DIR=/nebula/app/logs/
                     - NEBULA_CONFIG_DIR=/nebula/app/config/
                     - NEBULA_CERTS_DIR=/nebula/app/certs/
