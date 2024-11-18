@@ -17,7 +17,6 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("fsspec").setLevel(logging.WARNING)
 logging.getLogger("matplotlib").setLevel(logging.ERROR)
-logging.getLogger("aim").setLevel(logging.ERROR)
 logging.getLogger("plotly").setLevel(logging.ERROR)
 
 import pdb

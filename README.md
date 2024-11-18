@@ -147,7 +147,7 @@ Distributed under the GNU GPLv3 License. See `LICENSE` for more information.
 We would like to thank the following projects for their contributions which have helped shape NEBULA:
 
 - [PyTorch Lightning](https://github.com/Lightning-AI/pytorch-lightning) for the training loop and model management
-- [Tensorboard](https://github.com/tensorflow/tensorboard) and [Aim](https://github.com/aimhubio/aim) for the visualization tools and monitoring capabilities
+- [Tensorboard](https://github.com/tensorflow/tensorboard) for the visualization tools and monitoring capabilities
 - Different datasets ([nebula/core/datasets](https://github.com/CyberDataLab/nebula/tree/main/nebula/core/datasets)) and models ([nebula/core/models](https://github.com/CyberDataLab/nebula/tree/main/nebula/core/models)) for testing and validation purposes
 - [FastAPI](https://github.com/tiangolo/fastapi) for the RESTful API
 - [Web3](https://github.com/ethereum/web3.py) for the blockchain integration
