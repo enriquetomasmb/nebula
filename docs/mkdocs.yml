@@ -20,12 +20,11 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
+          paths:
+            - ../
           options:
             docstring_style: google
             show_source: true
-          setup_commands:
-            - import sys
-            - sys.path.append('../')
   - gen-files:
       scripts:
       - scripts/gen_ref_pages.py
@@ -44,7 +43,7 @@ theme:
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
-      primary: white
+      primary: indigo
       accent: deep orange
       toggle:
         icon: material/brightness-7
@@ -59,6 +58,9 @@ theme:
   icon:
     repo: fontawesome/brands/github
     edit: material/pencil
+    prev: material/keyboard_arrow_left
+    next: material/keyboard_arrow_right
+    release: fontawesome/solid/rocket
 
 extra:
   social:
@@ -73,12 +75,16 @@ extra:
       content: "NEBULA: A Platform for Decentralized Federated Learning"
     - name: keywords
       content: "NEBULA, Fedstellar, Federated Learning, Decentralized Federated Learning, Machine Learning, Privacy, Security, Trustworthiness AI"
+    - name: author
+      content: "Enrique Tomás Martínez Beltrán"
+    - name: robots
+      content: "index, follow"
   generator: false
 
 markdown_extensions:
   - toc:
       permalink: true
-      toc_depth: 4
+      toc_depth: 6
   - pymdownx.arithmatex:
       generic: true
   - pymdownx.magiclink
