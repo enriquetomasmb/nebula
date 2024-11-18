@@ -40,5 +40,4 @@ jobs:
 
       - name: Check if documentation can be built
         run: |
-          cd docs
-          uv run mkdocs build -s
+          uv run mkdocs build -f docs/mkdocs.yml -d _build -s
