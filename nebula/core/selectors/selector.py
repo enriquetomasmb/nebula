@@ -4,7 +4,6 @@ from nebula.addons.functions import print_msg_box
 
 
 class Selector:
-class Selector:
     """
     Base class for all different Node Selection Strategy Selectors
     For more information see:

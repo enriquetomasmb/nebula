@@ -156,7 +156,7 @@ class CommunicationsManager:
                 await self.handle_connection_message(source, message_wrapper.connection_message)
             elif message_wrapper.HasField("nss_features_message"):
                 await self.handle_nss_features_message(source, message_wrapper.nss_features_message)
-            elif message_wrapper.HasField('vote_message'):
+            elif message_wrapper.HasField("vote_message"):
                 await self.handle_vote_message(source, message_wrapper.vote_message)
             else:
                 logging.info(f"Unknown handler for message: {message_wrapper}")

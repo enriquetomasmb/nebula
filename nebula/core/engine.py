@@ -786,7 +786,7 @@ class Engine:
         s.close()
         return (time.time() - start) * 1000
 
-    def nss_extract_features(self):
+    def __nss_extract_features(self):
         """
         Extract the features necessary for the node selection strategy.
         """
@@ -895,7 +895,9 @@ class AggregatorNode(Engine):
         start_time = time.time()
         await self.trainer.test()
 
-        if self.node_selection_strategy_enabled and (self.nss_selector == "distance" or self.nss_selector == "distance-voting"):
+        if self.node_selection_strategy_enabled and (
+            self.nss_selector == "distance" or self.nss_selector == "distance-voting"
+        ):
             if self.node_selection_strategy_selector.should_train():
                 logging.info("[DistanceSelector] I am training this round")
                 self.node_selection_strategy_selector.reset_votes()

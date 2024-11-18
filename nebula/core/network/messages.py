@@ -99,7 +99,7 @@ class MessagesManager:
 
     def generate_vote_message(self):
         message = nebula_pb2.VoteMessage(
-            vote = 0,
+            vote=0,
         )
         message_wrapper = nebula_pb2.Wrapper()
         message_wrapper.source = self.addr

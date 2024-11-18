@@ -1,6 +1,6 @@
 import logging
-from statistics import mean, stdev
 import random
+from statistics import mean, stdev
 
 from nebula.core.selectors.selector import Selector
 from nebula.core.utils.helper import cosine_metric
@@ -35,22 +35,22 @@ class DistanceSelector(Selector):
             return True
 
         logging.info(f"[DistanceSelector] Rounds without training: {self.rounds_without_training}")
-    
+
         # Increase probability by 10% for each round without training
         probability = 0.1 + 0.1 * self.rounds_without_training
         round_train = random.random() < probability
-    
+
         vote_train = self.number_votes > len(self.neighbors_list) * (0.3 - 0.1 * self.threshold)
-        
+
         logging.info(f"[DistanceSelector] Train Vote : {vote_train}, Spontaneous: {round_train}")
-    
+
         train = vote_train or round_train
 
         if train:
             self.rounds_without_training = 0
         else:
             self.rounds_without_training = self.rounds_without_training + 1
-    
+
         return train
 
     def reset_votes(self):
