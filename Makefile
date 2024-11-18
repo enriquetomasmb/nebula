@@ -61,11 +61,11 @@ shell:				## Start a shell in the uv environment
 	else \
 		echo "🐚 Run the following command to activate the virtual environment:"; \
 		echo ""; \
-		echo '[Linux/MacOS] source .venv/bin/activate'; \
-		echo '[Windows] .venv\\bin\\activate'; \
+		echo '[Linux/MacOS]	\033[1;32msource .venv/bin/activate\033[0m'; \
+		echo '[Windows]	\033[1;32m.venv\\bin\\activate\033[0m'; \
 		echo ""; \
 		echo "🚀 NEBULA is ready to use!"; \
-		echo "🚀 Created by Enrique Tomás Martínez Beltrán <enriquetomas@um.es>"; \
+		echo "🚀 Created by \033[1;34mEnrique Tomás Martínez Beltrán\033[0m <\033[1;34menriquetomas@um.es\033[0m>"; \
 	fi
 
 .PHONY: lock
