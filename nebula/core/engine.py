@@ -158,14 +158,10 @@ class Engine:
         )
 
         # Register additional callbacks
-        self._event_manager.register_event(
-            (
-                nebula_pb2.FederationMessage,
-                nebula_pb2.FederationMessage.Action.REPUTATION,
-            ),
+        self._event_manager.register_callback(
             self._reputation_callback,
+            # ... add more callbacks here
         )
-        # ... add more callbacks here
 
     @property
     def cm(self):
