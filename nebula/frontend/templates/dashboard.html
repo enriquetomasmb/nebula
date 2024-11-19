@@ -145,9 +145,9 @@
                                 class="label btn btn-dark">Monitor</a>
                             <a href="{{ url_for('nebula_dashboard_statistics', scenario_name=name) }}"
                                 class="label btn btn-dark">Real-time metrics</a>
-                            <a id="note-btn-{{ name }}" data-scenario-name="{{ name }}" class="label btn btn-dark"><i
+                            <a id="note-btn-{{ name }}" title="Save Note" data-scenario-name="{{ name }}" class="label btn btn-dark"><i
                                     class="fa fa-sticky-note" style="color: white;"></i></a>
-                            <a id="config-btn-{{ name }}" data-scenario-name="{{ name }}" class="label btn btn-dark"><i
+                            <a id="config-btn-{{ name }}" title="Scenario Config" data-scenario-name="{{ name }}" class="label btn btn-dark"><i
                                 class="fa fa-sliders" style="color: white;"></i></a>
                             {% if status == "running" %}
                             <a href="{{ url_for('nebula_stop_scenario', scenario_name=name, stop_all=False) }}"
@@ -158,9 +158,9 @@
                             <a href="{{ url_for('nebula_stop_scenario', scenario_name='all', stop_all=True) }}"
                                 class="label btn btn-danger">Stop scenario queue</a>
                             {% else %}
-                            <a id="relaunch-btn" data-scenario-name="{{ name }}" data-scenario-title="{{ title }}" class="label btn btn-dark"><i
+                            <a id="relaunch-btn" title="Relaunch Scenario" data-scenario-name="{{ name }}" data-scenario-title="{{ title }}" class="label btn btn-dark"><i
                                 class="fa fa-rotate-right" style="color: white;"></i></a>
-                            <a id="remove-btn" data-scenario-name="{{ name }}" class="label btn btn-danger"><i
+                            <a id="remove-btn" title="Delete Scenario" data-scenario-name="{{ name }}" class="label btn btn-danger"><i
                                     class="fa fa-trash"></i></a>
                             {% endif %}
                         </td>
@@ -186,6 +186,37 @@
     </div>
 </section>
 {% endif %}
+
+<style>
+        /* Tooltips */
+        a[title] {
+            position: relative;
+        }
+
+        a[title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            white-space: nowrap;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease, top 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        a[title]:hover::after {
+            opacity: 1;
+            top: -50px;
+        }
+</style>
 
 
 {% if not user_logged_in %}
