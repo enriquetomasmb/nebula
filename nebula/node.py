@@ -263,17 +263,20 @@ async def main(config):
 
             # Modificar la primera capa convolucional
             # Cambiar kernel_size de 7 a 3, stride de 2 a 1, y padding de 3 a 1
-            model_embeddings.conv1 = torch.nn.Conv2d(
-                in_channels=3,
-                out_channels=64,
-                kernel_size=3,
-                stride=1,
-                padding=1,
-                bias=False
-            )
+            # model_embeddings.conv1 = torch.nn.Conv2d(
+            #     in_channels=3,
+            #     out_channels=64,
+            #     kernel_size=3,
+            #     stride=1,
+            #     padding=1,
+            #     bias=False
+            # )
 
             # Eliminar la capa de MaxPooling reemplazándola con una capa de identidad
-            model_embeddings.maxpool = torch.nn.Identity()
+            # model_embeddings.maxpool = torch.nn.Identity()
+            
+            # Replace the avgpool layer to adapt to any input size
+            model_embeddings.avgpool = torch.nn.AdaptiveAvgPool2d((1, 1))
 
             # Reemplazar la capa fully connected (fc) con identidad para obtener embeddings
             model_embeddings.fc = torch.nn.Identity()

@@ -1,16 +1,13 @@
+import ipaddress
 import logging
 import os
-from statistics import mean, stdev
-import random
 from scipy.spatial.distance import pdist, squareform
 
 import numpy as np
 import matplotlib.pyplot as plt
 
 from nebula.core.selectors.selector import Selector
-from nebula.core.utils.helper import cosine_metric
 import torch
-from sklearn.metrics.pairwise import cosine_similarity
 from nebula.core.utils.locker import Locker
 
 
@@ -30,6 +27,7 @@ class DistributionSelector(Selector):
         self.own_embedding = None
         self.node_embeddings = {}
         self.selected_nodes = set()
+        self.threshold_multiplier = 1.0 # Multiplier for the standard deviation to define the dynamic threshold for similarity (default: 1.0, equivalent to mean + std)
         
     async def get_embeddings(self, model, dataloader):
         logging.info("[DistributionSelector] Getting embeddings")
@@ -76,8 +74,10 @@ class DistributionSelector(Selector):
             logging.info(f"[DistributionSelector] Including own embedding")
             self.node_embeddings[self.config.participant['network_args']['addr']] = self.own_embedding
             logging.info(f"[DistributionSelector] All embeddings received")
-            # Sort embeddings by node name
-            self.node_embeddings = {k: v for k, v in sorted(self.node_embeddings.items(), key=lambda item: item[0])}
+            def sort_key(item):
+                ip, port = item[0].split(':')
+                return (ipaddress.ip_address(ip), int(port))
+            self.node_embeddings = {k: v for k, v in sorted(self.node_embeddings.items(), key=sort_key)}
             logging.info(f"[DistributionSelector] Sorted embeddings")
             logging.info(f"[DistributionSelector] Embeddings (keys): {self.node_embeddings.keys()}")
             logging.info(f"[DistributionSelector] Embeddings:\n{self.node_embeddings}")
@@ -85,7 +85,8 @@ class DistributionSelector(Selector):
             await self.embedding_lock.release_async()
             
     def compute_cosine_similarity(self, embeddings):
-        similarity_matrix = cosine_similarity(embeddings)
+        norm_embeddings = embeddings / np.linalg.norm(embeddings, axis=1, keepdims=True)
+        similarity_matrix = np.dot(norm_embeddings, norm_embeddings.T)
         logging.info("Cosine similarity matrix computed.")
         return similarity_matrix
     
@@ -159,23 +160,30 @@ class DistributionSelector(Selector):
             logging.info(f"Node {node} has similar nodes: {', '.join(similar_nodes_with_scores)}")
                         
             if node == own_node:
+                logging.info(f"--- [Own node '{node}'] ---")
                 # Exclude own node
                 similar_nodes = [n for n in sorted_nodes if n != own_node]
                 similar_scores = np.delete(sorted_scores, np.where(sorted_nodes == own_node))
                 similar_nodes_with_scores = [f"{similar_nodes[j]} [{similar_scores[j]:.4f}]" for j in range(len(similar_nodes))]
                 logging.info(f"Own node '{own_node}' similar nodes with scores: {', '.join(similar_nodes_with_scores)}")
                 
-        threshold = 0.9
-        
-        # Select nodes above the threshold
-        above_threshold_indices = np.where(similar_scores >= threshold)[0]
-        if len(above_threshold_indices) > 0:
-            selected_nodes = [similar_nodes[idx] for idx in above_threshold_indices]
-            logging.info(f"Own node '{own_node}' has similar nodes above threshold: {selected_nodes}")
-        else:
-            selected_nodes = similar_nodes[:max(1, len(similar_nodes) // 2)]
-            logging.info(f"No nodes above threshold for own node. Selecting top similar nodes: {selected_nodes}")
-            
+                # Compute mean and standard deviation of similarity scores
+                mean_similarity = np.mean(similar_scores)
+                std_similarity = np.std(similar_scores)
+                
+                # Define dynamic threshold
+                threshold = mean_similarity + self.threshold_multiplier * std_similarity
+                logging.info(f"Dynamic threshold for node '{own_node}': {threshold:.4f}")
+                
+                # Select nodes above the dynamic threshold
+                above_threshold_indices = np.where(similar_scores >= threshold)[0]
+                if len(above_threshold_indices) > len(similar_nodes) // 2:
+                    selected_nodes = [similar_nodes[idx] for idx in above_threshold_indices]
+                    logging.info(f"Own node '{own_node}' has similar nodes above dynamic threshold: {selected_nodes}")
+                else:
+                    selected_nodes = similar_nodes[:max(1, len(similar_nodes) // 2)]
+                    logging.info(f"No nodes above dynamic threshold for own node. Selecting top similar nodes: {selected_nodes}")
+                
         # Update the final selected nodes
         self.selected_nodes.update(selected_nodes)
         if own_node not in self.selected_nodes:
