@@ -358,42 +358,4 @@
     }
 </script>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var scenarios_finished = parseInt("{{scenarios_finished}}");
-        var scenarios_list_length = parseInt("{{scenarios_list_length}}");
-
-        var newScenarioBtn = document.getElementById("new-scenario-btn");
-        var aScenarioBtn = document.getElementById("a-scenario-btn");
-
-        if (scenarios_finished < scenarios_list_length) {
-            if (newScenarioBtn) {
-                newScenarioBtn.style.pointerEvents = 'none';
-                newScenarioBtn.style.backgroundColor = 'grey';
-                newScenarioBtn.style.borderColor = 'grey';
-                newScenarioBtn.style.cursor = 'default';
-            }
-
-            if (aScenarioBtn) {
-                aScenarioBtn.style.pointerEvents = 'none';
-                aScenarioBtn.style.backgroundColor = 'grey';
-                aScenarioBtn.style.borderColor = 'grey';
-                aScenarioBtn.style.cursor = 'default';
-            }
-        } else {
-            if (newScenarioBtn) {
-                newScenarioBtn.style.pointerEvents = 'auto';
-                newScenarioBtn.style.backgroundColor = '';
-                newScenarioBtn.style.cursor = 'pointer';
-            }
-
-            if (aScenarioBtn) {
-                aScenarioBtn.style.pointerEvents = 'auto';
-                aScenarioBtn.style.backgroundColor = '';
-                aScenarioBtn.style.cursor = 'pointer';
-            }
-        }
-    });
-</script>
-
 {% endblock %}

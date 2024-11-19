@@ -831,7 +831,7 @@ async def nebula_relaunch_scenario(
             scenarios_finished = 0
             scenarios_list.clear()
             scenarios_list.append(scenario)
-            background_tasks.add_task(run_scenarios, scenarios_list, session["role"])
+            background_tasks.add_task(run_scenarios, session["role"])
         else:
             scenarios_list.append(scenario)
 
@@ -1148,11 +1148,9 @@ async def run_scenario(scenario_data, role):
 
 
 # Deploy the list of scenarios
-async def run_scenarios(data, role):
+async def run_scenarios(role):
     try:
-        global scenarios_finished, scenarios_list, scenarios_list_length
-        logging.info(f"[FER] run_sceenarios, scenarios_list: {data}")
-        scenarios_list = data
+        global scenarios_finished, scenarios_list_length
         for scenario_data in scenarios_list:
             finish_scenario_event.clear()
             logging.info(f"Running scenario {scenario_data['scenario_title']}")
@@ -1165,7 +1163,7 @@ async def run_scenarios(data, role):
                 scenarios_list_length = 0
                 stop_scenario(scenario_name)
                 return
-            scenarios_finished = scenarios_finished + 1
+            scenarios_finished += 1
             stop_scenario(scenario_name)
             await asyncio.sleep(5)
     finally:
@@ -1184,15 +1182,18 @@ async def nebula_dashboard_deployment_run(
     if request.headers.get("content-type") != "application/json":
         raise HTTPException(status_code=401)
 
-    stop_all_scenarios()
-    finish_scenario_event.clear()
-    stop_all_scenarios_event.clear()
     data = await request.json()
-    global scenarios_finished, scenarios_list_length
-    scenarios_finished = 0
-    scenarios_list_length = len(data)
+    global scenarios_finished, scenarios_list_length, scenarios_list
+    if scenarios_list_length < 1:
+        scenarios_finished = 0
+        scenarios_list_length = len(data)
+        scenarios_list = data
+        background_tasks.add_task(run_scenarios, session["role"])
+    else:
+        scenarios_list_length += len(data)
+        scenarios_list.extend(data)
+        await asyncio.sleep(3)
     logging.info(f"Running deployment with {len(data)} scenarios")
-    background_tasks.add_task(run_scenarios, data, session["role"])
     return RedirectResponse(url="/nebula/dashboard", status_code=303)
     # return Response(content="Success", status_code=200)
 
