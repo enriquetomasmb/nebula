@@ -16,6 +16,7 @@ from nebula.core.network.communications import CommunicationsManager
 from nebula.core.pb import nebula_pb2
 from nebula.core.selectors.all_selector import AllSelector
 from nebula.core.selectors.distance_selector import DistanceSelector
+from nebula.core.selectors.distribution_selector import DistributionSelector
 from nebula.core.selectors.priority_selector import PrioritySelector
 from nebula.core.selectors.random_selector import RandomSelector
 from nebula.core.utils.locker import Locker
@@ -119,7 +120,9 @@ class Engine:
             elif self.nss_selector == "distance-voting":
                 threshold = float(config.participant["node_selection_strategy_args"]["parameter"])
                 self.node_selection_strategy_selector = DistanceSelector(voting=True, threshold=threshold)
-
+            elif self.nss_selector == "distribution":
+                self.node_selection_strategy_selector = DistributionSelector(self.config)
+                self.node_selection_strategy_parameter = config.participant["node_selection_strategy_args"]["parameter"]
         nss_info_msg = f"Enabled: {self.node_selection_strategy_enabled}\n{f'Selector: {self.nss_selector}' if self.node_selection_strategy_enabled else ''}"
         print_msg_box(msg=nss_info_msg, indent=2, title="NSS Info")
 
@@ -185,6 +188,7 @@ class Engine:
                 self._federation_models_included_callback,
                 self.__nss_features_message_callback,
                 self.__vote_message_callback,
+                self.__embedding_message_callback,
             ]
         )
 
@@ -372,6 +376,16 @@ class Engine:
             features["latency"] = latency
             self.node_selection_strategy_selector.add_neighbor(source)
             self.node_selection_strategy_selector.add_node_features(source, features)
+            
+    @event_handler(nebula_pb2.EmbeddingMessage, None)
+    async def __embedding_message_callback(self, source, message):
+        logging.info(f"📝  handle_embedding_message | Trigger | Received Embedding message from {source}")
+        if message is not None:
+            logging.info(f"Deserializing embedding from {source}")
+            deserialize_embedding = self.trainer.deserialize_embedding(message.embedding)
+            logging.info(f"Adding embedding from {source}")
+            current_neighbors = await self.cm.get_addrs_current_connections(only_direct=True)
+            await self.node_selection_strategy_selector.add_embedding(source, deserialize_embedding, current_neighbors)
 
     async def create_trainer_module(self):
         asyncio.create_task(self._start_learning())
@@ -420,6 +434,26 @@ class Engine:
             message = self.cm.mm.generate_federation_message(nebula_pb2.FederationMessage.Action.FEDERATION_READY)
             await self.cm.send_message_to_neighbors(message)
             logging.info("💤  Waiting until receiving the start signal from the start node")
+            
+    async def generate_and_send_embeddings(self):
+        if self.node_selection_strategy_enabled:
+            if self.nss_selector == "distribution":
+                # Sending embeddings
+                await self.node_selection_strategy_selector.embedding_lock.acquire_async()
+                logging.info(f"Model embeddings: {self.trainer.model.get_model_embeddings()}")
+                logging.info(f"Dataset embeddings: {self.trainer.model.get_dataset_embeddings()}")
+                embedding = await self.node_selection_strategy_selector.get_embeddings(model=self.trainer.model.get_model_embeddings(), dataloader=self.trainer.model.get_dataset_embeddings().train_dataloader())
+                logging.info(f"Variance of the embedding: {embedding.var()}")
+                logging.info(f"Mean embedding:\n{embedding}")
+                serialized_embedding = self.trainer.serialize_embedding(embedding)
+                message = self.cm.mm.generate_embedding_message(serialized_embedding)
+                logging.info("Sending embeddings to neighbors...")
+                await self.cm.send_message_to_neighbors(message)
+                await self.node_selection_strategy_selector.embedding_lock.acquire_async()
+            else:
+                logging.info("Distribution not selected")
+        else:
+            logging.info("Node Selection Strategy not enabled")
 
     async def _start_learning(self):
         await self.learning_cycle_lock.acquire_async()
@@ -442,9 +476,11 @@ class Engine:
                     f"Initial DIRECT connections: {direct_connections} | Initial UNDIRECT participants: {undirected_connections}"
                 )
                 logging.info("💤  Waiting initialization of the federation...")
+                await self.generate_and_send_embeddings()
                 # Lock to wait for the federation to be ready (only affects the first round, when the learning starts)
                 # Only applies to non-start nodes --> start node does not wait for the federation to be ready
                 await self.get_federation_ready_lock().acquire_async()
+                
                 if self.config.participant["device_args"]["start"]:
                     logging.info("Propagate initial model updates.")
                     await self.cm.propagator.propagate("initialization")

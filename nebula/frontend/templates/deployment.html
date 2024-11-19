@@ -909,7 +909,7 @@
                 <!-- Node Selection Strategy -->
                 <div class="form-group row container-shadow tiny grey">
                     <h5 class="step-number">Node Selection Strategy <i class="fa fa-bullseye"></i>
-                        <input type="checkbox" id="nodesel-strat-lock" onchange="lock('nodesel-strat-default-btn', 'nodesel-strat-all-btn', 'nodesel-strat-random-btn', 'nodesel-strat-priority-btn', 'nodesel-strat-distance-btn', checked)" style="display: none;">
+                        <input type="checkbox" id="nodesel-strat-lock" onchange="lock('nodesel-strat-default-btn', 'nodesel-strat-all-btn', 'nodesel-strat-random-btn', 'nodesel-strat-priority-btn', 'nodesel-strat-distance-btn', 'nodesel-strat-distribution-btn', checked)" style="display: none;">
                         <label for="nodesel-strat-lock" class="icon-container" style="float: right;">
                             <i class="fa fa-lock"></i>
                         </label>
@@ -945,6 +945,11 @@
                         <input class="form-check-input" type="radio" name="nodeSelectionStrategyOptions"
                             id="nodesel-strat-distance-voting-btn" value="distance-voting">
                         <label class="form-check-label" for="nodesel-strat-distance-voting-btn">Similarity Selection (Voting)</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="nodeSelectionStrategyOptions"
+                            id="nodesel-strat-distribution-btn" value="distribution">
+                        <label class="form-check-label" for="nodesel-strat-distribution-btn">Distribution Selection</label>
                     </div>
                     <div class="form-control">
                         <input type="number" id="nodeSelectionStrategyParameter"

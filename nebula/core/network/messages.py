@@ -105,3 +105,13 @@ class MessagesManager:
         message_wrapper.vote_message.CopyFrom(message)
         data = message_wrapper.SerializeToString()
         return data
+    
+    def generate_embedding_message(self, embedding):
+        message = nebula_pb2.EmbeddingMessage(
+            embedding=embedding,
+        )
+        message_wrapper = nebula_pb2.Wrapper()
+        message_wrapper.source = self.addr
+        message_wrapper.embedding_message.CopyFrom(message)
+        data = message_wrapper.SerializeToString()
+        return data

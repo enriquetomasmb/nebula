@@ -287,6 +287,27 @@ class Lightning:
             return OrderedDict(params_dict)
         except Exception as e:
             raise ParameterDeserializeError("Error decoding parameters") from e
+    
+    def serialize_embedding(self, embedding):
+        try:
+            buffer = io.BytesIO()
+            with gzip.GzipFile(fileobj=buffer, mode="wb") as f:
+                torch.save(embedding, f, pickle_protocol=pickle.HIGHEST_PROTOCOL)
+            serialized_data = buffer.getvalue()
+            buffer.close()
+            del buffer
+            return serialized_data
+        except Exception as e:
+            raise ParameterSerializeError("Error serializing model") from e
+    
+    def deserialize_embedding(self, data):
+        try:
+            buffer = io.BytesIO(data)
+            with gzip.GzipFile(fileobj=buffer, mode="rb") as f:
+                embedding = torch.load(f)
+            return embedding
+        except Exception as e:
+            raise ParameterDeserializeError("Error decoding embedding") from e
 
     def set_model_parameters(self, params, initialize=False):
         try:

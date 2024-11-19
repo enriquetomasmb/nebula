@@ -24,6 +24,7 @@ message Wrapper {
     ResponseMessage response_message = 7;
     NSSFeaturesMessage nss_features_message = 8;
     VoteMessage vote_message = 9;
+    EmbeddingMessage embedding_message = 10;
   }
 }
 
@@ -93,4 +94,8 @@ message NSSFeaturesMessage {
 
 message VoteMessage {
   int32 vote = 1;
+}
+
+message EmbeddingMessage {
+  bytes embedding = 1;
 }

@@ -6,6 +6,7 @@ import warnings
 
 import numpy as np
 import torch
+import torchvision
 
 torch.multiprocessing.set_start_method("spawn", force=True)
 
@@ -50,6 +51,7 @@ from nebula.core.models.syscall.svm import SyscallModelSGDOneClassSVM
 from nebula.core.role import Role
 from nebula.core.training.lightning import Lightning
 from nebula.core.training.siamese import Siamese
+from torchvision.models import resnet18
 
 # os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 # os.environ["TORCH_LOGS"] = "+dynamo"
@@ -110,6 +112,10 @@ async def main(config):
     dataset_str = config.participant["data_args"]["dataset"]
     num_workers = config.participant["data_args"]["num_workers"]
     model = None
+    
+    dataset_embeddings = None
+    model_embeddings = None
+    
     if dataset_str == "MNIST":
         dataset = MNISTDataset(
             num_classes=10,
@@ -205,6 +211,76 @@ async def main(config):
             model = CIFAR10ModelCNN_V3()
         else:
             raise ValueError(f"Model {model} not supported for dataset {dataset_str}")
+        
+        nss_selector = config.participant["node_selection_strategy_args"]["strategy"]
+        if nss_selector == "distribution":
+            logging.info(f"Using DistributionSelector")
+            dataset_embeddings = CIFAR10Dataset(
+                num_classes=10,
+                partition_id=idx,
+                partitions_number=n_nodes,
+                iid=iid,
+                partition=partition_selection,
+                partition_parameter=partition_parameter,
+                seed=42,
+                config=config,
+                embedding="resnet18",
+            )
+            dataset_embeddings = DataModule(
+                train_set=dataset_embeddings.train_set,
+                train_set_indices=dataset_embeddings.train_indices_map,
+                test_set=dataset_embeddings.test_set,
+                test_set_indices=dataset_embeddings.test_indices_map,
+                local_test_set_indices=dataset_embeddings.local_test_indices_map,
+                num_workers=num_workers,
+                partition_id=idx,
+                partitions_number=n_nodes,
+                batch_size=dataset_embeddings.batch_size,
+                label_flipping=label_flipping,
+                label_flipping_config=label_flipping_config,
+                data_poisoning=data_poisoning,
+                poisoned_percent=poisoned_percent,
+                poisoned_ratio=poisoned_ratio,
+                targeted=targeted,
+                target_label=target_label,
+                target_changed_label=target_changed_label,
+                noise_type=noise_type,
+            )
+            dataset_embeddings.setup("fit")
+            
+            # model_embeddings = resnet18(pretrained=True)
+            # model_embeddings.fc = torch.nn.Identity()  # Reemplazar la capa final con identidad para obtener embeddings
+            # for param in model_embeddings.parameters():
+            #     param.requires_grad = False  # Deshabilitar entrenamiento
+            
+            # model_embeddings = torchvision.models.mobilenet_v3_large(pretrained=True)
+            # model_embeddings.classifier = torch.nn.Identity()  # Replace classifier with identity for embeddings
+            # for param in model_embeddings.parameters():
+            #     param.requires_grad = False  # Disable training
+            
+            # Cargar el modelo ResNet18 preentrenado
+            model_embeddings = torchvision.models.resnet18(pretrained=True)
+
+            # Modificar la primera capa convolucional
+            # Cambiar kernel_size de 7 a 3, stride de 2 a 1, y padding de 3 a 1
+            model_embeddings.conv1 = torch.nn.Conv2d(
+                in_channels=3,
+                out_channels=64,
+                kernel_size=3,
+                stride=1,
+                padding=1,
+                bias=False
+            )
+
+            # Eliminar la capa de MaxPooling reemplazándola con una capa de identidad
+            model_embeddings.maxpool = torch.nn.Identity()
+
+            # Reemplazar la capa fully connected (fc) con identidad para obtener embeddings
+            model_embeddings.fc = torch.nn.Identity()
+            
+            model.set_dataset_embeddings(dataset_embeddings)
+            model.set_model_embeddings(model_embeddings)
+                
     elif dataset_str == "CIFAR100":
         dataset = CIFAR100Dataset(
             num_classes=100,
