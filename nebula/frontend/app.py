@@ -757,6 +757,9 @@ def stop_scenario(scenario_name):
     ScenarioManagement.stop_participants()
     ScenarioManagement.stop_blockchain()
     scenario_set_status_to_finished(scenario_name)
+    # Generate statistics for the scenario
+    path = Utils.check_path(settings.log_dir, scenario_name)
+    ScenarioManagement.generate_statistics(path)
 
 
 def stop_all_scenarios():

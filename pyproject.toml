@@ -124,6 +124,8 @@ frontend = [
     "setuptools==74.1.2",
     "tensorboard==2.17.1",
     "tensorboardx==2.6.2.2",
+    "tensorboard-reducer==0.3.1",
+    "torch==2.4.1",
     "uvicorn==0.30.6",
     "web3==6.20.0",
     "wheel==0.44.0",
