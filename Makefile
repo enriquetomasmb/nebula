@@ -1,6 +1,7 @@
 UV := uv
 PYTHON_VERSION := 3.11
 UV_INSTALL_SCRIPT := https://astral.sh/uv/install.sh
+PATH := $(HOME)/.local/bin:$(PATH)
 
 command_exists = $(shell command -v $(1) >/dev/null 2>&1 && echo true || echo false)
 
@@ -16,6 +17,10 @@ check-uv:		## Check and install uv if necessary
 	else \
 		echo "📦 uv is not installed. Installing uv..."; \
 		curl -LsSf $(UV_INSTALL_SCRIPT) | sh; \
+	fi; \
+	if ! command -v $(UV) >/dev/null 2>&1; then \
+		echo "❌  uv is not in your PATH. Please add the uv installation directory to your PATH environment variable."; \
+		exit 1; \
 	fi
 
 .PHONY: install-python
