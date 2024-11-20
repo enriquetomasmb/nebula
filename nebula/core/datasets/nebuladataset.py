@@ -40,6 +40,7 @@ class NebulaDataset(Dataset, ABC):
         partition_parameter=0.5,
         seed=42,
         config=None,
+        embedding=None,
     ):
         super().__init__()
 
@@ -56,6 +57,7 @@ class NebulaDataset(Dataset, ABC):
         self.partition_parameter = partition_parameter
         self.seed = seed
         self.config = config
+        self.embedding = embedding
 
         self.train_set = None
         self.train_indices_map = None

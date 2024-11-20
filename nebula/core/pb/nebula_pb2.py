@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cnebula.proto\x12\x06nebula\"\xa0\x03\n\x07Wrapper\x12\x0e\n\x06source\x18\x01 \x01(\t\x12\x35\n\x11\x64iscovery_message\x18\x02 \x01(\x0b\x32\x18.nebula.DiscoveryMessageH\x00\x12\x31\n\x0f\x63ontrol_message\x18\x03 \x01(\x0b\x32\x16.nebula.ControlMessageH\x00\x12\x37\n\x12\x66\x65\x64\x65ration_message\x18\x04 \x01(\x0b\x32\x19.nebula.FederationMessageH\x00\x12-\n\rmodel_message\x18\x05 \x01(\x0b\x32\x14.nebula.ModelMessageH\x00\x12\x37\n\x12\x63onnection_message\x18\x06 \x01(\x0b\x32\x19.nebula.ConnectionMessageH\x00\x12\x33\n\x10response_message\x18\x07 \x01(\x0b\x32\x17.nebula.ResponseMessageH\x00\x12:\n\x14nss_features_message\x18\x08 \x01(\x0b\x32\x1a.nebula.NSSFeaturesMessageH\x00\x42\t\n\x07message\"\x9e\x01\n\x10\x44iscoveryMessage\x12/\n\x06\x61\x63tion\x18\x01 \x01(\x0e\x32\x1f.nebula.DiscoveryMessage.Action\x12\x10\n\x08latitude\x18\x02 \x01(\x02\x12\x11\n\tlongitude\x18\x03 \x01(\x02\"4\n\x06\x41\x63tion\x12\x0c\n\x08\x44ISCOVER\x10\x00\x12\x0c\n\x08REGISTER\x10\x01\x12\x0e\n\nDEREGISTER\x10\x02\"\x9a\x01\n\x0e\x43ontrolMessage\x12-\n\x06\x61\x63tion\x18\x01 \x01(\x0e\x32\x1d.nebula.ControlMessage.Action\x12\x0b\n\x03log\x18\x02 \x01(\t\"L\n\x06\x41\x63tion\x12\t\n\x05\x41LIVE\x10\x00\x12\x0c\n\x08OVERHEAD\x10\x01\x12\x0c\n\x08MOBILITY\x10\x02\x12\x0c\n\x08RECOVERY\x10\x03\x12\r\n\tWEAK_LINK\x10\x04\"\xcd\x01\n\x11\x46\x65\x64\x65rationMessage\x12\x30\n\x06\x61\x63tion\x18\x01 \x01(\x0e\x32 .nebula.FederationMessage.Action\x12\x11\n\targuments\x18\x02 \x03(\t\x12\r\n\x05round\x18\x03 \x01(\x05\"d\n\x06\x41\x63tion\x12\x14\n\x10\x46\x45\x44\x45RATION_START\x10\x00\x12\x0e\n\nREPUTATION\x10\x01\x12\x1e\n\x1a\x46\x45\x44\x45RATION_MODELS_INCLUDED\x10\x02\x12\x14\n\x10\x46\x45\x44\x45RATION_READY\x10\x03\"A\n\x0cModelMessage\x12\x12\n\nparameters\x18\x01 \x01(\x0c\x12\x0e\n\x06weight\x18\x02 \x01(\x03\x12\r\n\x05round\x18\x03 \x01(\x05\"l\n\x11\x43onnectionMessage\x12\x30\n\x06\x61\x63tion\x18\x01 \x01(\x0e\x32 .nebula.ConnectionMessage.Action\"%\n\x06\x41\x63tion\x12\x0b\n\x07\x43ONNECT\x10\x00\x12\x0e\n\nDISCONNECT\x10\x01\"#\n\x0fResponseMessage\x12\x10\n\x08response\x18\x01 \x01(\t\"v\n\x12NSSFeaturesMessage\x12\x13\n\x0b\x63pu_percent\x18\x01 \x01(\x02\x12\x12\n\nbytes_sent\x18\x02 \x01(\x03\x12\x16\n\x0e\x62ytes_received\x18\x03 \x01(\x03\x12\x0c\n\x04loss\x18\x04 \x01(\x02\x12\x11\n\tdata_size\x18\x05 \x01(\x03\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cnebula.proto\x12\x06nebula\"\x84\x04\n\x07Wrapper\x12\x0e\n\x06source\x18\x01 \x01(\t\x12\x35\n\x11\x64iscovery_message\x18\x02 \x01(\x0b\x32\x18.nebula.DiscoveryMessageH\x00\x12\x31\n\x0f\x63ontrol_message\x18\x03 \x01(\x0b\x32\x16.nebula.ControlMessageH\x00\x12\x37\n\x12\x66\x65\x64\x65ration_message\x18\x04 \x01(\x0b\x32\x19.nebula.FederationMessageH\x00\x12-\n\rmodel_message\x18\x05 \x01(\x0b\x32\x14.nebula.ModelMessageH\x00\x12\x37\n\x12\x63onnection_message\x18\x06 \x01(\x0b\x32\x19.nebula.ConnectionMessageH\x00\x12\x33\n\x10response_message\x18\x07 \x01(\x0b\x32\x17.nebula.ResponseMessageH\x00\x12:\n\x14nss_features_message\x18\x08 \x01(\x0b\x32\x1a.nebula.NSSFeaturesMessageH\x00\x12+\n\x0cvote_message\x18\t \x01(\x0b\x32\x13.nebula.VoteMessageH\x00\x12\x35\n\x11\x65mbedding_message\x18\n \x01(\x0b\x32\x18.nebula.EmbeddingMessageH\x00\x42\t\n\x07message\"\x9e\x01\n\x10\x44iscoveryMessage\x12/\n\x06\x61\x63tion\x18\x01 \x01(\x0e\x32\x1f.nebula.DiscoveryMessage.Action\x12\x10\n\x08latitude\x18\x02 \x01(\x02\x12\x11\n\tlongitude\x18\x03 \x01(\x02\"4\n\x06\x41\x63tion\x12\x0c\n\x08\x44ISCOVER\x10\x00\x12\x0c\n\x08REGISTER\x10\x01\x12\x0e\n\nDEREGISTER\x10\x02\"\x9a\x01\n\x0e\x43ontrolMessage\x12-\n\x06\x61\x63tion\x18\x01 \x01(\x0e\x32\x1d.nebula.ControlMessage.Action\x12\x0b\n\x03log\x18\x02 \x01(\t\"L\n\x06\x41\x63tion\x12\t\n\x05\x41LIVE\x10\x00\x12\x0c\n\x08OVERHEAD\x10\x01\x12\x0c\n\x08MOBILITY\x10\x02\x12\x0c\n\x08RECOVERY\x10\x03\x12\r\n\tWEAK_LINK\x10\x04\"\xcd\x01\n\x11\x46\x65\x64\x65rationMessage\x12\x30\n\x06\x61\x63tion\x18\x01 \x01(\x0e\x32 .nebula.FederationMessage.Action\x12\x11\n\targuments\x18\x02 \x03(\t\x12\r\n\x05round\x18\x03 \x01(\x05\"d\n\x06\x41\x63tion\x12\x14\n\x10\x46\x45\x44\x45RATION_START\x10\x00\x12\x0e\n\nREPUTATION\x10\x01\x12\x1e\n\x1a\x46\x45\x44\x45RATION_MODELS_INCLUDED\x10\x02\x12\x14\n\x10\x46\x45\x44\x45RATION_READY\x10\x03\"A\n\x0cModelMessage\x12\x12\n\nparameters\x18\x01 \x01(\x0c\x12\x0e\n\x06weight\x18\x02 \x01(\x03\x12\r\n\x05round\x18\x03 \x01(\x05\"l\n\x11\x43onnectionMessage\x12\x30\n\x06\x61\x63tion\x18\x01 \x01(\x0e\x32 .nebula.ConnectionMessage.Action\"%\n\x06\x41\x63tion\x12\x0b\n\x07\x43ONNECT\x10\x00\x12\x0e\n\nDISCONNECT\x10\x01\"#\n\x0fResponseMessage\x12\x10\n\x08response\x18\x01 \x01(\t\"v\n\x12NSSFeaturesMessage\x12\x13\n\x0b\x63pu_percent\x18\x01 \x01(\x02\x12\x12\n\nbytes_sent\x18\x02 \x01(\x03\x12\x16\n\x0e\x62ytes_received\x18\x03 \x01(\x03\x12\x0c\n\x04loss\x18\x04 \x01(\x02\x12\x11\n\tdata_size\x18\x05 \x01(\x03\"\x1b\n\x0bVoteMessage\x12\x0c\n\x04vote\x18\x01 \x01(\x05\"%\n\x10\x45mbeddingMessage\x12\x11\n\tembedding\x18\x01 \x01(\x0c\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -22,27 +22,31 @@ _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'nebula_pb2', _globals)
 if _descriptor._USE_C_DESCRIPTORS == False:
   DESCRIPTOR._options = None
   _globals['_WRAPPER']._serialized_start=25
-  _globals['_WRAPPER']._serialized_end=441
-  _globals['_DISCOVERYMESSAGE']._serialized_start=444
-  _globals['_DISCOVERYMESSAGE']._serialized_end=602
-  _globals['_DISCOVERYMESSAGE_ACTION']._serialized_start=550
-  _globals['_DISCOVERYMESSAGE_ACTION']._serialized_end=602
-  _globals['_CONTROLMESSAGE']._serialized_start=605
-  _globals['_CONTROLMESSAGE']._serialized_end=759
-  _globals['_CONTROLMESSAGE_ACTION']._serialized_start=683
-  _globals['_CONTROLMESSAGE_ACTION']._serialized_end=759
-  _globals['_FEDERATIONMESSAGE']._serialized_start=762
-  _globals['_FEDERATIONMESSAGE']._serialized_end=967
-  _globals['_FEDERATIONMESSAGE_ACTION']._serialized_start=867
-  _globals['_FEDERATIONMESSAGE_ACTION']._serialized_end=967
-  _globals['_MODELMESSAGE']._serialized_start=969
-  _globals['_MODELMESSAGE']._serialized_end=1034
-  _globals['_CONNECTIONMESSAGE']._serialized_start=1036
-  _globals['_CONNECTIONMESSAGE']._serialized_end=1144
-  _globals['_CONNECTIONMESSAGE_ACTION']._serialized_start=1107
-  _globals['_CONNECTIONMESSAGE_ACTION']._serialized_end=1144
-  _globals['_RESPONSEMESSAGE']._serialized_start=1146
-  _globals['_RESPONSEMESSAGE']._serialized_end=1181
-  _globals['_NSSFEATURESMESSAGE']._serialized_start=1183
-  _globals['_NSSFEATURESMESSAGE']._serialized_end=1301
+  _globals['_WRAPPER']._serialized_end=541
+  _globals['_DISCOVERYMESSAGE']._serialized_start=544
+  _globals['_DISCOVERYMESSAGE']._serialized_end=702
+  _globals['_DISCOVERYMESSAGE_ACTION']._serialized_start=650
+  _globals['_DISCOVERYMESSAGE_ACTION']._serialized_end=702
+  _globals['_CONTROLMESSAGE']._serialized_start=705
+  _globals['_CONTROLMESSAGE']._serialized_end=859
+  _globals['_CONTROLMESSAGE_ACTION']._serialized_start=783
+  _globals['_CONTROLMESSAGE_ACTION']._serialized_end=859
+  _globals['_FEDERATIONMESSAGE']._serialized_start=862
+  _globals['_FEDERATIONMESSAGE']._serialized_end=1067
+  _globals['_FEDERATIONMESSAGE_ACTION']._serialized_start=967
+  _globals['_FEDERATIONMESSAGE_ACTION']._serialized_end=1067
+  _globals['_MODELMESSAGE']._serialized_start=1069
+  _globals['_MODELMESSAGE']._serialized_end=1134
+  _globals['_CONNECTIONMESSAGE']._serialized_start=1136
+  _globals['_CONNECTIONMESSAGE']._serialized_end=1244
+  _globals['_CONNECTIONMESSAGE_ACTION']._serialized_start=1207
+  _globals['_CONNECTIONMESSAGE_ACTION']._serialized_end=1244
+  _globals['_RESPONSEMESSAGE']._serialized_start=1246
+  _globals['_RESPONSEMESSAGE']._serialized_end=1281
+  _globals['_NSSFEATURESMESSAGE']._serialized_start=1283
+  _globals['_NSSFEATURESMESSAGE']._serialized_end=1401
+  _globals['_VOTEMESSAGE']._serialized_start=1403
+  _globals['_VOTEMESSAGE']._serialized_end=1430
+  _globals['_EMBEDDINGMESSAGE']._serialized_start=1432
+  _globals['_EMBEDDINGMESSAGE']._serialized_end=1469
 # @@protoc_insertion_point(module_scope)

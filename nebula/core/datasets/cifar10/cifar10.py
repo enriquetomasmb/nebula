@@ -19,6 +19,7 @@ class CIFAR10Dataset(NebulaDataset):
         partition_parameter=0.5,
         seed=42,
         config=None,
+        embedding=None,
     ):
         super().__init__(
             num_classes=num_classes,
@@ -31,6 +32,7 @@ class CIFAR10Dataset(NebulaDataset):
             partition_parameter=partition_parameter,
             seed=seed,
             config=config,
+            embedding=embedding,
         )
 
     def initialize_dataset(self):
@@ -60,12 +62,29 @@ class CIFAR10Dataset(NebulaDataset):
     def load_cifar10_dataset(self, train=True):
         mean = (0.4914, 0.4822, 0.4465)
         std = (0.2471, 0.2435, 0.2616)
-        apply_transforms = transforms.Compose([
-            transforms.RandomCrop(32, padding=4),
-            transforms.RandomHorizontalFlip(),
-            transforms.ToTensor(),
-            transforms.Normalize(mean, std, inplace=True),
-        ])
+        if self.embedding == "resnet18":
+            apply_transforms = transforms.Compose([
+                # transforms.Resize(224),
+                # transforms.RandomHorizontalFlip(),
+                transforms.RandomCrop(32, padding=4),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize(mean, std, inplace=True),
+            ])
+        elif self.embedding == "mobilenetv3":
+            apply_transforms = transforms.Compose([
+                transforms.Resize(224),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize(mean, std, inplace=True),
+            ])
+        else:
+            apply_transforms = transforms.Compose([
+                transforms.RandomCrop(32, padding=4),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor(),
+                transforms.Normalize(mean, std, inplace=True),
+            ])
         data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
         os.makedirs(data_dir, exist_ok=True)
         return CIFAR10(

@@ -283,8 +283,8 @@ class Connection:
 
                 if is_last_chunk:
                     await self._process_complete_message(message_id)
-        except asyncio.CancelledError:
-            logging.info("Message handling cancelled")
+        except asyncio.CancelledError as e:
+            logging.info(f"Message handling cancelled: {e}") 
         except ConnectionError as e:
             logging.exception(f"Connection closed while reading: {e}")
             # await self.reconnect()

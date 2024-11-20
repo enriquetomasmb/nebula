@@ -1,10 +1,11 @@
 import asyncio
 import logging
 import os
-import time
-import psutil
 import socket
+import time
+
 import docker
+import psutil
 
 from nebula.addons.attacks.attacks import create_attack
 from nebula.addons.functions import print_msg_box
@@ -15,6 +16,8 @@ from nebula.core.eventmanager import EventManager, event_handler
 from nebula.core.network.communications import CommunicationsManager
 from nebula.core.pb import nebula_pb2
 from nebula.core.selectors.all_selector import AllSelector
+from nebula.core.selectors.distance_selector import DistanceSelector
+from nebula.core.selectors.distribution_selector import DistributionSelector
 from nebula.core.selectors.priority_selector import PrioritySelector
 from nebula.core.selectors.random_selector import RandomSelector
 from nebula.core.utils.locker import Locker
@@ -112,6 +115,15 @@ class Engine:
                 self.node_selection_strategy_selector = PrioritySelector()
             elif self.nss_selector == "random":
                 self.node_selection_strategy_selector = RandomSelector()
+            elif self.nss_selector == "distance":
+                threshold = float(config.participant["node_selection_strategy_args"]["parameter"])
+                self.node_selection_strategy_selector = DistanceSelector(threshold=threshold)
+            elif self.nss_selector == "distance-voting":
+                threshold = float(config.participant["node_selection_strategy_args"]["parameter"])
+                self.node_selection_strategy_selector = DistanceSelector(voting=True, threshold=threshold)
+            elif self.nss_selector == "distribution":
+                self.node_selection_strategy_selector = DistributionSelector(self.config)
+                self.node_selection_strategy_parameter = config.participant["node_selection_strategy_args"]["parameter"]
         nss_info_msg = f"Enabled: {self.node_selection_strategy_enabled}\n{f'Selector: {self.nss_selector}' if self.node_selection_strategy_enabled else ''}"
         print_msg_box(msg=nss_info_msg, indent=2, title="NSS Info")
 
@@ -176,6 +188,8 @@ class Engine:
                 self._start_federation_callback,
                 self._federation_models_included_callback,
                 self.__nss_features_message_callback,
+                self.__vote_message_callback,
+                self.__embedding_message_callback,
             ]
         )
 
@@ -343,6 +357,12 @@ class Engine:
         finally:
             await self.cm.get_connections_lock().release_async()
 
+    @event_handler(nebula_pb2.VoteMessage, None)
+    async def __vote_message_callback(self, source, message):
+        if message is not None:
+            logging.info(f"📝  handle_vote_message | Trigger | Received Vote message from {source}")
+            self.node_selection_strategy_selector.add_vote()
+
     @event_handler(nebula_pb2.NSSFeaturesMessage, None)
     async def __nss_features_message_callback(self, source, message):
         logging.info(f"📝  handle_nss_features_message | Trigger | Received NSS features message from {source}")
@@ -357,6 +377,16 @@ class Engine:
             features["latency"] = latency
             self.node_selection_strategy_selector.add_neighbor(source)
             self.node_selection_strategy_selector.add_node_features(source, features)
+            
+    @event_handler(nebula_pb2.EmbeddingMessage, None)
+    async def __embedding_message_callback(self, source, message):
+        logging.info(f"📝  handle_embedding_message | Trigger | Received Embedding message from {source}")
+        if message is not None:
+            logging.info(f"Deserializing embedding from {source}")
+            deserialize_embedding = self.trainer.deserialize_embedding(message.embedding)
+            logging.info(f"Adding embedding from {source}")
+            current_neighbors = await self.cm.get_addrs_current_connections(only_direct=True)
+            await self.node_selection_strategy_selector.add_embedding(source, deserialize_embedding, current_neighbors)
 
     async def create_trainer_module(self):
         asyncio.create_task(self._start_learning())
@@ -405,6 +435,26 @@ class Engine:
             message = self.cm.mm.generate_federation_message(nebula_pb2.FederationMessage.Action.FEDERATION_READY)
             await self.cm.send_message_to_neighbors(message)
             logging.info("💤  Waiting until receiving the start signal from the start node")
+            
+    async def generate_and_send_embeddings(self):
+        if self.node_selection_strategy_enabled:
+            if self.nss_selector == "distribution":
+                # Sending embeddings
+                await self.node_selection_strategy_selector.embedding_lock.acquire_async()
+                logging.info(f"Model embeddings: {self.trainer.model.get_model_embeddings()}")
+                logging.info(f"Dataset embeddings: {self.trainer.model.get_dataset_embeddings()}")
+                embedding = await self.node_selection_strategy_selector.get_embeddings(model=self.trainer.model.get_model_embeddings(), dataloader=self.trainer.model.get_dataset_embeddings().train_dataloader())
+                logging.info(f"Variance of the embedding: {embedding.var()}")
+                logging.info(f"Mean embedding:\n{embedding}")
+                serialized_embedding = self.trainer.serialize_embedding(embedding)
+                message = self.cm.mm.generate_embedding_message(serialized_embedding)
+                logging.info("Sending embeddings to neighbors...")
+                await self.cm.send_message_to_neighbors(message)
+                await self.node_selection_strategy_selector.embedding_lock.acquire_async()
+            else:
+                logging.info("Distribution not selected")
+        else:
+            logging.info("Node Selection Strategy not enabled")
 
     async def _start_learning(self):
         await self.learning_cycle_lock.acquire_async()
@@ -427,9 +477,11 @@ class Engine:
                     f"Initial DIRECT connections: {direct_connections} | Initial UNDIRECT participants: {undirected_connections}"
                 )
                 logging.info("💤  Waiting initialization of the federation...")
+                await self.generate_and_send_embeddings()
                 # Lock to wait for the federation to be ready (only affects the first round, when the learning starts)
                 # Only applies to non-start nodes --> start node does not wait for the federation to be ready
                 await self.get_federation_ready_lock().acquire_async()
+                
                 if self.config.participant["device_args"]["start"]:
                     logging.info("Propagate initial model updates.")
                     await self.cm.propagator.propagate("initialization")
@@ -509,13 +561,27 @@ class Engine:
                 title="Round information",
             )
             self.trainer.on_round_start()
-            self.federation_nodes = await self.cm.get_addrs_current_connections(only_direct = True, myself = True)
+            self.federation_nodes = await self.cm.get_addrs_current_connections(only_direct=True, myself=True)
             logging.info(f"Federation nodes: {self.federation_nodes}")
             direct_connections = await self.cm.get_addrs_current_connections(only_direct=True)
             undirected_connections = await self.cm.get_addrs_current_connections(only_undirected=True)
             logging.info(f"Direct connections: {direct_connections} | Undirected connections: {undirected_connections}")
             logging.info(f"[Role {self.role}] Starting learning cycle...")
-            
+
+            if self.node_selection_strategy_enabled:
+                #if "distance" not in self.nss_selector:
+                # Extract Features needed for Node Selection Strategy
+                self.__nss_extract_features()
+                # Broadcast Features
+                logging.info("Broadcasting NSS features to the rest of the topology ...")
+                message = self.cm.mm.generate_nss_features_message(self.nss_features)
+                await self.cm.send_message_to_neighbors(message)
+                _nss_features_msg = f"""NSS features for round {self.round}:\nCPU Usage (%): {self.nss_features["cpu_percent"]}%\nBytes Sent: {self.nss_features["bytes_sent"]}\nBytes Received: {self.nss_features["bytes_received"]}\nLoss: {self.nss_features["loss"]}\nData Size: {self.nss_features["data_size"]}"""
+                print_msg_box(msg=_nss_features_msg, indent=2, title="NSS features (this node)")
+                    # selected_nodes = self.node_selection_strategy_selector.node_selection(self)
+
+                    # self.trainer._logger.log_text("[NSS] Selected nodes", str(selected_nodes), step=self.round)
+
             await self.aggregator.update_federation_nodes(self.federation_nodes)
             await self._extended_learning_cycle()
             
@@ -640,8 +706,9 @@ class Engine:
         self.nss_features = nss_features
 
     async def _get_current_neighbors(self):
-        current_connections = await self.cm.get_all_addrs_current_connections(only_direct = True)
+        current_connections = await self.cm.get_all_addrs_current_connections(only_direct=True)
         return set(current_connections)
+
 
 class MaliciousNode(Engine):
     def __init__(
@@ -725,24 +792,45 @@ class AggregatorNode(Engine):
     async def _extended_learning_cycle(self):
         # Define the functionality of the aggregator node
         await self.trainer.test()
-        await self.trainer.train()
-        
-        if self.node_selection_strategy_enabled:
-            # Extract Features needed for Node Selection Strategy
-            self.nss_extract_features()
-            # Broadcast Features
-            logging.info(f"Broadcasting NSS features to the rest of the topology ...")
-            message = self.cm.mm.generate_nss_features_message(self.nss_features)
-            await self.cm.send_message_to_neighbors(message)
-            _nss_features_msg = f"""NSS features for round {self.round}:\nCPU Usage (%): {self.nss_features['cpu_percent']}%\nBytes Sent: {self.nss_features['bytes_sent']}\nBytes Received: {self.nss_features['bytes_received']}\nLoss: {self.nss_features['loss']}\nData Size: {self.nss_features['data_size']}"""
-            print_msg_box(msg=_nss_features_msg, indent=2, title="NSS features (this node)")
 
-        await self.aggregator.include_model_in_buffer(
-            self.trainer.get_model_parameters(),
-            self.trainer.get_model_weight(),
-            source=self.addr,
-            round=self.round,
-        )
+        if self.node_selection_strategy_enabled and (self.nss_selector == "distance" or self.nss_selector == "distance-voting"):
+            if self.node_selection_strategy_selector.should_train():
+                logging.info("[DistanceSelector] I am training this round")
+                self.node_selection_strategy_selector.reset_votes()
+                await self.trainer.train()
+            else:
+                self.node_selection_strategy_selector.reset_votes()
+                logging.info("[DistanceSelector] I am not training this round")
+        else:
+            await self.trainer.train()
+
+        if self.node_selection_strategy_enabled:
+            if self.nss_selector == "distance" or self.nss_selector == "distance-voting":
+                if self.node_selection_strategy_selector.stop_training:
+                    self.node_selection_strategy_selector.stop_training = False
+                    logging.info("[DistanceSelector] DetectorSelector repeating four training rounds")
+                    await self.trainer.train()
+                    await self.trainer.train()
+                    await self.trainer.train()
+                    await self.trainer.train()
+                    self.node_selection_strategy_selector.already_activated = True
+
+        if self.lie_atk:
+            from nebula.addons.attacks.poisoning.update_manipulation import update_manipulation_LIE
+
+            await self.aggregator.include_model_in_buffer(
+                update_manipulation_LIE(self.trainer.get_model_parameters(), 899),
+                self.trainer.get_model_weight(),
+                source=self.addr,
+                round=self.round,
+            )
+        else:
+            await self.aggregator.include_model_in_buffer(
+                self.trainer.get_model_parameters(),
+                self.trainer.get_model_weight(),
+                source=self.addr,
+                round=self.round,
+            )
 
         await self.cm.propagator.propagate("stable")
         await self._waiting_model_updates()
@@ -778,14 +866,20 @@ class ServerNode(Engine):
         # In the first round, the server node doest take into account the initial model parameters for the aggregation
         if self.lie_atk:
             from nebula.addons.attacks.poisoning.update_manipulation import update_manipulation_LIE
-            await self.aggregator.include_model_in_buffer(update_manipulation_LIE(self.trainer.get_model_parameters(),899), self.trainer.BYPASS_MODEL_WEIGHT, source=self.addr, round=self.round)
+
+            await self.aggregator.include_model_in_buffer(
+                update_manipulation_LIE(self.trainer.get_model_parameters(), 899),
+                self.trainer.BYPASS_MODEL_WEIGHT,
+                source=self.addr,
+                round=self.round,
+            )
         else:
             await self.aggregator.include_model_in_buffer(
-            self.trainer.get_model_parameters(),
-            self.trainer.BYPASS_MODEL_WEIGHT,
-            source=self.addr,
-            round=self.round,
-        )
+                self.trainer.get_model_parameters(),
+                self.trainer.BYPASS_MODEL_WEIGHT,
+                source=self.addr,
+                round=self.round,
+            )
         await self._waiting_model_updates()
         await self.cm.propagator.propagate("stable")
 
@@ -823,9 +917,22 @@ class TrainerNode(Engine):
 
         if self.lie_atk:
             from nebula.addons.attacks.poisoning.update_manipulation import update_manipulation_LIE
-            await self.aggregator.include_model_in_buffer(update_manipulation_LIE(self.trainer.get_model_parameters(),899), self.trainer.get_model_weight(), source = self.addr,round = self.round, local = True)
+
+            await self.aggregator.include_model_in_buffer(
+                update_manipulation_LIE(self.trainer.get_model_parameters(), 899),
+                self.trainer.get_model_weight(),
+                source=self.addr,
+                round=self.round,
+                local=True,
+            )
         else:
-            await self.aggregator.include_model_in_buffer(self.trainer.get_model_parameters(), self.trainer.get_model_weight(), source = self.addr,round = self.round, local = True)
+            await self.aggregator.include_model_in_buffer(
+                self.trainer.get_model_parameters(),
+                self.trainer.get_model_weight(),
+                source=self.addr,
+                round=self.round,
+                local=True,
+            )
 
         await self.cm.propagator.propagate("stable")
         await self._waiting_model_updates()

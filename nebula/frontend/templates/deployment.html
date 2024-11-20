@@ -913,7 +913,7 @@
                 <!-- Node Selection Strategy -->
                 <div class="form-group row container-shadow tiny grey">
                     <h5 class="step-number">Node Selection Strategy <i class="fa fa-bullseye"></i>
-                        <input type="checkbox" id="nodesel-strat-lock" onchange="lock('nodesel-strat-default-btn', 'nodesel-strat-all-btn', 'nodesel-strat-random-btn', 'nodesel-strat-priority-btn', checked)" style="display: none;">
+                        <input type="checkbox" id="nodesel-strat-lock" onchange="lock('nodesel-strat-default-btn', 'nodesel-strat-all-btn', 'nodesel-strat-random-btn', 'nodesel-strat-priority-btn', 'nodesel-strat-distance-btn', 'nodesel-strat-distribution-btn', checked)" style="display: none;">
                         <label for="nodesel-strat-lock" class="icon-container" style="float: right;">
                             <i class="fa fa-lock"></i>
                         </label>
@@ -940,6 +940,28 @@
                             id="nodesel-strat-priority-btn" value="priority">
                         <label class="form-check-label" for="nodesel-strat-priority-btn">Priority Selection</label>
                     </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="nodeSelectionStrategyOptions"
+                            id="nodesel-strat-distance-btn" value="distance">
+                        <label class="form-check-label" for="nodesel-strat-distance-btn">Similarity Selection</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="nodeSelectionStrategyOptions"
+                            id="nodesel-strat-distance-voting-btn" value="distance-voting">
+                        <label class="form-check-label" for="nodesel-strat-distance-voting-btn">Similarity Selection (Voting)</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" name="nodeSelectionStrategyOptions"
+                            id="nodesel-strat-distribution-btn" value="distribution">
+                        <label class="form-check-label" for="nodesel-strat-distribution-btn">Distribution Selection</label>
+                    </div>
+                    <div class="form-control">
+                        <input type="number" id="nodeSelectionStrategyParameter"
+                            placeholder="Std dev multiplier" min="0" value="0"
+                            style="display: inline; width: 10%">
+                    </div>
+
+
                 </div>
 
             </div>
@@ -1315,6 +1337,7 @@
             data["schema_additional_participants"] = document.getElementById("schemaAdditionalParticipantsSelect").value
             // Step 16
             data["node_selection_strategy"] = document.querySelector('input[name="nodeSelectionStrategyOptions"]:checked').value
+            data["node_selection_parameter"] = document.getElementById("nodeSelectionStrategyParameter").value
             return data
         }
 

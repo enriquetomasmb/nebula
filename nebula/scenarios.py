@@ -10,6 +10,7 @@ import sys
 import textwrap
 import time
 from datetime import datetime
+import tensorboard_reducer as tbr
 
 import docker
 
@@ -68,7 +69,8 @@ class Scenario:
         mobile_participants_percent,
         additional_participants,
         schema_additional_participants,
-        node_selection_strategy
+        node_selection_strategy,
+        node_selection_parameter
     ):
         """
         Initialize the scenario.
@@ -159,7 +161,8 @@ class Scenario:
         self.additional_participants = additional_participants
         self.schema_additional_participants = schema_additional_participants
         self.node_selection_strategy = node_selection_strategy
-
+        self.node_selection_parameter = node_selection_parameter
+        
     def attack_node_assign(
         self,
         nodes,
@@ -376,6 +379,8 @@ class ScenarioManagement:
             participant_config["mobility_args"]["round_frequency"] = self.scenario.round_frequency
             participant_config["node_selection_strategy_args"]["enabled"] = False if self.scenario.node_selection_strategy == "default" else True
             participant_config["node_selection_strategy_args"]["strategy"] = self.scenario.node_selection_strategy
+            participant_config["node_selection_strategy_args"]["parameter"] = self.scenario.node_selection_parameter
+
             participant_config["resource_args"]["resource_constricted"] = node_config["resourceConstricted"]
             participant_config["resource_args"]["resource_constraint_cpu"] = node_config["resourceConstraintCPU"]
             participant_config["resource_args"]["resource_constraint_latency"] = node_config["resourceConstraintLatency"]
@@ -1082,3 +1087,55 @@ class ScenarioManagement:
                 return False
 
             time.sleep(5)
+            
+    @classmethod
+    def generate_statistics(cls, path):
+        try:
+            # Generate statistics
+            logging.info(f"Generating statistics for scenario {path}")
+    
+            # Define input directories
+            input_event_dirs = sorted(glob.glob(os.path.join(path, "metrics/*")))
+            # Where to write reduced TB events
+            tb_events_output_dir = os.path.join(path, "metrics", "reduced-data")
+            csv_out_path = os.path.join(path, "metrics", "reduced-data-as.csv")
+            # Whether to abort or overwrite when csv_out_path already exists
+            overwrite = False
+            reduce_ops = ("mean", "min", "max", "median", "std", "var")
+            
+            # Handle duplicate steps
+            handle_dup_steps = "keep-first"
+            # Strict steps
+            strict_steps = False
+    
+            events_dict = tbr.load_tb_events(
+                input_event_dirs,
+                handle_dup_steps=handle_dup_steps,
+                strict_steps=strict_steps
+            )
+    
+            # Number of recorded tags. e.g. would be 3 if you recorded loss, MAE and R^2
+            n_scalars = len(events_dict)
+            n_steps, n_events = list(events_dict.values())[0].shape
+    
+            logging.info(
+                f"Loaded {n_events} TensorBoard runs with {n_scalars} scalars and {n_steps} steps each"
+            )
+            logging.info(f"Events dict keys: {events_dict.keys()}")
+    
+            reduced_events = tbr.reduce_events(events_dict, reduce_ops)
+    
+            for op in reduce_ops:
+                logging.info(f"Writing '{op}' reduction to '{tb_events_output_dir}-{op}'")
+    
+            tbr.write_tb_events(reduced_events, tb_events_output_dir, overwrite)
+    
+            logging.info(f"Writing results to '{csv_out_path}'")
+    
+            tbr.write_data_file(reduced_events, csv_out_path, overwrite)
+    
+            logging.info("Reduction complete")
+            
+        except Exception as e:
+            logging.exception(f"Error generating statistics: {e}")
+            return False

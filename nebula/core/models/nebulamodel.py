@@ -197,6 +197,23 @@ class NebulaModel(pl.LightningModule, ABC):
         # Communication manager for sending messages from the model (e.g., prototypes, gradients)
         # Model parameters are sent by default using network.propagator
         self.communication_manager = None
+        
+        self.model_embeddings = None
+        self.dataset_embeddings = None
+        
+    def set_model_embeddings(self, model_embeddings):
+        logging_training.info(f"Setting model embeddings: {model_embeddings}")
+        self.model_embeddings = model_embeddings
+        
+    def set_dataset_embeddings(self, dataset_embeddings):
+        logging_training.info(f"Setting dataset embeddings: {dataset_embeddings}")
+        self.dataset_embeddings = dataset_embeddings
+        
+    def get_model_embeddings(self):
+        return self.model_embeddings
+    
+    def get_dataset_embeddings(self):
+        return self.dataset_embeddings
 
     def set_communication_manager(self, communication_manager):
         self.communication_manager = communication_manager
