@@ -15,7 +15,43 @@ import requests
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
 
-logging.basicConfig(level=logging.INFO)
+
+class Settings:
+    port: int = os.environ.get("NEBULA_FRONTEND_PORT", 6060)
+    production: bool = os.environ.get("NEBULA_PRODUCTION", "False") == "True"
+    gpu_available: bool = os.environ.get("NEBULA_GPU_AVAILABLE", "False") == "True"
+    advanced_analytics: bool = os.environ.get("NEBULA_ADVANCED_ANALYTICS", "False") == "True"
+    host_platform: str = os.environ.get("NEBULA_HOST_PLATFORM", "unix")
+    log_dir: str = os.environ.get("NEBULA_LOGS_DIR")
+    config_dir: str = os.environ.get("NEBULA_CONFIG_DIR")
+    cert_dir: str = os.environ.get("NEBULA_CERTS_DIR")
+    root_host_path: str = os.environ.get("NEBULA_ROOT_HOST")
+    config_frontend_dir: str = os.environ.get("FEDELLAR_CONFIG_FRONTEND_DIR", "config")
+    statistics_port: int = os.environ.get("NEBULA_STATISTICS_PORT", 8080)
+    secret_key: str = os.environ.get("SECRET_KEY", os.urandom(24).hex())
+    PERMANENT_SESSION_LIFETIME: datetime.timedelta = datetime.timedelta(minutes=60)
+    templates_dir: str = "templates"
+    server_log: str = os.environ.get("NEBULA_SERVER_LOG", "/nebula/app/logs/server.log")
+
+
+settings = Settings()
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="[%(asctime)s] [%(levelname)s] %(message)s",
+    handlers=[
+        logging.StreamHandler(),
+        logging.FileHandler(settings.server_log, mode="w"),
+    ],
+)
+
+uvicorn_loggers = ["uvicorn", "uvicorn.error", "uvicorn.access"]
+for logger_name in uvicorn_loggers:
+    logger = logging.getLogger(logger_name)
+    logger.propagate = False  # Prevent duplicate logs
+    handler = logging.FileHandler(settings.server_log, mode="a")
+    handler.setFormatter(logging.Formatter("[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s"))
+    logger.addHandler(handler)
 
 
 from ansi2html import Ansi2HTMLConverter
@@ -51,7 +87,6 @@ from nebula.frontend.database import (
     delete_user_from_db,
     get_all_scenarios_and_check_completed,
     get_notes,
-    get_run_hashes_scenario,
     get_running_scenario,
     get_scenario_by_name,
     get_user_info,
@@ -72,28 +107,9 @@ from nebula.frontend.database import (
 )
 from nebula.frontend.utils import Utils
 
-
-class Settings:
-    port: int = os.environ.get("NEBULA_FRONTEND_PORT", 6060)
-    production: bool = os.environ.get("NEBULA_PRODUCTION", "False") == "True"
-    gpu_available: bool = os.environ.get("NEBULA_GPU_AVAILABLE", "False") == "True"
-    advanced_analytics: bool = os.environ.get("NEBULA_ADVANCED_ANALYTICS", "False") == "True"
-    host_platform: str = os.environ.get("NEBULA_HOST_PLATFORM", "unix")
-    log_dir: str = os.environ.get("NEBULA_LOGS_DIR")
-    config_dir: str = os.environ.get("NEBULA_CONFIG_DIR")
-    cert_dir: str = os.environ.get("NEBULA_CERTS_DIR")
-    root_host_path: str = os.environ.get("NEBULA_ROOT_HOST")
-    config_frontend_dir: str = os.environ.get("FEDELLAR_CONFIG_FRONTEND_DIR", "config")
-    statistics_port: int = os.environ.get("NEBULA_STATISTICS_PORT", 8080)
-    secret_key: str = os.environ.get("SECRET_KEY", os.urandom(24).hex())
-    PERMANENT_SESSION_LIFETIME: datetime.timedelta = datetime.timedelta(minutes=60)
-    templates_dir: str = "templates"
-
-
-settings = Settings()
+logging.info(f"🚀  Starting Nebula Frontend on port {settings.port}")
 
 logging.info(f"NEBULA_PRODUCTION: {settings.production}")
-logging.info(f"NEBULA_ADVANCED_ANALYTICS: {settings.advanced_analytics}")
 
 app = FastAPI()
 app.add_middleware(SessionMiddleware, secret_key=settings.secret_key)
@@ -190,6 +206,8 @@ async def startup_event():
 
 nodes_registration = {}
 
+scenarios_list = []
+
 scenarios_list_length = 0
 
 scenarios_finished = 0
@@ -282,6 +300,25 @@ async def get_notes_for_scenario(scenario_name: str):
         return JSONResponse({"status": "success", "notes": notes_data["scenario_notes"]})
     else:
         return JSONResponse({"status": "error", "message": "Notes not found for the specified scenario"})
+
+
+@app.get("/nebula/dashboard/{scenario_name}/config")
+async def get_config_for_scenario(scenario_name: str):
+    json_path = os.path.join(os.environ.get("NEBULA_CONFIG_DIR"), scenario_name, "scenario.json")
+
+    try:
+        with open(json_path) as file:
+            scenarios_data = json.load(file)
+
+        if scenarios_data:
+            return JSONResponse({"status": "success", "config": scenarios_data})
+        else:
+            return JSONResponse({"status": "error", "message": "Configuration not found for the specified scenario"})
+
+    except FileNotFoundError:
+        return JSONResponse({"status": "error", "message": "scenario.json file not found"})
+    except json.JSONDecodeError:
+        return JSONResponse({"status": "error", "message": "Error decoding JSON file"})
 
 
 @app.post("/nebula/login")
@@ -765,30 +802,45 @@ def remove_scenario(scenario_name=None):
     from nebula.scenarios import ScenarioManagement
 
     if settings.advanced_analytics:
-        from aim.sdk.repo import Repo
-
-        # NEBULALOGGER START
-        try:
-            repo = Repo.from_path(f"{settings.log_dir}")
-            list_tuples_participant_hash = get_run_hashes_scenario(scenario_name)
-            hashes = [tuple[1] for tuple in list_tuples_participant_hash]
-            logging.info(f"Removing statistics from {scenario_name}: {hashes}")
-            success, remaining_runs = repo.delete_runs(hashes)
-            if success:
-                logging.info(f"Successfully deleted {len(hashes)} runs.")
-            else:
-                logging.info("Something went wrong while deleting runs.")
-                logging.info(f"Remaining runs: {remaining_runs}")
-        except Exception as e:
-            logging.exception(f"Error removing statistics from {scenario_name}: {e}")
-            pass
-        # NEBULALOGGER END
+        logging.info("Advanced analytics enabled")
     # Remove registered nodes and conditions
     nodes_registration.pop(scenario_name, None)
     remove_nodes_by_scenario_name(scenario_name)
     remove_scenario_by_name(scenario_name)
     remove_note(scenario_name)
     ScenarioManagement.remove_files_by_scenario(scenario_name)
+
+
+@app.get("/nebula/dashboard/{scenario_name}/relaunch")
+async def nebula_relaunch_scenario(
+    scenario_name: str, background_tasks: BackgroundTasks, session: dict = Depends(get_session)
+):
+    global scenarios_list, scenarios_list_length, scenarios_finished
+
+    if "user" in session:
+        if session["role"] == "demo":
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+        elif session["role"] == "user":
+            if not check_scenario_with_role(session["role"], scenario_name):
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+
+        scenario_path = Utils.check_path(settings.config_dir, os.path.join(scenario_name, "scenario.json"))
+        with open(scenario_path) as scenario_file:
+            scenario = json.load(scenario_file)
+
+        scenarios_list_length = scenarios_list_length + 1
+
+        if scenarios_list_length == 1:
+            scenarios_finished = 0
+            scenarios_list.clear()
+            scenarios_list.append(scenario)
+            background_tasks.add_task(run_scenarios, session["role"])
+        else:
+            scenarios_list.append(scenario)
+
+        return RedirectResponse(url="/nebula/dashboard", status_code=303)
+    else:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 
 @app.get("/nebula/dashboard/{scenario_name}/remove")
@@ -807,133 +859,11 @@ async def nebula_remove_scenario(scenario_name: str, request: Request, session: 
 
 if settings.advanced_analytics:
     logging.info("Advanced analytics enabled")
-
-    # NEBULALOGGER START
-    def get_tracking_hash_scenario(scenario_name):
-        import requests
-
-        url = f"http://127.0.0.1:{settings.statistics_port}/nebula/statistics/api/experiments"
-        # Get JSON data from the URL
-        response = requests.get(url)
-        if response.status_code == 200:
-            experiments = response.json()
-            for experiment in experiments:
-                if experiment["name"] == scenario_name:
-                    return experiment["id"]
-
-        return None
-
-    @app.get("/nebula/dashboard/statistics/", response_class=HTMLResponse)
-    @app.get("/nebula/dashboard/{scenario_name}/statistics/", response_class=HTMLResponse)
-    async def nebula_dashboard_statistics(request: Request, scenario_name: str = None):
-        statistics_url = "/nebula/statistics/"
-        if scenario_name is not None:
-            experiment_hash = get_tracking_hash_scenario(scenario_name=scenario_name)
-            statistics_url += f"experiments/{experiment_hash}/runs"
-
-        return templates.TemplateResponse("statistics.html", {"request": request, "statistics_url": statistics_url})
-
-    @app.get(
-        "/nebula/dashboard/{scenario_name}/node/{hash}/metrics",
-        response_class=HTMLResponse,
-    )
-    async def nebula_dashboard_node_metrics(request: Request, scenario_name: str, hash: str):
-        statistics_url = f"/nebula/statistics/runs/{hash}/metrics"
-        return templates.TemplateResponse("statistics.html", {"request": request, "statistics_url": statistics_url})
-
-    @app.api_route("/nebula/statistics/", methods=["GET", "POST"])
-    @app.api_route("/nebula/statistics/{path:path}", methods=["GET", "POST"])
-    async def statistics_proxy(request: Request, path: str = None, session: dict = Depends(get_session)):
-        if "user" in session:
-            query_string = urlencode(request.query_params)
-
-            url = f"http://127.0.0.1:{settings.statistics_port}/nebula/statistics"
-            url = f"{url}{('/' + path) if path else '/'}" + (f"?{query_string}" if query_string else "")
-
-            headers = {key: value for key, value in request.headers.items() if key.lower() != "host"}
-
-            response = requests.request(
-                method=request.method,
-                url=url,
-                headers=headers,
-                data=await request.body(),
-                cookies=request.cookies,
-                allow_redirects=False,
-            )
-
-            excluded_headers = [
-                "content-encoding",
-                "content-length",
-                "transfer-encoding",
-                "connection",
-            ]
-            filtered_headers = [
-                (name, value) for name, value in response.raw.headers.items() if name.lower() not in excluded_headers
-            ]
-
-            return Response(
-                content=response.content,
-                status_code=response.status_code,
-                headers=dict(filtered_headers),
-            )
-        else:
-            raise HTTPException(status_code=401)
-
-    @app.get("/nebula/dashboard/{scenario_name}/download/metrics")
-    async def nebula_dashboard_download_metrics(
-        scenario_name: str, request: Request, session: dict = Depends(get_session)
-    ):
-        from aim.sdk.repo import Repo
-
-        if "user" in session:
-            # Obtener las métricas del escenario
-            os.makedirs(
-                Utils.check_path(settings.log_dir, os.path.join(scenario_name, "metrics")),
-                exist_ok=True,
-            )
-
-            aim_repo = Repo.from_path("/nebula/nebula/app/logs")
-            query = f"run.experiment == '{scenario_name}'"
-            df = aim_repo.query_metrics(query).dataframe()
-
-            hash_to_participant = {hash: participant for participant, hash in get_run_hashes_scenario(scenario_name)}
-            df["participant"] = df["run.hash"].map(hash_to_participant)
-            df.drop(
-                columns=["run", "run.hash", "metric.context", "epoch"],
-                axis=1,
-                inplace=True,
-            )
-            cols = df.columns.tolist()
-            cols.remove("participant")
-            cols.remove("metric.name")
-            df = df.reindex(columns=["participant", "metric.name"] + cols)
-
-            for name, group in df.groupby("participant"):
-                group.to_csv(
-                    os.path.join(settings.log_dir, scenario_name, "metrics", f"{name}.csv"),
-                    index=True,
-                )
-
-            # Crear un archivo zip con las métricas, enviarlo al usuario y eliminarlo
-            memory_file = io.BytesIO()
-            with zipfile.ZipFile(memory_file, "w", zipfile.ZIP_DEFLATED) as zipf:
-                zipdir(os.path.join(settings.log_dir, scenario_name, "metrics"), zipf)
-
-            memory_file.seek(0)
-
-            return StreamingResponse(
-                memory_file,
-                media_type="application/zip",
-                headers={"Content-Disposition": f"attachment; filename={scenario_name}_metrics.zip"},
-            )
-        else:
-            raise HTTPException(status_code=401)
-
-    # NEBULALOGGER END
 else:
     logging.info("Advanced analytics disabled")
 
     # TENSORBOARD START
+
     @app.get("/nebula/dashboard/statistics/", response_class=HTMLResponse)
     @app.get("/nebula/dashboard/{scenario_name}/statistics/", response_class=HTMLResponse)
     async def nebula_dashboard_statistics(request: Request, scenario_name: str = None):
@@ -1221,22 +1151,26 @@ async def run_scenario(scenario_data, role):
 
 
 # Deploy the list of scenarios
-async def run_scenarios(data, role):
-    global scenarios_finished
-    for scenario_data in data:
-        finish_scenario_event.clear()
-        logging.info(f"Running scenario {scenario_data['scenario_title']}")
-        scenario_name = await run_scenario(scenario_data, role)
-        # Waits till the scenario is completed
-        while not finish_scenario_event.is_set() and not stop_all_scenarios_event.is_set():
-            await asyncio.sleep(1)
-        if stop_all_scenarios_event.is_set():
-            stop_all_scenarios_event.clear()
+async def run_scenarios(role):
+    try:
+        global scenarios_finished, scenarios_list_length
+        for scenario_data in scenarios_list:
+            finish_scenario_event.clear()
+            logging.info(f"Running scenario {scenario_data['scenario_title']}")
+            scenario_name = await run_scenario(scenario_data, role)
+            # Waits till the scenario is completed
+            while not finish_scenario_event.is_set() and not stop_all_scenarios_event.is_set():
+                await asyncio.sleep(1)
+            if stop_all_scenarios_event.is_set():
+                stop_all_scenarios_event.clear()
+                scenarios_list_length = 0
+                stop_scenario(scenario_name)
+                return
+            scenarios_finished += 1
             stop_scenario(scenario_name)
-            return
-        scenarios_finished = scenarios_finished + 1
-        stop_scenario(scenario_name)
-        await asyncio.sleep(5)
+            await asyncio.sleep(5)
+    finally:
+        scenarios_list_length = 0
 
 
 @app.post("/nebula/dashboard/deployment/run")
@@ -1251,16 +1185,18 @@ async def nebula_dashboard_deployment_run(
     if request.headers.get("content-type") != "application/json":
         raise HTTPException(status_code=401)
 
-    stop_all_scenarios()
-    finish_scenario_event.clear()
-    stop_all_scenarios_event.clear()
     data = await request.json()
-    print(data)
-    global scenarios_finished, scenarios_list_length
-    scenarios_finished = 0
-    scenarios_list_length = len(data)
+    global scenarios_finished, scenarios_list_length, scenarios_list
+    if scenarios_list_length < 1:
+        scenarios_finished = 0
+        scenarios_list_length = len(data)
+        scenarios_list = data
+        background_tasks.add_task(run_scenarios, session["role"])
+    else:
+        scenarios_list_length += len(data)
+        scenarios_list.extend(data)
+        await asyncio.sleep(3)
     logging.info(f"Running deployment with {len(data)} scenarios")
-    background_tasks.add_task(run_scenarios, data, session["role"])
     return RedirectResponse(url="/nebula/dashboard", status_code=303)
     # return Response(content="Success", status_code=200)
 

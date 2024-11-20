@@ -1,42 +1,34 @@
 name: "setup-env"
-description: "Set up a Python environment with Poetry"
+description: "Set up a Python environment"
 
 inputs:
   python-version:
     required: false
-    description: "The version of Python to use with Poetry"
-    default: "3.11"
+    description: "The version of Python"
+    default: "3.11.7"
 
 runs:
   using: "composite"
   steps:
     - name: Set up python
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ inputs.python-version }}
-
-    - name: Install Poetry
-      env:
-        POETRY_VERSION: "1.8.4"
-      run: curl -sSL https://install.python-poetry.org | python - -y
+      run: |
+        curl -fsSL https://astral.sh/uv/install.sh | bash
+        uv python install ${{ inputs.python-version }}
+        uv python pin ${{ inputs.python-version }}
       shell: bash
 
-    - name: Add Poetry to Path
+    - name: Add uv to Path
       run: echo "$HOME/.local/bin" >> $GITHUB_PATH
       shell: bash
 
-    - name: Configure Poetry virtual environment in project
-      run: poetry config virtualenvs.in-project true
-      shell: bash
-
-    - name: Load cached venv
-      id: cached-poetry-dependencies
+    - name: Cache virtual environment
+      id: cache-venv
       uses: actions/cache@v4
       with:
         path: .venv
-        key: venv-${{ runner.os }}-${{ inputs.python-version }}-${{ hashFiles('poetry.lock') }}
+        key: venv-${{ runner.os }}-${{ inputs.python-version }}-${{ hashFiles('pyproject.toml', 'uv.lock') }}
 
-    - name: Install dependencies
-      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-      run: poetry install --no-interaction
+    - name: Install dependencies if cache is not hit
+      if: steps.cache-venv.outputs.cache-hit != 'true'
+      run: uv sync
       shell: bash

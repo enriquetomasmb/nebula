@@ -34,7 +34,10 @@ jobs:
       - name: Set up the environment
         uses: ./.github/actions/setup-env
 
+      - name: Install doc dependencies
+        run: |
+          uv sync --group docs
+
       - name: Check if documentation can be built
         run: |
-          cd docs
-          poetry run mkdocs build -s
+          uv run mkdocs build -f docs/mkdocs.yml -d _build -s

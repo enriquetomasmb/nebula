@@ -250,6 +250,11 @@
                             <i id="architectureHelpIcon" class="fa fa-info-circle" style="cursor: pointer;"></i>
                         </small>
                     </div>
+                    <h5 class="step-title">Number of rounds</h5>
+                    <div class="form-check form-check-inline">
+                        <input type="number" class="form-control" id="rounds" placeholder="Number of rounds" value="10"
+                            style="display: inline; width: 20%">
+                    </div>
                 </div>
                 <div id="networkTopologyForm" class="form-group row container-shadow tiny grey">
                     <h5 class="step-number">Network Topology <i class="fa fa-sitemap"></i>
@@ -261,7 +266,7 @@
                     <h5 class="step-title">Topology generation</h5>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="inlineNetworkTopology"
-                            id="custom-topology-btn" checked>
+                            id="custom-topology-btn">
                         <label class="form-check-label" for="custom-topology-btn">Custom topology</label>
                         <small id="topologyCustomHelp" class="form-text text-muted">
                             <i id="topologyCustomIcon" class="fa fa-info-circle"></i>
@@ -269,13 +274,13 @@
                     </div>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="inlineNetworkTopology"
-                            id="predefined-topology-btn">
+                            id="predefined-topology-btn" checked>
                         <label class="form-check-label" for="predefined-topology-btn">Predefined topology</label>
                         <small id="topologyPredefinedHelp" class="form-text text-muted">
                             <i id="topologyPredefinedIcon" class="fa fa-info-circle"></i>
                         </small>
                     </div>
-                    <div id="predefined-topology" style="display: none">
+                    <div id="predefined-topology">
                         <select class="form-control" id="predefined-topology-select" name="predefined-topology"
                             style="display: inline; width: 40%">
                             <option selected>Fully</option>
@@ -285,7 +290,6 @@
                         </select>
                         <input type="number" class="form-control" id="predefined-topology-nodes"
                             placeholder="Number of nodes" min="1" value="3" oninput="greaterthan0(this)" style="display: inline; width: 40%">
-                        <i id="networkTopologyRandom" class="fa fa-refresh"></i>
                     </div>
                 </div>
                 <div class="form-group row container-shadow tiny grey">
@@ -416,25 +420,24 @@
                 </div>
                 <button id="next-btn" type="button" class="btn btn-dark" style="margin-top: 10px; display: none;">&gt;
                 </button>
-                <button id="new-btn" type="button" class="btn btn-dark" style="margin-top: 10px; display: none;">
+                <button id="add-btn" title="New Scenario" type="button" class="btn btn-dark" style="margin-top: 10px;">
                     <i class="fa fa-plus" aria-hidden="true"></i>
-                </button>
-                <button id="add-btn" type="button" class="btn btn-dark" style="margin-top: 10px;">
-                    <i class="fa fa-floppy-o" aria-hidden="true"></i>
                 </button>
                 <button id="del-btn" type="button" class="btn btn-dark" style="margin-top: 10px; background-color: red; border-color: red; display: none;">
                     <i class="fa fa-trash" aria-hidden="true"></i>
                 </button>
-                <button id="run-btn" type="button" class="btn btn-dark"
-                    style="margin-top: 10px; margin-left: 15px; float: right" disabled="true">Run
-                    NEBULA
+                <button id="run-btn" type="button" class="btn btn-dark" style="margin-top: 10px; margin-left: 15px; float: right">
+                    Run NEBULA
                 </button>
-                <button id="load-config-btn" type="button" class="btn btn-dark"
-                    style="margin-top: 10px; margin-left: 5px; float: right">Load</button>
-                <button id="save-config-btn" type="button" class="btn btn-dark"
-                    style="margin-top: 10px; margin-left: 5px; float: right">Save</button>
-                <button id="open-gen-modal-btn" type="button" class="btn btn-dark"
-                    style="margin-top: 10px; margin-left: 5px; float: right;"><i class="fa fa-list-ul" aria-hidden="true"></i></button>
+                <button id="load-config-btn" title="Upload Scenario" type="button" class="btn btn-dark" style="margin-top: 10px; margin-left: 5px; float: right">
+                    <i class="fa fa-upload" aria-hidden="true"></i>
+                </button>
+                <button id="save-config-btn" title="Download Scenario" type="button" class="btn btn-dark" style="margin-top: 10px; margin-left: 5px; float: right">
+                    <i class="fa fa-download" aria-hidden="true"></i>
+                </button>
+                <button id="open-gen-modal-btn" title="Scenario generation" type="button" class="btn btn-dark" style="margin-top: 10px; margin-left: 5px; float: right;">
+                    <i class="fa fa-list-ul" aria-hidden="true"></i>
+                </button>
             </div>
             <div id="expert-container" class="col-md-12 " style="display: none">
                 <div class="form-group row container-shadow tiny grey">
@@ -444,11 +447,6 @@
                             <i class="fa fa-lock"></i>
                         </label>
                     </h5>
-                    <h5 class="step-title">Number of rounds</h5>
-                    <div class="form-check form-check-inline">
-                        <input type="number" class="form-control" id="rounds" placeholder="Number of rounds" value="10"
-                            style="display: inline; width: 20%">
-                    </div>
                     <h5 class="step-title">Logging</h5>
                     <div class="form-check form-check-inline">
                         <select class="form-control" id="loggingLevel" name="logginglevel"
@@ -1021,6 +1019,35 @@
             content: "\f09c";
         }
 
+        /* Tooltips */
+        button[title] {
+            position: relative;
+        }
+
+        button[title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            white-space: nowrap;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease, top 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        button[title]:hover::after {
+            opacity: 1;
+            top: -50px;
+        }
+
         #expert-container .step-number::before {
             background-color: #3333338a;
             color: #fff;
@@ -1129,13 +1156,6 @@
 
         .popover {
             max-width: 800px;
-        }
-
-        #networkTopologyRandom {
-            margin-left: 5px;
-            margin-right: 5px;
-            font-size: 15px;
-            cursor: pointer;
         }
 
         .overlay {
@@ -1519,17 +1539,21 @@
 
 
                         //Show buttons to move through the list
-                        if (scenarioStorage.scenariosList.length > 1){
-                            document.getElementById("prev-btn").style.display = "inline-block";
-                            document.getElementById("run-btn").disabled = false;
-                            document.getElementById("del-btn").style.display = "inline-block";
-                        }else{
+                        if (scenarioStorage.scenariosList.length < 1) {
                             document.getElementById("prev-btn").style.display = "none";
                             document.getElementById("run-btn").disabled = true;
                         }
+                        else if (scenarioStorage.scenariosList.length > 1){
+                            document.getElementById("prev-btn").style.display = "inline-block";
+                            document.getElementById("run-btn").disabled = false;
+                            document.getElementById("del-btn").style.display = "inline-block";
+                        } else {
+                            document.getElementById("prev-btn").style.display = "none";
+                            document.getElementById("run-btn").disabled = false;
+                            document.getElementById("del-btn").style.display = "inline-block";
+                        }
 
-                        document.getElementById("new-btn").style.display = "inline-block";
-                        document.getElementById("add-btn").style.display = "none";
+                        document.getElementById("add-btn").style.display = "inline-block";
                         updateScenariosPosition();
                         showAlert('info', 'Configuration file loaded successfully');
                     } catch (error) {
@@ -1950,7 +1974,7 @@
                 document.getElementById("predefined-topology-btn").checked = false;
                 document.getElementById("predefined-topology-select").value = "Fully";
                 document.getElementById("predefined-topology-nodes").value = 3;
-                document.getElementById("networkTopologyRandom").click();
+                updateNodes();
                 document.getElementById("custom-topology-btn").click();
             }
             // Step 5
@@ -2041,22 +2065,6 @@
             }
         }
 
-        //When click "new-btn" button, clear fields to define new Scenario
-        document.getElementById("new-btn").addEventListener("click", function(){
-            //Save actual scenario in the list
-            scenarioStorage.replaceScenario();
-
-            clearFields();
-            updateModelOptions();
-            updateScenariosPosition(true);
-
-            document.getElementById("new-btn").style.display = "none";
-            document.getElementById("prev-btn").style.display = "none";
-            document.getElementById("next-btn").style.display = "none";
-            document.getElementById("del-btn").style.display = "none";
-            document.getElementById("add-btn").style.display = "inline-block";
-        });
-
         //When click "add-btn" button, save actual scenario in the list of scenarios
         document.getElementById("add-btn").addEventListener("click", function(){
             scenarioStorage.saveScenario();
@@ -2069,7 +2077,6 @@
             var actual_scenario = scenarioStorage.scenariosList[scenarioStorage.actual_scenario];
             setScenarioData(actual_scenario);
 
-            document.getElementById("add-btn").style.display = "none";
             if(scenarioStorage.scenariosList.length == 1){
                 document.getElementById("prev-btn").style.display = "none";
                 document.getElementById("next-btn").style.display = "none";
@@ -2077,7 +2084,6 @@
             else{
                 document.getElementById("prev-btn").style.display = "inline-block";
             }
-            document.getElementById("new-btn").style.display = "inline-block";
             document.getElementById("del-btn").style.display = "inline-block";
 
             //Enable run
@@ -2102,7 +2108,6 @@
 
                 updateScenariosPosition(true);
                 document.getElementById("add-btn").style.display = "inline-block";
-                document.getElementById("new-btn").style.display = "none";
                 document.getElementById("del-btn").style.display = "none";
                 document.getElementById("run-btn").disabled = true;
             }
@@ -2111,7 +2116,7 @@
                 setScenarioData(scenarioStorage.scenariosList[0]);
 
                 updateScenariosPosition();
-                document.getElementById("new-btn").style.display = "inline-block";
+                document.getElementById("add-btn").style.display = "inline-block";
                 document.getElementById("next-btn").style.display = "none";
                 document.getElementById("prev-btn").style.display = "none";
             }
@@ -2123,7 +2128,7 @@
                 //Last scenario in the list is displayed
                 if(!(scenarioStorage.actual_scenario < scenarioStorage.scenariosList.length -1)){
                     document.getElementById("prev-btn").style.display = "inline-block";
-                    document.getElementById("new-btn").style.display = "inline-block";
+                    document.getElementById("add-btn").style.display = "inline-block";
                     document.getElementById("next-btn").style.display = "none";
                 }
             }
@@ -2141,7 +2146,7 @@
 
             if(scenarioStorage.actual_scenario == scenarioStorage.scenariosList.length - 1){
                 document.getElementById("next-btn").style.display = "none";
-                document.getElementById("new-btn").style.display = "inline-block";
+                document.getElementById("add-btn").style.display = "inline-block";
             }
             document.getElementById("prev-btn").style.display = "inline-block";
         });
@@ -2160,7 +2165,7 @@
             if(scenarioStorage.actual_scenario == 0){
                 document.getElementById("prev-btn").style.display = "none";
             }
-            document.getElementById("new-btn").style.display = "none";
+            document.getElementById("add-btn").style.display = "none";
             document.getElementById("next-btn").style.display = "inline-block";
         });
     </script>
@@ -2284,7 +2289,7 @@
                                 }
 
                                 document.getElementById("predefined-topology-nodes").value = nodes;
-                                document.getElementById("networkTopologyRandom").click();
+                                updateNodes();
 
                                 //Generate datasets
                                 //Selected dataset
@@ -2334,9 +2339,8 @@
                 document.getElementById("prev-btn").style.display = "inline-block";
             }
             document.getElementById("run-btn").disabled = false;
-            document.getElementById("new-btn").style.display = "inline-block";
+            document.getElementById("add-btn").style.display = "inline-block";
             document.getElementById("del-btn").style.display = "inline-block";
-            document.getElementById("add-btn").style.display = "none";
         }
 
         //Generate and save scenarios
@@ -2366,6 +2370,10 @@
                 document.getElementById("yes-button").disabled = false;
 
                 document.getElementById("yes-button").addEventListener("click", function () {
+
+                    if(scenarioStorage.scenariosList < 1) {
+                        document.getElementById("scenario-title").value = "scenario"
+                    }
 
                     scenarioStorage.replaceScenario();
                     var data = scenarioStorage.scenariosList;
@@ -2644,7 +2652,7 @@
             predefinedTopologyDiv.style.display = "block";
         });
 
-        document.getElementById("networkTopologyRandom").addEventListener("click", function () {
+        function updateNodes(){
             var n_nodes_predefined = document.getElementById("predefined-topology-nodes").value;
             n_nodes_predefined = parseInt(n_nodes_predefined);
 
@@ -2729,9 +2737,15 @@
 
             // Update the graph
             updateGraph();
+        }
 
+        document.getElementById("predefined-topology-nodes").addEventListener("change", function (){
+            updateNodes();
         });
 
+        document.getElementById("predefined-topology-select").addEventListener("change", function (){
+            updateNodes();
+        });
     </script>
 
     <script>
@@ -2743,8 +2757,7 @@
                 $('#predefined-topology-select').prop('disabled', true);
                 // Change value of the input "predefined-topology-nodes" to number of nodes
                 $('#predefined-topology-nodes').val(gData.nodes.length);
-                // Click on "networkTopologyRandom" to update the graph
-                $('#networkTopologyRandom').click();
+                updateNodes();
 
                 // Update gData: change the role of the central node to "server"
                 gData.nodes[0].role = "server";

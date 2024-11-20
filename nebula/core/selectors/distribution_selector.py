@@ -142,6 +142,8 @@ class DistributionSelector(Selector):
         cax = ax.matshow(similarity_matrix, cmap='viridis')
         fig.colorbar(cax)
         plt.title(f"{method.capitalize()} Similarity Matrix")
+        plt.xticks(range(len(nodes)), nodes, rotation=45)
+        plt.yticks(range(len(nodes)), nodes)
         plt.savefig(image_path)
         plt.close()
         logging.info(f"similarity_matrix saved in {image_path}")
