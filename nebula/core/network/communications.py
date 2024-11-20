@@ -337,7 +337,7 @@ class CommunicationsManager:
 
     async def handle_nss_features_message(self, source, message):
         try:
-            logging.error(f"🔍  handle_nss_features_message | Received Message from: {source}")
+            logging.info(f"🔍  handle_nss_features_message | Received Message from: {source}")
             await self.engine.event_manager.trigger_event(source, message)
         except Exception as e:
             logging.error(f"🔍  handle_nss_features_message | Error while processing: {message} | {e}")

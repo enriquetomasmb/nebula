@@ -286,7 +286,7 @@ class Connection:
         except asyncio.CancelledError as e:
             logging.info(f"Message handling cancelled: {e}") 
         except ConnectionError as e:
-            logging.exception(f"Connection closed while reading: {e}")
+            logging.exception(f"Connection closed while reading {self.addr}: {e}")
             # await self.reconnect()
         except Exception as e:
             logging.exception(f"Error handling incoming message: {e}")
