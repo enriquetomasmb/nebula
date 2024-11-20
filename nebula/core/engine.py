@@ -566,7 +566,7 @@ class Engine:
             if self.node_selection_strategy_enabled:
                 #if "distance" not in self.nss_selector:
                 # Extract Features needed for Node Selection Strategy
-                self.__nss_extract_features()
+                self.nss_extract_features()
                 # Broadcast Features
                 logging.info("Broadcasting NSS features to the rest of the topology ...")
                 message = self.cm.mm.generate_nss_features_message(self.nss_features)
