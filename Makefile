@@ -37,13 +37,19 @@ install: install-python		## Install core dependencies
 	@echo "🔧 Installing pre-commit hooks"
 	@$(UV) run pre-commit install
 	@echo ""
-	@echo "🐳 Building nebula-frontend docker image. Do you want to continue? (y/n)"
-	@read ans && [ $${ans:-N} = y ] || { echo "Build cancelled."; exit 1; }
-	@docker build -t nebula-frontend -f nebula/frontend/Dockerfile .
+	@echo "🐳 Building nebula-frontend docker image. Do you want to continue (overrides existing image)? (y/n)"
+	@read ans; if [ "$${ans:-N}" = y ]; then \
+		docker build -t nebula-frontend -f nebula/frontend/Dockerfile .; \
+	else \
+		echo "Skipping nebula-frontend docker build."; \
+	fi
 	@echo ""
-	@echo "🐳 Building nebula-core docker image. Do you want to continue? (y/n)"
-	@read ans && [ $${ans:-N} = y ] || { echo "Build cancelled."; exit 1; }
-	@docker build -t nebula-core .
+	@echo "🐳 Building nebula-core docker image. Do you want to continue? (overrides existing image)? (y/n)"
+	@read ans; if [ "$${ans:-N}" = y ]; then \
+		docker build -t nebula-core .; \
+	else \
+		echo "Skipping nebula-core docker build."; \
+	fi
 	@echo ""
 	@$(MAKE) shell
 
