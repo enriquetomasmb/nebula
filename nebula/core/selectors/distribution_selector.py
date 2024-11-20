@@ -82,7 +82,9 @@ class DistributionSelector(Selector):
         if len(self.node_embeddings) == len(current_neighbors):
             if self.own_embedding is None:
                 logging.info(f"[DistributionSelector] Own embedding not computed yet")
-                return
+                while self.own_embedding is None:
+                    logging.info(f"[DistributionSelector] Waiting for own embedding")
+                    await asyncio.sleep(1)
             logging.info(f"[DistributionSelector] Including own embedding")
             self.node_embeddings[self.config.participant['network_args']['addr']] = self.own_embedding
             logging.info(f"[DistributionSelector] All embeddings received")
