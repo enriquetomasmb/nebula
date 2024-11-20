@@ -209,6 +209,14 @@ class NebulaModel(pl.LightningModule, ABC):
         logging_training.info(f"Setting dataset embeddings: {dataset_embeddings}")
         self.dataset_embeddings = dataset_embeddings
         
+    def remove_dataset_embeddings(self):
+        logging_training.info("Removing dataset embeddings.")
+        self.dataset_embeddings = None
+        
+    def remove_model_embeddings(self):
+        logging_training.info("Removing model embeddings.")
+        self.model_embeddings = None
+        
     def get_model_embeddings(self):
         return self.model_embeddings
     

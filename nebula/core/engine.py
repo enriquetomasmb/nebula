@@ -439,6 +439,8 @@ class Engine:
                 logging.info(f"Model embeddings: {self.trainer.model.get_model_embeddings()}")
                 logging.info(f"Dataset embeddings: {self.trainer.model.get_dataset_embeddings()}")
                 embedding = await self.node_selection_strategy_selector.get_embeddings(model=self.trainer.model.get_model_embeddings(), dataloader=self.trainer.model.get_dataset_embeddings().train_dataloader())
+                self.trainer.model.remove_dataset_embeddings()
+                self.trainer.model.remove_model_embeddings()
                 logging.info(f"Variance of the embedding: {embedding.var()}")
                 logging.info(f"Mean embedding:\n{embedding}")
                 serialized_embedding = self.trainer.serialize_embedding(embedding)

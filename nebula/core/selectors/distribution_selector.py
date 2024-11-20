@@ -1,3 +1,4 @@
+import asyncio
 import ipaddress
 import logging
 import os
@@ -31,13 +32,20 @@ class DistributionSelector(Selector):
         
     async def get_embeddings(self, model, dataloader):
         logging.info("[DistributionSelector] Getting embeddings")
+        np.random.seed()
+        timeout = round(np.random.uniform(0, 20), 2)
+        logging.info(f"[DistributionSelector] Sleeping for {timeout} seconds")
+        await asyncio.sleep(timeout)
+        logging.info(f"[DistributionSelector] Waking up after {timeout} seconds")
         logging.info(f"Model is in {'eval' if model.training else 'train'} mode")
         logging.info(f"Tamaño del DataLoader: {len(dataloader)} batches")
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        # device = torch.device('cpu')
         logging.info(f"Device: {device}")
         logging.info(f"Is CUDA available: {torch.cuda.is_available()}")
-        logging.info(f"Current CUDA device: {torch.cuda.current_device()}")
-        logging.info(f"CUDA device name: {torch.cuda.get_device_name(device)}")
+        if device.type == 'cuda':
+            logging.info(f"Current CUDA device: {torch.cuda.current_device()}")
+            logging.info(f"Device name: {torch.cuda.get_device_name(device)}")
         model = model.to(device)
         model.eval()
         embedding_sum = None
@@ -63,6 +71,7 @@ class DistributionSelector(Selector):
                     raise e
         mean_embedding = embedding_sum / total_samples
         self.own_embedding = mean_embedding.cpu()
+        del model
         return self.own_embedding
     
     async def add_embedding(self, node, embedding, current_neighbors):
@@ -71,6 +80,9 @@ class DistributionSelector(Selector):
         logging.info(f"[DistributionSelector] Current embeddings: {len(self.node_embeddings)}")
         logging.info(f"[DistributionSelector] Current neighbors: {len(current_neighbors)}")
         if len(self.node_embeddings) == len(current_neighbors):
+            if self.own_embedding is None:
+                logging.info(f"[DistributionSelector] Own embedding not computed yet")
+                return
             logging.info(f"[DistributionSelector] Including own embedding")
             self.node_embeddings[self.config.participant['network_args']['addr']] = self.own_embedding
             logging.info(f"[DistributionSelector] All embeddings received")
