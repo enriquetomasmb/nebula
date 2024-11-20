@@ -138,12 +138,15 @@ class DistributionSelector(Selector):
         
         
         image_path = os.path.join(self.config.participant['tracking_args']['log_dir'], self.config.participant['scenario_args']['name'], f"participant_{self.config.participant['device_args']['idx']}_{method}_similarity_matrix.png")
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(8, 8))
         cax = ax.matshow(similarity_matrix, cmap='viridis')
         fig.colorbar(cax)
         plt.title(f"{method.capitalize()} Similarity Matrix")
-        plt.xticks(range(len(nodes)), nodes, rotation=45)
-        plt.yticks(range(len(nodes)), nodes)
+        plt.xticks(range(len(nodes)), nodes, rotation=45, fontsize=6)
+        plt.yticks(range(len(nodes)), nodes, fontsize=6)
+        plt.xlabel("Nodes")
+        plt.ylabel("Nodes")
+        plt.tight_layout()
         plt.savefig(image_path)
         plt.close()
         logging.info(f"similarity_matrix saved in {image_path}")
