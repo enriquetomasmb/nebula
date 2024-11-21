@@ -248,10 +248,9 @@ async def main(config):
             )
             dataset_embeddings.setup("fit")
             
-            # model_embeddings = resnet18(pretrained=True)
+            model_embeddings = resnet18(pretrained=True)
             # model_embeddings.fc = torch.nn.Identity()  # Reemplazar la capa final con identidad para obtener embeddings
-            # for param in model_embeddings.parameters():
-            #     param.requires_grad = False  # Deshabilitar entrenamiento
+            model_embeddings = torch.nn.Sequential(*list(model_embeddings.children())[:-1])
             
             # model_embeddings = torchvision.models.mobilenet_v3_large(pretrained=True)
             # model_embeddings.classifier = torch.nn.Identity()  # Replace classifier with identity for embeddings
@@ -259,27 +258,19 @@ async def main(config):
             #     param.requires_grad = False  # Disable training
             
             # Cargar el modelo ResNet18 preentrenado
-            model_embeddings = torchvision.models.resnet18(pretrained=True)
-
-            # Modificar la primera capa convolucional
-            # Cambiar kernel_size de 7 a 3, stride de 2 a 1, y padding de 3 a 1
-            # model_embeddings.conv1 = torch.nn.Conv2d(
-            #     in_channels=3,
-            #     out_channels=64,
-            #     kernel_size=3,
-            #     stride=1,
-            #     padding=1,
-            #     bias=False
-            # )
-
-            # Eliminar la capa de MaxPooling reemplazándola con una capa de identidad
-            # model_embeddings.maxpool = torch.nn.Identity()
-            
+            # model_embeddings = torchvision.models.resnet18(pretrained=True)
             # Replace the avgpool layer to adapt to any input size
-            model_embeddings.avgpool = torch.nn.AdaptiveAvgPool2d((1, 1))
-
+            # model_embeddings.avgpool = torch.nn.AdaptiveAvgPool2d((1, 1))
             # Reemplazar la capa fully connected (fc) con identidad para obtener embeddings
-            model_embeddings.fc = torch.nn.Identity()
+            # model_embeddings.fc = torch.nn.Identity()
+            
+            # Cargar el modelo EfficientNetB0 preentrenado
+            # model_embeddings = torchvision.models.efficientnet_b0(pretrained=True)
+            # model_embeddings.classifier = torch.nn.Identity()  # Replace classifier with identity for embeddings
+            
+            # Cargar el modelo ResNet50 preentrenado
+            # model_embeddings = torchvision.models.resnet50(pretrained=True)
+            # model_embeddings.fc = torch.nn.Identity()
             
             model.set_dataset_embeddings(dataset_embeddings)
             model.set_model_embeddings(model_embeddings)

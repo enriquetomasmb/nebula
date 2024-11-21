@@ -98,4 +98,5 @@ message VoteMessage {
 
 message EmbeddingMessage {
   bytes embedding = 1;
+  bytes embedding_covariance = 2;
 }

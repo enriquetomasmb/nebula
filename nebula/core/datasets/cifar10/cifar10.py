@@ -1,6 +1,8 @@
 import os
 
+import torch
 from torchvision import transforms
+from torchvision.transforms import v2
 from torchvision.datasets import CIFAR10
 
 from nebula.core.datasets.nebuladataset import NebulaDataset
@@ -63,10 +65,19 @@ class CIFAR10Dataset(NebulaDataset):
         mean = (0.4914, 0.4822, 0.4465)
         std = (0.2471, 0.2435, 0.2616)
         if self.embedding == "resnet18":
+            # Get mean and std for resnet18 (ImageNet)
+            mean = (0.485, 0.456, 0.406)
+            std = (0.229, 0.224, 0.225)
+            # apply_transforms = v2.Compose([
+            #     v2.ToImage(),
+            #     v2.Resize(224, antialias=True),
+            #     v2.RandomCrop(32, padding=4),
+            #     v2.RandomHorizontalFlip(),
+            #     v2.ToDtype(torch.float32, scale=True),
+            #     v2.Normalize(mean, std, inplace=True),
+            # ])
             apply_transforms = transforms.Compose([
-                # transforms.Resize(224),
-                # transforms.RandomHorizontalFlip(),
-                transforms.RandomCrop(32, padding=4),
+                transforms.Resize(224),
                 transforms.RandomHorizontalFlip(),
                 transforms.ToTensor(),
                 transforms.Normalize(mean, std, inplace=True),

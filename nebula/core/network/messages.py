@@ -106,9 +106,10 @@ class MessagesManager:
         data = message_wrapper.SerializeToString()
         return data
     
-    def generate_embedding_message(self, embedding):
+    def generate_embedding_message(self, embedding, embedding_covariance):
         message = nebula_pb2.EmbeddingMessage(
             embedding=embedding,
+            embedding_covariance=embedding_covariance,
         )
         message_wrapper = nebula_pb2.Wrapper()
         message_wrapper.source = self.addr
