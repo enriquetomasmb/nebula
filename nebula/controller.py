@@ -8,6 +8,7 @@ import textwrap
 import threading
 import time
 
+import docker
 import psutil
 from dotenv import load_dotenv
 from watchdog.events import PatternMatchingEventHandler
@@ -16,6 +17,7 @@ from watchdog.observers import Observer
 from nebula.addons.env import check_environment
 from nebula.config.config import Config
 from nebula.config.mender import Mender
+from nebula.frontend.utils import DockerUtils
 from nebula.scenarios import ScenarioManagement
 from nebula.tests import main as deploy_tests
 
@@ -501,191 +503,76 @@ class Controller:
                     "/var/run/docker.sock not found, please check if Docker is running and Docker Compose is installed."
                 )
 
-        docker_compose_template = textwrap.dedent(
-            """
-            services:
-            {}
-        """
-        )
-
-        frontend_template = textwrap.dedent(
-            """
-            nebula-frontend:
-                container_name: nebula-frontend
-                image: nebula-frontend
-                build:
-                    context: {path}
-                    dockerfile: nebula/frontend/Dockerfile
-                restart: unless-stopped
-                volumes:
-                    - {path}:/nebula
-                    - /var/run/docker.sock:/var/run/docker.sock
-                    - ./config/nebula:/etc/nginx/sites-available/default
-                environment:
-                    - NEBULA_PRODUCTION={production}
-                    - NEBULA_GPU_AVAILABLE={gpu_available}
-                    - NEBULA_ADVANCED_ANALYTICS={advanced_analytics}
-                    - NEBULA_SERVER_LOG=/nebula/app/logs/server.log
-                    - NEBULA_LOGS_DIR=/nebula/app/logs/
-                    - NEBULA_CONFIG_DIR=/nebula/app/config/
-                    - NEBULA_CERTS_DIR=/nebula/app/certs/
-                    - NEBULA_ENV_PATH=/nebula/app/.env
-                    - NEBULA_ROOT_HOST={path}
-                    - NEBULA_HOST_PLATFORM={platform}
-                    - NEBULA_DEFAULT_USER=admin
-                    - NEBULA_DEFAULT_PASSWORD=admin
-                    - NEBULA_FRONTEND_PORT={frontend_port}
-                extra_hosts:
-                    - "host.docker.internal:host-gateway"
-                ipc: host
-                privileged: true
-                ports:
-                    - {frontend_port}:80
-                    - {statistics_port}:8080
-                networks:
-                    nebula-net-base:
-                        ipv4_address: {ip}
-        """
-        )
-        frontend_template = textwrap.indent(frontend_template, " " * 4)
-
-        network_template = textwrap.dedent(
-            """
-            networks:
-                nebula-net-base:
-                    name: nebula-net-base
-                    driver: bridge
-                    ipam:
-                        config:
-                            - subnet: {}
-                              gateway: {}
-        """
-        )
-
-        network_template_external = textwrap.dedent(
-            """
-            networks:
-                nebula-net-base:
-                    external: true
-        """
-        )
-
         try:
             subprocess.check_call(["nvidia-smi"])
             self.gpu_available = True
         except Exception:
             logging.info("No GPU available for the frontend, nodes will be deploy in CPU mode")
 
-        # Generate the Docker Compose file dynamically
-        services = ""
-        services += frontend_template.format(
-            production=self.production,
-            gpu_available=self.gpu_available,
-            advanced_analytics=self.advanced_analytics,
-            path=self.root_path,
-            platform=self.host_platform,
-            gw="192.168.10.1",
-            ip="192.168.10.100",
-            frontend_port=self.frontend_port,
-            statistics_port=self.statistics_port,
+        network_name = f"{os.environ['USER']}-nebula-net-base"
+
+        # Create the Docker network
+        base = DockerUtils.create_docker_network(network_name)
+
+        client = docker.from_env()
+
+        environment = {
+            "NEBULA_CONTROLLER_NAME": os.environ["USER"],
+            "NEBULA_PRODUCTION": self.production,
+            "NEBULA_GPU_AVAILABLE": self.gpu_available,
+            "NEBULA_ADVANCED_ANALYTICS": self.advanced_analytics,
+            "NEBULA_SERVER_LOG": "/nebula/app/logs/server.log",
+            "NEBULA_LOGS_DIR": "/nebula/app/logs/",
+            "NEBULA_CONFIG_DIR": "/nebula/app/config/",
+            "NEBULA_CERTS_DIR": "/nebula/app/certs/",
+            "NEBULA_ENV_PATH": "/nebula/app/.env",
+            "NEBULA_ROOT_HOST": self.root_path,
+            "NEBULA_HOST_PLATFORM": self.host_platform,
+            "NEBULA_DEFAULT_USER": "admin",
+            "NEBULA_DEFAULT_PASSWORD": "admin",
+            "NEBULA_FRONTEND_PORT": self.frontend_port,
+        }
+
+        volumes = ["/nebula", "/var/run/docker.sock", "/etc/nginx/sites-available/default"]
+
+        ports = [80, 8080]
+
+        host_config = client.api.create_host_config(
+            binds=[
+                f"{self.root_path}:/nebula",
+                "/var/run/docker.sock:/var/run/docker.sock",
+                f"{self.root_path}/nebula/frontend/config/nebula:/etc/nginx/sites-available/default",
+            ],
+            port_bindings={80: self.frontend_port, 8080: self.statistics_port},
         )
-        docker_compose_file = docker_compose_template.format(services)
 
-        if self.production:
-            # If WAF is enabled, we need to use the same network
-            docker_compose_file += network_template_external
-        else:
-            docker_compose_file += network_template.format("192.168.10.0/24", "192.168.10.1")
-        # Write the Docker Compose file in config directory
-        with open(
-            f"{os.path.join(os.environ['NEBULA_ROOT'], 'nebula', 'frontend', 'docker-compose.yml')}",
-            "w",
-        ) as f:
-            f.write(docker_compose_file)
+        networking_config = client.api.create_networking_config({
+            f"{network_name}": client.api.create_endpoint_config(ipv4_address=f"{base}.100")
+        })
 
-        # Start the Docker Compose file, catch error if any
-        try:
-            subprocess.check_call([
-                "docker",
-                "compose",
-                "-f",
-                f"{os.path.join(os.environ['NEBULA_ROOT'], 'nebula', 'frontend', 'docker-compose.yml')}",
-                "up",
-                "--build",
-                "-d",
-            ])
-        except subprocess.CalledProcessError:
-            raise Exception(
-                "Docker Compose failed to start, please check if Docker Compose is installed (https://docs.docker.com/compose/install/) and Docker Engine is running."
-            )
+        container_id = client.api.create_container(
+            image="nebula-frontend",
+            name=f"{os.environ['USER']}-nebula-frontend",
+            detach=True,
+            environment=environment,
+            volumes=volumes,
+            host_config=host_config,
+            networking_config=networking_config,
+            ports=ports,
+        )
 
-        except Exception as e:
-            raise Exception(f"Error while starting the frontend: {e}")
+        client.api.start(container_id)
 
     def run_test(self):
         deploy_tests.start()
 
     @staticmethod
     def stop_frontend():
-        if sys.platform == "win32":
-            try:
-                # kill all the docker containers which contain the word "nebula"
-                commands = [
-                    """docker kill $(docker ps -q --filter name=^nebula-frontend$) | Out-Null""",
-                    """docker rm $(docker ps -a -q --filter name=^nebula-frontend$) | Out-Null""",
-                ]
-
-                for command in commands:
-                    time.sleep(1)
-                    exit_code = os.system(f'powershell.exe -Command "{command}"')
-                    # logging.info(f"Windows Command '{command}' executed with exit code: {exit_code}")
-
-            except Exception as e:
-                raise Exception(f"Error while killing docker containers: {e}")
-        else:
-            try:
-                commands = [
-                    """docker kill $(docker ps -q --filter name=^nebula-frontend$) > /dev/null 2>&1""",
-                    """docker rm $(docker ps -a -q --filter name=^nebula-frontend$) > /dev/null 2>&1""",
-                ]
-
-                for command in commands:
-                    time.sleep(1)
-                    exit_code = os.system(command)
-                    # logging.info(f"Linux Command '{command}' executed with exit code: {exit_code}")
-
-            except Exception as e:
-                raise Exception(f"Error while killing docker containers: {e}")
+        DockerUtils.remove_containers_by_prefix(f"{os.environ['USER']}-nebula-frontend")
 
     @staticmethod
     def stop_network():
-        if sys.platform == "win32":
-            try:
-                # kill all the docker containers which contain the word "nebula"
-                commands = [
-                    r"""docker network rm $(docker network ls | Where-Object { ($_ -split '\s+')[1] -eq 'nebula-net-base' } | ForEach-Object { ($_ -split '\s+')[0] }) | Out-Null"""
-                ]
-
-                for command in commands:
-                    time.sleep(1)
-                    exit_code = os.system(f'powershell.exe -Command "{command}"')
-                    # logging.info(f"Windows Command '{command}' executed with exit code: {exit_code}")
-
-            except Exception as e:
-                raise Exception(f"Error while killing docker containers: {e}")
-        else:
-            try:
-                commands = [
-                    """docker network rm $(docker network ls | grep '^nebula-net-base$' | awk '{print $1}') > /dev/null 2>&1"""
-                ]
-
-                for command in commands:
-                    time.sleep(1)
-                    exit_code = os.system(command)
-                    # logging.info(f"Linux Command '{command}' executed with exit code: {exit_code}")
-
-            except Exception as e:
-                raise Exception(f"Error while killing docker containers: {e}")
+        DockerUtils.remove_docker_network(f"{os.environ['USER']}-nebula-net-base")
 
     @staticmethod
     def stop_waf():

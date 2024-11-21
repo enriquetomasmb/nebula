@@ -834,7 +834,7 @@ async def nebula_relaunch_scenario(
             scenarios_finished = 0
             scenarios_list.clear()
             scenarios_list.append(scenario)
-            background_tasks.add_task(run_scenarios, session["role"])
+            background_tasks.add_task(run_scenarios, session["role"], session["user"])
         else:
             scenarios_list.append(scenario)
 
@@ -1104,13 +1104,13 @@ async def node_stopped(scenario_name: str, request: Request):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
 
 
-async def run_scenario(scenario_data, role):
+async def run_scenario(scenario_data, role, user):
     import subprocess
 
     from nebula.scenarios import ScenarioManagement
 
     # Manager for the actual scenario
-    scenarioManagement = ScenarioManagement(scenario_data)
+    scenarioManagement = ScenarioManagement(scenario_data, user)
 
     scenario_update_record(
         scenario_name=scenarioManagement.scenario_name,
@@ -1151,13 +1151,13 @@ async def run_scenario(scenario_data, role):
 
 
 # Deploy the list of scenarios
-async def run_scenarios(role):
+async def run_scenarios(role, user):
     try:
         global scenarios_finished, scenarios_list_length
         for scenario_data in scenarios_list:
             finish_scenario_event.clear()
             logging.info(f"Running scenario {scenario_data['scenario_title']}")
-            scenario_name = await run_scenario(scenario_data, role)
+            scenario_name = await run_scenario(scenario_data, role, user)
             # Waits till the scenario is completed
             while not finish_scenario_event.is_set() and not stop_all_scenarios_event.is_set():
                 await asyncio.sleep(1)
@@ -1191,7 +1191,7 @@ async def nebula_dashboard_deployment_run(
         scenarios_finished = 0
         scenarios_list_length = len(data)
         scenarios_list = data
-        background_tasks.add_task(run_scenarios, session["role"])
+        background_tasks.add_task(run_scenarios, session["role"], session["user"])
     else:
         scenarios_list_length += len(data)
         scenarios_list.extend(data)

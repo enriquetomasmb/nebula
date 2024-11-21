@@ -18,7 +18,7 @@ from nebula.addons.blockchain.blockchain_deployer import BlockchainDeployer
 from nebula.addons.topologymanager import TopologyManager
 from nebula.config.config import Config
 from nebula.core.utils.certificate import generate_ca_certificate, generate_certificate
-from nebula.frontend.utils import Utils
+from nebula.frontend.utils import DockerUtils, Utils
 
 
 # Definition of a scenario
@@ -233,9 +233,11 @@ class Scenario:
 
 # Class to manage the current scenario
 class ScenarioManagement:
-    def __init__(self, scenario):
+    def __init__(self, scenario, user=None):
         # Current scenario
         self.scenario = Scenario.from_dict(scenario)
+        # Uid of the user
+        self.user = user
         # Scenario management settings
         self.start_date_scenario = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
         self.scenario_name = f"nebula_{self.scenario.federation}_{datetime.now().strftime('%d_%m_%Y_%H_%M_%S')}"
@@ -249,7 +251,7 @@ class ScenarioManagement:
 
         # Assign the controller endpoint
         if self.scenario.deployment == "docker":
-            self.controller = "nebula-frontend"
+            self.controller = f"{os.environ.get('NEBULA_CONTROLLER_NAME')}-nebula-frontend"
         else:
             self.controller = f"127.0.0.1:{os.environ.get('NEBULA_FRONTEND_PORT')}"
 
@@ -653,48 +655,104 @@ class ScenarioManagement:
             raise e
 
     def start_nodes_docker(self):
-        import subprocess
-
-        try:
-            # First, get the list of IDs of exited containers
-            result_ps = subprocess.run(
-                "docker ps -aq -f status=exited --filter 'name=nebula'",
-                shell=True,
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-
-            # Get the container IDs
-            container_ids = result_ps.stdout.strip()
-
-            if container_ids:
-                # Run the command to remove the containers
-                result_rm = subprocess.run(
-                    "docker rm $(docker ps -aq -f status=exited --filter 'name=nebula')",
-                    shell=True,
-                    check=True,
-                    capture_output=True,
-                    text=True,
-                )
-                print(f"Dangling containers removed successfully: {result_rm.stdout.strip()}.")
-            else:
-                print("No dangling containers to remove.")
-        except subprocess.CalledProcessError as e:
-            print(f"Error removing stopped containers: {e}")
-            print(f"Error output: {e.stderr}")
-        except Exception as e:
-            print(f"Unexpected error: {e}")
+        DockerUtils.remove_containers_by_prefix(f"{self.user}-participant")
 
         logging.info("Starting nodes using Docker Compose...")
         logging.info(f"env path: {self.env_path}")
 
-        docker_compose_template = textwrap.dedent(
-            """
-            services:
-            {}
-        """
-        )
+        network_name = f"{self.user}-nebula-net-scenario"
+
+        # Create the Docker network
+        base = DockerUtils.create_docker_network(network_name)
+
+        client = docker.from_env()
+
+        self.config.participants.sort(key=lambda x: x["device_args"]["idx"])
+        i = 2
+        container_ids = []
+        for idx, node in enumerate(self.config.participants):
+            image = "nebula-core"
+            name = f"{self.user}-participant{node['device_args']['idx']}"
+
+            if node["device_args"]["accelerator"] == "gpu":
+                environment = {"NVIDIA_DISABLE_REQUIRE": True}
+
+            volumes = ["/nebula", "/var/run/docker.sock"]
+            host_config = client.api.create_host_config(
+                binds=[f"{self.root_path}:/nebula", "/var/run/docker.sock:/var/run/docker.sock"], privileged=True
+            )
+
+            logging.info(f"[FER] participant {name}")
+
+            start_command = "sleep 10" if node["device_args"]["start"] else "sleep 0"
+            command = [
+                "/bin/bash",
+                "-c",
+                f"{start_command} && ifconfig && echo '{base}.1 host.docker.internal' >> /etc/hosts && python /nebula/nebula/node.py /nebula/app/config/{self.scenario_name}/participant_{node['device_args']['idx']}.json",
+            ]
+
+            if self.use_blockchain:
+                networking_config = client.api.create_networking_config({
+                    f"{network_name}": client.api.create_endpoint_config(
+                        ipv4_address=f"{base}.{i}",
+                    ),
+                    "proxy": client.api.create_endpoint_config(name="chainnet"),
+                })
+            else:
+                networking_config = client.api.create_networking_config({
+                    f"{network_name}": client.api.create_endpoint_config(
+                        ipv4_address=f"{base}.{i}",
+                    ),
+                    f"{os.environ.get('NEBULA_CONTROLLER_NAME')}-nebula-net-base": client.api.create_endpoint_config(),
+                })
+
+            node["tracking_args"]["log_dir"] = "/nebula/app/logs"
+            node["tracking_args"]["config_dir"] = f"/nebula/app/config/{self.scenario_name}"
+            node["scenario_args"]["controller"] = self.controller
+            node["scenario_args"]["deployment"] = self.scenario.deployment
+            node["security_args"]["certfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_cert.pem"
+            node["security_args"]["keyfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_key.pem"
+            node["security_args"]["cafile"] = "/nebula/app/certs/ca_cert.pem"
+            node = json.loads(json.dumps(node).replace("192.168.50.", f"{base}."))
+
+            # Write the config file in config directory
+            with open(f"{self.config_dir}/participant_{node['device_args']['idx']}.json", "w") as f:
+                json.dump(node, f, indent=4)
+
+            try:
+                container_id = client.api.create_container(
+                    image=image,
+                    name=name,
+                    detach=True,
+                    volumes=volumes,
+                    command=command,
+                    host_config=host_config,
+                    networking_config=networking_config,
+                )
+            except Exception as e:
+                logging.info(f"[FER] create_container: {e}")
+            logging.info(f"[FER] creating participant {name}")
+
+            try:
+                client.api.start(container_id)
+                container_ids.append(container_id)
+
+            except Exception as e:
+                logging.info(f"[FER] starting participant {name} error: {e}")
+            i += 1
+
+        # container_id = client.api.create_container(
+        #     image="nebula-frontend",
+        #     name=f"{os.environ['USER']}-nebula-frontend",
+        #     detach=True,
+        #     environment=environment,
+        #     volumes=volumes,
+        #     host_config=host_config,
+        #     networking_config=networking_config,
+
+        # )
+
+        # client.api.start(container_id)
 
         participant_template = textwrap.dedent(
             """
@@ -716,7 +774,7 @@ class ScenarioManagement:
                 networks:
                     nebula-net-scenario:
                         ipv4_address: {}
-                    nebula-net-base:
+                    fer-nebula-net-base:
                     {}
         """
         )
@@ -767,8 +825,8 @@ class ScenarioManagement:
                         config:
                             - subnet: {}
                               gateway: {}
-                nebula-net-base:
-                    name: nebula-net-base
+                fer-nebula-net-base:
+                    name: fer-nebula-net-base
                     external: true
                 {}
                     {}
@@ -834,52 +892,52 @@ class ScenarioManagement:
                 json.dump(node, f, indent=4)
 
         # Start the Docker Compose file, catch error if any
-        try:
-            subprocess.check_call([
-                "docker",
-                "compose",
-                "-f",
-                f"{self.config_dir}/docker-compose.yml",
-                "up",
-                "--build",
-                "-d",
-            ])
-        except subprocess.CalledProcessError:
-            raise Exception(
-                "Docker Compose failed to start, please check if Docker Compose is installed (https://docs.docker.com/compose/install/) and Docker Engine is running."
-            )
+        # try:
+        #     subprocess.check_call([
+        #         "docker",
+        #         "compose",
+        #         "-f",
+        #         f"{self.config_dir}/docker-compose.yml",
+        #         "up",
+        #         "--build",
+        #         "-d",
+        #     ])
+        # except subprocess.CalledProcessError:
+        #     raise Exception(
+        #         "Docker Compose failed to start, please check if Docker Compose is installed (https://docs.docker.com/compose/install/) and Docker Engine is running."
+        #     )
 
-        container_ids = None
+        # container_ids = None
         logging.info("Waiting for nodes to start...")
         # Loop until all containers are running (equivalent to the number of participants)
-        while container_ids is None or len(container_ids) != len(self.config.participants):
-            time.sleep(3)
-            try:
-                # Obtain docker ids
-                result = subprocess.run(
-                    [
-                        "docker",
-                        "compose",
-                        "-f",
-                        f"{self.config_dir}/docker-compose.yml",
-                        "ps",
-                        "-q",
-                    ],
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                )
+        # while container_ids is None or len(container_ids) != len(self.config.participants):
+        #     time.sleep(3)
+        #     try:
+        #         # Obtain docker ids
+        #         result = subprocess.run(
+        #             [
+        #                 "docker",
+        #                 "compose",
+        #                 "-f",
+        #                 f"{self.config_dir}/docker-compose.yml",
+        #                 "ps",
+        #                 "-q",
+        #             ],
+        #             stdout=subprocess.PIPE,
+        #             stderr=subprocess.PIPE,
+        #             text=True,
+        #         )
 
-                if result.returncode != 0:
-                    raise Exception(f"Error obtaining docker IDs: {result.stderr}")
+        #         if result.returncode != 0:
+        #             raise Exception(f"Error obtaining docker IDs: {result.stderr}")
 
-                container_ids = result.stdout.strip().split("\n")
+        #         container_ids = result.stdout.strip().split("\n")
 
-            except subprocess.CalledProcessError:
-                raise Exception(
-                    "Docker Compose failed to start, please check if Docker Compose is installed "
-                    "(https://docs.docker.com/compose/install/) and Docker Engine is running."
-                )
+        #     except subprocess.CalledProcessError:
+        #         raise Exception(
+        #             "Docker Compose failed to start, please check if Docker Compose is installed "
+        #             "(https://docs.docker.com/compose/install/) and Docker Engine is running."
+        #         )
 
         # Change log and config directory in dockers to /nebula/app, and change controller endpoint
         for idx, node in enumerate(self.config.participants):
