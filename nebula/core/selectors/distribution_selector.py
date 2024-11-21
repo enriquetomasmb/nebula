@@ -38,7 +38,7 @@ class DistributionSelector(Selector):
         idx = self.config.participant['device_args']['idx']
         logging.info(f"[DistributionSelector] Participant index: {idx}")
         # timeout = round(np.random.uniform(0, 20), 2)
-        timeout = idx * 5
+        timeout = idx * 20
         logging.info(f"[DistributionSelector] Sleeping for {timeout} seconds")
         await asyncio.sleep(timeout)
         logging.info(f"[DistributionSelector] Waking up after {timeout} seconds")
@@ -232,22 +232,12 @@ class DistributionSelector(Selector):
                 similar_nodes_with_scores = [f"{similar_nodes[j]} [{similar_scores[j]:.4f}]" for j in range(len(similar_nodes))]
                 logging.info(f"Own node '{own_node}' similar nodes with scores: {', '.join(similar_nodes_with_scores)}")
                 
-                # Compute mean and standard deviation of similarity scores
-                mean_similarity = np.mean(similar_scores)
-                std_similarity = np.std(similar_scores)
-                
-                # Define dynamic threshold
-                threshold = mean_similarity + self.threshold_multiplier * std_similarity
-                logging.info(f"Dynamic threshold for node '{own_node}': {threshold:.4f}")
-                
-                # Select nodes above the dynamic threshold
-                above_threshold_indices = np.where(similar_scores >= threshold)[0]
-                if len(above_threshold_indices) > len(similar_nodes) // 2:
-                    selected_nodes = [similar_nodes[idx] for idx in above_threshold_indices]
-                    logging.info(f"Own node '{own_node}' has similar nodes above dynamic threshold: {selected_nodes}")
-                else:
-                    selected_nodes = similar_nodes[:max(1, len(similar_nodes) // 2)]
-                    logging.info(f"No nodes above dynamic threshold for own node. Selecting top similar nodes: {selected_nodes}")
+                # Calculate the 75th percentile threshold
+                threshold = np.percentile(similar_scores, 75)
+                logging.info(f"Similarity threshold (75th percentile): {threshold}")
+
+                # Select nodes with similarity above the threshold
+                selected_nodes = {n for n, s in zip(similar_nodes, similar_scores) if s >= threshold}
                 
         # Update the final selected nodes
         self.selected_nodes.update(selected_nodes)
