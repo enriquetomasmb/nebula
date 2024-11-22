@@ -51,7 +51,7 @@
     "reordering": "0%"
   },
   "adaptive_args": {
-    "model_similarity": false
+    "model_similarity": true
   },
   "mobility_args": {
     "latitude": "",
@@ -87,7 +87,7 @@
   },
   "aggregator_args": {
     "algorithm": "FedAvg",
-    "aggregation_timeout": 300
+    "aggregation_timeout": 20
   },
   "defense_args": {
     "with_reputation": false,

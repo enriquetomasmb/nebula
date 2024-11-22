@@ -716,34 +716,35 @@ class MaliciousNode(Engine):
             noise_type,
         )
         self.attack = create_attack(config.participant["adversarial_args"]["attacks"])
+        logging.info(f"Attack: {self.attack}")
         self.fit_time = 0.0
         self.extra_time = 0.0
 
-        self.round_start_attack = 6
-        self.round_stop_attack = 9
+        self.round_start_attack = 10
+        self.round_stop_attack = 17
 
         self.aggregator_bening = self._aggregator
 
-    async def flood_attack(self, repetitions=10, interval=0.05):
-        neighbors = set(await self.cm.get_addrs_current_connections(only_direct=True))
-        for nei in neighbors:
-            for i in range(repetitions):
-                message_data = self.cm.mm.generate_flood_attack_message(
-                    attacker_id=self.addr,
-                    frequency=int(i),
-                    duration=int(interval*1000),
-                    target_node=nei,
-                )
-                await self.cm.send_message_to_neighbors(message_data, neighbors={nei})
-                logging.info(f"Flood attack message sent to {nei} - Attempt {i + 1}/{repetitions}.")
-                await asyncio.sleep(interval)
-                self.cm.store_send_timestamp(nei, self.round, "flood_attack")
+    # async def flood_attack(self, repetitions=10, interval=0.05):
+    #     neighbors = set(await self.cm.get_addrs_current_connections(only_direct=True))
+    #     for nei in neighbors:
+    #         for i in range(repetitions):
+    #             message_data = self.cm.mm.generate_flood_attack_message(
+    #                 attacker_id=self.addr,
+    #                 frequency=int(i),
+    #                 duration=int(interval*1000),
+    #                 target_node=nei,
+    #             )
+    #             await self.cm.send_message_to_neighbors(message_data, neighbors={nei})
+    #             logging.info(f"Flood attack message sent to {nei} - Attempt {i + 1}/{repetitions}.")
+    #             await asyncio.sleep(interval)
+    #             self.cm.store_send_timestamp(nei, self.round, "flood_attack")
     
     async def _extended_learning_cycle(self):
         if self.attack != None:
             if self.round in range(self.round_start_attack, self.round_stop_attack):
                 logging.info("Changing aggregation function maliciously...")
-                await self.flood_attack("flood_attack")
+                # await self.flood_attack(repetitions=10, interval=0.05)
                 self._aggregator = create_malicious_aggregator(self._aggregator, self.attack)
             elif self.round == self.round_stop_attack:
                 logging.info("Changing aggregation function benignly...")

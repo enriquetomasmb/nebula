@@ -86,8 +86,8 @@ class Connection:
     def __repr__(self):
         return self.__str__()
 
-    def __del__(self):
-        self.stop()
+    async def __del__(self):
+        await self.stop()
 
     def get_addr(self):
         return self.addr
