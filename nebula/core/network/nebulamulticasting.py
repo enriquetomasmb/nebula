@@ -54,12 +54,13 @@ class NebulaServer(threading.Thread):
                         sock.close()
                         return
                 else:
-                    if self._is_nebula_message(data): 
+                    if self._is_nebula_message(data):
+                        logging.info("Nebula request recieved | response on the way..") 
                         self.respond(addr)
                     #time.sleep(1)
                     #self.stop()
         except Exception as e:
-            logging.info('Error in Nebula npnp server listening: %s', e)
+            logging.error('Error in Nebula npnp server listening: %s', e)
 
     def _is_nebula_message(self, msg):
         msg_str = msg.decode('utf-8')
@@ -80,7 +81,7 @@ class NebulaServer(threading.Thread):
             outSock.sendto(UPNP_RESPOND.encode('ASCII'), addr)
             outSock.close()
         except Exception as e:
-            logging.info('Error in Nebula upnp response message to client %s', e)
+            logging.error('Error in Nebula upnp response message to client %s', e)
 
 class NebulaClient(threading.Thread):
     # 30 seconds for search_interval
@@ -89,6 +90,7 @@ class NebulaClient(threading.Thread):
     BCAST_PORT = 1900
            
     def __init__(self, nebula_service: "NebulaConnectionService"):
+        logging.info("Initializating Nebula Multicasting Client")
         threading.Thread.__init__(self)
         self.interrupted = False
         self.ns = nebula_service
@@ -104,6 +106,7 @@ class NebulaClient(threading.Thread):
         """
         run search function every SEARCH_INTERVAL
         """
+        logging.info("Federation searching loop start")
         try:
             while True:
                 self.search()
@@ -112,13 +115,14 @@ class NebulaClient(threading.Thread):
                     if self.interrupted:
                         return
         except Exception as e:
-            logging.info('Error in Nebula upnp client keep search %s', e)
+            logging.error('Error in Nebula upnp client keep search %s', e)
 
     def search(self):
         """
         broadcast SSDP DISCOVER message to LAN network
         filter our protocal and add to network
         """
+        logging.info("Client thread searching for nodes..")
         try:
             SSDP_DISCOVER = ('M-SEARCH * HTTP/1.1\r\n' +
                             'HOST: 239.255.255.250:1900\r\n' +
@@ -133,6 +137,7 @@ class NebulaClient(threading.Thread):
             while True:
                 data, addr = sock.recvfrom(1024)
                 if self._is_nebula_message(data):
+                    logging.info("Recieved response from server")
                     self.ns.response_recieved(data, addr)
         except:
             sock.close()
@@ -145,6 +150,7 @@ class NebulaConnectionService(ExternalConnectionService):
     
     def __init__(self, addr):
         self.addrs_found_lock = Locker(name="addrs_found_lock")
+        self.get_nodes_lock= Locker(name="get_nodes_lock")
         self.nodes_found = []
         self.repeatsearch_interval = 3
         self.addr = addr
@@ -167,28 +173,32 @@ class NebulaConnectionService(ExternalConnectionService):
         self.client = NebulaClient(self)
         self.client.start()
         time.sleep(self.repeatsearch_interval)
-        while not len(self.get_nodes()):
+        while len(self.get_nodes()) == 0:
+            logging.info("Waiting for server response..")
             time.sleep(self.repeatsearch_interval)
         self.client.stop()
+        return self.get_nodes()
               
     def response_recieved(self, data, addr):
+        logging.info("Parsing response..")
         msg_str = data.decode('utf-8')
         self._add_addr(msg_str)
         
     def _add_addr(self, msg_str):
-        self.mutex.acquire()
+        self.addrs_found_lock.acquire()
         lineas = msg_str.splitlines()
         # Buscar la línea que contiene "LOCATION: "
         for linea in lineas:
             if linea.strip().startswith("LOCATION:"):
                 addr = linea.split(": ")[1].strip()
                 break
+        logging.info(f"Device addr received: {addr}")
         self.nodes_found.append(addr)
-        self.mutex.release()
+        self.addrs_found_lock.release()
         
     def get_nodes(self):
-        self.mutex.acquire()
+        self.get_nodes_lock.acquire()
         cp = self.nodes_found.copy()
-        self.mutex.release()
+        self.get_nodes_lock.release()
         return cp
             

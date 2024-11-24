@@ -88,7 +88,7 @@ class MessagesManager:
         )
         message_wrapper = nebula_pb2.Wrapper()
         message_wrapper.source = self.addr
-        message_wrapper.discovery_message.CopyFrom(message)
+        message_wrapper.discover_message.CopyFrom(message)
         data = message_wrapper.SerializeToString()
         return data
 
@@ -105,7 +105,7 @@ class MessagesManager:
         )
         message_wrapper = nebula_pb2.Wrapper()
         message_wrapper.source = self.addr
-        message_wrapper.discovery_message.CopyFrom(message)
+        message_wrapper.offer_message.CopyFrom(message)
         data = message_wrapper.SerializeToString()
         return data
 

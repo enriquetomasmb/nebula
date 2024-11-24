@@ -32,6 +32,7 @@ class STDModelHandler(ModelHandler):
         if not self.model_lock.locked():
             self.model_lock.acquire()
             self.model = model
+        return self.model_lock.locked()
             
     def get_model(self, model):
         """

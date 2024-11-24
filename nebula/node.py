@@ -347,15 +347,19 @@ async def main(config):
     # In order to do that, it should request the current round to the controller
     if additional_node_status:
         logging.info(f"Waiting for round {additional_node_round} to start")
-        time.sleep(6000)  # DEBUG purposes
-        import requests
+        logging.info("Waiting 60s to start finding federation")
+        time.sleep(60)
+        #time.sleep(6000)  # DEBUG purposes
+        #import requests
 
-        url = f"http://{node.config.participant['scenario_args']['controller']}/platform/{node.config.participant['scenario_args']['name']}/round"
-        current_round = int(requests.get(url).json()["round"])
-        while current_round < additional_node_round:
-            logging.info(f"Waiting for round {additional_node_round} to start")
-            time.sleep(10)
-        logging.info(f"Round {additional_node_round} started, connecting to the network")
+        #url = f"http://{node.config.participant['scenario_args']['controller']}/platform/{node.config.participant['scenario_args']['name']}/round"
+        #current_round = int(requests.get(url).json()["round"])
+        #while current_round < additional_node_round:
+        #    logging.info(f"Waiting for round {additional_node_round} to start")
+        #    time.sleep(10)
+        #logging.info(f"Round {additional_node_round} started, connecting to the network")
+
+        await node._aditional_node_start()
 
     if node.cm is not None:
         await node.cm.network_wait()

@@ -18,6 +18,8 @@ from nebula.core.network.forwarder import Forwarder
 from nebula.core.network.messages import MessagesManager
 from nebula.core.network.propagator import Propagator
 from nebula.core.pb import nebula_pb2
+from nebula.core.network.nebulamulticasting import NebulaConnectionService
+
 from nebula.core.utils.helper import (
     cosine_metric,
     euclidean_metric,
@@ -77,6 +79,21 @@ class CommunicationsManager:
         self.loop = asyncio.get_event_loop()
         max_concurrent_tasks = 5
         self.semaphore_send_model = asyncio.Semaphore(max_concurrent_tasks)
+        
+        # Connection service to communicate with external devices
+        self._external_connection_service = None
+        
+        # The line below is neccesary when mobility would be set up
+        mob = self.config.participant["mobility_args"]["mobility"]
+        aditional_node = self.config.participant["mobility_args"]["additional_node"]["status"]
+        if mob == True and not aditional_node:
+            self._external_connection_service = NebulaConnectionService(self.addr)
+            logging.info("Deploying External Connection Service")
+            self.ecs.start()
+        else:
+            logging.info("Deploying External Connection Service | No running")
+            self._external_connection_service = NebulaConnectionService(self.addr)
+        
 
     @property
     def engine(self):
@@ -109,6 +126,10 @@ class CommunicationsManager:
     @property
     def mobility(self):
         return self._mobility
+    
+    @property
+    def ecs(self):
+        return self._external_connection_service
 
     async def check_federation_ready(self):
         # Check if all my connections are in ready_connections
@@ -154,6 +175,15 @@ class CommunicationsManager:
                     await self.handle_model_message(source, message_wrapper.model_message)
             elif message_wrapper.HasField("connection_message"):
                 await self.handle_connection_message(source, message_wrapper.connection_message)
+            elif message_wrapper.HasField("discover_message"):
+                if self.include_received_message_hash(hashlib.md5(data).hexdigest()):
+                    await self.handle_discover_message(source, message_wrapper.discover_message)
+            elif message_wrapper.HasField("offer_message"):
+                if self.include_received_message_hash(hashlib.md5(data).hexdigest()):
+                    await self.handle_offer_message(source, message_wrapper.offer_message)
+            elif message_wrapper.HasField("link_message"):
+                if self.include_received_message_hash(hashlib.md5(data).hexdigest()):
+                    await self.handle_offer_message(source, message_wrapper.link_message)
             else:
                 logging.info(f"Unknown handler for message: {message_wrapper}")
         except Exception as e:
@@ -328,6 +358,60 @@ class CommunicationsManager:
             await self.engine.event_manager.trigger_event(source, message)
         except Exception as e:
             logging.exception(f"🔗  handle_connection_message | Error while processing: {message.action} | {e}")
+    
+    async def handle_discover_message(self, source, message):
+        logging.info(f"🔍  handle_discover_message | Received [Action {message.action}] from {source}")
+        try:
+            await self.engine.event_manager.trigger_event(source, message)
+        except Exception as e:
+            logging.error(f"🔍  handle_discover_message | Error while processing: {e}")
+
+    async def handle_offer_message(self, source, message):
+        logging.info(f"🔍  handle_offer_message | Received [Action {message.action}] from {source}")
+        try:
+            await self.engine.event_manager.trigger_event(source, message)
+        except Exception as e:
+            logging.error(f"🔍  handle_offer_message | Error while processing: {message.action} {message.arguments} | {e}")
+
+    async def handle_link_message(self, source, message):
+        logging.info(f"🔍  handle_link_message | Received [Action {message.action}] from {source}")
+        try:
+            await self.engine.event_manager.trigger_event(source, message)
+        except Exception as e:
+            logging.error(f"🔍  handle_link_message | Error while processing: {message.action} {message.arguments} | {e}")
+            
+    def start_external_connection_service(self):
+        self.ecs = NebulaConnectionService(self.addr)
+        self.ecs.start()
+        
+    def stop_external_connection_service(self):
+        self.ecs.stop()    
+        
+    def init_external_connection_service(self):
+        self.ecs = NebulaConnectionService(self.addr)
+        self.start_external_connection_service()    
+        
+    async def establish_connection_with_federation(self):
+        """
+            Using ExternalConnectionService to get addrs on local network, after that
+            stablishment of TCP connection and send the message broadcasted
+        """
+        logging.info("Searching federation process beginning..")
+        addrs = self.ecs.find_federation()
+        logging.info(f"Found federation devices | addrs {addrs}")
+        msg = self.mm.generate_discover_message(nebula_pb2.DiscoverMessage.Action.DISCOVER_JOIN)
+        logging.info("Starting communications with devices found")
+        for addr in addrs:
+            await self.connect(addr, direct=False)
+            await asyncio.sleep(1)
+        while not self.verify_connections(addrs):
+            await asyncio.sleep(1)
+        current_connections = await self.get_addrs_current_connections()
+        logging.info(f"Connections verified after searching: {current_connections}")
+        for addr in addrs:
+            logging.info(f"Sending discover join to --> {addr}")
+            asyncio.create_task(self.send_message(addr, msg))
+            await asyncio.sleep(1)        
 
     def get_connections_lock(self):
         return self.connections_lock
@@ -666,6 +750,22 @@ class CommunicationsManager:
             except Exception as e:
                 logging.exception(f"❗️  Cannot send model to {dest_addr}: {e!s}")
                 await self.disconnect(dest_addr, mutual_disconnection=False)
+                
+    async def send_offer_model(self, dest_addr, offer_message):
+        async with self.semaphore_send_model:
+            try:
+                conn = self.connections.get(dest_addr)
+                if conn is None:
+                    logging.info(f"❗️  Connection with {dest_addr} not found")
+                    return
+                logging.info(
+                    f"Sending model to {dest_addr}"
+                )
+                await conn.send(data=offer_message, is_compressed=True)
+                logging.info(f"Offer_Model sent to {dest_addr}")
+            except Exception as e:
+                logging.exception(f"❗️  Cannot send model to {dest_addr}: {e!s}")
+                await self.disconnect(dest_addr, mutual_disconnection=False)            
 
     async def establish_connection(self, addr, direct=True, reconnect=False):
         logging.info(f"🔗  [outgoing] Establishing connection with {addr} (direct: {direct})")
@@ -864,6 +964,14 @@ class CommunicationsManager:
         current_connections = set(current_connections)
         logging.info(f"Current connections: {current_connections}")
         self.config.update_neighbors_from_config(current_connections, dest_addr)
+        
+    async def remove_temporary_connection(self, temp_addr):
+        logging.info(f"Removing temporary conneciton:{temp_addr}..")
+        try:
+            await self.get_connections_lock().acquire_async()
+            self.connections.pop(temp_addr, None)
+        finally:
+            await self.get_connections_lock().release_async()     
 
     async def get_all_addrs_current_connections(self, only_direct=False, only_undirected=False):
         try:

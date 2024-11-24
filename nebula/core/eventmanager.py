@@ -49,6 +49,7 @@ class EventManager:
             self._event_callbacks[handler_info].append(callback)
         else:
             raise ValueError("The callback must be a callable function.")
+        
 
     def unregister_event(self, handler_info, callback):
         """Unregisters a previously registered callback for an event."""

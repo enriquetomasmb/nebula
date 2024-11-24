@@ -12,6 +12,7 @@ from nebula.core.eventmanager import EventManager, event_handler
 from nebula.core.network.communications import CommunicationsManager
 from nebula.core.pb import nebula_pb2
 from nebula.core.utils.locker import Locker
+from nebula.core.neighbormanagement.nodemanager import NodeManager
 
 logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
@@ -145,6 +146,15 @@ class Engine:
         self.trainer.model.set_communication_manager(self._cm)
 
         self._reporter = Reporter(config=self.config, trainer=self.trainer, cm=self.cm)
+        
+        # Mobility setup
+        self._node_manager = None
+        mob = self.config.participant["mobility_args"]["mobility"]
+        if mob == True:
+            topology = self.config.participant["mobility_args"]["mobility_type"]
+            model_handler = "std" #self.config.participant["mobility_args"]["model_handler"]
+            self._node_manager = NodeManager(topology, model_handler, engine=self)
+        
 
         self._event_manager = EventManager(
             default_callbacks=[
@@ -155,6 +165,14 @@ class Engine:
                 self._federation_ready_callback,
                 self._start_federation_callback,
                 self._federation_models_included_callback,
+                self._discover_discover_join_callback,
+                self._discover_discover_nodes_callback,
+                self._connection_late_connect_callback,
+                self._connection_restructure_callback,
+                self._offer_offer_model_callback,
+                self._offer_offer_metric_callback,
+                self._link_connect_to_callback,
+                self._link_disconnect_from_callback,
             ]
         )
 
@@ -166,8 +184,9 @@ class Engine:
             ),
             self._reputation_callback,
         )
+        
         # ... add more callbacks here
-
+              
     @property
     def cm(self):
         return self._cm
@@ -190,6 +209,17 @@ class Engine:
     @property
     def trainer(self):
         return self._trainer
+    
+    @property
+    def nm(self):
+        return self._node_manager
+
+    async def _aditional_node_start(self):
+        logging.info(f"{self.addr} is an aditional node going to stablish connection with federation")
+        await self.nm.start_late_connection_process()
+        # continue ..
+        logging.info("Creating trainer service to start the federation process..")
+        #await self.cm.establish_connection_with_federation()
 
     def get_addr(self):
         return self.addr
@@ -322,6 +352,141 @@ class Engine:
         finally:
             await self.cm.get_connections_lock().release_async()
 
+    # Mobility callbacks
+    @event_handler(
+        nebula_pb2.ConnectionMessage,
+        nebula_pb2.ConnectionMessage.Action.LATE_CONNECT,
+    )
+    async def _connection_late_connect_callback(self, source, message):
+        logging.info(f"🔗  handle_connection_message | Trigger | Received late_connect message from {source}")   
+        if self.nm.accept_connection(source, joining=True):
+            logging.info(f"🔗  Late connection acepted | source:{source}") 
+            self.nm.add_weight_modifier(source) 
+            ct_actions , df_actions = self.nm.get_actions()
+            
+            # connect to            
+            for addr in ct_actions.split():
+                cnt_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.CONNECTO_TO, addr)
+                await self.cm.send_message(source, cnt_msg)    
+            # disconnect from
+            for addr in df_actions.split():
+                df_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.DISCONNECT_FROM, addr)
+                await self.cm.send_message(source, df_msg)
+
+            await self.cm.connect(source, direct=True)
+            self.nm.update_neighbors(source)
+
+    @event_handler(
+        nebula_pb2.ConnectionMessage,
+        nebula_pb2.ConnectionMessage.Action.RESTRUCTURE,
+    )
+    async def _connection_restructure_callback(self, source, message):
+        logging.info(f"🔗  handle_connection_message | Trigger | Received restructure message from {source}")
+        if self.nm.accept_connection(source, joining=False):
+            logging.info(f"🔗  handle_connection_message | Trigger | restructure connection accepted from {source}")
+            ct_actions , df_actions = self.nm.get_actions()
+                        
+            for addr in ct_actions.split():
+                cnt_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.CONNECTO_TO, addr)
+                await self.cm.send_message(source, cnt_msg)
+            
+            for addr in df_actions.split():
+                df_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.DISCONNECT_FROM, addr)
+                await self.cm.send_message(source, df_msg)      
+        else:
+            logging.info(f"🔗  handle_connection_message | Trigger | restructure connection denied from {source}")
+            await self.cm.disconnect(source, mutual_disconnection=False)
+            self.nm.update_neighbors(source, remove=True) 
+    
+    @event_handler(nebula_pb2.DiscoverMessage, nebula_pb2.DiscoverMessage.Action.DISCOVER_JOIN)
+    async def _discover_discover_join_callback(self, source, message):
+        logging.info(f"🔍  handle_discover_message | Trigger | Received discover_join message from {source} ")   
+        self.nm.meet_node(source)
+        if len(self.get_federation_nodes()) > 0:
+            #model, rounds, round = await self.cm.propagator.get_model_information(source, "stable") if self.get_round() > 0 else await self.cm.propagator.get_model_information(source, "initialization")
+            model, rounds, round = await self.cm.propagator.get_model_information(source, "initialization")
+            # Process not initiated yet
+            if round != -1:
+                epochs = self.config.participant["training_args"]["epochs"]
+                msg = self.cm.mm.generate_offer_message(
+                    nebula_pb2.OfferMessage.Action.OFFER_MODEL, 
+                    len(self.get_federation_nodes()), 
+                    0, #self.trainer.get_loss(),
+                    model,
+                    rounds,
+                    round,
+                    epochs
+                )
+                await self.cm.send_offer_model(source, msg)
+                await asyncio.sleep(1)
+                await self.cm.remove_temporary_connection(source)
+            else:
+                # for the starter federation node
+                logging.info()
+        else:
+            logging.info(f"🔗  Dissmissing discover join from {source} | no active connections at the moment")
+                    
+    @event_handler(
+        nebula_pb2.DiscoverMessage,
+        nebula_pb2.DiscoverMessage.Action.DISCOVER_NODES,
+    )
+    async def _discover_discover_nodes_callback(self, source, message):
+        logging.info(f"🔍  handle_discover_message | Trigger | Received discover_node message from {source} ")
+        self.nm.meet_node(source)
+        msg = self.cm.mm.generate_offer_message(nebula_pb2.OfferMessage.Action.OFFER_METRIC, len(self.get_federation_nodes()), self.trainer.get_loss())
+        await self.cm.send_message(source, msg)                
+                    
+    @event_handler(
+        nebula_pb2.OfferMessage,
+        nebula_pb2.OfferMessage.Action.OFFER_MODEL,
+    )
+    async def _offer_offer_model_callback(self, source, message):
+        logging.info(f"🔍  handle_offer_message | Trigger | Received offer_model message from {source}")
+        if not self.nm.get_restructure_process_lock().locked():
+            try:
+                decoded_model = self.trainer.deserialize_model(message.parameters)
+                self.nm.accept_model(source, decoded_model, message.rounds, message.round, message.epochs, message.n_neighbors, message.loss)
+                self.nm.add_candidate(source, message.n_neighbors, message.loss)
+                self.nm.meet_node(source)
+            except RuntimeError:
+                pass    
+        await self.cm.remove_temporary_connection(source)
+            
+    @event_handler(
+        nebula_pb2.OfferMessage,
+        nebula_pb2.OfferMessage.Action.OFFER_METRIC,
+    )
+    async def _offer_offer_metric_callback(self, source, message):
+        logging.info(f"🔍  handle_offer_message | Trigger | Received offer_metric message from {source}")
+        if not self.nm.get_restructure_process_lock().locked():
+            n_neighbors, loss, _, _, _, _ = message.arguments
+            self.nm.add_candidate(source, n_neighbors, loss)
+            self.nm.meet_node(source)
+
+    @event_handler(
+        nebula_pb2.LinkMessage,
+        nebula_pb2.LinkMessage.Action.CONNECT_TO,
+    )
+    async def _link_connect_to_callback(self, source, message):
+        logging.info(f"🔗  handle_link_message | Trigger | Received connecto_to message from {source}")
+        addrs = message.arguments
+        for addr in addrs:
+            await self.cm.connect(addr, direct=True)
+            self.nm.update_neighbors(addr)
+            self.nm.meet_node(source)
+            
+    @event_handler(
+        nebula_pb2.LinkMessage,
+        nebula_pb2.LinkMessage.Action.DISCONNECT_FROM,
+    )
+    async def _link_disconnect_from_callback(self, source, message):
+        logging.info(f"🔗  handle_link_message | Trigger | Received disconnect_from message from {source}")
+        addrs = message.arguments
+        for addr in addrs:
+            await self.cm.disconnect(source, mutual_disconnection=False)
+            self.nm.update_neighbors(addr, remove=True)                
+                    
+                    
     async def create_trainer_module(self):
         asyncio.create_task(self._start_learning())
         logging.info("Started trainer module...")

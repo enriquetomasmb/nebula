@@ -196,6 +196,8 @@ class NebulaModel(pl.LightningModule, ABC):
         # Communication manager for sending messages from the model (e.g., prototypes, gradients)
         # Model parameters are sent by default using network.propagator
         self.communication_manager = None
+        
+        self.current_loss = -1
 
     def set_communication_manager(self, communication_manager):
         self.communication_manager = communication_manager
@@ -222,7 +224,11 @@ class NebulaModel(pl.LightningModule, ABC):
         loss = self.criterion(y_pred, y)
         self.process_metrics(phase, y_pred, y, loss)
 
+        self.current_loss=loss
         return loss
+
+    def get_loss(self):
+        return self.current_loss
 
     def training_step(self, batch, batch_idx):
         """

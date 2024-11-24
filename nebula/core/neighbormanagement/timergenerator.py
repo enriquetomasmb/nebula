@@ -3,6 +3,7 @@ import numpy as np
 from collections import deque
 import time
 from nebula.core.utils.locker import Locker
+import logging
 
 class TimerGenerator():
     def __init__(
@@ -15,6 +16,7 @@ class TimerGenerator():
         max_historic_size = 10,
         adaptative=False
         ):
+        logging.info("🌐  Initializing Timer Generator..")
         self.waiting_time = initial_timer_value if initial_timer_value != None else max_timer_value
         self.max_timer_value = max_timer_value
         self.acceptable_percent = acceptable_percent
@@ -31,7 +33,7 @@ class TimerGenerator():
         #self.all_updates_received = asyncio.Condition()
         
     def get_stop_condition(self):
-        return self.all_updates_received     
+        return True #self.all_updates_received     
         
     def get_timer(self, round):
         self.round = round

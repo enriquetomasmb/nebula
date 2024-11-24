@@ -28,5 +28,5 @@ def factory_ModelHandler(model_handler) -> ModelHandler:
         "aggregator": AGGModelHandler
     } 
     
-    cs = options.get(model_handler)
+    cs = options.get(model_handler, STDModelHandler)
     return cs() 

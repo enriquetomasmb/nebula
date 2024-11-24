@@ -34,5 +34,5 @@ def factory_CandidateSelector(topology) -> CandidateSelector:
         "random": HETCandidateSelector  
     } 
     
-    cs = options.get(topology)
+    cs = options.get(topology, FCCandidateSelector)
     return cs() 

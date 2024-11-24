@@ -11,6 +11,7 @@ from nebula.core.neighbormanagement.neighborpolicies.neighborpolicy import facto
 from nebula.core.neighbormanagement.timergenerator import TimerGenerator
 from nebula.core.pb import nebula_pb2
 from nebula.core.network.communications import CommunicationsManager
+from nebula.addons.functions import print_msg_box
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -24,11 +25,15 @@ class NodeManager():
         model_handler,
         engine : "Engine"
     ):
+        print_msg_box(msg=f"Starting NodeManager module...\nTopology: {topology}", indent=2, title="NodeManager module")
         logging.info("🌐  Initializing Node Manager")
         self._engine = engine
         self.config = engine.get_config()
-        self._neighbor_policy = factory_NeighborPolicy(topology)  
-        self._candidate_selector = factory_CandidateSelector(topology) 
+        logging.info("Initializing Neighbor policy")
+        self._neighbor_policy = factory_NeighborPolicy(topology)
+        logging.info("Initializing Candidate Selector")  
+        self._candidate_selector = factory_CandidateSelector(topology)
+        logging.info("Initializing Model Handler")
         self._model_handler = factory_ModelHandler(model_handler)
         self.late_connection_process_lock = Locker(name="late_connection_process_lock")
         self.weight_modifier = {}
@@ -39,7 +44,8 @@ class NodeManager():
         self._restructure_process_lock = Locker(name="restructure_process_lock")
         self.restructure = False
         self.max_time_to_wait = 6
-        self._timer_generator = TimerGenerator(self.engine.cm.get_addrs_current_connections(only_direct=True, myself=False), self.max_time_to_wait, 80)
+        logging.info("Initializing Timer generator")
+        self._timer_generator = None #TimerGenerator(self.engine.cm.get_addrs_current_connections(only_direct=True, myself=False), self.max_time_to_wait, 80)
         
         self.set_confings()
 
@@ -83,9 +89,12 @@ class NodeManager():
                 - self weight distance
                 - self weight hetereogeneity
         """
+        logging.info("Building neighbor policy configuration..")
         self.neighbor_policy.set_config([self.engine.cm.get_addrs_current_connections(only_direct=True, myself=False), self.engine.cm.get_addrs_current_connections(only_direct=False, myself=False), self.engine.addr])
         #self.model_handler.set_config([self.engine.get_round(), self.engine.config.participant["training_args"]["epochs"]])
-        self.candidate_selector.set_config([self.engine.get_loss(), self.config.participant["molibity_args"]["weight_distance"], self.config.participant["molibity_args"]["weight_het"]])
+        logging.info("Building candidate selector configuration..")
+        self.candidate_selector.set_config([0, 0.2 , 0.8])
+        #self.engine.trainer.get_loss(), self.config.participant["molibity_args"]["weight_distance"], self.config.participant["molibity_args"]["weight_het"]
     
     def get_timer(self):
         return self.timer_generator.get_timer(self.engine.get_round())
@@ -100,39 +109,39 @@ class NodeManager():
         await self.timer_generator.receive_update(node_id, node_response_time)   
               
     def add_weight_modifier(self, addr):
-        self.weight_modifier_lock().acquire()
+        self.weight_modifier_lock.acquire()
         if not addr in self.weight_modifier:
             self.weight_modifier[addr] = self.new_node_weight_value
-        self.weight_modifier_lock().release()
+        self.weight_modifier_lock.release()
     
     def remove_weight_modifier(self, addr):
-        self.weight_modifier_lock().acquire()
+        self.weight_modifier_lock.acquire()
         if addr in self.weight_modifier:
             del self.weight_modifier[addr]
-        self.weight_modifier_lock().release()
+        self.weight_modifier_lock.release()
         
     def _update_weight_modifier(self, addr):
-        self.weight_modifier_lock().acquire()
+        self.weight_modifier_lock.acquire()
         if addr in self.weight_modifier:
             new_weight = self.weight_modifier[addr] - 1/self.engine.get_round()**2
             if new_weight > 1:
                 self.weight_modifier[addr] = new_weight
             else:
                 self.remove_weight_modifier(addr)
-        self.weight_modifier_lock().release()
+        self.weight_modifier_lock.release()
     
     def get_weight_modifier(self, addr):
-        self.weight_modifier_lock().acquire()
+        self.weight_modifier_lock.acquire()
         if addr in self.weight_modifier:
             wm = self.weight_modifier[addr]
             self._update_weight_modifier(addr, self.engine.get_round()) 
         else:
             wm = 1
-        self.weight_modifier_lock().release()
+        self.weight_modifier_lock.release()
         return wm
     
-    def accept_connection(self,source):
-        if self.accept_candidates_lock().locked():
+    def accept_connection(self, source, joining=False):
+        if self.accept_candidates_lock.locked():
             return False
         return self.neighbor_policy.accept_connection(source)
     
@@ -144,7 +153,7 @@ class NodeManager():
     
     def update_neighbors(self, node, remove=False):
         self.neighbor_policy.update_neighbors(node, remove)
-        self.timer_generator.update_node(node, remove)
+        #self.timer_generator.update_node(node, remove)
         if remove:
             self.remove_weight_modifier(node)
         if not remove:
@@ -160,13 +169,13 @@ class NodeManager():
         return self.neighbor_policy.get_nodes_known(neighbors_too)
     
     def accept_model(self, source, decoded_model, rounds, round, epochs, n_neighbors, loss): 
-        if not self.accept_candidates_lock().locked():
+        if not self.accept_candidates_lock.locked():
             self.model_handler.accept_model(decoded_model)
             self.model_handler.set_config(config=(rounds, round, epochs))    
             self.candidate_selector.add_candidate((source, n_neighbors, loss))
 
     def add_candidate(self,source, n_neighbors, loss):
-        if not self.accept_candidates_lock().locked():
+        if not self.accept_candidates_lock.locked():
             self.candidate_selector.add_candidate((source, n_neighbors, loss))
 
     async def start_late_connection_process(self):
@@ -181,43 +190,44 @@ class NodeManager():
         Returns:
             data neccesary to create trainer
         """
-        logging.info("🌐  Initializing start late connection process from Node Manager")
+        logging.info("🌐  Initializing late connection process..")
         
         self.late_connection_process_lock.acquire()
         best_candidates = []
         self.candidate_selector.remove_candidates()
         
-        # send discover
-        msg = self.engine.cm.mm.generate_discover_message(nebula_pb2.DiscoverMessage.Action.DISCOVER_JOIN)
-        await self.engine.cm.establish_connection_with_federation(msg)
+        # find federation and send discover
+        await self.engine.cm.establish_connection_with_federation()
            
         # wait offer
+        logging.info(f"Waiting: {self.recieve_offer_timer}s to receive offers from federation")
         await asyncio.sleep(self.recieve_offer_timer)
         
         # acquire lock to not accept late candidates
         self.accept_candidates_lock.acquire()
         
         if self.candidate_selector.any_candidate():
-            
+            logging.info("Candidates found to connect")
             # create message to send to new neightbors
             msg = self.engine.cm.mm.generate_connection_message(nebula_pb2.ConnectionMessage.Action.LATE_CONNECT)
             
             best_candidates =  self.candidate_selector.select_candidates()
             
-            for addr, _, _ in best_candidates:
-                await self.engine.cm.connect(addr, direct=True)
-                await self.engine.cm.send_message(addr, msg)
+            #for addr, _, _ in best_candidates:
+                #await self.engine.cm.connect(addr, direct=True)
+                #await self.engine.cm.send_message(addr, msg)
                                     
             model, rounds, round, epochs = self.model_handler.get_model()
-            self.accept_candidates_lock().release()
+            self.accept_candidates_lock.release()
             self.late_connection_process_lock.release()
             return (model, rounds, round, epochs)         
                                                                                        
         # if no candidates, repeat process
         else:
+            logging.info("No Candidates found | repeating process")
             self.accept_candidates_lock.release()
             self.late_connection_process_lock.release()
-            return self.start_late_connection_process()
+            return await self.start_late_connection_process()
     
     
     

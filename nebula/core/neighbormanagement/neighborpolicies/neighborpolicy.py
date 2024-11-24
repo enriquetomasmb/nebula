@@ -42,11 +42,11 @@ def factory_NeighborPolicy(topology) -> NeighborPolicy:
     from nebula.core.neighbormanagement.neighborpolicies.starneighborpolicy import STARNeighborPolicy
     
     options = {
-        'random': IDLENeighborPolicy, # default value
-        'fully': FCNeighborPolicy,
-        'ring': RINGNeighborPolicy,
-        'star': IDLENeighborPolicy
+        "random": IDLENeighborPolicy, # default value
+        "fully": FCNeighborPolicy,
+        "ring": RINGNeighborPolicy,
+        "star": IDLENeighborPolicy
     } 
     
-    cs = options.get(topology)
+    cs = options.get(topology, IDLENeighborPolicy)
     return cs() 
