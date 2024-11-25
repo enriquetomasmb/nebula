@@ -27,12 +27,12 @@ class STDModelHandler(ModelHandler):
     
     def accept_model(self, model):
         """
-            save only first model receive to set up own model later
+            save only first model received to set up own model later
         """
         if not self.model_lock.locked():
             self.model_lock.acquire()
             self.model = model
-        return self.model_lock.locked()
+        return True
             
     def get_model(self, model):
         """

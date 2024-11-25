@@ -781,7 +781,11 @@ class CommunicationsManager:
                 async with self.connections_manager_lock:
                     if addr in self.connections:
                         logging.info(f"🔗  [outgoing] Already connected with {self.connections[addr]}")
-                        return False
+                        if not self.connections[addr].get_direct() and (direct == True):
+                            self.connections[addr].set_direct(direct)
+                            return True
+                        else:    
+                            return False
                     if addr in self.pending_connections:
                         logging.info(f"🔗  [outgoing] Connection with {addr} is already pending")
                         if int(self.host.split(".")[3]) >= int(host.split(".")[3]):

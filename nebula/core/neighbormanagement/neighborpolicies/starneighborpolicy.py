@@ -68,12 +68,13 @@ class STARNeighborPolicy(NeighborPolicy):
                 - Second one represents the same but for disconnect from LinkMessage
         """ 
         self.neighbors_lock.acquire()
-        actions = []
+        ct_actions = []
+        df_actions = []
         if len(self.neighbors) < self.max_neighbors:
-            actions.append(self.neighbors[0])               # connect to star point
-            actions.append(self.addr)                       # disconnect from me
+            ct_actions.append(self.neighbors[0])               # connect to star point
+            df_actions.append(self.addr)                       # disconnect from me
         self.neighbors_lock.release()
-        return actions
+        return [ct_actions, df_actions]
     
     def update_neighbors(self, node, remove=False):
         pass

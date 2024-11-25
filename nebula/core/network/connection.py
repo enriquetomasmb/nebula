@@ -287,7 +287,7 @@ class Connection:
             logging.info("Message handling cancelled")
         except ConnectionError as e:
             logging.exception(f"Connection closed while reading: {e}")
-            await self.reconnect()
+            #await self.reconnect()
         except Exception as e:
             logging.exception(f"Error handling incoming message: {e}")
 

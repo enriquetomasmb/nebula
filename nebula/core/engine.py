@@ -149,9 +149,10 @@ class Engine:
         
         # Mobility setup
         self._node_manager = None
-        mob = self.config.participant["mobility_args"]["mobility"]
-        if mob == True:
-            topology = self.config.participant["mobility_args"]["mobility_type"]
+        self.mobility = self.config.participant["mobility_args"]["mobility"]
+        if self.mobility == True:
+            topology = self.config.participant["mobility_args"]["topology_type"]
+            topology = topology.lower()
             model_handler = "std" #self.config.participant["mobility_args"]["model_handler"]
             self._node_manager = NodeManager(topology, model_handler, engine=self)
         
@@ -213,13 +214,6 @@ class Engine:
     @property
     def nm(self):
         return self._node_manager
-
-    async def _aditional_node_start(self):
-        logging.info(f"{self.addr} is an aditional node going to stablish connection with federation")
-        await self.nm.start_late_connection_process()
-        # continue ..
-        logging.info("Creating trainer service to start the federation process..")
-        #await self.cm.establish_connection_with_federation()
 
     def get_addr(self):
         return self.addr
@@ -360,21 +354,25 @@ class Engine:
     async def _connection_late_connect_callback(self, source, message):
         logging.info(f"🔗  handle_connection_message | Trigger | Received late_connect message from {source}")   
         if self.nm.accept_connection(source, joining=True):
-            logging.info(f"🔗  Late connection acepted | source:{source}") 
+            logging.info(f"🔗  Late connection accepted | source: {source}") 
             self.nm.add_weight_modifier(source) 
             ct_actions , df_actions = self.nm.get_actions()
             
-            # connect to            
-            for addr in ct_actions.split():
-                cnt_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.CONNECTO_TO, addr)
-                await self.cm.send_message(source, cnt_msg)    
-            # disconnect from
-            for addr in df_actions.split():
-                df_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.DISCONNECT_FROM, addr)
-                await self.cm.send_message(source, df_msg)
+            if len(ct_actions):            
+                for addr in ct_actions.split():
+                    cnt_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.CONNECT_TO, addr)
+                    #await self.cm.send_message(source, cnt_msg)
+            
+            if len(df_actions):    
+                for addr in df_actions.split():
+                    df_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.DISCONNECT_FROM, addr)
+                    #await self.cm.send_message(source, df_msg) 
 
             await self.cm.connect(source, direct=True)
+            self.nm.meet_node(source)
             self.nm.update_neighbors(source)
+        else:
+            logging.info(f"🔗  Late connection NOT accepted | source: {source}") 
 
     @event_handler(
         nebula_pb2.ConnectionMessage,
@@ -385,14 +383,17 @@ class Engine:
         if self.nm.accept_connection(source, joining=False):
             logging.info(f"🔗  handle_connection_message | Trigger | restructure connection accepted from {source}")
             ct_actions , df_actions = self.nm.get_actions()
-                        
-            for addr in ct_actions.split():
-                cnt_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.CONNECTO_TO, addr)
-                await self.cm.send_message(source, cnt_msg)
+                     
+            if len(ct_actions):            
+                for addr in ct_actions.split():
+                    cnt_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.CONNECT_TO, addr)
+                    pass
+                    #await self.cm.send_message(source, cnt_msg)
             
-            for addr in df_actions.split():
-                df_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.DISCONNECT_FROM, addr)
-                await self.cm.send_message(source, df_msg)      
+            if len(df_actions):    
+                for addr in df_actions.split():
+                    df_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.DISCONNECT_FROM, addr)
+                    #await self.cm.send_message(source, df_msg)      
         else:
             logging.info(f"🔗  handle_connection_message | Trigger | restructure connection denied from {source}")
             await self.cm.disconnect(source, mutual_disconnection=False)
@@ -418,11 +419,9 @@ class Engine:
                     epochs
                 )
                 await self.cm.send_offer_model(source, msg)
-                await asyncio.sleep(1)
-                await self.cm.remove_temporary_connection(source)
             else:
-                # for the starter federation node
-                logging.info()
+                logging.info("Discover join received before federation is running..")
+                # starter node is going to send info to the new node
         else:
             logging.info(f"🔗  Dissmissing discover join from {source} | no active connections at the moment")
                     
@@ -442,16 +441,18 @@ class Engine:
     )
     async def _offer_offer_model_callback(self, source, message):
         logging.info(f"🔍  handle_offer_message | Trigger | Received offer_model message from {source}")
-        if not self.nm.get_restructure_process_lock().locked():
+        self.nm.meet_node(source)
+        if not self.nm.get_restructure_process_lock().locked() and not self.nm.still_waiting_for_candidates():
             try:
-                decoded_model = self.trainer.deserialize_model(message.parameters)
-                self.nm.accept_model(source, decoded_model, message.rounds, message.round, message.epochs, message.n_neighbors, message.loss)
-                self.nm.add_candidate(source, message.n_neighbors, message.loss)
-                self.nm.meet_node(source)
+                model_compressed = message.parameters
+                if self.nm.accept_model_offer(source, model_compressed, message.rounds, message.round, message.epochs, message.n_neighbors, message.loss):
+                    logging.info("Model accepted from offer")
+                else:
+                    logging.info("Model offer discarded")
+                    self.nm.add_to_discarded_offers(source)        
             except RuntimeError:
-                pass    
-        await self.cm.remove_temporary_connection(source)
-            
+                pass
+        
     @event_handler(
         nebula_pb2.OfferMessage,
         nebula_pb2.OfferMessage.Action.OFFER_METRIC,
@@ -486,7 +487,58 @@ class Engine:
             await self.cm.disconnect(source, mutual_disconnection=False)
             self.nm.update_neighbors(addr, remove=True)                
                     
-                    
+    async def _aditional_node_start(self):
+        logging.info(f"Aditional node | {self.addr} | going to stablish connection with federation")
+        await self.nm.start_late_connection_process()
+        # continue ..
+        await self.nm.stop_not_selected_connections()
+        logging.info("Creating trainer service to start the federation process..")
+        asyncio.create_task(self._start_learning_late())
+        #decoded_model = self.trainer.deserialize_model(message.parameters)
+
+              
+    async def _start_learning_late(self):
+        await self.learning_cycle_lock.acquire_async()
+        try:
+            model_serialized, rounds, round, _epochs = self.nm.get_trainning_info()
+            self.total_rounds = rounds
+            epochs = _epochs
+            await self.get_round_lock().acquire_async()
+            self.round = round
+            await self.get_round_lock().release_async()
+            await self.learning_cycle_lock.release_async()
+            print_msg_box(
+                    msg="Starting Federated Learning process...",
+                    indent=2,
+                    title="Start of the experiment late",
+            )
+            logging.info(f"Trainning setup | total rounds: {rounds} | current round: {round} | epochs: {_epochs}")
+            direct_connections = await self.cm.get_addrs_current_connections(only_direct=True)
+            logging.info(f"Initial DIRECT connections: {direct_connections}")
+            self.trainer.set_epochs(epochs)
+            self.trainer.create_trainer()
+            try:
+                logging.info("🤖  Initializing model...")
+                model = self.trainer.deserialize_model(model_serialized)
+                self.trainer.set_model_parameters(model, initialize=True)
+                logging.info("Model Parameters Initialized")
+                self.set_initialization_status(True)
+                await (
+                    self.get_federation_ready_lock().release_async()
+                )  # Enable learning cycle once the initialization is done
+                try:
+                    await (
+                        self.get_federation_ready_lock().release_async()
+                    )  # Release the lock acquired at the beginning of the engine
+                except RuntimeError:
+                    pass
+            except RuntimeError:
+                pass
+            await self._learning_cycle()
+        finally:
+            if await self.learning_cycle_lock.locked_async():
+                await self.learning_cycle_lock.release_async()
+                   
     async def create_trainer_module(self):
         asyncio.create_task(self._start_learning())
         logging.info("Started trainer module...")
@@ -507,6 +559,9 @@ class Engine:
             await asyncio.sleep(1)
         current_connections = await self.cm.get_addrs_current_connections()
         logging.info(f"Connections verified: {current_connections}")
+        if self.mobility:
+            logging.info("Building NodeManager configurations...")
+            await self.nm.set_confings()
         await self._reporter.start()
         await self.cm.deploy_additional_services()
         await asyncio.sleep(self.config.participant["misc_args"]["grace_time_connection"] // 2)

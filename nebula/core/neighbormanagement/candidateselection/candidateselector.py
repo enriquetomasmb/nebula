@@ -29,9 +29,9 @@ def factory_CandidateSelector(topology) -> CandidateSelector:
     from nebula.core.neighbormanagement.candidateselection.ringcandidateselector import RINGCandidateSelector
     
     options = {
-        'ring': RINGCandidateSelector,
+        "ring": RINGCandidateSelector,
         "fully": FCCandidateSelector,
-        "random": HETCandidateSelector  
+        "random": HETCandidateSelector,  
     } 
     
     cs = options.get(topology, FCCandidateSelector)

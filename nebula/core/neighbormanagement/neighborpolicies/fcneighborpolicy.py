@@ -73,14 +73,11 @@ class FCNeighborPolicy(NeighborPolicy):
                 - First list represents addrs argument to LinkMessage to connect to
                 - Second one represents the same but for disconnect from LinkMessage
         """ 
-        actions = []
-        actions.append(self._connect_to())
-        actions.append(self._disconnect_from())
-        return actions
+        return [self._connect_to(), self._disconnect_from()]
           
     
     def _disconnect_from(self):
-        return ""
+        return []
     
     def _connect_to(self):
         ct = ""

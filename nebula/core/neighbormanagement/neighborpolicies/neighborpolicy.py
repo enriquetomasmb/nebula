@@ -45,7 +45,7 @@ def factory_NeighborPolicy(topology) -> NeighborPolicy:
         "random": IDLENeighborPolicy, # default value
         "fully": FCNeighborPolicy,
         "ring": RINGNeighborPolicy,
-        "star": IDLENeighborPolicy
+        "star": IDLENeighborPolicy,
     } 
     
     cs = options.get(topology, IDLENeighborPolicy)

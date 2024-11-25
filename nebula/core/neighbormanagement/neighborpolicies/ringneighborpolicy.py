@@ -75,15 +75,16 @@ class RINGNeighborPolicy(NeighborPolicy):
                 - Second one represents the same but for disconnect from LinkMessage
         """ 
         self.neighbors_lock.acquire()
-        actions = []
+        ct_actions = []
+        df_actions = []
         if len(self.neighbors) < self.max_neighbors:
             list_neighbors = list(self.neighbors)
             index = random.randint(0, len(list_neighbors)-1)
             node = list_neighbors[index]
-            actions.append(node)                            # connect to
-            actions.append(self.addr)                       # disconnect from
+            ct_actions.append(node)                            # connect to
+            df_actions.append(self.addr)                       # disconnect from
         self.neighbors_lock.release()
-        return actions
+        return [ct_actions, df_actions]
     
     def update_neighbors(self, node, remove=False):
         self.neighbors_lock.acquire()
