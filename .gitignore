@@ -118,9 +118,9 @@ venv.bak/
 # Rope project settings
 .ropeproject
 
-# poetry
-.poetry/
-poetry.lock
+# uv
+.venv/
+uv.lock
 
 # mkdocs documentation
 /site

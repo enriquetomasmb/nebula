@@ -20,12 +20,6 @@ RUN apt-get install -y curl net-tools iproute2 iputils-ping
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 2
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
-# Install pip
-RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-RUN python3.11 get-pip.py
-
-RUN python3.11 -m pip install --upgrade pip setuptools virtualenv
-
 RUN apt-get install -y nginx
 
 # Install gcc and git
@@ -44,15 +38,21 @@ RUN apt-get update
 
 RUN apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
-RUN curl -sSL https://install.python-poetry.org | python3 -
+ADD https://astral.sh/uv/install.sh /uv-installer.sh
 
-ENV PATH="${PATH}:/root/.local/bin"
+RUN sh /uv-installer.sh && rm /uv-installer.sh
 
-ENV POETRY_VIRTUALENVS_CREATE=false
+ENV PATH="/root/.local/bin/:$PATH"
 
 COPY pyproject.toml .
 
-RUN poetry install --only frontend --no-root
+RUN uv python install 3.11.7
+
+RUN uv python pin 3.11.7
+
+RUN uv sync --group frontend
+
+ENV PATH="/.venv/bin:$PATH"
 
 COPY /nebula/frontend/start_services.sh .
 

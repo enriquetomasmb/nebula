@@ -1,142 +1,157 @@
-POETRY_HOME := $(CURDIR)/.poetry
-POETRY := $(POETRY_HOME)/bin/poetry
+UV := uv
+PYTHON_VERSION := 3.11
+UV_INSTALL_SCRIPT := https://astral.sh/uv/install.sh
+PATH := $(HOME)/.local/bin:$(PATH)
 
-MIN_PYTHON_VERSION := 3.10
+command_exists = $(shell command -v $(1) >/dev/null 2>&1 && echo true || echo false)
 
-PYTHON_VERSIONS := 3.11 3.10
+define install_uv
+	@echo "📦 uv is not installed. Installing uv..."
+	@curl -LsSf $(UV_INSTALL_SCRIPT) | sh
+endef
 
-PYTHON := $(shell \
-    for ver in $(PYTHON_VERSIONS); do \
-        if command -v python$$ver >/dev/null 2>&1; then echo python$$ver; exit 0; fi; \
-    done \
-)
-
-ifndef PYTHON
-$(error "Python version $(MIN_PYTHON_VERSION) or higher is required but not found.")
-endif
-
-.PHONY: pre-install
-pre-install:
-	@echo "🐍 Using Python interpreter: $(PYTHON)"
-	@echo "🐍 Checking if Python is installed"
-	@command -v $(PYTHON) >/dev/null 2>&1 || { echo >&2 "$(PYTHON) is not installed. Aborting."; exit 1; }
-	@echo "🐍 Checking Python version"
-	@$(PYTHON) --version | grep -E "Python 3\.(1[0-9]|[2-9][0-9])" >/dev/null 2>&1 || { echo >&2 "Python $(MIN_PYTHON_VERSION) or higher is required. Aborting."; exit 1; }
-	@echo "📦 Checking if Poetry is installed"
-	@if ! command -v poetry >/dev/null 2>&1 || [ ! -d "$(POETRY_HOME)" ]; then \
-	    echo "Poetry is not installed or POETRY_HOME does not exist. Installing Poetry."; \
-	    curl -sSL https://install.python-poetry.org | POETRY_HOME=$(POETRY_HOME) $(PYTHON) -; \
-	fi
-	@echo "📦 Configuring Poetry"
-	@if [ -z "$$CONDA_PREFIX" ] && [ -z "$$VIRTUAL_ENV" ]; then \
-	    echo "Configuring Poetry to create a virtual environment."; \
-	    $(POETRY) config virtualenvs.in-project true; \
+.PHONY: check-uv
+check-uv:		## Check and install uv if necessary
+	@if command -v $(UV) >/dev/null 2>&1; then \
+		echo "📦 uv is already installed."; \
 	else \
-	    echo "Configuring Poetry to use the existing environment."; \
-	    $(POETRY) config virtualenvs.create false; \
+		echo "📦 uv is not installed. Installing uv..."; \
+		curl -LsSf $(UV_INSTALL_SCRIPT) | sh; \
+	fi; \
+	if ! command -v $(UV) >/dev/null 2>&1; then \
+		echo "❌  uv is not in your PATH. Please add the uv installation directory to your PATH environment variable."; \
+		exit 1; \
 	fi
-	@echo "📦 Setting Poetry to use $(PYTHON)"
-	@$(POETRY) env use $(PYTHON) || { echo "Failed to set Python version for Poetry. Aborting."; exit 1; }
+
+.PHONY: install-python
+install-python: check-uv	## Install Python with uv
+	@echo "🐍 Installing Python $(PYTHON_VERSION) with uv"
+	@$(UV) python install $(PYTHON_VERSION)
+	@echo "🔧 Configuring Python $(PYTHON_VERSION) as the default Python version"
+	@$(UV) python pin $(PYTHON_VERSION)
 
 .PHONY: install
-install: pre-install ## Install the poetry environment and install the pre-commit hooks
-	@echo "📦 Installing dependencies with Poetry"
-	@PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring $(POETRY) install --with core
+install: install-python		## Install core dependencies
+	@echo "📦 Installing core dependencies with uv"
+	@$(UV) sync --group core
 	@echo "🔧 Installing pre-commit hooks"
-	@$(POETRY) run pre-commit install
+	@$(UV) run pre-commit install
+	@echo ""
+	@echo "🐳 Building nebula-frontend docker image. Do you want to continue (overrides existing image)? (y/n)"
+	@read ans; if [ "$${ans:-N}" = y ]; then \
+		docker build -t nebula-frontend -f nebula/frontend/Dockerfile .; \
+	else \
+		echo "Skipping nebula-frontend docker build."; \
+	fi
+	@echo ""
+	@echo "🐳 Building nebula-core docker image. Do you want to continue? (overrides existing image)? (y/n)"
+	@read ans; if [ "$${ans:-N}" = y ]; then \
+		docker build -t nebula-core .; \
+	else \
+		echo "Skipping nebula-core docker build."; \
+	fi
+	@echo ""
 	@$(MAKE) shell
 
 .PHONY: full-install
-full-install: pre-install ## Install the poetry environment and install the pre-commit hooks
-	@echo "📦 Installing dependencies with Poetry"
-	@PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring $(POETRY) install --with core,docs,dev
+full-install: install-python	## Install all dependencies (core, docs)
+	@echo "📦 Installing all dependencies with uv"
+	@$(UV) sync --group core --group docs
 	@echo "🔧 Installing pre-commit hooks"
-	@$(POETRY) run pre-commit install
+	@$(UV) run pre-commit install
 	@$(MAKE) shell
 
 .PHONY: shell
-shell: ## Start a shell in the poetry environment
-	@if [ -z "$$CONDA_PREFIX" ] && [ -z "$$VIRTUAL_ENV" ]; then \
-	    echo "🐚 Activating virtual environment"; \
-	    $(POETRY) shell; \
+shell:				## Start a shell in the uv environment
+	@echo "🐚 Starting a shell in the uv environment"
+	@if [ -n "$$VIRTUAL_ENV" ]; then \
+		echo "🐚 Already in a virtual environment: $$VIRTUAL_ENV"; \
+	elif [ ! -d ".venv" ]; then \
+		echo "❌ .venv directory not found. Running 'make install' to create it..."; \
+		$(MAKE) install; \
 	else \
-	    echo "🐚 Conda or virtual environment detected, skipping Poetry shell activation"; \
+		echo "🐚 Run the following command to activate the virtual environment:"; \
+		echo ""; \
+		echo '[Linux/MacOS]	\033[1;32msource .venv/bin/activate\033[0m'; \
+		echo '[Windows]	\033[1;32m.venv\\bin\\activate\033[0m'; \
+		echo ""; \
+		echo "🚀 NEBULA is ready to use!"; \
+		echo "🚀 Created by \033[1;34mEnrique Tomás Martínez Beltrán\033[0m <\033[1;34menriquetomas@um.es\033[0m>"; \
 	fi
 
-.PHONY: sync
-sync: ## Sync the lock file
-	@echo "📦 Syncing the lock file"
-	@PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring $(POETRY) lock
+.PHONY: lock
+lock:				## Update the lock file
+	@echo "🔒 This will update the lock file. Do you want to continue? (y/n)"
+	@read ans && [ $${ans:-N} = y ] || { echo "Lock cancelled."; exit 1; }
+	@echo "🔒 Locking dependencies..."
+	@$(UV) lock
 
 .PHONY: update-libs
-update-libs: ## Update libraries to the latest version
-	@echo "🔧 This will override the version of current libraries. Do you want to continue? (y/n)"
+update-libs:			## Update libraries to the latest version
+	@echo "🔧 This will override the versions of current libraries. Do you want to continue? (y/n)"
 	@read ans && [ $${ans:-N} = y ] || { echo "Update cancelled."; exit 1; }
 	@echo "📦 Updating libraries..."
-	@PYTHON_KEYRING_BACKEND=keyring.backends.null.Keyring $(POETRY) update
+	@$(UV) update
 
 .PHONY: check
-check: ## Run code quality tools.
+check:				## Run code quality tools
 	@echo "🛠️ Running code quality checks"
-	@echo "🔍 Checking Poetry lock file consistency"
-	@$(POETRY) check --lock
+	@echo "🔍 Checking uv lock file consistency"
+	@$(UV) sync
 	@echo "🚨 Linting code with pre-commit"
-	@$(POETRY) run pre-commit run -a
+	@$(UV) run pre-commit run -a
 
 .PHONY: check-plus
-check-plus: check ## Run additional code quality tools.
-	@echo "🔍 Checking code formatting with black
-	@$(POETRY) run black --check ."
+check-plus: check		## Run additional code quality tools
+	@echo "🔍 Checking code formatting with black"
+	@$(UV) run black --check .
 	@echo "⚙️ Static type checking with mypy"
-	@$(POETRY) run mypy
+	@$(UV) run mypy
 	@echo "🔎 Checking for obsolete dependencies"
-	@$(POETRY) run deptry .
+	@$(UV) run deptry .
 
 .PHONY: build
-build: clean-build ## Build wheel file using poetry
+build: clean-build		## Build the wheel file
 	@echo "🚀 Creating wheel file"
-	@$(POETRY) build
+	@$(UV) build
 
 .PHONY: clean-build
-clean-build: ## clean build artifacts
+clean-build:			## Clean build artifacts
 	@rm -rf dist
 
 .PHONY: publish
-publish: ## publish a release to pypi.
-	@echo "🚀 Publishing: Dry run."
-	@$(POETRY) config pypi-token.pypi $(PYPI_TOKEN)
-	@$(POETRY) publish --dry-run
-	@echo "🚀 Publishing."
-	@$(POETRY) publish
+publish:			## Publish a release to PyPI
+	@echo "🚀 Publishing...""
+	@$(UV) publish --token $(PYPI_TOKEN)
 
 .PHONY: build-and-publish
-build-and-publish: build publish ## Build and publish.
+build-and-publish: build publish	## Build and publish the package
 
 .PHONY: doc-test
-doc-test: ## Test if documentation can be built without warnings or errors
-	@$(POETRY) run mkdocs build -f docs/mkdocs.yml -d _build -s
+doc-test:			## Test if documentation can be built without errors
+	@$(UV) run mkdocs build -f docs/mkdocs.yml -d _build -s
 
 .PHONY: doc-build
-doc-build: ## Build the documentation
-	@$(POETRY) run mkdocs build -f docs/mkdocs.yml -d _build
+doc-build:			## Build the documentation
+	@$(UV) run mkdocs build -f docs/mkdocs.yml -d _build
 
 .PHONY: doc-serve
-doc-serve: ## Build and serve the documentation
-	@$(POETRY) run mkdocs serve -f docs/mkdocs.yml
+doc-serve:			## Serve the documentation locally
+	@$(UV) run mkdocs serve -f docs/mkdocs.yml
 
 .PHONY: format
-format: ## Format code with black and isort
+format:				## Format code with black and isort
 	@echo "🎨 Formatting code"
-	@$(POETRY) run black .
-	@$(POETRY) run isort .
+	@$(UV) run black .
+	@$(UV) run isort .
 
 .PHONY: clean
-clean: clean-build ## Clean up build artifacts and cache files
+clean: clean-build		## Clean up build artifacts and caches
 	@echo "🧹 Cleaning up build artifacts and caches"
 	@rm -rf __pycache__ */__pycache__ .mypy_cache
 
 .PHONY: help
-help:
+help:				## Display available commands
 	@echo "Available commands:"
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "💡 \033[36m%-20s\033[0m %s\n", $$1, $$2}'
 

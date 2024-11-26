@@ -43,6 +43,14 @@ class EventManager:
             else:
                 raise ValueError("The callback must be decorated with @event_handler.")
 
+    def register_callback(self, callback):
+        """Registers a callback for an event."""
+        handler_info = getattr(callback, "_event_handler", None)
+        if handler_info is not None:
+            self.register_event(handler_info, callback)
+        else:
+            raise ValueError("The callback must be decorated with @event_handler.")
+
     def register_event(self, handler_info, callback):
         """Records a callback for a specific event."""
         if callable(callback):
