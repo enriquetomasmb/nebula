@@ -72,9 +72,9 @@
             {% endif %}
             <hr>
             <h5>Scenario name: <b id="scenario_name">{{ scenario_running[0] }}</b></h5>
-            <h5>Scenario title: <b id="scenario_title">{{ scenario_running[3] }}</b></h5>
-            <h5>Scenario description: <b id="scenario_description">{{ scenario_running[4] }}</b></h5>
-            <h5>Scenario start time: <b id="scenario_start_time">{{ scenario_running[1] }}</b></h5>
+            <h5>Scenario title: <b id="scenario_title">{{ scenario_running[4] }}</b></h5>
+            <h5>Scenario description: <b id="scenario_description">{{ scenario_running[5] }}</b></h5>
+            <h5>Scenario start time: <b id="scenario_start_time">{{ scenario_running[2] }}</b></h5>
             <div class="d-flex flex-row justify-content-start p-3">
                 <a id="new-scenario-btn" href="{{ url_for('nebula_dashboard_deployment') }}"
                     class="btn btn-dark me-2">Deploy new scenario</a>
@@ -125,7 +125,7 @@
                             <th>Action</th>
                         </tr>
                     </thead>
-                    {% for name, start_time, end_time, title, description, status, network_subnet, model, dataset,
+                    {% for name, username, start_time, end_time, title, description, status, network_subnet, model, dataset,
                     rounds, role in scenarios %}
                     <tr id="scenario-vars">
                         <td id="title">{{ title }}</td>

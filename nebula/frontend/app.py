@@ -204,13 +204,14 @@ async def startup_event():
     set_default_user()
 
 
-nodes_registration = {}
+class UserData:
+    nodes_registration = {}
+    scenarios_list = []
+    scenarios_list_length = 0
+    scenarios_finished = 0
 
-scenarios_list = []
 
-scenarios_list_length = 0
-
-scenarios_finished = 0
+user_data_store = {}
 
 
 # Detect CTRL+C from parent process
@@ -411,16 +412,21 @@ async def nebula_dashboard_runningscenario():
 @app.get("/nebula/dashboard", response_class=HTMLResponse)
 async def nebula_dashboard(request: Request, session: dict = Depends(get_session)):
     if "user" in session:
-        scenarios = get_all_scenarios_and_check_completed()  # Get all scenarios after checking if they are completed
+        scenarios = get_all_scenarios_and_check_completed(
+            username=session["user"], role=session["role"]
+        )  # Get all scenarios after checking if they are completed
         scenario_running = get_running_scenario()
+        if session["user"] not in user_data_store:
+            user_data_store[session["user"]] = UserData()
+
+        user_data = user_data_store[session["user"]]
     else:
         scenarios = None
         scenario_running = None
 
     bool_completed = False
     if scenario_running:
-        bool_completed = scenario_running[5] == "completed"
-
+        bool_completed = scenario_running[6] == "completed"
     if scenarios:
         if request.url.path == "/nebula/dashboard":
             return templates.TemplateResponse(
@@ -428,8 +434,8 @@ async def nebula_dashboard(request: Request, session: dict = Depends(get_session
                 {
                     "request": request,
                     "scenarios": scenarios,
-                    "scenarios_list_length": scenarios_list_length,
-                    "scenarios_finished": scenarios_finished,
+                    "scenarios_list_length": user_data.scenarios_list_length,
+                    "scenarios_finished": user_data.scenarios_finished,
                     "scenario_running": scenario_running,
                     "scenario_completed": bool_completed,
                     "user_logged_in": session.get("user"),
@@ -591,7 +597,7 @@ def update_topology(scenario_name, nodes_list, nodes_config):
 
 
 @app.post("/nebula/dashboard/{scenario_name}/node/update")
-async def nebula_update_node(scenario_name: str, request: Request, session: dict = Depends(get_session)):
+async def nebula_update_node(scenario_name: str, request: Request):
     if request.method == "POST":
         if request.headers.get("content-type") == "application/json":
             config = await request.json()
@@ -646,16 +652,21 @@ async def nebula_update_node(scenario_name: str, request: Request, session: dict
 
 
 @app.post("/nebula/dashboard/{scenario_name}/node/register")
-async def nebula_register_node(scenario_name: str, request: Request):
+async def nebula_register_node(scenario_name: str, request: Request, session: dict = Depends(get_session)):
+    user_data = user_data_store[session["user"]]
+
     if request.headers.get("content-type") == "application/json":
         data = await request.json()
         node = data["node"]
         logging.info(f"Registering node {node} for scenario {scenario_name}")
-        async with nodes_registration[scenario_name]["condition"]:
-            nodes_registration[scenario_name]["nodes"].add(node)
+        async with user_data.nodes_registration[scenario_name]["condition"]:
+            user_data.nodes_registration[scenario_name]["nodes"].add(node)
             logging.info(f"Node {node} registered")
-            if len(nodes_registration[scenario_name]["nodes"]) == nodes_registration[scenario_name]["n_nodes"]:
-                nodes_registration[scenario_name]["condition"].notify_all()
+            if (
+                len(user_data.nodes_registration[scenario_name]["nodes"])
+                == user_data.nodes_registration[scenario_name]["n_nodes"]
+            ):
+                user_data.nodes_registration[scenario_name]["condition"].notify_all()
                 logging.info("All nodes registered")
 
         return JSONResponse({"message": "Node registered", "status": "success"}, status_code=200)
@@ -665,11 +676,13 @@ async def nebula_register_node(scenario_name: str, request: Request):
 
 @app.get("/nebula/dashboard/scenarios/node/list")
 async def nebula_list_all_scenarios(session: dict = Depends(get_session)):
+    user_data = user_data_store[session["user"]]
+
     if "user" not in session or session["role"] not in ["admin", "user"]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
 
     scenarios = {}
-    for scenario_name, scenario_info in nodes_registration.items():
+    for scenario_name, scenario_info in user_data.nodes_registration.items():
         scenarios[scenario_name] = list(scenario_info["nodes"])
 
     if not scenarios:
@@ -680,21 +693,28 @@ async def nebula_list_all_scenarios(session: dict = Depends(get_session)):
 
 @app.get("/nebula/dashboard/scenarios/node/erase")
 async def nebula_erase_all_nodes(session: dict = Depends(get_session)):
+    user_data = user_data_store[session["user"]]
+
     if "user" not in session or session["role"] not in ["admin", "user"]:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Unauthorized")
 
-    nodes_registration.clear()
+    user_data.nodes_registration.clear()
     return JSONResponse({"message": "All nodes erased", "status": "success"}, status_code=200)
 
 
 @app.get("/nebula/dashboard/{scenario_name}/node/wait")
-async def nebula_wait_nodes(scenario_name: str):
-    if scenario_name not in nodes_registration:
+async def nebula_wait_nodes(scenario_name: str, session: dict = Depends(get_session)):
+    user_data = user_data_store[session["user"]]
+
+    if scenario_name not in user_data.nodes_registration:
         return JSONResponse({"message": "Scenario not found", "status": "error"}, status_code=404)
 
-    async with nodes_registration[scenario_name]["condition"]:
-        while len(nodes_registration[scenario_name]["nodes"]) < nodes_registration[scenario_name]["n_nodes"]:
-            await nodes_registration[scenario_name]["condition"].wait()
+    async with user_data.nodes_registration[scenario_name]["condition"]:
+        while (
+            len(user_data.nodes_registration[scenario_name]["nodes"])
+            < user_data.nodes_registration[scenario_name]["n_nodes"]
+        ):
+            await user_data.nodes_registration[scenario_name]["condition"].wait()
         return JSONResponse({"message": "All nodes registered", "status": "success"}, status_code=200)
 
 
@@ -754,6 +774,7 @@ async def nebula_monitor_image(scenario_name: str):
 def stop_scenario(scenario_name):
     from nebula.scenarios import ScenarioManagement
 
+    logging.info("[FER] stopping scenario")
     ScenarioManagement.stop_participants()
     ScenarioManagement.stop_blockchain()
     scenario_set_status_to_finished(scenario_name)
@@ -777,6 +798,7 @@ async def nebula_stop_scenario(
     request: Request,
     session: dict = Depends(get_session),
 ):
+    user_data = user_data_store[session["user"]]
     if "user" in session:
         if session["role"] == "demo":
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
@@ -785,10 +807,8 @@ async def nebula_stop_scenario(
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
         if stop_all:
             stop_all_scenarios_event.set()
-            global scenarios_list_length
-            global scenarios_finished
-            scenarios_list_length = 0
-            scenarios_finished = 0
+            user_data.scenarios_list_length = 0
+            user_data.scenarios_finished = 0
             stop_scenario(scenario_name)
         else:
             finish_scenario_event.set()
@@ -798,13 +818,15 @@ async def nebula_stop_scenario(
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
 
-def remove_scenario(scenario_name=None):
+def remove_scenario(scenario_name=None, user=None):
     from nebula.scenarios import ScenarioManagement
+
+    user_data = user_data_store[user]
 
     if settings.advanced_analytics:
         logging.info("Advanced analytics enabled")
     # Remove registered nodes and conditions
-    nodes_registration.pop(scenario_name, None)
+    user_data.nodes_registration.pop(scenario_name, None)
     remove_nodes_by_scenario_name(scenario_name)
     remove_scenario_by_name(scenario_name)
     remove_note(scenario_name)
@@ -815,7 +837,7 @@ def remove_scenario(scenario_name=None):
 async def nebula_relaunch_scenario(
     scenario_name: str, background_tasks: BackgroundTasks, session: dict = Depends(get_session)
 ):
-    global scenarios_list, scenarios_list_length, scenarios_finished
+    user_data = user_data_store[session["user"]]
 
     if "user" in session:
         if session["role"] == "demo":
@@ -828,15 +850,15 @@ async def nebula_relaunch_scenario(
         with open(scenario_path) as scenario_file:
             scenario = json.load(scenario_file)
 
-        scenarios_list_length = scenarios_list_length + 1
+        user_data.scenarios_list_length = user_data.scenarios_list_length + 1
 
-        if scenarios_list_length == 1:
-            scenarios_finished = 0
-            scenarios_list.clear()
-            scenarios_list.append(scenario)
+        if user_data.scenarios_list_length == 1:
+            user_data.scenarios_finished = 0
+            user_data.scenarios_list.clear()
+            user_data.scenarios_list.append(scenario)
             background_tasks.add_task(run_scenarios, session["role"], session["user"])
         else:
-            scenarios_list.append(scenario)
+            user_data.scenarios_list.append(scenario)
 
         return RedirectResponse(url="/nebula/dashboard", status_code=303)
     else:
@@ -844,14 +866,14 @@ async def nebula_relaunch_scenario(
 
 
 @app.get("/nebula/dashboard/{scenario_name}/remove")
-async def nebula_remove_scenario(scenario_name: str, request: Request, session: dict = Depends(get_session)):
+async def nebula_remove_scenario(scenario_name: str, session: dict = Depends(get_session)):
     if "user" in session:
         if session["role"] == "demo":
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
         elif session["role"] == "user":
             if not check_scenario_with_role(session["role"], scenario_name):
                 raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-        remove_scenario(scenario_name)
+        remove_scenario(scenario_name, session["user"])
         return RedirectResponse(url="/nebula/dashboard")
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
@@ -1065,7 +1087,7 @@ def mobility_assign(nodes, mobile_participants_percent):
     return nodes
 
 
-# Stop all scenarios in the scenarios_list
+# Stop all scenarios in the user_data.scenarios_list
 stop_all_scenarios_event = asyncio.Event()
 
 # Finish actual scenario
@@ -1088,6 +1110,7 @@ async def node_stopped(scenario_name: str, request: Request):
             if str(node[1]) not in map(str, nodes_finished):
                 finished = False
 
+        logging.info(f"[FER] finished? {finished}, nodes_list: {nodes_list}, nodes_finished: {nodes_finished}")
         if finished:
             nodes_finished.clear()
             finish_scenario_event.set()
@@ -1109,22 +1132,30 @@ async def run_scenario(scenario_data, role, user):
 
     from nebula.scenarios import ScenarioManagement
 
+    user_data = user_data_store[user]
+
     # Manager for the actual scenario
     scenarioManagement = ScenarioManagement(scenario_data, user)
 
-    scenario_update_record(
-        scenario_name=scenarioManagement.scenario_name,
-        start_time=scenarioManagement.start_date_scenario,
-        end_time="",
-        status="running",
-        title=scenario_data["scenario_title"],
-        description=scenario_data["scenario_description"],
-        network_subnet=scenario_data["network_subnet"],
-        model=scenario_data["model"],
-        dataset=scenario_data["dataset"],
-        rounds=scenario_data["rounds"],
-        role=role,
-    )
+    try:
+        scenario_update_record(
+            scenario_name=scenarioManagement.scenario_name,
+            username=user,
+            start_time=scenarioManagement.start_date_scenario,
+            end_time="",
+            status="running",
+            title=scenario_data["scenario_title"],
+            description=scenario_data["scenario_description"],
+            network_subnet=scenario_data["network_subnet"],
+            model=scenario_data["model"],
+            dataset=scenario_data["dataset"],
+            rounds=scenario_data["rounds"],
+            role=role,
+        )
+    except Exception as e:
+        logging.info(f"[FER] insert error {e}")
+
+    logging.info("[FER] scenario insert database.py")
 
     # Run the actual scenario
     try:
@@ -1139,13 +1170,22 @@ async def run_scenario(scenario_data, role, user):
     except subprocess.CalledProcessError as e:
         logging.exception(f"Error docker-compose up: {e}")
         return
+    except Exception as e:
+        logging.info(f"[FER] errrorrr{e}")
 
-    nodes_registration[scenarioManagement.scenario_name] = {
-        "n_nodes": scenario_data["n_nodes"],
-        "nodes": set(),
-    }
+    logging.info(f"[FER] scenario_name = {scenarioManagement.scenario_name}")
 
-    nodes_registration[scenarioManagement.scenario_name]["condition"] = asyncio.Condition()
+    try:
+        user_data.nodes_registration[scenarioManagement.scenario_name] = {
+            "n_nodes": scenario_data["n_nodes"],
+            "nodes": set(),
+        }
+
+        user_data.nodes_registration[scenarioManagement.scenario_name]["condition"] = asyncio.Condition()
+    except Exception as e:
+        logging.info(f"[FER] Errror: {e}")
+
+    logging.info("[FER] nodes registered")
 
     return scenarioManagement.scenario_name
 
@@ -1153,24 +1193,27 @@ async def run_scenario(scenario_data, role, user):
 # Deploy the list of scenarios
 async def run_scenarios(role, user):
     try:
-        global scenarios_finished, scenarios_list_length
-        for scenario_data in scenarios_list:
+        user_data = user_data_store[user]
+
+        for scenario_data in user_data.scenarios_list:
             finish_scenario_event.clear()
             logging.info(f"Running scenario {scenario_data['scenario_title']}")
             scenario_name = await run_scenario(scenario_data, role, user)
+            logging.info("[FER] running scenarios loop")
             # Waits till the scenario is completed
             while not finish_scenario_event.is_set() and not stop_all_scenarios_event.is_set():
                 await asyncio.sleep(1)
             if stop_all_scenarios_event.is_set():
                 stop_all_scenarios_event.clear()
-                scenarios_list_length = 0
+                user_data.scenarios_list_length = 0
                 stop_scenario(scenario_name)
                 return
-            scenarios_finished += 1
+            logging.info("[FER] finish_scenario_event")
+            user_data.scenarios_finished += 1
             stop_scenario(scenario_name)
             await asyncio.sleep(5)
     finally:
-        scenarios_list_length = 0
+        user_data.scenarios_list_length = 0
 
 
 @app.post("/nebula/dashboard/deployment/run")
@@ -1186,15 +1229,16 @@ async def nebula_dashboard_deployment_run(
         raise HTTPException(status_code=401)
 
     data = await request.json()
-    global scenarios_finished, scenarios_list_length, scenarios_list
-    if scenarios_list_length < 1:
-        scenarios_finished = 0
-        scenarios_list_length = len(data)
-        scenarios_list = data
+    user_data = user_data_store[session["user"]]
+
+    if user_data.scenarios_list_length < 1:
+        user_data.scenarios_finished = 0
+        user_data.scenarios_list_length = len(data)
+        user_data.scenarios_list = data
         background_tasks.add_task(run_scenarios, session["role"], session["user"])
     else:
-        scenarios_list_length += len(data)
-        scenarios_list.extend(data)
+        user_data.scenarios_list_length += len(data)
+        user_data.scenarios_list.extend(data)
         await asyncio.sleep(3)
     logging.info(f"Running deployment with {len(data)} scenarios")
     return RedirectResponse(url="/nebula/dashboard", status_code=303)

@@ -7,7 +7,6 @@ import os
 import shutil
 import subprocess
 import sys
-import textwrap
 import time
 from datetime import datetime
 
@@ -674,13 +673,25 @@ class ScenarioManagement:
             image = "nebula-core"
             name = f"{self.user}-participant{node['device_args']['idx']}"
 
-            if node["device_args"]["accelerator"] == "gpu":
-                environment = {"NVIDIA_DISABLE_REQUIRE": True}
+            try:
+                if node["device_args"]["accelerator"] == "gpu":
+                    environment = {"NVIDIA_DISABLE_REQUIRE": True}
+                    host_config = client.api.create_host_config(
+                        binds=[f"{self.root_path}:/nebula", "/var/run/docker.sock:/var/run/docker.sock"],
+                        privileged=True,
+                        device_requests=[docker.types.DeviceRequest(driver="nvidia", count=-1, capabilities=[["gpu"]])],
+                    )
+                else:
+                    environment = ""
+                    host_config = client.api.create_host_config(
+                        binds=[f"{self.root_path}:/nebula", "/var/run/docker.sock:/var/run/docker.sock"],
+                        privileged=True,
+                        device_requests=[],
+                    )
+            except Exception as e:
+                logging.info(f"[FER] create_host_config: {e}")
 
             volumes = ["/nebula", "/var/run/docker.sock"]
-            host_config = client.api.create_host_config(
-                binds=[f"{self.root_path}:/nebula", "/var/run/docker.sock:/var/run/docker.sock"], privileged=True
-            )
 
             logging.info(f"[FER] participant {name}")
 
@@ -725,6 +736,7 @@ class ScenarioManagement:
                     name=name,
                     detach=True,
                     volumes=volumes,
+                    environment=environment,
                     command=command,
                     host_config=host_config,
                     networking_config=networking_config,
@@ -754,199 +766,151 @@ class ScenarioManagement:
 
         # client.api.start(container_id)
 
-        participant_template = textwrap.dedent(
-            """
-            participant{}:
-                image: nebula-core
-                restart: no
-                volumes:
-                    - {}:/nebula
-                    - /var/run/docker.sock:/var/run/docker.sock
-                extra_hosts:
-                    - "host.docker.internal:host-gateway"
-                ipc: host
-                privileged: true
-                command:
-                    - /bin/bash
-                    - -c
-                    - |
-                        {} && ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python /nebula/nebula/node.py {}
-                networks:
-                    nebula-net-scenario:
-                        ipv4_address: {}
-                    fer-nebula-net-base:
-                    {}
-        """
-        )
-        participant_template = textwrap.indent(participant_template, " " * 4)
+        # participant_template = textwrap.dedent(
+        #     """
+        #     participant{}:
+        #         image: nebula-core
+        #         restart: no
+        #         volumes:
+        #             - {}:/nebula
+        #             - /var/run/docker.sock:/var/run/docker.sock
+        #         extra_hosts:
+        #             - "host.docker.internal:host-gateway"
+        #         ipc: host
+        #         privileged: true
+        #         command:
+        #             - /bin/bash
+        #             - -c
+        #             - |
+        #                 {} && ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python /nebula/nebula/node.py {}
+        #         networks:
+        #             nebula-net-scenario:
+        #                 ipv4_address: {}
+        #             fer-nebula-net-base:
+        #             {}
+        # """
+        # )
+        # participant_template = textwrap.indent(participant_template, " " * 4)
 
-        participant_gpu_template = textwrap.dedent(
-            """
-            participant{}:
-                image: nebula-core
-                environment:
-                    - NVIDIA_DISABLE_REQUIRE=true
-                restart: no
-                volumes:
-                    - {}:/nebula
-                    - /var/run/docker.sock:/var/run/docker.sock
-                extra_hosts:
-                    - "host.docker.internal:host-gateway"
-                ipc: host
-                privileged: true
-                command:
-                    - /bin/bash
-                    - -c
-                    - |
-                        {} && ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python /nebula/nebula/node.py {}
-                deploy:
-                    resources:
-                        reservations:
-                            devices:
-                                - driver: nvidia
-                                  count: all
-                                  capabilities: [gpu]
-                networks:
-                    nebula-net-scenario:
-                        ipv4_address: {}
-                    nebula-net-base:
-                    {}
-        """
-        )
-        participant_gpu_template = textwrap.indent(participant_gpu_template, " " * 4)
+        # participant_gpu_template = textwrap.dedent(
+        #     """
+        #     participant{}:
+        #         image: nebula-core
+        #         environment:
+        #             - NVIDIA_DISABLE_REQUIRE=true
+        #         restart: no
+        #         volumes:
+        #             - {}:/nebula
+        #             - /var/run/docker.sock:/var/run/docker.sock
+        #         extra_hosts:
+        #             - "host.docker.internal:host-gateway"
+        #         ipc: host
+        #         privileged: true
+        #         command:
+        #             - /bin/bash
+        #             - -c
+        #             - |
+        #                 {} && ifconfig && echo '{} host.docker.internal' >> /etc/hosts && python /nebula/nebula/node.py {}
+        #         deploy:
+        #             resources:
+        #                 reservations:
+        #                     devices:
+        #                         - driver: nvidia
+        #                           count: all
+        #                           capabilities: [gpu]
+        #         networks:
+        #             nebula-net-scenario:
+        #                 ipv4_address: {}
+        #             nebula-net-base:
+        #             {}
+        # """
+        # )
+        # participant_gpu_template = textwrap.indent(participant_gpu_template, " " * 4)
 
-        network_template = textwrap.dedent(
-            """
-            networks:
-                nebula-net-scenario:
-                    name: nebula-net-scenario
-                    driver: bridge
-                    ipam:
-                        config:
-                            - subnet: {}
-                              gateway: {}
-                fer-nebula-net-base:
-                    name: fer-nebula-net-base
-                    external: true
-                {}
-                    {}
-                    {}
-        """
-        )
+        # network_template = textwrap.dedent(
+        #     """
+        #     networks:
+        #         nebula-net-scenario:
+        #             name: nebula-net-scenario
+        #             driver: bridge
+        #             ipam:
+        #                 config:
+        #                     - subnet: {}
+        #                       gateway: {}
+        #         fer-nebula-net-base:
+        #             name: fer-nebula-net-base
+        #             external: true
+        #         {}
+        #             {}
+        #             {}
+        # """
+        # )
 
-        # Generate the Docker Compose file dynamically
-        services = ""
-        self.config.participants.sort(key=lambda x: x["device_args"]["idx"])
-        for node in self.config.participants:
-            idx = node["device_args"]["idx"]
-            path = f"/nebula/app/config/{self.scenario_name}/participant_{idx}.json"
-            logging.info(f"Starting node {idx} with configuration {path}")
-            logging.info("Node {} is listening on ip {}".format(idx, node["network_args"]["ip"]))
-            # Add one service for each participant
-            if node["device_args"]["accelerator"] == "gpu":
-                logging.info(f"Node {idx} is using GPU")
-                services += participant_gpu_template.format(
-                    idx,
-                    self.root_path,
-                    "sleep 10" if node["device_args"]["start"] else "sleep 0",
-                    self.scenario.network_gateway,
-                    path,
-                    node["network_args"]["ip"],
-                    "proxy:" if self.scenario.deployment and self.use_blockchain else "",
-                )
-            else:
-                logging.info(f"Node {idx} is using CPU")
-                services += participant_template.format(
-                    idx,
-                    self.root_path,
-                    "sleep 10" if node["device_args"]["start"] else "sleep 0",
-                    self.scenario.network_gateway,
-                    path,
-                    node["network_args"]["ip"],
-                    "proxy:" if self.scenario.deployment and self.use_blockchain else "",
-                )
-        docker_compose_file = docker_compose_template.format(services)
-        docker_compose_file += network_template.format(
-            self.scenario.network_subnet,
-            self.scenario.network_gateway,
-            "proxy:" if self.scenario.deployment and self.use_blockchain else "",
-            "name: chainnet" if self.scenario.deployment and self.use_blockchain else "",
-            "external: true" if self.scenario.deployment and self.use_blockchain else "",
-        )
-        # Write the Docker Compose file in config directory
-        with open(f"{self.config_dir}/docker-compose.yml", "w") as f:
-            f.write(docker_compose_file)
-
-        # Include additional config to the participants
-        for idx, node in enumerate(self.config.participants):
-            node["tracking_args"]["log_dir"] = "/nebula/app/logs"
-            node["tracking_args"]["config_dir"] = f"/nebula/app/config/{self.scenario_name}"
-            node["scenario_args"]["controller"] = self.controller
-            node["scenario_args"]["deployment"] = self.scenario.deployment
-            node["security_args"]["certfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_cert.pem"
-            node["security_args"]["keyfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_key.pem"
-            node["security_args"]["cafile"] = "/nebula/app/certs/ca_cert.pem"
-
-            # Write the config file in config directory
-            with open(f"{self.config_dir}/participant_{node['device_args']['idx']}.json", "w") as f:
-                json.dump(node, f, indent=4)
-
-        # Start the Docker Compose file, catch error if any
-        # try:
-        #     subprocess.check_call([
-        #         "docker",
-        #         "compose",
-        #         "-f",
-        #         f"{self.config_dir}/docker-compose.yml",
-        #         "up",
-        #         "--build",
-        #         "-d",
-        #     ])
-        # except subprocess.CalledProcessError:
-        #     raise Exception(
-        #         "Docker Compose failed to start, please check if Docker Compose is installed (https://docs.docker.com/compose/install/) and Docker Engine is running."
-        #     )
-
-        # container_ids = None
-        logging.info("Waiting for nodes to start...")
-        # Loop until all containers are running (equivalent to the number of participants)
-        # while container_ids is None or len(container_ids) != len(self.config.participants):
-        #     time.sleep(3)
-        #     try:
-        #         # Obtain docker ids
-        #         result = subprocess.run(
-        #             [
-        #                 "docker",
-        #                 "compose",
-        #                 "-f",
-        #                 f"{self.config_dir}/docker-compose.yml",
-        #                 "ps",
-        #                 "-q",
-        #             ],
-        #             stdout=subprocess.PIPE,
-        #             stderr=subprocess.PIPE,
-        #             text=True,
+        # # Generate the Docker Compose file dynamically
+        # services = ""
+        # self.config.participants.sort(key=lambda x: x["device_args"]["idx"])
+        # for node in self.config.participants:
+        #     idx = node["device_args"]["idx"]
+        #     path = f"/nebula/app/config/{self.scenario_name}/participant_{idx}.json"
+        #     logging.info(f"Starting node {idx} with configuration {path}")
+        #     logging.info("Node {} is listening on ip {}".format(idx, node["network_args"]["ip"]))
+        #     # Add one service for each participant
+        #     if node["device_args"]["accelerator"] == "gpu":
+        #         logging.info(f"Node {idx} is using GPU")
+        #         services += participant_gpu_template.format(
+        #             idx,
+        #             self.root_path,
+        #             "sleep 10" if node["device_args"]["start"] else "sleep 0",
+        #             self.scenario.network_gateway,
+        #             path,
+        #             node["network_args"]["ip"],
+        #             "proxy:" if self.scenario.deployment and self.use_blockchain else "",
         #         )
-
-        #         if result.returncode != 0:
-        #             raise Exception(f"Error obtaining docker IDs: {result.stderr}")
-
-        #         container_ids = result.stdout.strip().split("\n")
-
-        #     except subprocess.CalledProcessError:
-        #         raise Exception(
-        #             "Docker Compose failed to start, please check if Docker Compose is installed "
-        #             "(https://docs.docker.com/compose/install/) and Docker Engine is running."
+        #     else:
+        #         logging.info(f"Node {idx} is using CPU")
+        #         services += participant_template.format(
+        #             idx,
+        #             self.root_path,
+        #             "sleep 10" if node["device_args"]["start"] else "sleep 0",
+        #             self.scenario.network_gateway,
+        #             path,
+        #             node["network_args"]["ip"],
+        #             "proxy:" if self.scenario.deployment and self.use_blockchain else "",
         #         )
+        # docker_compose_file = docker_compose_template.format(services)
+        # docker_compose_file += network_template.format(
+        #     self.scenario.network_subnet,
+        #     self.scenario.network_gateway,
+        #     "proxy:" if self.scenario.deployment and self.use_blockchain else "",
+        #     "name: chainnet" if self.scenario.deployment and self.use_blockchain else "",
+        #     "external: true" if self.scenario.deployment and self.use_blockchain else "",
+        # )
+        # # Write the Docker Compose file in config directory
+        # with open(f"{self.config_dir}/docker-compose.yml", "w") as f:
+        #     f.write(docker_compose_file)
 
-        # Change log and config directory in dockers to /nebula/app, and change controller endpoint
-        for idx, node in enumerate(self.config.participants):
-            # Assign docker ID to node
-            node["device_args"]["docker_id"] = container_ids[idx]
+        # # Include additional config to the participants
+        # for idx, node in enumerate(self.config.participants):
+        #     node["tracking_args"]["log_dir"] = "/nebula/app/logs"
+        #     node["tracking_args"]["config_dir"] = f"/nebula/app/config/{self.scenario_name}"
+        #     node["scenario_args"]["controller"] = self.controller
+        #     node["scenario_args"]["deployment"] = self.scenario.deployment
+        #     node["security_args"]["certfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_cert.pem"
+        #     node["security_args"]["keyfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_key.pem"
+        #     node["security_args"]["cafile"] = "/nebula/app/certs/ca_cert.pem"
 
-            # Write the config file in config directory
-            with open(f"{self.config_dir}/participant_{node['device_args']['idx']}.json", "w") as f:
-                json.dump(node, f, indent=4)
+        #     # Write the config file in config directory
+        #     with open(f"{self.config_dir}/participant_{node['device_args']['idx']}.json", "w") as f:
+        #         json.dump(node, f, indent=4)
+
+        # # Change log and config directory in dockers to /nebula/app, and change controller endpoint
+        # for idx, node in enumerate(self.config.participants):
+        #     # Assign docker ID to node
+        #     node["device_args"]["docker_id"] = container_ids[idx]
+
+        #     # Write the config file in config directory
+        #     with open(f"{self.config_dir}/participant_{node['device_args']['idx']}.json", "w") as f:
+        #         json.dump(node, f, indent=4)
 
     def start_nodes_process(self):
         logging.info("Starting nodes as processes...")

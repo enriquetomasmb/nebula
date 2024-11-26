@@ -77,6 +77,7 @@ async def initialize_databases():
             """
             CREATE TABLE IF NOT EXISTS scenarios (
                 name TEXT PRIMARY KEY,
+                username TEXT NOT NULL,
                 start_time TEXT NOT NULL,
                 end_time TEXT NOT NULL,
                 title TEXT NOT NULL,
@@ -321,25 +322,43 @@ def get_run_hashes_scenario(scenario_name):
         return result_hashes
 
 
-def get_all_scenarios(sort_by="start_time"):
+def get_all_scenarios(username, role, sort_by="start_time"):
     with sqlite3.connect(scenario_db_file_location) as conn:
         conn.row_factory = sqlite3.Row
         c = conn.cursor()
-        if sort_by == "start_time":
-            command = """
-            SELECT * FROM scenarios
-            ORDER BY strftime('%Y-%m-%d %H:%M:%S', substr(start_time, 7, 4) || '-' || substr(start_time, 4, 2) || '-' || substr(start_time, 1, 2) || ' ' || substr(start_time, 12, 8));
-            """
-            c.execute(command)
+        if role == "admin":
+            if sort_by == "start_time":
+                command = """
+                SELECT * FROM scenarios
+                ORDER BY strftime('%Y-%m-%d %H:%M:%S', substr(start_time, 7, 4) || '-' || substr(start_time, 4, 2) || '-' || substr(start_time, 1, 2) || ' ' || substr(start_time, 12, 8));
+                """
+                c.execute(command)
+            else:
+                command = "SELECT * FROM scenarios ORDER BY ?;"
+                c.execute(command, (sort_by,))
         else:
-            command = "SELECT * FROM scenarios ORDER BY ?;"
-            c.execute(command, (sort_by,))
+            if sort_by == "start_time":
+                command = """
+                SELECT * FROM scenarios
+                WHERE username = ?
+                ORDER BY strftime('%Y-%m-%d %H:%M:%S', substr(start_time, 7, 4) || '-' || substr(start_time, 4, 2) || '-' || substr(start_time, 1, 2) || ' ' || substr(start_time, 12, 8));
+                """
+                c.execute(command)
+            else:
+                command = "SELECT * FROM scenarios WHERE username = ? ORDER BY ?;"
+                c.execute(
+                    command,
+                    (
+                        username,
+                        sort_by,
+                    ),
+                )
         result = c.fetchall()
 
     return result
 
 
-def get_all_scenarios_and_check_completed(sort_by="start_time"):
+def get_all_scenarios_and_check_completed(username, role, sort_by="start_time"):
     with sqlite3.connect(scenario_db_file_location) as _conn:
         _conn.row_factory = sqlite3.Row
         _c = _conn.cursor()
@@ -359,13 +378,14 @@ def get_all_scenarios_and_check_completed(sort_by="start_time"):
             if scenario["status"] == "running":
                 if check_scenario_federation_completed(scenario["name"]):
                     scenario_set_status_to_completed(scenario["name"])
-                    result = get_all_scenarios()
+                    result = get_all_scenarios(username, role)
 
     return result
 
 
 def scenario_update_record(
     scenario_name,
+    username,
     start_time,
     end_time,
     title,
@@ -387,9 +407,10 @@ def scenario_update_record(
     if result is None:
         # Create a new record
         _c.execute(
-            "INSERT INTO scenarios VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO scenarios VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 scenario_name,
+                username,
                 start_time,
                 end_time,
                 title,
