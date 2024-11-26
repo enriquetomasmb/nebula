@@ -656,7 +656,7 @@ class ScenarioManagement:
             raise e
 
     def start_nodes_docker(self):
-        DockerUtils.remove_containers_by_prefix(f"{self.user}-participant")
+        DockerUtils.remove_containers_by_prefix(f"{os.environ.get('NEBULA_CONTROLLER_NAME')}-{self.user}-participant")
 
         logging.info("Starting nodes using Docker Compose...")
         logging.info(f"env path: {self.env_path}")
