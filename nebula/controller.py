@@ -579,7 +579,7 @@ class Controller:
 
     @staticmethod
     def stop_network():
-        DockerUtils.remove_docker_network(f"{os.environ['USER']}-nebula-net-base")
+        DockerUtils.remove_docker_networks_by_prefix(f"{os.environ['USER']}")
 
     @staticmethod
     def stop_waf():

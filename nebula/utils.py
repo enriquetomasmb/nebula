@@ -101,6 +101,28 @@ class DockerUtils:
             logging.exception("Unexpected error")
 
     @classmethod
+    def remove_docker_networks_by_prefix(cls, prefix):
+        try:
+            # Connect to Docker
+            client = docker.from_env()
+    
+            # List all networks
+            networks = client.networks.list()
+    
+            # Filter and remove networks with names starting with the prefix
+            for network in networks:
+                if network.name.startswith(prefix):
+                    network.remove()
+                    logging.info(f"Network {network.name} removed successfully.")
+    
+        except docker.errors.NotFound:
+            logging.exception(f"One or more networks with prefix {prefix} not found.")
+        except docker.errors.APIError:
+            logging.exception("Error interacting with Docker")
+        except Exception:
+            logging.exception("Unexpected error")
+    
+    @classmethod
     def remove_containers_by_prefix(cls, prefix):
         try:
             # Connect to Docker client
