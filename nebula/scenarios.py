@@ -398,37 +398,39 @@ class ScenarioManagement:
         except Exception as e:
             logging.exception(f"Error while removing current_scenario_commands.sh file: {e}")
 
-        if sys.platform == "win32":
-            try:
-                # kill all the docker containers which contain the word "nebula-core"
-                commands = [
-                    """docker kill $(docker ps -q --filter ancestor=nebula-core) | Out-Null""",
-                    """docker rm $(docker ps -a -q --filter ancestor=nebula-core) | Out-Null""",
-                    r"""docker network rm $(docker network ls | Where-Object { ($_ -split '\s+')[1] -like 'nebula-net-scenario' } | ForEach-Object { ($_ -split '\s+')[0] }) | Out-Null""",
-                ]
+        DockerUtils.remove_containers_by_prefix(f"{os.environ.get('NEBULA_CONTROLLER_NAME')}")
 
-                for command in commands:
-                    time.sleep(1)
-                    exit_code = os.system(f'powershell.exe -Command "{command}"')
-                    # logging.info(f"Windows Command '{command}' executed with exit code: {exit_code}")
+        # if sys.platform == "win32":
+        #     try:
+        #         # kill all the docker containers which contain the word "nebula-core"
+        #         commands = [
+        #             """docker kill $(docker ps -q --filter ancestor=nebula-core) | Out-Null""",
+        #             """docker rm $(docker ps -a -q --filter ancestor=nebula-core) | Out-Null""",
+        #             r"""docker network rm $(docker network ls | Where-Object { ($_ -split '\s+')[1] -like 'nebula-net-scenario' } | ForEach-Object { ($_ -split '\s+')[0] }) | Out-Null""",
+        #         ]
 
-            except Exception as e:
-                raise Exception(f"Error while killing docker containers: {e}")
-        else:
-            try:
-                commands = [
-                    """docker kill $(docker ps -q --filter ancestor=nebula-core) > /dev/null 2>&1""",
-                    """docker rm $(docker ps -a -q --filter ancestor=nebula-core) > /dev/null 2>&1""",
-                    """docker network rm $(docker network ls | grep nebula-net-scenario | awk '{print $1}') > /dev/null 2>&1""",
-                ]
+        #         for command in commands:
+        #             time.sleep(1)
+        #             exit_code = os.system(f'powershell.exe -Command "{command}"')
+        #             # logging.info(f"Windows Command '{command}' executed with exit code: {exit_code}")
 
-                for command in commands:
-                    time.sleep(1)
-                    exit_code = os.system(command)
-                    # logging.info(f"Linux Command '{command}' executed with exit code: {exit_code}")
+        #     except Exception as e:
+        #         raise Exception(f"Error while killing docker containers: {e}")
+        # else:
+        #     try:
+        #         commands = [
+        #             """docker kill $(docker ps -q --filter ancestor=nebula-core) > /dev/null 2>&1""",
+        #             """docker rm $(docker ps -a -q --filter ancestor=nebula-core) > /dev/null 2>&1""",
+        #             """docker network rm $(docker network ls | grep nebula-net-scenario | awk '{print $1}') > /dev/null 2>&1""",
+        #         ]
 
-            except Exception as e:
-                raise Exception(f"Error while killing docker containers: {e}")
+        #         for command in commands:
+        #             time.sleep(1)
+        #             exit_code = os.system(command)
+        #             # logging.info(f"Linux Command '{command}' executed with exit code: {exit_code}")
+
+        #     except Exception as e:
+        #         raise Exception(f"Error while killing docker containers: {e}")
 
     @staticmethod
     def stop_nodes():

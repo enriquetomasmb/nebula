@@ -105,7 +105,7 @@ from nebula.frontend.database import (
     verify,
     verify_hash_algorithm,
 )
-from nebula.utils import Utils
+from nebula.utils import DockerUtils, Utils
 
 logging.info(f"🚀  Starting Nebula Frontend on port {settings.port}")
 
@@ -772,11 +772,12 @@ async def nebula_monitor_image(scenario_name: str):
         raise HTTPException(status_code=404, detail="Topology image not found")
 
 
-def stop_scenario(scenario_name):
+def stop_scenario(scenario_name, user):
     from nebula.scenarios import ScenarioManagement
 
     logging.info("[FER] stopping scenario")
-    ScenarioManagement.stop_participants()
+    # ScenarioManagement.stop_participants()
+    DockerUtils.remove_containers_by_prefix(f"{os.environ.get('NEBULA_CONTROLLER_NAME')}-{user}-participant")
     ScenarioManagement.stop_blockchain()
     scenario_set_status_to_finished(scenario_name)
     # Generate statistics for the scenario
@@ -810,10 +811,10 @@ async def nebula_stop_scenario(
             stop_all_scenarios_event.set()
             user_data.scenarios_list_length = 0
             user_data.scenarios_finished = 0
-            stop_scenario(scenario_name)
+            stop_scenario(scenario_name, session["user"])
         else:
             finish_scenario_event.set()
-            stop_scenario(scenario_name)
+            stop_scenario(scenario_name, session["user"])
         return RedirectResponse(url="/nebula/dashboard")
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
@@ -1207,11 +1208,11 @@ async def run_scenarios(role, user):
             if stop_all_scenarios_event.is_set():
                 stop_all_scenarios_event.clear()
                 user_data.scenarios_list_length = 0
-                stop_scenario(scenario_name)
+                stop_scenario(scenario_name, user)
                 return
             logging.info("[FER] finish_scenario_event")
             user_data.scenarios_finished += 1
-            stop_scenario(scenario_name)
+            stop_scenario(scenario_name, user)
             await asyncio.sleep(5)
     finally:
         user_data.scenarios_list_length = 0
