@@ -88,7 +88,7 @@
   },
   "aggregator_args": {
     "algorithm": "FedAvg",
-    "aggregation_timeout": 300
+    "aggregation_timeout": 20
   },
   "defense_args": {
     "with_reputation": false,

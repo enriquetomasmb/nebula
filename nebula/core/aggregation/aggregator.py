@@ -165,6 +165,8 @@ class Aggregator(ABC):
         if len(self.get_nodes_pending_models_to_aggregate()) >= len(self._federation_nodes):
             logging.info("🔄  _add_pending_model | All models were added in the aggregation buffer. Run aggregation...")
             await self._aggregation_done_lock.release_async()
+        else:
+            await self.aggregation_push_available()
         await self._add_model_lock.release_async()
         return self.get_nodes_pending_models_to_aggregate()
 
@@ -252,6 +254,32 @@ class Aggregator(ABC):
         total_memory_in_mb = total_memory / (1024**2)
         logging.info(f"print_model_size | Model size: {total_memory_in_mb} MB")
 
+    async def aggregation_push_available(self):
+        """
+            If the node is not sinchronized with the federation, it may be possible to make a push
+            and try to catch the federation asap. 
+        """
+        logging.info(f"❗️ synchronized status: {self.engine.get_sinchronized_status()} | Analizing if an aggregation push is available...")
+        if not self.engine.get_sinchronized_status():
+            n_fed_nodes = len(self._federation_nodes)
+            further_round = self.engine.get_round()
+            if len(self.get_nodes_pending_models_to_aggregate()) < n_fed_nodes:
+                for f_round, fm in self._future_models_to_aggregate.items():
+                    if len(fm) == n_fed_nodes:
+                        further_round = f_round                  
+                        push = self.engine.get_push_acceleration()
+                        if push == "slow":
+                            logging.info(f"❗️ FUTURE round: {round} is available | PUSH available")
+                            logging.info("❗️ SLOW push selected | Start PUSHING slow")
+                            self._aggregation_done_lock.release_async()
+                            return
+                if further_round != self.engine.get_round() and push == "fast":
+                    logging.info("❗️ FAST push selected | Start PUSHING fast")
+                    
+                else:
+                    self.engine.update_sinchronized_status(True)
+            else:
+                logging.info(f"All models updates are received | models number: {len(self.get_nodes_pending_models_to_aggregate())}")
 
 def create_malicious_aggregator(aggregator, attack):
     # It creates a partial function aggregate that wraps the aggregate method of the original aggregator.

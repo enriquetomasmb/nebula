@@ -51,6 +51,9 @@ class NodeManager():
         logging.info("Initializing Timer generator")
         self._timer_generator = None #TimerGenerator(self.engine.cm.get_addrs_current_connections(only_direct=True, myself=False), self.max_time_to_wait, 80)
         
+        self._push_acceleration = "slow"
+        self.init_model = None
+        
         #self.set_confings()
 
     @property
@@ -73,12 +76,14 @@ class NodeManager():
     def timer_generator(self):
         return self._timer_generator
     
+    def get_push_acceleration(self):
+        return self._push_acceleration
+    
     def get_restructure_process_lock(self):
         return self._restructure_process_lock
     
     def still_waiting_for_candidates(self):
         return self.accept_candidates_lock.locked()
-        
     
     async def set_confings(self):
         """
@@ -109,8 +114,8 @@ class NodeManager():
         self.candidate_selector.set_config(
             [
                 0, 
-                0.2, 
-                0.8
+                0.5, 
+                0.5
             ]
         )
         #self.engine.trainer.get_loss(), self.config.participant["molibity_args"]["weight_distance"], self.config.participant["molibity_args"]["weight_het"]

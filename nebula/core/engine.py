@@ -147,6 +147,11 @@ class Engine:
 
         self._reporter = Reporter(config=self.config, trainer=self.trainer, cm=self.cm)
         
+        self._sinchronized_status = True
+        self.sinchronized_status_lock = Locker(name="sinchronized_status_lock")
+        
+        self.trainning_in_progress_lock =  Locker(name="trainning_in_progress_lock", async_lock=True)
+        
         # Mobility setup
         self._node_manager = None
         self.mobility = self.config.participant["mobility_args"]["mobility"]
@@ -241,6 +246,15 @@ class Engine:
 
     def get_round_lock(self):
         return self.round_lock
+    
+    def get_sinchronized_status(self):
+        with self.sinchronized_status_lock:
+            return self._sinchronized_status
+        
+    def update_sinchronized_status(self, status):
+        with self.sinchronized_status_lock:
+            self._sinchronized_status = status
+        
 
     @event_handler(nebula_pb2.DiscoveryMessage, nebula_pb2.DiscoveryMessage.Action.DISCOVER)
     async def _discovery_discover_callback(self, source, message):
@@ -404,9 +418,10 @@ class Engine:
         logging.info(f"🔍  handle_discover_message | Trigger | Received discover_join message from {source} ")   
         self.nm.meet_node(source)
         if len(self.get_federation_nodes()) > 0:
-            #model, rounds, round = await self.cm.propagator.get_model_information(source, "stable") if self.get_round() > 0 else await self.cm.propagator.get_model_information(source, "initialization")
-            model, rounds, round = await self.cm.propagator.get_model_information(source, "initialization")
-            # Process not initiated yet
+            await self.trainning_in_progress_lock.acquire_async()
+            model, rounds, round = await self.cm.propagator.get_model_information(source, "stable") if self.get_round() > 0 else await self.cm.propagator.get_model_information(source, "initialization")
+            await self.trainning_in_progress_lock.release_async()
+            #model, rounds, round = await self.cm.propagator.get_model_information(source, "initialization")
             if round != -1:
                 epochs = self.config.participant["training_args"]["epochs"]
                 msg = self.cm.mm.generate_offer_message(
@@ -446,9 +461,9 @@ class Engine:
             try:
                 model_compressed = message.parameters
                 if self.nm.accept_model_offer(source, model_compressed, message.rounds, message.round, message.epochs, message.n_neighbors, message.loss):
-                    logging.info("Model accepted from offer")
+                    logging.info("🔧 Model accepted from offer")
                 else:
-                    logging.info("Model offer discarded")
+                    logging.info("❗️ Model offer discarded")
                     self.nm.add_to_discarded_offers(source)        
             except RuntimeError:
                 pass
@@ -488,6 +503,7 @@ class Engine:
             self.nm.update_neighbors(addr, remove=True)                
                     
     async def _aditional_node_start(self):
+        self.update_sinchronized_status(False)
         logging.info(f"Aditional node | {self.addr} | going to stablish connection with federation")
         await self.nm.start_late_connection_process()
         # continue ..
@@ -496,13 +512,15 @@ class Engine:
         asyncio.create_task(self._start_learning_late())
         #decoded_model = self.trainer.deserialize_model(message.parameters)
 
+    def get_push_acceleration(self):
+        return self.nm.get_push_acceleration()
               
     async def _start_learning_late(self):
         await self.learning_cycle_lock.acquire_async()
         try:
             model_serialized, rounds, round, _epochs = self.nm.get_trainning_info()
-            self.total_rounds = rounds
-            epochs = _epochs
+            self.total_rounds = rounds # self.config.participant["scenario_args"]["rounds"] #rounds
+            epochs = _epochs # self.config.participant["training_args"]["epochs"] #_epochs     
             await self.get_round_lock().acquire_async()
             self.round = round
             await self.get_round_lock().release_async()
@@ -512,13 +530,13 @@ class Engine:
                     indent=2,
                     title="Start of the experiment late",
             )
-            logging.info(f"Trainning setup | total rounds: {rounds} | current round: {round} | epochs: {_epochs}")
+            logging.info(f"Trainning setup | total rounds: {rounds} | current round: {round} | epochs: {epochs}")
             direct_connections = await self.cm.get_addrs_current_connections(only_direct=True)
             logging.info(f"Initial DIRECT connections: {direct_connections}")
-            self.trainer.set_epochs(epochs)
-            self.trainer.create_trainer()
+            await asyncio.sleep(1)
             try:
                 logging.info("🤖  Initializing model...")
+                await asyncio.sleep(1)
                 model = self.trainer.deserialize_model(model_serialized)
                 self.trainer.set_model_parameters(model, initialize=True)
                 logging.info("Model Parameters Initialized")
@@ -534,7 +552,11 @@ class Engine:
                     pass
             except RuntimeError:
                 pass
+            
+            self.trainer.set_epochs(epochs)
+            self.trainer.create_trainer()
             await self._learning_cycle()
+            
         finally:
             if await self.learning_cycle_lock.locked_async():
                 await self.learning_cycle_lock.release_async()
@@ -875,7 +897,9 @@ class AggregatorNode(Engine):
     async def _extended_learning_cycle(self):
         # Define the functionality of the aggregator node
         await self.trainer.test()
+        await self.trainning_in_progress_lock.acquire_async()
         await self.trainer.train()
+        await self.trainning_in_progress_lock.release_async()
 
         await self.aggregator.include_model_in_buffer(
             self.trainer.get_model_parameters(),
