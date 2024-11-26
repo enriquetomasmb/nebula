@@ -1,6 +1,7 @@
 import argparse
 import asyncio
 import datetime
+from dotenv import load_dotenv
 import io
 import json
 import logging
@@ -26,9 +27,9 @@ class Settings:
     config_dir: str = os.environ.get("NEBULA_CONFIG_DIR")
     cert_dir: str = os.environ.get("NEBULA_CERTS_DIR")
     root_host_path: str = os.environ.get("NEBULA_ROOT_HOST")
-    config_frontend_dir: str = os.environ.get("FEDELLAR_CONFIG_FRONTEND_DIR", "config")
+    config_frontend_dir: str = os.environ.get("NEBULA_CONFIG_FRONTEND_DIR", "config")
+    env_file: str = os.environ.get("NEBULA_ENV_PATH", ".env")
     statistics_port: int = os.environ.get("NEBULA_STATISTICS_PORT", 8080)
-    secret_key: str = os.environ.get("SECRET_KEY", os.urandom(24).hex())
     PERMANENT_SESSION_LIFETIME: datetime.timedelta = datetime.timedelta(minutes=60)
     templates_dir: str = "templates"
     server_log: str = os.environ.get("NEBULA_SERVER_LOG", "/nebula/app/logs/server.log")
@@ -53,6 +54,9 @@ for logger_name in uvicorn_loggers:
     handler.setFormatter(logging.Formatter("[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s"))
     logger.addHandler(handler)
 
+if os.path.exists(settings.env_file):
+    logging.info(f"Loading environment variables from {settings.env_file}")
+    load_dotenv(settings.env_file, override=True)
 
 from ansi2html import Ansi2HTMLConverter
 from fastapi import (
@@ -111,8 +115,17 @@ logging.info(f"🚀  Starting Nebula Frontend on port {settings.port}")
 
 logging.info(f"NEBULA_PRODUCTION: {settings.production}")
 
+if "SECRET_KEY" not in os.environ:
+    logging.info("Generating SECRET_KEY")
+    os.environ["SECRET_KEY"] = os.urandom(24).hex()
+    logging.info(f"Saving SECRET_KEY to {settings.env_file}")
+    with open(settings.env_file, "a") as f:
+        f.write(f"SECRET_KEY={os.environ['SECRET_KEY']}\n")
+else:
+    logging.info("SECRET_KEY already set")
+
 app = FastAPI()
-app.add_middleware(SessionMiddleware, secret_key=settings.secret_key)
+app.add_middleware(SessionMiddleware, secret_key=os.environ.get("SECRET_KEY"))
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
