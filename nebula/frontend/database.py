@@ -343,7 +343,7 @@ def get_all_scenarios(username, role, sort_by="start_time"):
                 WHERE username = ?
                 ORDER BY strftime('%Y-%m-%d %H:%M:%S', substr(start_time, 7, 4) || '-' || substr(start_time, 4, 2) || '-' || substr(start_time, 1, 2) || ' ' || substr(start_time, 12, 8));
                 """
-                c.execute(command)
+                c.execute(command, (username,))
             else:
                 command = "SELECT * FROM scenarios WHERE username = ? ORDER BY ?;"
                 c.execute(
@@ -362,17 +362,38 @@ def get_all_scenarios_and_check_completed(username, role, sort_by="start_time"):
     with sqlite3.connect(scenario_db_file_location) as _conn:
         _conn.row_factory = sqlite3.Row
         _c = _conn.cursor()
-        if sort_by == "start_time":
-            command = """
-            SELECT * FROM scenarios
-            ORDER BY strftime('%Y-%m-%d %H:%M:%S', substr(start_time, 7, 4) || '-' || substr(start_time, 4, 2) || '-' || substr(start_time, 1, 2) || ' ' || substr(start_time, 12, 8));
-            """
-            _c.execute(command)
+
+        if role == "admin":
+            if sort_by == "start_time":
+                command = """
+                SELECT * FROM scenarios
+                ORDER BY strftime('%Y-%m-%d %H:%M:%S', substr(start_time, 7, 4) || '-' || substr(start_time, 4, 2) || '-' || substr(start_time, 1, 2) || ' ' || substr(start_time, 12, 8));
+                """
+                _c.execute(command)
+            else:
+                command = "SELECT * FROM scenarios ORDER BY ?;"
+                _c.execute(command, (sort_by,))
+            # _c.execute(command)
+            result = _c.fetchall()
         else:
-            command = "SELECT * FROM scenarios ORDER BY ?;"
-            _c.execute(command, (sort_by,))
-        _c.execute(command)
-        result = _c.fetchall()
+            if sort_by == "start_time":
+                command = """
+                SELECT * FROM scenarios
+                WHERE username = ?
+                ORDER BY strftime('%Y-%m-%d %H:%M:%S', substr(start_time, 7, 4) || '-' || substr(start_time, 4, 2) || '-' || substr(start_time, 1, 2) || ' ' || substr(start_time, 12, 8));
+                """
+                _c.execute(command, (username,))
+            else:
+                command = "SELECT * FROM scenarios WHERE username = ? ORDER BY ?;"
+                _c.execute(
+                    command,
+                    (
+                        username,
+                        sort_by,
+                    ),
+                )
+            # _c.execute(command)
+            result = _c.fetchall()
 
         for scenario in result:
             if scenario["status"] == "running":

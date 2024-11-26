@@ -439,6 +439,7 @@ async def nebula_dashboard(request: Request, session: dict = Depends(get_session
                     "scenario_running": scenario_running,
                     "scenario_completed": bool_completed,
                     "user_logged_in": session.get("user"),
+                    "user_role": session.get("role"),
                 },
             )
         elif request.url.path == "/nebula/api/dashboard":
@@ -1222,7 +1223,7 @@ async def nebula_dashboard_deployment_run(
     background_tasks: BackgroundTasks,
     session: dict = Depends(get_session),
 ):
-    if "user" not in session or session["role"] in ["demo", "user"] and get_running_scenario():
+    if "user" not in session or session["role"] in ["demo"] and get_running_scenario():
         raise HTTPException(status_code=401)
 
     if request.headers.get("content-type") != "application/json":
