@@ -132,7 +132,7 @@
                     rounds, role in scenarios %}
                     <tr id="scenario-vars">
                         {% if user_role == "admin" %}
-                        <td id="username">{{ username }}</td>
+                        <td id="username">{{ username|lower }}</td>
                         {% endif %}
                         <td id="title">{{ title }}</td>
                         <td id="start_time">{{ start_time }}</td>

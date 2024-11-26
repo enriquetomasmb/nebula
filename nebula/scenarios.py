@@ -17,7 +17,7 @@ from nebula.addons.blockchain.blockchain_deployer import BlockchainDeployer
 from nebula.addons.topologymanager import TopologyManager
 from nebula.config.config import Config
 from nebula.core.utils.certificate import generate_ca_certificate, generate_certificate
-from nebula.frontend.utils import DockerUtils, Utils
+from nebula.utils import DockerUtils, Utils
 
 
 # Definition of a scenario
@@ -659,7 +659,7 @@ class ScenarioManagement:
         logging.info("Starting nodes using Docker Compose...")
         logging.info(f"env path: {self.env_path}")
 
-        network_name = f"{self.user}-nebula-net-scenario"
+        network_name = f"{str(self.user).lower()}-nebula-net-scenario"
 
         # Create the Docker network
         base = DockerUtils.create_docker_network(network_name)

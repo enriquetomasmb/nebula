@@ -17,7 +17,7 @@ from watchdog.observers import Observer
 from nebula.addons.env import check_environment
 from nebula.config.config import Config
 from nebula.config.mender import Mender
-from nebula.frontend.utils import DockerUtils
+from nebula.utils import DockerUtils
 from nebula.scenarios import ScenarioManagement
 from nebula.tests import main as deploy_tests
 

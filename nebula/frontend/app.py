@@ -105,7 +105,7 @@ from nebula.frontend.database import (
     verify,
     verify_hash_algorithm,
 )
-from nebula.frontend.utils import Utils
+from nebula.utils import Utils
 
 logging.info(f"🚀  Starting Nebula Frontend on port {settings.port}")
 
