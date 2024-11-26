@@ -17,9 +17,9 @@ from watchdog.observers import Observer
 from nebula.addons.env import check_environment
 from nebula.config.config import Config
 from nebula.config.mender import Mender
-from nebula.utils import DockerUtils
 from nebula.scenarios import ScenarioManagement
 from nebula.tests import main as deploy_tests
+from nebula.utils import DockerUtils, SocketUtils
 
 
 # Setup controller logger
@@ -230,6 +230,13 @@ class Controller:
         self.network_subnet = args.network_subnet if hasattr(args, "network_subnet") else None
         self.network_gateway = args.network_gateway if hasattr(args, "network_gateway") else None
 
+        # Check ports available
+        if not SocketUtils.is_port_open(self.frontend_port):
+            self.frontend_port = SocketUtils.find_free_port()
+
+        if not SocketUtils.is_port_open(self.statistics_port):
+            self.statistics_port = SocketUtils.find_free_port(self.frontend_port + 1)
+
         self.config = Config(entity="controller")
         self.topologymanager = None
         self.n_nodes = 0
@@ -280,7 +287,7 @@ class Controller:
             self.run_test()
         else:
             self.run_frontend()
-            logging.info(f"NEBULA Frontend is running at port {self.frontend_port}")
+            logging.info(f"NEBULA Frontend is running at http://localhost:{self.frontend_port}")
 
         # Watchdog for running additional scripts in the host machine (i.e. during the execution of a federation)
         event_handler = NebulaEventHandler()

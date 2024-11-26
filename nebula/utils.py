@@ -1,5 +1,6 @@
 import logging
 import os
+import socket
 
 import docker
 
@@ -13,6 +14,25 @@ class Utils:
         if not full_path.startswith(base_path):
             raise Exception("Not allowed")
         return full_path
+
+
+class SocketUtils:
+    @classmethod
+    def is_port_open(cls, port):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            s.bind(("127.0.0.1", port))
+            s.close()
+            return True
+        except OSError:
+            return False
+
+    @classmethod
+    def find_free_port(cls, start_port=49152, end_port=65535):
+        for port in range(start_port, end_port + 1):
+            if SocketUtils.is_port_open(port):
+                return port
+        return None
 
 
 class DockerUtils:
@@ -30,7 +50,6 @@ class DockerUtils:
                 ipam_config = network.attrs.get("IPAM", {}).get("Config", [])
                 if ipam_config:
                     for config in ipam_config:
-                        logging.info("[FER]1")
                         if "Subnet" in config:
                             existing_subnets.append(config["Subnet"])
 
