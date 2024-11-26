@@ -659,7 +659,7 @@ class ScenarioManagement:
         logging.info("Starting nodes using Docker Compose...")
         logging.info(f"env path: {self.env_path}")
 
-        network_name = f"{str(self.user).lower()}-nebula-net-scenario"
+        network_name = f"{os.environ['USER']}-{str(self.user).lower()}-nebula-net-scenario"
 
         # Create the Docker network
         base = DockerUtils.create_docker_network(network_name)
@@ -671,7 +671,7 @@ class ScenarioManagement:
         container_ids = []
         for idx, node in enumerate(self.config.participants):
             image = "nebula-core"
-            name = f"{self.user}-participant{node['device_args']['idx']}"
+            name = f"{os.environ['USER']}-{self.user}-participant{node['device_args']['idx']}"
 
             try:
                 if node["device_args"]["accelerator"] == "gpu":
