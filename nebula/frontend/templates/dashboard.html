@@ -64,7 +64,7 @@
                 <p style="color: #772953; font-weight: bold; padding-top: 6px;">Scenarios queue {{ scenarios_finished
                     }}/{{ scenarios_list_length }}</p>
                 {% if scenarios_finished != scenarios_list_length %}
-                <a href="{{ url_for('nebula_stop_scenario', scenario_name='all', stop_all=True) }}"
+                <a href="{{ url_for('nebula_stop_scenario', scenario_name=scenario_running[0], stop_all=True) }}"
                     class="label btn btn-danger" style="float: left; margin-left: 10px; margin-bottom: 10px;">Stop
                     scenario queue</a>
                 {% endif %}
@@ -96,7 +96,7 @@
                 <p style="color: #772953; font-weight: bold; padding-top: 6px;">Scenarios queue {{ scenarios_finished
                     }}/{{ scenarios_list_length }}</p>
                 {% if scenarios_finished != scenarios_list_length %}
-                <a href="{{ url_for('nebula_stop_scenario', scenario_name='all', stop_all=True) }}"
+                <a href="{{ url_for('nebula_stop_scenario', scenario_name=scenario_running[0], stop_all=True) }}"
                     class="label btn btn-danger" style="float: left; margin-left: 10px; margin-bottom: 10px;">Stop
                     scenario queue</a>
                 {% endif %}
@@ -161,7 +161,7 @@
                             {% elif status == "completed" %}
                             <a href="{{ url_for('nebula_stop_scenario', scenario_name=name, stop_all=False) }}"
                                 class="label btn btn-danger">Stop scenario</a>
-                            <a href="{{ url_for('nebula_stop_scenario', scenario_name='all', stop_all=True) }}"
+                            <a href="{{ url_for('nebula_stop_scenario', scenario_name=name, stop_all=True) }}"
                                 class="label btn btn-danger">Stop scenario queue</a>
                             {% else %}
                             <a id="relaunch-btn" title="Relaunch Scenario" data-scenario-name="{{ name }}" data-scenario-title="{{ title }}" class="label btn btn-dark"><i

@@ -574,14 +574,6 @@ class Controller:
         deploy_tests.start()
 
     @staticmethod
-    def stop_frontend():
-        DockerUtils.remove_containers_by_prefix(f"{os.environ['USER']}-nebula-frontend")
-
-    @staticmethod
-    def stop_network():
-        DockerUtils.remove_docker_networks_by_prefix(f"{os.environ['USER']}")
-
-    @staticmethod
     def stop_waf():
         if sys.platform == "win32":
             try:
@@ -616,11 +608,10 @@ class Controller:
     @staticmethod
     def stop():
         logging.info("Closing NEBULA (exiting from components)... Please wait")
-        ScenarioManagement.stop_participants()
+        DockerUtils.remove_containers_by_prefix(f"{os.environ['USER']}")
         ScenarioManagement.stop_blockchain()
-        Controller.stop_frontend()
         Controller.stop_waf()
-        Controller.stop_network()
+        DockerUtils.remove_docker_networks_by_prefix(f"{os.environ['USER']}")
         controller_pid_file = os.path.join(os.path.dirname(__file__), "controller.pid")
         try:
             with open(controller_pid_file) as f:

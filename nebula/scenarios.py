@@ -17,7 +17,7 @@ from nebula.addons.blockchain.blockchain_deployer import BlockchainDeployer
 from nebula.addons.topologymanager import TopologyManager
 from nebula.config.config import Config
 from nebula.core.utils.certificate import generate_ca_certificate, generate_certificate
-from nebula.utils import DockerUtils, Utils
+from nebula.utils import DockerUtils, FileUtils
 
 
 # Definition of a scenario
@@ -398,7 +398,7 @@ class ScenarioManagement:
         except Exception as e:
             logging.exception(f"Error while removing current_scenario_commands.sh file: {e}")
 
-        DockerUtils.remove_containers_by_prefix(f"{os.environ.get('NEBULA_CONTROLLER_NAME')}")
+        # DockerUtils.remove_containers_by_prefix(f"{os.environ.get('NEBULA_CONTROLLER_NAME')}")
 
         # if sys.platform == "win32":
         #     try:
@@ -1002,7 +1002,7 @@ class ScenarioManagement:
     @classmethod
     def remove_files_by_scenario(cls, scenario_name):
         try:
-            shutil.rmtree(Utils.check_path(os.environ["NEBULA_CONFIG_DIR"], scenario_name))
+            shutil.rmtree(FileUtils.check_path(os.environ["NEBULA_CONFIG_DIR"], scenario_name))
         except FileNotFoundError:
             logging.warning("Files not found, nothing to remove")
         except Exception as e:
@@ -1010,21 +1010,21 @@ class ScenarioManagement:
             logging.exception(e)
             raise e
         try:
-            shutil.rmtree(Utils.check_path(os.environ["NEBULA_LOGS_DIR"], scenario_name))
+            shutil.rmtree(FileUtils.check_path(os.environ["NEBULA_LOGS_DIR"], scenario_name))
         except PermissionError:
             # Avoid error if the user does not have enough permissions to remove the tf.events files
             logging.warning("Not enough permissions to remove the files, moving them to tmp folder")
             os.makedirs(
-                Utils.check_path(os.environ["NEBULA_ROOT"], os.path.join("app", "tmp", scenario_name)),
+                FileUtils.check_path(os.environ["NEBULA_ROOT"], os.path.join("app", "tmp", scenario_name)),
                 exist_ok=True,
             )
             os.chmod(
-                Utils.check_path(os.environ["NEBULA_ROOT"], os.path.join("app", "tmp", scenario_name)),
+                FileUtils.check_path(os.environ["NEBULA_ROOT"], os.path.join("app", "tmp", scenario_name)),
                 0o777,
             )
             shutil.move(
-                Utils.check_path(os.environ["NEBULA_LOGS_DIR"], scenario_name),
-                Utils.check_path(os.environ["NEBULA_ROOT"], os.path.join("app", "tmp", scenario_name)),
+                FileUtils.check_path(os.environ["NEBULA_LOGS_DIR"], scenario_name),
+                FileUtils.check_path(os.environ["NEBULA_ROOT"], os.path.join("app", "tmp", scenario_name)),
             )
         except FileNotFoundError:
             logging.warning("Files not found, nothing to remove")

@@ -539,6 +539,18 @@ def get_scenario_by_name(scenario_name):
 
     return result
 
+def get_user_by_scenario_name(scenario_name):
+    _conn = sqlite3.connect(scenario_db_file_location)
+    _c = _conn.cursor()
+    command = "SELECT username FROM scenarios WHERE name = ?;"
+    _c.execute(command, (scenario_name,))
+    result = _c.fetchone()
+
+    _conn.commit()
+    _conn.close()
+
+    return result[0] if result else None
+
 
 def remove_scenario_by_name(scenario_name):
     _conn = sqlite3.connect(scenario_db_file_location)

@@ -5,7 +5,7 @@ import socket
 import docker
 
 
-class Utils:
+class FileUtils:
     @classmethod
     def check_path(cls, base_path, relative_path):
         full_path = os.path.normpath(os.path.join(base_path, relative_path))
