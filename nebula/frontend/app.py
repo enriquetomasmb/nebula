@@ -126,7 +126,7 @@ else:
     logging.info("SECRET_KEY already set")
 
 app = FastAPI()
-app.add_middleware(SessionMiddleware, secret_key=os.environ.get("SECRET_KEY"))
+app.add_middleware(SessionMiddleware, secret_key=os.environ.get("SECRET_KEY"), session_cookie=f"session_{os.environ.get('NEBULA_FRONTEND_PORT')}")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
