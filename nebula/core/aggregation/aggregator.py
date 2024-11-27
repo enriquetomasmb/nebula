@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from abc import ABC, abstractmethod
 from functools import partial
@@ -208,6 +209,10 @@ class Aggregator(ABC):
             await self._aggregation_done_lock.acquire_async(timeout=timeout)
         except TimeoutError:
             logging.exception("🔄  get_aggregation | Timeout reached for aggregation")
+        except asyncio.CancelledError:
+            logging.exception("🔄  get_aggregation | Lock acquisition was cancelled")
+        except Exception as e:
+            logging.exception(f"🔄  get_aggregation | Error acquiring lock: {e}")
         finally:
             await self._aggregation_done_lock.release_async()
 

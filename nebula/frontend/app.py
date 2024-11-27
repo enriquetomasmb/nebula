@@ -1,7 +1,6 @@
 import argparse
 import asyncio
 import datetime
-from dotenv import load_dotenv
 import io
 import json
 import logging
@@ -12,6 +11,7 @@ import zipfile
 from urllib.parse import urlencode
 
 import requests
+from dotenv import load_dotenv
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
