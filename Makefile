@@ -37,28 +37,8 @@ install: install-python		## Install core dependencies
 	@echo "🔧 Installing pre-commit hooks"
 	@$(UV) run pre-commit install
 	@echo ""
-	@echo "🐳 Building nebula-frontend docker image. Do you want to continue (overrides existing image)? (y/n)"
-	@read ans; if [ "$${ans:-N}" = y ]; then \
-		docker build -t nebula-frontend -f nebula/frontend/Dockerfile .; \
-	else \
-		echo "Skipping nebula-frontend docker build."; \
-	fi
+	@$(MAKE) update
 	@echo ""
-	@echo "🐳 Building nebula-core docker image. Do you want to continue? (overrides existing image)? (y/n)"
-	@read ans; if [ "$${ans:-N}" = y ]; then \
-		docker build -t nebula-core .; \
-	else \
-		echo "Skipping nebula-core docker build."; \
-	fi
-	@echo ""
-	@$(MAKE) shell
-
-.PHONY: full-install
-full-install: install-python	## Install all dependencies (core, docs)
-	@echo "📦 Installing all dependencies with uv"
-	@$(UV) sync --group core --group docs
-	@echo "🔧 Installing pre-commit hooks"
-	@$(UV) run pre-commit install
 	@$(MAKE) shell
 
 .PHONY: shell
@@ -79,19 +59,30 @@ shell:				## Start a shell in the uv environment
 		echo "🚀 Created by \033[1;34mEnrique Tomás Martínez Beltrán\033[0m <\033[1;34menriquetomas@um.es\033[0m>"; \
 	fi
 
+.PHONY: update
+update:				## Update docker images
+	@echo "🐳 Updating docker images..."
+	@echo "🐳 Building nebula-frontend docker image. Do you want to continue (overrides existing image)? (y/n)"
+	@read ans; if [ "$${ans:-N}" = y ]; then \
+		docker build -t nebula-frontend -f nebula/frontend/Dockerfile .; \
+	else \
+		echo "Skipping nebula-frontend docker build."; \
+	fi
+	@echo ""
+	@echo "🐳 Building nebula-core docker image. Do you want to continue? (overrides existing image)? (y/n)"
+	@read ans; if [ "$${ans:-N}" = y ]; then \
+		docker build -t nebula-core .; \
+	else \
+		echo "Skipping nebula-core docker build."; \
+	fi
+	echo "🐳 Docker images updated."
+
 .PHONY: lock
 lock:				## Update the lock file
 	@echo "🔒 This will update the lock file. Do you want to continue? (y/n)"
 	@read ans && [ $${ans:-N} = y ] || { echo "Lock cancelled."; exit 1; }
 	@echo "🔒 Locking dependencies..."
 	@$(UV) lock
-
-.PHONY: update-libs
-update-libs:			## Update libraries to the latest version
-	@echo "🔧 This will override the versions of current libraries. Do you want to continue? (y/n)"
-	@read ans && [ $${ans:-N} = y ] || { echo "Update cancelled."; exit 1; }
-	@echo "📦 Updating libraries..."
-	@$(UV) update
 
 .PHONY: check
 check:				## Run code quality tools
@@ -126,6 +117,12 @@ publish:			## Publish a release to PyPI
 
 .PHONY: build-and-publish
 build-and-publish: build publish	## Build and publish the package
+
+.PHONY: doc-install
+full-install: install-python	## Install dependencies for documentation
+	@echo "📦 Installing doc dependencies with uv"
+	@$(UV) sync --group core --group docs
+	@$(MAKE) shell
 
 .PHONY: doc-test
 doc-test:			## Test if documentation can be built without errors
