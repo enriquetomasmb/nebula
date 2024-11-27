@@ -165,6 +165,7 @@ class Aggregator(ABC):
 
         if len(self.get_nodes_pending_models_to_aggregate()) >= len(self._federation_nodes):
             logging.info("🔄  _add_pending_model | All models were added in the aggregation buffer. Run aggregation...")
+            self.engine.update_sinchronized_status(True)
             await self._aggregation_done_lock.release_async()
         else:
             await self.aggregation_push_available()
@@ -234,6 +235,7 @@ class Aggregator(ABC):
         else:
             logging.info("🔄  get_aggregation | All models accounted for, proceeding with aggregation.")
 
+        #self._pending_models_to_aggregate = self.engine.apply_weight_strategy(self._pending_models_to_aggregate)
         aggregated_result = self.run_aggregation(self._pending_models_to_aggregate)
         self._pending_models_to_aggregate.clear()
         return aggregated_result
@@ -277,6 +279,7 @@ class Aggregator(ABC):
                             logging.info(f"❗️ FUTURE round: {further_round} is available | PUSH strategy ON")
                             logging.info("❗️ SLOW push selected | Start PUSHING slow")
                             # Unlock aggregation
+                            self.engine.set_pushed_done(self.engine.get_round() - further_round)
                             self._aggregation_done_lock.release_async()
                             return
                 if further_round != self.engine.get_round() and push == "fast":
@@ -290,6 +293,7 @@ class Aggregator(ABC):
                         (decoded_model, weight, source) = future_update
                         self._pending_models_to_aggregate.update({source: (decoded_model, weight)})
                     
+                    self.engine.set_pushed_done(self.engine.get_round() - further_round)
                     self.engine.set_round(further_round)
                     
                     # Unlock aggregation

@@ -23,6 +23,7 @@ class NodeManager():
         self,  
         topology,
         model_handler,
+        push_acceleration,
         engine : "Engine"
     ):
         self.topology = topology
@@ -47,12 +48,12 @@ class NodeManager():
         self.discarded_offers_addr_lock = Locker(name="discarded_offers_addr_lock")
         self.discarded_offers_addr = []
         
-        self.max_time_to_wait = 6
+        self.max_time_to_wait = 20
         logging.info("Initializing Timer generator")
         self._timer_generator = None #TimerGenerator(self.engine.cm.get_addrs_current_connections(only_direct=True, myself=False), self.max_time_to_wait, 80)
         
-        self._push_acceleration = "slow"
-        self.init_model = None
+        self._push_acceleration = push_acceleration
+        self.rounds_pushed = 0
         
         #self.set_confings()
 
@@ -81,6 +82,9 @@ class NodeManager():
     
     def get_restructure_process_lock(self):
         return self._restructure_process_lock
+    
+    def set_rounds_pushed(self, rp):
+        self.rounds_pushed = rp
     
     def still_waiting_for_candidates(self):
         return self.accept_candidates_lock.locked()
@@ -141,30 +145,48 @@ class NodeManager():
     def add_weight_modifier(self, addr):
         self.weight_modifier_lock.acquire()
         if not addr in self.weight_modifier:
-            self.weight_modifier[addr] = self.new_node_weight_value
+            wv = self.new_node_weight_value 
+            logging.info(f"📝 Registering | Weight modifier registered for source {addr} | round: {round} | value: {wv}")
+            self.weight_modifier[addr] = wv
         self.weight_modifier_lock.release()
     
     def remove_weight_modifier(self, addr):
         self.weight_modifier_lock.acquire()
         if addr in self.weight_modifier:
+            logging.info(f"📝 Removing | weight modifier registered for source {addr}")
             del self.weight_modifier[addr]
         self.weight_modifier_lock.release()
-        
-    def _update_weight_modifier(self, addr):
-        self.weight_modifier_lock.acquire()
-        if addr in self.weight_modifier:
-            new_weight = self.weight_modifier[addr] - 1/self.engine.get_round()**2
+    
+    def apply_weight_strategy(self, updates):
+        logging.info(f"🔄 Applying weight Strategy...")
+        # We must lower the weight_modifier value if a round jump has been occured
+        # as many times as rounds have been jumped
+        if self.rounds_pushed:
+            for i in range(0, self.rounds_pushed):
+                self._update_weight_modifiers()
+            self.rounds_pushed = 0
+        for addr,update in updates.items():
+            weight_modifier = self._get_weight_modifier(addr)
+            if weight_modifier != 1:
+                logging.info(f"📝 addr found :{addr}")
+                logging.info (f"📝 Appliying modified weight strategy | multiplier value: {weight_modifier}")
+                model, weight = update
+                updates.update({addr: (model, weight*weight_modifier)})
+                
+    def _update_weight_modifiers(self):
+        self.weight_modifier_lock.acquire() 
+        for addr,weight in self.weight_modifier.items():
+            new_weight = weight - 1/(round**2)
             if new_weight > 1:
                 self.weight_modifier[addr] = new_weight
             else:
                 self.remove_weight_modifier(addr)
         self.weight_modifier_lock.release()
     
-    def get_weight_modifier(self, addr):
+    def _get_weight_modifier(self, addr):
         self.weight_modifier_lock.acquire()
         if addr in self.weight_modifier:
-            wm = self.weight_modifier[addr]
-            self._update_weight_modifier(addr, self.engine.get_round()) 
+            wm = self.weight_modifier[addr]      
         else:
             wm = 1
         self.weight_modifier_lock.release()

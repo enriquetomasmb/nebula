@@ -159,7 +159,8 @@ class Engine:
             topology = self.config.participant["mobility_args"]["topology_type"]
             topology = topology.lower()
             model_handler = "std" #self.config.participant["mobility_args"]["model_handler"]
-            self._node_manager = NodeManager(topology, model_handler, engine=self)
+            acceleration_push = self.config.participant["aggregation_args"]["aggregation_push"]
+            self._node_manager = NodeManager(topology, model_handler, acceleration_push, engine=self)
         
 
         self._event_manager = EventManager(
@@ -369,7 +370,7 @@ class Engine:
         nebula_pb2.ConnectionMessage.Action.LATE_CONNECT,
     )
     async def _connection_late_connect_callback(self, source, message):
-        logging.info(f"🔗  handle_connection_message | Trigger | Received late_connect message from {source}")   
+        logging.info(f"🔗  handle_connection_message | Trigger | Received late connect message from {source}")   
         if self.nm.accept_connection(source, joining=True):
             logging.info(f"🔗  Late connection accepted | source: {source}") 
             self.nm.add_weight_modifier(source) 
@@ -517,6 +518,16 @@ class Engine:
 
     def get_push_acceleration(self):
         return self.nm.get_push_acceleration()
+    
+    def set_pushed_done(self, rounds_push):
+        self.nm.set_rounds_pushed(rounds_push)
+    
+    def apply_weight_strategy(self, pending_models):
+        #if self.mobility:
+        #    
+        #else:
+        return     
+        
               
     async def _start_learning_late(self):
         await self.learning_cycle_lock.acquire_async()
@@ -726,6 +737,7 @@ class Engine:
             logging.info(f"[Role {self.role}] Starting learning cycle...")
             await self.aggregator.update_federation_nodes(self.federation_nodes)
             await self._extended_learning_cycle()
+            await self._additional_mobility_actions()
 
             await self.get_round_lock().acquire_async()
             print_msg_box(
@@ -779,6 +791,12 @@ class Engine:
         functionalities. The method is called in the _learning_cycle method.
         """
         pass
+    
+    async def _additional_mobility_actions(self):
+        if not self.mobility:
+            return
+        logging.info("🔄 Starting additional mobility actions...")
+        #self.nm.update_weight_modifiers()
 
     def reputation_calculation(self, aggregated_models_weights):
         cossim_threshold = 0.5
