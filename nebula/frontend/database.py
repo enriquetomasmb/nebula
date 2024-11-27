@@ -29,6 +29,15 @@ async def setup_database(db_file_location):
         await db.commit()
 
 
+async def ensure_columns(conn, table_name, desired_columns):
+    _c = await conn.execute(f"PRAGMA table_info({table_name});")
+    existing_columns = [row[1] for row in await _c.fetchall()]
+    for column_name, column_definition in desired_columns.items():
+        if column_name not in existing_columns:
+            await conn.execute(f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_definition};")
+    await conn.commit()
+
+
 async def initialize_databases():
     await setup_database(user_db_file_location)
     await setup_database(node_db_file_location)
@@ -36,74 +45,101 @@ async def initialize_databases():
     await setup_database(notes_db_file_location)
 
     async with aiosqlite.connect(user_db_file_location) as conn:
-        _c = await conn.cursor()
-        await _c.execute(
+        await conn.execute(
             """
             CREATE TABLE IF NOT EXISTS users (
                 user TEXT PRIMARY KEY,
-                password TEXT NOT NULL,
-                role TEXT NOT NULL
+                password TEXT,
+                role TEXT
             );
             """
         )
-        await conn.commit()
+        desired_columns = {"user": "TEXT PRIMARY KEY", "password": "TEXT", "role": "TEXT"}
+        await ensure_columns(conn, "users", desired_columns)
 
     async with aiosqlite.connect(node_db_file_location) as conn:
-        _c = await conn.cursor()
-        await _c.execute(
+        await conn.execute(
             """
             CREATE TABLE IF NOT EXISTS nodes (
                 uid TEXT PRIMARY KEY,
-                idx TEXT NOT NULL,
-                ip TEXT NOT NULL,
-                port TEXT NOT NULL,
-                role TEXT NOT NULL,
-                neighbors TEXT NOT NULL,
-                latitude TEXT NOT NULL,
-                longitude TEXT NOT NULL,
-                timestamp TEXT NOT NULL,
-                federation TEXT NOT NULL,
-                round TEXT NOT NULL,
-                scenario TEXT NOT NULL,
-                hash TEXT NOT NULL
+                idx TEXT,
+                ip TEXT,
+                port TEXT,
+                role TEXT,
+                neighbors TEXT,
+                latitude TEXT,
+                longitude TEXT,
+                timestamp TEXT,
+                federation TEXT,
+                round TEXT,
+                scenario TEXT,
+                hash TEXT
             );
             """
         )
-        await conn.commit()
+        desired_columns = {
+            "uid": "TEXT PRIMARY KEY",
+            "idx": "TEXT",
+            "ip": "TEXT",
+            "port": "TEXT",
+            "role": "TEXT",
+            "neighbors": "TEXT",
+            "latitude": "TEXT",
+            "longitude": "TEXT",
+            "timestamp": "TEXT",
+            "federation": "TEXT",
+            "round": "TEXT",
+            "scenario": "TEXT",
+            "hash": "TEXT",
+        }
+        await ensure_columns(conn, "nodes", desired_columns)
 
     async with aiosqlite.connect(scenario_db_file_location) as conn:
-        _c = await conn.cursor()
-        await _c.execute(
+        await conn.execute(
             """
             CREATE TABLE IF NOT EXISTS scenarios (
                 name TEXT PRIMARY KEY,
-                username TEXT NOT NULL,
-                start_time TEXT NOT NULL,
-                end_time TEXT NOT NULL,
-                title TEXT NOT NULL,
-                description TEXT NOT NULL,
-                status TEXT NOT NULL,
-                network_subnet TEXT NOT NULL,
-                model TEXT NOT NULL,
-                dataset TEXT NOT NULL,
-                rounds TEXT NOT NULL,
-                role TEXT NOT NULL
+                username TEXT,
+                start_time TEXT,
+                end_time TEXT,
+                title TEXT,
+                description TEXT,
+                status TEXT,
+                network_subnet TEXT,
+                model TEXT,
+                dataset TEXT,
+                rounds TEXT,
+                role TEXT
             );
             """
         )
-        await conn.commit()
+        desired_columns = {
+            "name": "TEXT PRIMARY KEY",
+            "username": "TEXT",
+            "start_time": "TEXT",
+            "end_time": "TEXT",
+            "title": "TEXT",
+            "description": "TEXT",
+            "status": "TEXT",
+            "network_subnet": "TEXT",
+            "model": "TEXT",
+            "dataset": "TEXT",
+            "rounds": "TEXT",
+            "role": "TEXT",
+        }
+        await ensure_columns(conn, "scenarios", desired_columns)
 
     async with aiosqlite.connect(notes_db_file_location) as conn:
-        _c = await conn.cursor()
-        await _c.execute(
+        await conn.execute(
             """
             CREATE TABLE IF NOT EXISTS notes (
                 scenario TEXT PRIMARY KEY,
-                scenario_notes TEXT NOT NULL
+                scenario_notes TEXT
             );
             """
         )
-        await conn.commit()
+        desired_columns = {"scenario": "TEXT PRIMARY KEY", "scenario_notes": "TEXT"}
+        await ensure_columns(conn, "notes", desired_columns)
 
 
 def list_users(all_info=False):
@@ -538,6 +574,7 @@ def get_scenario_by_name(scenario_name):
     _conn.close()
 
     return result
+
 
 def get_user_by_scenario_name(scenario_name):
     _conn = sqlite3.connect(scenario_db_file_location)

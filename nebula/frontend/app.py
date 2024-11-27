@@ -797,7 +797,9 @@ def stop_scenario(scenario_name, user):
     logging.info(f"[FER] stopping scenario user {user}")
     ScenarioManagement.stop_participants()
     DockerUtils.remove_containers_by_prefix(f"{os.environ.get('NEBULA_CONTROLLER_NAME')}-{user}-participant")
-    DockerUtils.remove_docker_network(f"{(os.environ.get('NEBULA_CONTROLLER_NAME'))}-{str(user).lower()}-nebula-net-scenario")
+    DockerUtils.remove_docker_network(
+        f"{(os.environ.get('NEBULA_CONTROLLER_NAME'))}-{str(user).lower()}-nebula-net-scenario"
+    )
     ScenarioManagement.stop_blockchain()
     scenario_set_status_to_finished(scenario_name)
     # Generate statistics for the scenario
@@ -1182,7 +1184,6 @@ async def run_scenario(scenario_data, role, user):
     except subprocess.CalledProcessError as e:
         logging.exception(f"Error docker-compose up: {e}")
         return
-
 
     user_data.nodes_registration[scenarioManagement.scenario_name] = {
         "n_nodes": scenario_data["n_nodes"],
