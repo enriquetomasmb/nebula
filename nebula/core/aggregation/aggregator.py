@@ -269,12 +269,27 @@ class Aggregator(ABC):
                         further_round = f_round                  
                         push = self.engine.get_push_acceleration()
                         if push == "slow":
-                            logging.info(f"❗️ FUTURE round: {round} is available | PUSH available")
+                            logging.info(f"❗️ FUTURE round: {further_round} is available | PUSH strategy ON")
                             logging.info("❗️ SLOW push selected | Start PUSHING slow")
+                            # Unlock aggregation
                             self._aggregation_done_lock.release_async()
                             return
                 if further_round != self.engine.get_round() and push == "fast":
+                    logging.info(f"❗️ FUTURE round: {further_round} is available | PUSH strategy ON")
                     logging.info("❗️ FAST push selected | Start PUSHING fast")
+                    (model, weight) = self._pending_models_to_aggregate.get(self.engine.get_addr())
+                    self._pending_models_to_aggregate.clear()
+                    self._pending_models_to_aggregate.update({self.engine.get_addr(): (model, weight)})
+                    
+                    for future_update in self._future_models_to_aggregate[further_round]:
+                        (decoded_model, weight, source) = future_update
+                        self._pending_models_to_aggregate.update({source: (decoded_model, weight)})
+                    
+                    self.engine.set_round(further_round)
+                    
+                    # Unlock aggregation
+                    self._aggregation_done_lock.release_async()
+                    return
                     
                 else:
                     self.engine.update_sinchronized_status(True)

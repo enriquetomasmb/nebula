@@ -254,6 +254,9 @@ class Engine:
     def update_sinchronized_status(self, status):
         with self.sinchronized_status_lock:
             self._sinchronized_status = status
+    
+    def set_round(self, new_round):
+        self.round = new_round
         
 
     @event_handler(nebula_pb2.DiscoveryMessage, nebula_pb2.DiscoveryMessage.Action.DISCOVER)
