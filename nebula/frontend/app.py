@@ -388,10 +388,10 @@ async def nebula_add_user(
     if session.get("role") == "admin":  # only Admin should be able to add user.
         user_list = list_users(all_info=True)
         if user.upper() in user_list or " " in user or "'" in user or '"' in user:
-            return RedirectResponse(url="/nebula/admin")
+            return RedirectResponse(url="/nebula/admin", status_code=status.HTTP_303_SEE_OTHER)
         else:
             add_user(user, password, role)
-            return RedirectResponse(url="/nebula/admin")
+            return RedirectResponse(url="/nebula/admin", status_code=status.HTTP_303_SEE_OTHER)
     else:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
 
@@ -404,15 +404,10 @@ async def nebula_update_user(
     password: str = Form(...),
     role: str = Form(...),
 ):
-    if session.get("role") == "admin":
-        user_list = list_users()
-        if user not in user_list:
-            return RedirectResponse(url="/nebula/admin")
-        else:
-            update_user(user, password, role)
-            return RedirectResponse(url="/nebula/admin")
-    else:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    if 'user' not in session or session['role'] != 'admin':
+        return RedirectResponse(url='/nebula', status_code=status.HTTP_302_FOUND)
+    update_user(user, password, role)
+    return RedirectResponse(url='/nebula/admin', status_code=status.HTTP_302_FOUND)
 
 
 @app.get("/nebula/api/dashboard/runningscenario", response_class=JSONResponse)
