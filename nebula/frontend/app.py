@@ -458,6 +458,7 @@ async def nebula_dashboard(request: Request, session: dict = Depends(get_session
                     "scenario_completed": bool_completed,
                     "user_logged_in": session.get("user"),
                     "user_role": session.get("role"),
+                    "user_data_store": user_data_store,
                 },
             )
         elif request.url.path == "/nebula/api/dashboard":
@@ -825,9 +826,9 @@ async def nebula_stop_scenario(
         user_data = user_data_store[user]
         if session["role"] == "demo":
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-        elif session["role"] == "user":
-            if not check_scenario_with_role(session["role"], scenario_name):
-                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+        # elif session["role"] == "user":
+        #     if not check_scenario_with_role(session["role"], scenario_name):
+        #         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
         if stop_all:
             user_data.stop_all_scenarios_event.set()
             user_data.scenarios_list_length = 0

@@ -59,7 +59,30 @@
                 <p style="color: #772953; font-weight: bold">The federation is currently running</p>
             </div>
             {% endif %}
-            {% if scenarios_list_length > 1 %}
+            <div class="table-responsive">
+                <table id="table-queue" class="table small">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>scenarios_finished</th>
+                            <th>/</th>
+                            <th>scenarios_list_length</th>
+                        </tr>
+                    </thead>
+                    {% for user, user_data in user_data_store.items() %}
+                        <tr>
+                            <td id="user">{{ user}}</td>
+                            <td id="scenarios_finished" style="text-align: center;">{{ user_data.scenarios_finished }}</td>
+                            <td id="bar">{{ "/" }}</td>
+                            <td id="scenarios_list_length" style="text-align: center;">{{ user_data.scenarios_list_length }}</td>
+                            <!-- <td class="td-icons">
+                                <a href="{{ url_for('nebula_stop_scenario', scenario_name=scenario_running[0], stop_all=True) }}"
+                                class="label btn btn-danger">Stop scenario queue</a>
+                            </td> -->
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
             <div style="text-align: center; display: flex;justify-content: center;" class="col">
                 <p style="color: #772953; font-weight: bold; padding-top: 6px;">Scenarios queue {{ scenarios_finished
                     }}/{{ scenarios_list_length }}</p>
@@ -69,7 +92,6 @@
                     scenario queue</a>
                 {% endif %}
             </div>
-            {% endif %}
             <hr>
             <h5>Scenario name: <b id="scenario_name">{{ scenario_running[0] }}</b></h5>
             <h5>Scenario title: <b id="scenario_title">{{ scenario_running[4] }}</b></h5>
