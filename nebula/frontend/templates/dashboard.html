@@ -83,6 +83,7 @@
                     {% endfor %}
                 </table>
             </div>
+            {% if scenario_running %}
             <div style="text-align: center; display: flex;justify-content: center;" class="col">
                 <p style="color: #772953; font-weight: bold; padding-top: 6px;">Scenarios queue {{ scenarios_finished
                     }}/{{ scenarios_list_length }}</p>
@@ -92,11 +93,12 @@
                     scenario queue</a>
                 {% endif %}
             </div>
+            {% endif %}
             <hr>
             <h5>Scenario name: <b id="scenario_name">{{ scenario_running[0] }}</b></h5>
-            <h5>Scenario title: <b id="scenario_title">{{ scenario_running[4] }}</b></h5>
-            <h5>Scenario description: <b id="scenario_description">{{ scenario_running[5] }}</b></h5>
-            <h5>Scenario start time: <b id="scenario_start_time">{{ scenario_running[2] }}</b></h5>
+            <h5>Scenario title: <b id="scenario_title">{{ scenario_running[3] }}</b></h5>
+            <h5>Scenario description: <b id="scenario_description">{{ scenario_running[4] }}</b></h5>
+            <h5>Scenario start time: <b id="scenario_start_time">{{ scenario_running[1] }}</b></h5>
             <div class="d-flex flex-row justify-content-start p-3">
                 <a id="new-scenario-btn" href="{{ url_for('nebula_dashboard_deployment') }}"
                     class="btn btn-dark me-2">Deploy new scenario</a>
@@ -113,17 +115,6 @@
                 <a href="{{ url_for('nebula_dashboard_statistics') }}" class="btn btn-dark">Compare scenarios</a>
                 {% endif %}
             </div>
-            {% if scenarios_list_length is defined and scenarios_list_length > 1 %}
-            <div style="text-align: center; display: flex;justify-content: center;" class="col">
-                <p style="color: #772953; font-weight: bold; padding-top: 6px;">Scenarios queue {{ scenarios_finished
-                    }}/{{ scenarios_list_length }}</p>
-                {% if scenarios_finished != scenarios_list_length %}
-                <a href="{{ url_for('nebula_stop_scenario', scenario_name=scenario_running[0], stop_all=True) }}"
-                    class="label btn btn-danger" style="float: left; margin-left: 10px; margin-bottom: 10px;">Stop
-                    scenario queue</a>
-                {% endif %}
-            </div>
-            {% endif %}
             {% endif %}
         </div>
     </div>

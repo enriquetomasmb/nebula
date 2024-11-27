@@ -99,7 +99,6 @@ async def initialize_databases():
             """
             CREATE TABLE IF NOT EXISTS scenarios (
                 name TEXT PRIMARY KEY,
-                username TEXT,
                 start_time TEXT,
                 end_time TEXT,
                 title TEXT,
@@ -109,13 +108,13 @@ async def initialize_databases():
                 model TEXT,
                 dataset TEXT,
                 rounds TEXT,
-                role TEXT
+                role TEXT,
+                username TEXT
             );
             """
         )
         desired_columns = {
             "name": "TEXT PRIMARY KEY",
-            "username": "TEXT",
             "start_time": "TEXT",
             "end_time": "TEXT",
             "title": "TEXT",
@@ -126,6 +125,7 @@ async def initialize_databases():
             "dataset": "TEXT",
             "rounds": "TEXT",
             "role": "TEXT",
+            "username": "TEXT",
         }
         await ensure_columns(conn, "scenarios", desired_columns)
 
@@ -467,7 +467,6 @@ def scenario_update_record(
             "INSERT INTO scenarios VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 scenario_name,
-                username,
                 start_time,
                 end_time,
                 title,
@@ -478,6 +477,7 @@ def scenario_update_record(
                 dataset,
                 rounds,
                 role,
+                username,
             ),
         )
     else:
