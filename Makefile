@@ -3,13 +3,6 @@ PYTHON_VERSION := 3.11
 UV_INSTALL_SCRIPT := https://astral.sh/uv/install.sh
 PATH := $(HOME)/.local/bin:$(PATH)
 
-command_exists = $(shell command -v $(1) >/dev/null 2>&1 && echo true || echo false)
-
-define install_uv
-	@echo "📦 uv is not installed. Installing uv..."
-	@curl -LsSf $(UV_INSTALL_SCRIPT) | sh
-endef
-
 .PHONY: check-uv
 check-uv:		## Check and install uv if necessary
 	@if command -v $(UV) >/dev/null 2>&1; then \
@@ -150,12 +143,6 @@ doc-build:			## Build the documentation
 .PHONY: doc-serve
 doc-serve:			## Serve the documentation locally
 	@$(UV) run mkdocs serve -f docs/mkdocs.yml
-
-.PHONY: format
-format:				## Format code with black and isort
-	@echo "🎨 Formatting code"
-	@$(UV) run black .
-	@$(UV) run isort .
 
 .PHONY: clean
 clean: clean-build		## Clean up build artifacts and caches
