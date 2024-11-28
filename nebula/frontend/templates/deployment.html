@@ -1654,6 +1654,13 @@
             var scenariosList = [];
             var actual_scenario = 0;
 
+            //Replace a scenario by index
+            function setScenario(index, newScenario) {
+                if (index >= 0 && index < scenariosList.length) {
+                    scenariosList[index] = newScenario;
+                }
+            }
+
             //Save current scenario
             function saveScenario(){
                 //Save scenario data
@@ -2103,10 +2110,15 @@
                 document.getElementById("yes-button").addEventListener("click", function () {
 
                     if(scenarioStorage.scenariosList < 1) {
-                        document.getElementById("scenario-title").value = "scenario"
+                        document.getElementById("scenario-title").value = "empty"
                     }
 
                     scenarioStorage.replaceScenario();
+                    scenarioStorage.scenariosList.forEach((scenario, index) => {
+                        if (!scenario.scenario_title){
+                            scenarioStorage.scenariosList[index].scenario_title = "empty";
+                        }
+                    });
                     var data = scenarioStorage.scenariosList;
 
                     // Hide the modal
@@ -2121,24 +2133,24 @@
                         },
                         body: JSON.stringify(data)
                     })
-                    .then(response => {
-                        if (response.redirected) {
-                            window.location.href = response.url;
-                        } else {
-                            document.querySelector(".overlay").style.display = "none";
-                            document.getElementById("spinner").style.display = "none";
-                            // If the user is a demo, show a modal with a message
-                            $('#confirm-modal').on('hidden.bs.modal', function () {
-                                $('#info-modal-body').html('You are not allowed to run a scenario. You have a limited functionality or a scenario is already running');
-                                $('#info-modal').modal('show');
-                            });
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        document.querySelector(".overlay").style.display = "none";
-                        document.getElementById("spinner").style.display = "none";
-                    });
+                    // .then(response => {
+                    //     if (response.redirected) {
+                    //         window.location.href = response.url;
+                    //     } else {
+                    //         document.querySelector(".overlay").style.display = "none";
+                    //         document.getElementById("spinner").style.display = "none";
+                    //         // If the user is a demo, show a modal with a message
+                    //         $('#confirm-modal').on('hidden.bs.modal', function () {
+                    //             $('#info-modal-body').html('You are not allowed to run a scenario. You have a limited functionality or a scenario is already running');
+                    //             $('#info-modal').modal('show');
+                    //         });
+                    //     }
+                    // })
+                    // .catch(error => {
+                    //     console.error('Error:', error);
+                    //     document.querySelector(".overlay").style.display = "none";
+                    //     document.getElementById("spinner").style.display = "none";
+                    // });
 
                 });
             }
