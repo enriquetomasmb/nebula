@@ -167,8 +167,8 @@ class Aggregator(ABC):
             logging.info("🔄  _add_pending_model | All models were added in the aggregation buffer. Run aggregation...")
             self.engine.update_sinchronized_status(True)
             await self._aggregation_done_lock.release_async()
-        else:
-            await self.aggregation_push_available()
+        #else:
+        #    await self.aggregation_push_available()
         await self._add_model_lock.release_async()
         return self.get_nodes_pending_models_to_aggregate()
 
@@ -246,6 +246,7 @@ class Aggregator(ABC):
             self._future_models_to_aggregate[round] = []
         decoded_model = self.engine.trainer.deserialize_model(model)
         self._future_models_to_aggregate[round].append((decoded_model, weight, source))
+        #await self.aggregation_push_available()
 
     def print_model_size(self, model):
         total_params = 0
@@ -267,21 +268,32 @@ class Aggregator(ABC):
             and try to catch the federation asap. 
         """
         logging.info(f"❗️ synchronized status: {self.engine.get_sinchronized_status()} | Analizing if an aggregation push is available...")
-        if not self.engine.get_sinchronized_status():
-            n_fed_nodes = len(self._federation_nodes)
+        if not self.engine.get_sinchronized_status() and not self.engine.get_trainning_in_progress_lock().locked() and not self.engine.get_synchronizing_rounds():
+            n_fed_nodes = len(self._federation_nodes) 
             further_round = self.engine.get_round()
+            logging.info(f" Pending models: {len(self.get_nodes_pending_models_to_aggregate())} | federation: {n_fed_nodes}")
             if len(self.get_nodes_pending_models_to_aggregate()) < n_fed_nodes:
                 for f_round, fm in self._future_models_to_aggregate.items():
+                    # future_models dont count self node
+                    n_fed_nodes-=1
                     if len(fm) == n_fed_nodes:
                         further_round = f_round                  
                         push = self.engine.get_push_acceleration()
                         if push == "slow":
                             logging.info(f"❗️ FUTURE round: {further_round} is available | PUSH strategy ON")
-                            logging.info("❗️ SLOW push selected | Start PUSHING slow")
-                            # Unlock aggregation
+                            logging.info("❗️ SLOW push selected | Start PUSHING slow")    
                             self.engine.set_pushed_done(self.engine.get_round() - further_round)
-                            self._aggregation_done_lock.release_async()
+                            # we wait until learning cycle reach aggregation point
+                            while not self._aggregation_done_lock.locked_async():
+                                logging.info("🔄 Waiting | aggregation step not reached yet...")
+                                await asyncio.sleep(1)
+                            # Unlock aggregation
+                            logging.info("🔄 Releasing aggregation lock...")
+                            await self._aggregation_done_lock.release_async()
                             return
+                # hay que revisar la sincronizacion bien de todo, saltar rondas puede ser complicado
+                # si en lo q se esta realizando este cambio llega un mensaje, que? tienen q estar las estructuras
+                # bloqueadas. Tengo que estudiarlo bien
                 if further_round != self.engine.get_round() and push == "fast":
                     logging.info(f"❗️ FUTURE round: {further_round} is available | PUSH strategy ON")
                     logging.info("❗️ FAST push selected | Start PUSHING fast")
@@ -297,13 +309,22 @@ class Aggregator(ABC):
                     self.engine.set_round(further_round)
                     
                     # Unlock aggregation
-                    self._aggregation_done_lock.release_async()
+                    # we wait until learning cycle reach aggregation point
+                    while not self._aggregation_done_lock.locked_async():
+                        await asyncio.sleep(1)
+                    await self._aggregation_done_lock.release_async()
                     return
                     
                 else:
                     self.engine.update_sinchronized_status(True)
             else:
                 logging.info(f"All models updates are received | models number: {len(self.get_nodes_pending_models_to_aggregate())}")
+        else:
+            if not self.engine.get_sinchronized_status():
+                if self.engine.get_sinchronized_status():
+                    logging.info("❗️ Cannot analize push | Trainning in progress")
+                elif self.engine.get_synchronizing_rounds():
+                    logging.info("❗️ Cannot analize push | already pushing rounds")
 
 def create_malicious_aggregator(aggregator, attack):
     # It creates a partial function aggregate that wraps the aggregate method of the original aggregator.

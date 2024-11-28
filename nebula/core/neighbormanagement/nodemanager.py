@@ -53,7 +53,10 @@ class NodeManager():
         self._timer_generator = None #TimerGenerator(self.engine.cm.get_addrs_current_connections(only_direct=True, myself=False), self.max_time_to_wait, 80)
         
         self._push_acceleration = push_acceleration
+        self.rounds_pushed_lock = Locker(name="rounds_pushed_lock")
         self.rounds_pushed = 0
+        
+        self.synchronizing_rounds = False
         
         #self.set_confings()
 
@@ -83,11 +86,18 @@ class NodeManager():
     def get_restructure_process_lock(self):
         return self._restructure_process_lock
     
+    def set_synchronizing_rounds(self, status):
+        self.synchronizing_rounds = status
+        
+    def get_syncrhonizing_rounds(self):
+        return self.synchronizing_rounds    
+    
     def set_rounds_pushed(self, rp):
-        self.rounds_pushed = rp
+        with self.rounds_pushed_lock:
+            self.rounds_pushed = rp
     
     def still_waiting_for_candidates(self):
-        return self.accept_candidates_lock.locked()
+        return not self.accept_candidates_lock.locked()
     
     async def set_confings(self):
         """
@@ -146,7 +156,7 @@ class NodeManager():
         self.weight_modifier_lock.acquire()
         if not addr in self.weight_modifier:
             wv = self.new_node_weight_value 
-            logging.info(f"📝 Registering | Weight modifier registered for source {addr} | round: {round} | value: {wv}")
+            logging.info(f"📝 Registering | Weight modifier registered for source {addr} | round: {self.engine.get_round()} | value: {wv}")
             self.weight_modifier[addr] = wv
         self.weight_modifier_lock.release()
     
@@ -168,8 +178,7 @@ class NodeManager():
         for addr,update in updates.items():
             weight_modifier = self._get_weight_modifier(addr)
             if weight_modifier != 1:
-                logging.info(f"📝 addr found :{addr}")
-                logging.info (f"📝 Appliying modified weight strategy | multiplier value: {weight_modifier}")
+                logging.info (f"📝 Appliying modified weight strategy | addr: {addr}| multiplier value: {weight_modifier}")
                 model, weight = update
                 updates.update({addr: (model, weight*weight_modifier)})
                 

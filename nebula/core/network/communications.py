@@ -759,7 +759,7 @@ class CommunicationsManager:
                     logging.info(f"❗️  Connection with {dest_addr} not found")
                     return
                 logging.info(
-                    f"Sending model to {dest_addr}"
+                    f"Sending offer model to {dest_addr}"
                 )
                 await conn.send(data=offer_message, is_compressed=True)
                 logging.info(f"Offer_Model sent to {dest_addr}")

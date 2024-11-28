@@ -159,7 +159,7 @@ class Engine:
             topology = self.config.participant["mobility_args"]["topology_type"]
             topology = topology.lower()
             model_handler = "std" #self.config.participant["mobility_args"]["model_handler"]
-            acceleration_push = self.config.participant["aggregation_args"]["aggregation_push"]
+            acceleration_push = "slow" #self.config.participant["aggregation_args"]["aggregation_push"]
             self._node_manager = NodeManager(topology, model_handler, acceleration_push, engine=self)
         
 
@@ -244,6 +244,9 @@ class Engine:
 
     def get_federation_setup_lock(self):
         return self.federation_setup_lock
+    
+    def get_trainning_in_progress_lock(self):
+        return self.trainning_in_progress_lock
 
     def get_round_lock(self):
         return self.round_lock
@@ -252,8 +255,13 @@ class Engine:
         with self.sinchronized_status_lock:
             return self._sinchronized_status
         
+    def get_synchronizing_rounds(self):
+        return self.nm.get_syncrhonizing_rounds()
+        
     def update_sinchronized_status(self, status):
         with self.sinchronized_status_lock:
+            if self.mobility:
+                self.nm.set_synchronizing_rounds(status)
             self._sinchronized_status = status
     
     def set_round(self, new_round):
@@ -461,16 +469,19 @@ class Engine:
     async def _offer_offer_model_callback(self, source, message):
         logging.info(f"🔍  handle_offer_message | Trigger | Received offer_model message from {source}")
         self.nm.meet_node(source)
-        if not self.nm.get_restructure_process_lock().locked() and not self.nm.still_waiting_for_candidates():
+        if not self.nm.get_restructure_process_lock().locked() and self.nm.still_waiting_for_candidates():
             try:
                 model_compressed = message.parameters
                 if self.nm.accept_model_offer(source, model_compressed, message.rounds, message.round, message.epochs, message.n_neighbors, message.loss):
-                    logging.info("🔧 Model accepted from offer")
+                    logging.info(f"🔧 Model accepted from offer | source: {source}")
                 else:
-                    logging.info("❗️ Model offer discarded")
+                    logging.info(f"❗️ Model offer discarded | source: {source}")
                     self.nm.add_to_discarded_offers(source)        
             except RuntimeError:
-                pass
+                logging.info(f"❗️ Error proccesing offer model from {source}")
+        else:
+            logging.info(f"❗️ handfle_offer_message | NOT accepting offers | restructure: {self.nm.get_restructure_process_lock().locked()} | waiting candidates: {self.nm.still_waiting_for_candidates()}")
+            self.nm.add_to_discarded_offers(source) 
         
     @event_handler(
         nebula_pb2.OfferMessage,
@@ -528,7 +539,6 @@ class Engine:
         #else:
         return     
         
-              
     async def _start_learning_late(self):
         await self.learning_cycle_lock.acquire_async()
         try:
@@ -568,6 +578,7 @@ class Engine:
                 pass
             
             self.trainer.set_epochs(epochs)
+            self.trainer.set_current_round(round)
             self.trainer.create_trainer()
             await self._learning_cycle()
             
@@ -712,6 +723,7 @@ class Engine:
 
     async def _waiting_model_updates(self):
         logging.info(f"💤  Waiting convergence in round {self.round}.")
+        await self.aggregator.aggregation_push_available()
         params = await self.aggregator.get_aggregation()
         if params is not None:
             logging.info(

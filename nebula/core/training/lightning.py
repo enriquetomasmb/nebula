@@ -239,6 +239,9 @@ class Lightning:
 
     def set_epochs(self, epochs):
         self.epochs = epochs
+    
+    def set_current_round(self, round):
+        self.round = round
 
     def serialize_model(self, model):
         # From https://pytorch.org/docs/stable/notes/serialization.html
