@@ -2133,24 +2133,24 @@
                         },
                         body: JSON.stringify(data)
                     })
-                    // .then(response => {
-                    //     if (response.redirected) {
-                    //         window.location.href = response.url;
-                    //     } else {
-                    //         document.querySelector(".overlay").style.display = "none";
-                    //         document.getElementById("spinner").style.display = "none";
-                    //         // If the user is a demo, show a modal with a message
-                    //         $('#confirm-modal').on('hidden.bs.modal', function () {
-                    //             $('#info-modal-body').html('You are not allowed to run a scenario. You have a limited functionality or a scenario is already running');
-                    //             $('#info-modal').modal('show');
-                    //         });
-                    //     }
-                    // })
-                    // .catch(error => {
-                    //     console.error('Error:', error);
-                    //     document.querySelector(".overlay").style.display = "none";
-                    //     document.getElementById("spinner").style.display = "none";
-                    // });
+                    .then(response => {
+                        if (response.redirected) {
+                            window.location.href = response.url;
+                        } else {
+                            document.querySelector(".overlay").style.display = "none";
+                            document.getElementById("spinner").style.display = "none";
+                            // If the user is a demo, show a modal with a message
+                            $('#confirm-modal').on('hidden.bs.modal', function () {
+                                $('#info-modal-body').html('You are not allowed to run a scenario. You have a limited functionality or a scenario is already running');
+                                $('#info-modal').modal('show');
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        document.querySelector(".overlay").style.display = "none";
+                        document.getElementById("spinner").style.display = "none";
+                    });
 
                 });
             }
