@@ -3,6 +3,9 @@ FROM owasp/modsecurity-crs:3.3.5-nginx-202310170110
 
 ARG NGINX_VERSION=1.24.0
 
+ARG USER
+ENV USER=${USER}
+
 # Installed necessary packages
 RUN apt-get update && apt-get install -y libmaxminddb0 libmaxminddb-dev mmdb-bin git wget
 RUN apt install -y build-essential libpcre3 libpcre3-dev zlib1g zlib1g-dev libssl-dev
@@ -37,6 +40,9 @@ RUN wget https://git.io/GeoLite2-Country.mmdb -P /usr/share/GeoIP/
 
 # nginx configuration files
 COPY default.conf /etc/nginx/templates/conf.d/default.conf.template
+
+RUN sed -i "s|http://nebula|http://${USER}|g" /etc/nginx/templates/conf.d/default.conf.template
+
 COPY nginx.conf /etc/nginx/templates/nginx.conf.template
 
 # owasp crs

@@ -1,1 +1,3 @@
 FROM grafana/loki:latest
+
+COPY loki-config.yml /mnt/config/loki-config.yml

@@ -1,1 +1,8 @@
 FROM grafana/promtail:latest
+
+ARG USER
+ENV USER=${USER}
+
+COPY promtail-config.yml /etc/promtail/config.yml
+
+RUN sed -i "s|http://nebula|http://$USER|g" /etc/promtail/config.yml

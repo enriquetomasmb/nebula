@@ -2,6 +2,7 @@ UV := uv
 PYTHON_VERSION := 3.11
 UV_INSTALL_SCRIPT := https://astral.sh/uv/install.sh
 PATH := $(HOME)/.local/bin:$(PATH)
+USER := $(shell whoami)
 
 command_exists = $(shell command -v $(1) >/dev/null 2>&1 && echo true || echo false)
 
@@ -83,13 +84,13 @@ update:				## Update docker images
 update-production:		## Update production docker images
 	@echo "🐳 Updating production docker images..."
 	@echo "🐳 Building nebula-waf"
-	@docker build -t nebula-waf -f nebula/addons/waf/Dockerfile-waf nebula/addons/waf
+	@docker build -t nebula-waf -f nebula/addons/waf/Dockerfile-waf --build-arg USER=$(USER) nebula/addons/waf
 	@echo "🐳 Building nebula-loki"
 	@docker build -t nebula-waf-loki -f nebula/addons/waf/Dockerfile-loki nebula/addons/waf
 	@echo "🐳 Building nebula-promtail"
-	@docker build -t nebula-waf-promtail -f nebula/addons/waf/Dockerfile-promtail nebula/addons/waf
+	@docker build -t nebula-waf-promtail -f nebula/addons/waf/Dockerfile-promtail --build-arg USER=$(USER) nebula/addons/waf
 	@echo "🐳 Building nebula-grafana"
-	@docker build -t nebula-waf-grafana -f nebula/addons/waf/Dockerfile-grafana nebula/addons/waf
+	@docker build -t nebula-waf-grafana -f nebula/addons/waf/Dockerfile-grafana --build-arg USER=$(USER) nebula/addons/waf
 	echo "🐳 Docker images updated."
 
 .PHONY: lock
