@@ -46,6 +46,19 @@ class DockerUtils:
             # Obtain existing docker subnets
             existing_subnets = []
             networks = client.networks.list()
+            
+            existing_network = next((n for n in networks if n.name == network_name), None)
+
+            if existing_network:
+                ipam_config = existing_network.attrs.get("IPAM", {}).get("Config", [])
+                if ipam_config:
+                    # Assume there's only one subnet per network for simplicity
+                    existing_subnet = ipam_config[0].get("Subnet", "")
+                    potential_base = ".".join(existing_subnet.split(".")[:3])  # Extract base from subnet
+                    logging.info(f"Network '{network_name}' already exists with base {potential_base}")
+                    return potential_base
+            
+            
             for network in networks:
                 ipam_config = network.attrs.get("IPAM", {}).get("Config", [])
                 if ipam_config:

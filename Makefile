@@ -39,6 +39,8 @@ install: install-python		## Install core dependencies
 	@echo ""
 	@$(MAKE) update
 	@echo ""
+	@$(MAKE) update-production
+	@echo ""
 	@$(MAKE) shell
 
 .PHONY: shell
@@ -75,6 +77,19 @@ update:				## Update docker images
 	else \
 		echo "Skipping nebula-core docker build."; \
 	fi
+	echo "🐳 Docker images updated."
+
+.PHONY: update-production
+update-production:		## Update production docker images
+	@echo "🐳 Updating production docker images..."
+	@echo "🐳 Building nebula-waf"
+	@docker build -t nebula-waf -f nebula/addons/waf/Dockerfile-waf nebula/addons/waf
+	@echo "🐳 Building nebula-loki"
+	@docker build -t nebula-waf-loki -f nebula/addons/waf/Dockerfile-loki nebula/addons/waf
+	@echo "🐳 Building nebula-promtail"
+	@docker build -t nebula-waf-promtail -f nebula/addons/waf/Dockerfile-promtail nebula/addons/waf
+	@echo "🐳 Building nebula-grafana"
+	@docker build -t nebula-waf-grafana -f nebula/addons/waf/Dockerfile-grafana nebula/addons/waf
 	echo "🐳 Docker images updated."
 
 .PHONY: lock

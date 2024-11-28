@@ -332,171 +332,288 @@ class Controller:
         observer.join()
 
     def run_waf(self):
-        docker_compose_template = textwrap.dedent(
-            """
-            services:
-            {}
-        """
+        # docker_compose_template = textwrap.dedent(
+        #     """
+        #     services:
+        #     {}
+        # """
+        # )
+        
+        network_name = f"{os.environ['USER']}-nebula-net-base"
+        base = DockerUtils.create_docker_network(network_name)
+
+        # waf_template = textwrap.dedent(
+        #     """
+        #     nebula-waf:
+        #         container_name: nebula-waf
+        #         image: nebula-waf
+        #         build:
+        #             context: .
+        #             dockerfile: Dockerfile-waf
+        #         restart: unless-stopped
+        #         volumes:
+        #             - {log_path}/waf/nginx:/var/log/nginx
+        #         extra_hosts:
+        #             - "host.docker.internal:host-gateway"
+        #         ipc: host
+        #         privileged: true
+        #         ports:
+        #             - {waf_port}:80
+        #         networks:
+        #             nebula-net-base:
+        #                 ipv4_address: {ip}
+        # """
+        # )
+        
+        client = docker.from_env()
+
+        volumes_waf = ["/var/log/nginx"]
+
+        ports_waf = [80]
+
+        host_config_waf = client.api.create_host_config(
+            binds=[f"{os.environ['NEBULA_LOGS_DIR']}/waf/nginx:/var/log/nginx"],
+            privileged = True,
+            port_bindings={80: self.waf_port},
         )
 
-        waf_template = textwrap.dedent(
-            """
-            nebula-waf:
-                container_name: nebula-waf
-                image: nebula-waf
-                build:
-                    context: .
-                    dockerfile: Dockerfile-waf
-                restart: unless-stopped
-                volumes:
-                    - {log_path}/waf/nginx:/var/log/nginx
-                extra_hosts:
-                    - "host.docker.internal:host-gateway"
-                ipc: host
-                privileged: true
-                ports:
-                    - {waf_port}:80
-                networks:
-                    nebula-net-base:
-                        ipv4_address: {ip}
-        """
+        networking_config_waf = client.api.create_networking_config({
+            f"{network_name}": client.api.create_endpoint_config(ipv4_address=f"{base}.200")
+        })
+
+        container_id_waf = client.api.create_container(
+            image="nebula-waf",
+            name=f"{os.environ['USER']}-nebula-waf",
+            detach=True,
+            volumes=volumes_waf,
+            host_config=host_config_waf,
+            networking_config=networking_config_waf,
+            ports=ports_waf,
         )
 
-        grafana_template = textwrap.dedent(
-            """
-            grafana:
-                container_name: nebula-waf-grafana
-                image: nebula-waf-grafana
-                build:
-                    context: .
-                    dockerfile: Dockerfile-grafana
-                restart: unless-stopped
-                environment:
-                    - GF_SECURITY_ADMIN_PASSWORD=admin
-                    - GF_USERS_ALLOW_SIGN_UP=false
-                    - GF_SERVER_HTTP_PORT=3000
-                    - GF_SERVER_PROTOCOL=http
-                    - GF_SERVER_DOMAIN=localhost:{grafana_port}
-                    - GF_SERVER_ROOT_URL=http://localhost:{grafana_port}/grafana/
-                    - GF_SERVER_SERVE_FROM_SUB_PATH=true
-                    - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/dashboard.json
-                    - GF_METRICS_MAX_LIMIT_TSDB=0
-                ports:
-                    - {grafana_port}:3000
-                ipc: host
-                privileged: true
-                networks:
-                    nebula-net-base:
-                        ipv4_address: {ip}
-        """
+        client.api.start(container_id_waf)
+        
+        # grafana_template = textwrap.dedent(
+        #     """
+        #     grafana:
+        #         container_name: nebula-waf-grafana
+        #         image: nebula-waf-grafana
+        #         build:
+        #             context: .
+        #             dockerfile: Dockerfile-grafana
+        #         restart: unless-stopped
+        #         environment:
+        #             - GF_SECURITY_ADMIN_PASSWORD=admin
+        #             - GF_USERS_ALLOW_SIGN_UP=false
+        #             - GF_SERVER_HTTP_PORT=3000
+        #             - GF_SERVER_PROTOCOL=http
+        #             - GF_SERVER_DOMAIN=localhost:{grafana_port}
+        #             - GF_SERVER_ROOT_URL=http://localhost:{grafana_port}/grafana/
+        #             - GF_SERVER_SERVE_FROM_SUB_PATH=true
+        #             - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/dashboard.json
+        #             - GF_METRICS_MAX_LIMIT_TSDB=0
+        #         ports:
+        #             - {grafana_port}:3000
+        #         ipc: host
+        #         privileged: true
+        #         networks:
+        #             fer-nebula-net-base:
+        #                 ipv4_address: {ip}
+        # """
+        # )
+        
+        environment = {
+            "GF_SECURITY_ADMIN_PASSWORD":"admin",
+            "GF_USERS_ALLOW_SIGN_UP":"false",
+            "GF_SERVER_HTTP_PORT":"3000",
+            "GF_SERVER_PROTOCOL":"http",
+            "GF_SERVER_DOMAIN":f"localhost:{self.grafana_port}",
+            "GF_SERVER_ROOT_URL":f"http://localhost:{self.grafana_port}/grafana/",
+            "GF_SERVER_SERVE_FROM_SUB_PATH":"true",
+            "GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH":"/var/lib/grafana/dashboards/dashboard.json",
+            "GF_METRICS_MAX_LIMIT_TSDB":"0",
+        }
+
+        ports = [3000]
+
+        host_config = client.api.create_host_config(
+            port_bindings={3000: self.grafana_port},
         )
 
-        loki_template = textwrap.dedent(
-            """
-            loki:
-                container_name: nebula-waf-loki
-                image: nebula-waf-loki
-                build:
-                    context: .
-                    dockerfile: Dockerfile-loki
-                restart: unless-stopped
-                volumes:
-                    - ./loki-config.yml:/mnt/config/loki-config.yml
-                ports:
-                    - {loki_port}:3100
-                user: "0:0"
-                command:
-                    - '-config.file=/mnt/config/loki-config.yml'
-                networks:
-                    nebula-net-base:
-                        ipv4_address: {ip}
-        """
+        networking_config = client.api.create_networking_config({
+            f"{network_name}": client.api.create_endpoint_config(ipv4_address=f"{base}.201")
+        })
+
+        container_id = client.api.create_container(
+            image="nebula-waf-grafana",
+            name=f"{os.environ['USER']}-nebula-waf-grafana",
+            detach=True,
+            environment=environment,
+            host_config=host_config,
+            networking_config=networking_config,
+            ports=ports,
         )
 
-        promtail_template = textwrap.dedent(
-            """
-            promtail:
-                container_name: nebula-waf-promtail
-                image: nebula-waf-promtail
-                build:
-                    context: .
-                    dockerfile: Dockerfile-promtail
-                restart: unless-stopped
-                volumes:
-                    - {log_path}/waf/nginx:/var/log/nginx
-                    - ./promtail-config.yml:/etc/promtail/config.yml
-                command:
-                    - '-config.file=/etc/promtail/config.yml'
-                networks:
-                    nebula-net-base:
-                        ipv4_address: {ip}
-        """
+        client.api.start(container_id)
+
+        # loki_template = textwrap.dedent(
+        #     """
+        #     loki:
+        #         container_name: nebula-waf-loki
+        #         image: nebula-waf-loki
+        #         build:
+        #             context: .
+        #             dockerfile: Dockerfile-loki
+        #         restart: unless-stopped
+        #         volumes:
+        #             - ./loki-config.yml:/mnt/config/loki-config.yml
+        #         ports:
+        #             - {loki_port}:3100
+        #         user: "0:0"
+        #         command:
+        #             - '-config.file=/mnt/config/loki-config.yml'
+        #         networks:
+        #             fer-nebula-net-base:
+        #                 ipv4_address: {ip}
+        # """
+        # )
+        
+        volumes_loki = ["/mnt/config/loki-config.yml"]
+        
+        command = ["-config.file=/mnt/config/loki-config.yml"]
+
+        ports_loki = [3100]
+
+        host_config_loki = client.api.create_host_config(
+            binds=[f"{os.environ.get('NEBULA_ROOT_HOST')}/nebula/addons/waf/loki-config.yml:/mnt/config/loki-config.yml"],
+            port_bindings={3100: self.loki_port},
         )
 
-        waf_template = textwrap.indent(waf_template, " " * 4)
-        grafana_template = textwrap.indent(grafana_template, " " * 4)
-        loki_template = textwrap.indent(loki_template, " " * 4)
-        promtail_template = textwrap.indent(promtail_template, " " * 4)
+        networking_config_loki = client.api.create_networking_config({
+            f"{network_name}": client.api.create_endpoint_config(ipv4_address=f"{base}.202")
+        })
 
-        network_template = textwrap.dedent(
-            """
-            networks:
-                nebula-net-base:
-                    name: nebula-net-base
-                    driver: bridge
-                    ipam:
-                        config:
-                            - subnet: {}
-                              gateway: {}
-        """
+        container_id_loki = client.api.create_container(
+            image="nebula-waf-loki",
+            name=f"{os.environ['USER']}-nebula-waf-loki",
+            detach=True,
+            volumes=volumes_loki,
+            command=command,
+            host_config=host_config_loki,
+            networking_config=networking_config_loki,
+            ports=ports_loki,
         )
 
-        # Generate the Docker Compose file dynamically
-        services = ""
-        services += waf_template.format(
-            path=self.root_path,
-            log_path=os.environ["NEBULA_LOGS_DIR"],
-            waf_port=self.waf_port,
-            gw="192.168.10.1",
-            ip="192.168.10.200",
+        client.api.start(container_id_loki)
+
+        # promtail_template = textwrap.dedent(
+        #     """
+        #     promtail:
+        #         container_name: nebula-waf-promtail
+        #         image: nebula-waf-promtail
+        #         build:
+        #             context: .
+        #             dockerfile: Dockerfile-promtail
+        #         restart: unless-stopped
+        #         volumes:
+        #             - {log_path}/waf/nginx:/var/log/nginx
+        #             - ./promtail-config.yml:/etc/promtail/config.yml
+        #         command:
+        #             - '-config.file=/etc/promtail/config.yml'
+        #         networks:
+        #             fer-nebula-net-base:
+        #                 ipv4_address: {ip}
+        # """
+        # )
+        
+        volumes_promtail = ["/var/log/nginx", "/etc/promtail/config.yml"]
+
+        host_config_promtail = client.api.create_host_config(
+            binds=[
+                f"{os.environ['NEBULA_LOGS_DIR']}/waf/nginx:/var/log/nginx",
+                f"{os.environ.get('NEBULA_ROOT_HOST')}/nebula/addons/waf/promtail-config.yml:/etc/promtail/config.yml"
+                ],
         )
 
-        services += grafana_template.format(
-            log_path=os.environ["NEBULA_LOGS_DIR"],
-            grafana_port=self.grafana_port,
-            loki_port=self.loki_port,
-            ip="192.168.10.201",
+        networking_config_promtail = client.api.create_networking_config({
+            f"{network_name}": client.api.create_endpoint_config(ipv4_address=f"{base}.203")
+        })
+
+        container_id_promtail = client.api.create_container(
+            image="nebula-waf-promtail",
+            name=f"{os.environ['USER']}-nebula-waf-promtail",
+            detach=True,
+            volumes=volumes_promtail,
+            host_config=host_config_promtail,
+            networking_config=networking_config_promtail,
         )
 
-        services += loki_template.format(loki_port=self.loki_port, ip="192.168.10.202")
+        client.api.start(container_id_promtail)
 
-        services += promtail_template.format(log_path=os.environ["NEBULA_LOGS_DIR"], ip="192.168.10.203")
+        # waf_template = textwrap.indent(waf_template, " " * 4)
+        # grafana_template = textwrap.indent(grafana_template, " " * 4)
+        # loki_template = textwrap.indent(loki_template, " " * 4)
+        # promtail_template = textwrap.indent(promtail_template, " " * 4)
 
-        docker_compose_file = docker_compose_template.format(services)
-        docker_compose_file += network_template.format("192.168.10.0/24", "192.168.10.1")
+        # network_template = textwrap.dedent(
+        #     """
+        #     networks:
+        #         fer-nebula-net-base:
+        #             name: fer-nebula-net-base
+        #             driver: bridge
+        #             ipam:
+        #                 config:
+        #                     - subnet: {}
+        #                       gateway: {}
+        # """
+        # )
 
-        # Write the Docker Compose file in waf directory
-        with open(
-            f"{os.path.join(os.environ['NEBULA_ROOT'], 'nebula', 'addons', 'waf', 'docker-compose.yml')}",
-            "w",
-        ) as f:
-            f.write(docker_compose_file)
+        # # Generate the Docker Compose file dynamically
+        # services = ""
+        # services += waf_template.format(
+        #     path=self.root_path,
+        #     log_path=os.environ["NEBULA_LOGS_DIR"],
+        #     waf_port=self.waf_port,
+        #     gw="192.168.10.1",
+        #     ip="192.168.10.200",
+        # )
 
-        # Start the Docker Compose file, catch error if any
-        try:
-            subprocess.check_call([
-                "docker",
-                "compose",
-                "-f",
-                f"{os.path.join(os.environ['NEBULA_ROOT'], 'nebula', 'addons', 'waf', 'docker-compose.yml')}",
-                "up",
-                "--build",
-                "-d",
-            ])
-        except subprocess.CalledProcessError:
-            raise Exception(
-                "Docker Compose failed to start, please check if Docker Compose is installed (https://docs.docker.com/compose/install/) and Docker Engine is running."
-            )
+        # services += grafana_template.format(
+        #     log_path=os.environ["NEBULA_LOGS_DIR"],
+        #     grafana_port=self.grafana_port,
+        #     loki_port=self.loki_port,
+        #     ip="192.168.10.201",
+        # )
+
+        # services += loki_template.format(loki_port=self.loki_port, ip="192.168.10.202")
+
+        # services += promtail_template.format(log_path=os.environ["NEBULA_LOGS_DIR"], ip="192.168.10.203")
+
+        # docker_compose_file = docker_compose_template.format(services)
+        # docker_compose_file += network_template.format("192.168.10.0/24", "192.168.10.1")
+
+        # # Write the Docker Compose file in waf directory
+        # with open(
+        #     f"{os.path.join(os.environ['NEBULA_ROOT'], 'nebula', 'addons', 'waf', 'docker-compose.yml')}",
+        #     "w",
+        # ) as f:
+        #     f.write(docker_compose_file)
+
+        # # Start the Docker Compose file, catch error if any
+        # try:
+        #     subprocess.check_call([
+        #         "docker",
+        #         "compose",
+        #         "-f",
+        #         f"{os.path.join(os.environ['NEBULA_ROOT'], 'nebula', 'addons', 'waf', 'docker-compose.yml')}",
+        #         "up",
+        #         "--build",
+        #         "-d",
+        #     ])
+        # except subprocess.CalledProcessError:
+        #     raise Exception(
+        #         "Docker Compose failed to start, please check if Docker Compose is installed (https://docs.docker.com/compose/install/) and Docker Engine is running."
+        #     )
 
     def run_frontend(self):
         if sys.platform == "win32":
@@ -575,35 +692,36 @@ class Controller:
 
     @staticmethod
     def stop_waf():
-        if sys.platform == "win32":
-            try:
-                # kill all the docker containers which contain the word "nebula"
-                commands = [
-                    """docker compose -p waf down | Out-Null""",
-                    """docker compose -p waf rm | Out-Null""",
-                ]
+        DockerUtils.remove_containers_by_prefix(f"{os.environ['USER']}-nebula-waf")
+        # if sys.platform == "win32":
+        #     try:
+        #         # kill all the docker containers which contain the word "nebula"
+        #         commands = [
+        #             """docker compose -p waf down | Out-Null""",
+        #             """docker compose -p waf rm | Out-Null""",
+        #         ]
 
-                for command in commands:
-                    time.sleep(1)
-                    exit_code = os.system(f'powershell.exe -Command "{command}"')
-                    # logging.info(f"Windows Command '{command}' executed with exit code: {exit_code}")
+        #         for command in commands:
+        #             time.sleep(1)
+        #             exit_code = os.system(f'powershell.exe -Command "{command}"')
+        #             # logging.info(f"Windows Command '{command}' executed with exit code: {exit_code}")
 
-            except Exception as e:
-                raise Exception(f"Error while killing docker containers: {e}")
-        else:
-            try:
-                commands = [
-                    """docker compose -p waf down > /dev/null 2>&1""",
-                    """docker compose -p waf rm > /dev/null 2>&1""",
-                ]
+        #     except Exception as e:
+        #         raise Exception(f"Error while killing docker containers: {e}")
+        # else:
+        #     try:
+        #         commands = [
+        #             """docker compose -p waf down > /dev/null 2>&1""",
+        #             """docker compose -p waf rm > /dev/null 2>&1""",
+        #         ]
 
-                for command in commands:
-                    time.sleep(1)
-                    exit_code = os.system(command)
-                    # logging.info(f"Linux Command '{command}' executed with exit code: {exit_code}")
+        #         for command in commands:
+        #             time.sleep(1)
+        #             exit_code = os.system(command)
+        #             # logging.info(f"Linux Command '{command}' executed with exit code: {exit_code}")
 
-            except Exception as e:
-                raise Exception(f"Error while killing docker containers: {e}")
+        #     except Exception as e:
+        #         raise Exception(f"Error while killing docker containers: {e}")
 
     @staticmethod
     def stop():
