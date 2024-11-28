@@ -2,7 +2,6 @@ UV := uv
 PYTHON_VERSION := 3.11
 UV_INSTALL_SCRIPT := https://astral.sh/uv/install.sh
 PATH := $(HOME)/.local/bin:$(PATH)
-USER := $(shell whoami)
 
 command_exists = $(shell command -v $(1) >/dev/null 2>&1 && echo true || echo false)
 
