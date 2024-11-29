@@ -707,7 +707,8 @@ class ScenarioManagement:
                     f"{network_name}": client.api.create_endpoint_config(
                         ipv4_address=f"{base}.{i}",
                     ),
-                    "proxy": client.api.create_endpoint_config(name="chainnet"),
+                    f"{os.environ.get('NEBULA_CONTROLLER_NAME')}-nebula-net-base": client.api.create_endpoint_config(),
+                    "chainnet": client.api.create_endpoint_config(),
                 })
             else:
                 networking_config = client.api.create_networking_config({
