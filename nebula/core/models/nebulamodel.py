@@ -229,6 +229,15 @@ class NebulaModel(pl.LightningModule, ABC):
 
     def get_loss(self):
         return self.current_loss
+    
+    def set_updated_round(self, round):
+        self.round = round
+        self.global_number = {
+            "Train": round,
+            "Validation": round,
+            "Test (Local)": round,
+            "Test (Global)": round,
+        }
 
     def training_step(self, batch, batch_idx):
         """

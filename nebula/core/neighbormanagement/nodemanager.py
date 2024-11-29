@@ -172,17 +172,18 @@ class NodeManager():
         # We must lower the weight_modifier value if a round jump has been occured
         # as many times as rounds have been jumped
         if self.rounds_pushed:
+            round = self.engine.get_round()
             for i in range(0, self.rounds_pushed):
-                self._update_weight_modifiers()
+                self._update_weight_modifiers((round + i))
             self.rounds_pushed = 0
         for addr,update in updates.items():
             weight_modifier = self._get_weight_modifier(addr)
             if weight_modifier != 1:
-                logging.info (f"📝 Appliying modified weight strategy | addr: {addr}| multiplier value: {weight_modifier}")
+                logging.info (f"📝 Appliying modified weight strategy | addr: {addr} | multiplier value: {weight_modifier}")
                 model, weight = update
                 updates.update({addr: (model, weight*weight_modifier)})
                 
-    def _update_weight_modifiers(self):
+    def _update_weight_modifiers(self, round):
         self.weight_modifier_lock.acquire() 
         for addr,weight in self.weight_modifier.items():
             new_weight = weight - 1/(round**2)

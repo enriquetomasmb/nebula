@@ -439,7 +439,7 @@ class Engine:
                 msg = self.cm.mm.generate_offer_message(
                     nebula_pb2.OfferMessage.Action.OFFER_MODEL, 
                     len(self.get_federation_nodes()), 
-                    0, #self.trainer.get_loss(),
+                    0, #self.trainer.get_current_loss(),
                     model,
                     rounds,
                     round,
@@ -459,7 +459,7 @@ class Engine:
     async def _discover_discover_nodes_callback(self, source, message):
         logging.info(f"🔍  handle_discover_message | Trigger | Received discover_node message from {source} ")
         self.nm.meet_node(source)
-        msg = self.cm.mm.generate_offer_message(nebula_pb2.OfferMessage.Action.OFFER_METRIC, len(self.get_federation_nodes()), self.trainer.get_loss())
+        msg = self.cm.mm.generate_offer_message(nebula_pb2.OfferMessage.Action.OFFER_METRIC, len(self.get_federation_nodes()), self.trainer.get_current_loss())
         await self.cm.send_message(source, msg)                
                     
     @event_handler(

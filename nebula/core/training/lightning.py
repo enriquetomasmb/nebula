@@ -241,7 +241,12 @@ class Lightning:
         self.epochs = epochs
     
     def set_current_round(self, round):
+        logging.info(f"Update | current round = {round}")
         self.round = round
+        self.model.set_updated_round(round)
+        
+    def get_current_loss(self):
+        return self.model.get_loss()
 
     def serialize_model(self, model):
         # From https://pytorch.org/docs/stable/notes/serialization.html
