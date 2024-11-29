@@ -40,7 +40,7 @@ class NodeManager():
         self.late_connection_process_lock = Locker(name="late_connection_process_lock")
         self.weight_modifier = {}
         self.weight_modifier_lock = Locker(name="weight_modifier_lock")
-        self.new_node_weight_value = 3
+        self.new_node_weight_multiplier = 3
         self.accept_candidates_lock = Locker(name="accept_candidates_lock")
         self.recieve_offer_timer = 5
         self._restructure_process_lock = Locker(name="restructure_process_lock")
@@ -155,9 +155,9 @@ class NodeManager():
     def add_weight_modifier(self, addr):
         self.weight_modifier_lock.acquire()
         if not addr in self.weight_modifier:
-            wv = self.new_node_weight_value 
-            logging.info(f"📝 Registering | Weight modifier registered for source {addr} | round: {self.engine.get_round()} | value: {wv}")
-            self.weight_modifier[addr] = wv
+            wm = self.new_node_weight_multiplier 
+            logging.info(f"📝 Registering | Weight modifier registered for source {addr} | round: {self.engine.get_round()} | value: {wm}")
+            self.weight_modifier[addr] = (wm,1)
         self.weight_modifier_lock.release()
     
     def remove_weight_modifier(self, addr):
@@ -172,33 +172,31 @@ class NodeManager():
         # We must lower the weight_modifier value if a round jump has been occured
         # as many times as rounds have been jumped
         if self.rounds_pushed:
-            round = self.engine.get_round()
             for i in range(0, self.rounds_pushed):
-                self._update_weight_modifiers((round + i))
+                self._update_weight_modifiers()
             self.rounds_pushed = 0
         for addr,update in updates.items():
-            weight_modifier = self._get_weight_modifier(addr)
+            weight_modifier, _ = self._get_weight_modifier(addr)
             if weight_modifier != 1:
                 logging.info (f"📝 Appliying modified weight strategy | addr: {addr} | multiplier value: {weight_modifier}")
                 model, weight = update
                 updates.update({addr: (model, weight*weight_modifier)})
-                
-    def _update_weight_modifiers(self, round):
+        self._update_weight_modifiers()
+      
+    def _update_weight_modifiers(self):
         self.weight_modifier_lock.acquire() 
-        for addr,weight in self.weight_modifier.items():
-            new_weight = weight - 1/(round**2)
+        for addr,(weight,rounds) in self.weight_modifier.items():
+            new_weight = weight - 1/(rounds**2)
+            rounds = rounds + 1
             if new_weight > 1:
-                self.weight_modifier[addr] = new_weight
+                self.weight_modifier[addr] = (new_weight, rounds)            
             else:
                 self.remove_weight_modifier(addr)
         self.weight_modifier_lock.release()
     
     def _get_weight_modifier(self, addr):
         self.weight_modifier_lock.acquire()
-        if addr in self.weight_modifier:
-            wm = self.weight_modifier[addr]      
-        else:
-            wm = 1
+        wm = self.weight_modifier.get(addr, (1,0))      
         self.weight_modifier_lock.release()
         return wm
     

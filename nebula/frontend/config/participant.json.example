@@ -62,6 +62,7 @@
     "mobility": false,
     "mobility_type": "topology",
     "topology_type": "",
+    "push_strategy": "slow",
     "radius_federation": 1000,
     "scheme_mobility": "random",
     "round_frequency": 1,

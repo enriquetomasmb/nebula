@@ -64,6 +64,7 @@ class Aggregator(ABC):
         self._pending_models_to_aggregate = {}
         self._future_models_to_aggregate = {}
         self._add_model_lock = Locker(name="add_model_lock", async_lock=True)
+        self._add_next_model_lock = Locker(name="add_next_model_lock", async_lock=True)
         self._aggregation_done_lock = Locker(name="aggregation_done_lock", async_lock=True)
 
     def __str__(self):
@@ -235,8 +236,11 @@ class Aggregator(ABC):
         else:
             logging.info("🔄  get_aggregation | All models accounted for, proceeding with aggregation.")
 
-        #self._pending_models_to_aggregate = self.engine.apply_weight_strategy(self._pending_models_to_aggregate)
+        self._pending_models_to_aggregate = self.engine.apply_weight_strategy(self._pending_models_to_aggregate)
         aggregated_result = self.run_aggregation(self._pending_models_to_aggregate)
+        if not self.engine.get_sinchronized_status() and self.engine.get_push_acceleration() == "fast":
+            await self._add_model_lock.release_async()
+            await self._add_next_model_lock.release_async()
         self._pending_models_to_aggregate.clear()
         return aggregated_result
 
@@ -245,7 +249,9 @@ class Aggregator(ABC):
         if round not in self._future_models_to_aggregate:
             self._future_models_to_aggregate[round] = []
         decoded_model = self.engine.trainer.deserialize_model(model)
+        await self._add_next_model_lock.acquire_async()
         self._future_models_to_aggregate[round].append((decoded_model, weight, source))
+        await self._add_next_model_lock.release_async()
         #await self.aggregation_push_available()
 
     def print_model_size(self, model):
@@ -273,9 +279,9 @@ class Aggregator(ABC):
             further_round = self.engine.get_round()
             logging.info(f" Pending models: {len(self.get_nodes_pending_models_to_aggregate())} | federation: {n_fed_nodes}")
             if len(self.get_nodes_pending_models_to_aggregate()) < n_fed_nodes:
+                n_fed_nodes-=1
                 for f_round, fm in self._future_models_to_aggregate.items():
-                    # future_models dont count self node
-                    n_fed_nodes-=1
+                    # future_models dont count self node           
                     if len(fm) == n_fed_nodes:
                         further_round = f_round                  
                         push = self.engine.get_push_acceleration()
@@ -291,20 +297,48 @@ class Aggregator(ABC):
                             logging.info("🔄 Releasing aggregation lock...")
                             await self._aggregation_done_lock.release_async()
                             return
-                # hay que revisar la sincronizacion bien de todo, saltar rondas puede ser complicado
-                # si en lo q se esta realizando este cambio llega un mensaje, que? tienen q estar las estructuras
-                # bloqueadas. Tengo que estudiarlo bien
+                        
                 if further_round != self.engine.get_round() and push == "fast":
                     logging.info(f"❗️ FUTURE round: {further_round} is available | PUSH strategy ON")
                     logging.info("❗️ FAST push selected | Start PUSHING fast")
-                    (model, weight) = self._pending_models_to_aggregate.get(self.engine.get_addr())
+                    
+                    if further_round == (self.engine.get_round()+1):
+                        logging.info(f"🔄 Rounds jumped: {1}...")
+                        self.engine.set_pushed_done(self.engine.get_round() - further_round)
+                        # we wait until learning cycle reach aggregation point
+                        while not self._aggregation_done_lock.locked_async():
+                            logging.info("🔄 Waiting | aggregation step not reached yet...")
+                            await asyncio.sleep(1)
+                        # Unlock aggregation
+                        logging.info("🔄 Releasing aggregation lock...")
+                        await self._aggregation_done_lock.release_async()
+                        return
+                    
+                    logging.info(f"🔄 Rounds jumped: {self.engine.get_round() - further_round}...")
+                    own_update = self._pending_models_to_aggregate.get(self.engine.get_addr())
+                    while own_update == None:
+                        own_update = self._pending_models_to_aggregate.get(self.engine.get_addr())
+                        asyncio.sleep(1)    
+                    (model, weight) = own_update
+                    
+                    # Getting locks to avoid concurrency issues
+                    await self._add_model_lock.acquire_async()
+                    await self._add_next_model_lock.acquire_async()
+                    
+                    # Remove all pendings updates and add own_update
                     self._pending_models_to_aggregate.clear()
                     self._pending_models_to_aggregate.update({self.engine.get_addr(): (model, weight)})
                     
+                    # Add to pendings the future round updates
                     for future_update in self._future_models_to_aggregate[further_round]:
                         (decoded_model, weight, source) = future_update
                         self._pending_models_to_aggregate.update({source: (decoded_model, weight)})
                     
+                    # Clear all rounds that are going to be jumped
+                    for key in self._future_models_to_aggregate.keys():
+                        if key <= further_round:
+                            del self._future_models_to_aggregate[key]
+
                     self.engine.set_pushed_done(self.engine.get_round() - further_round)
                     self.engine.set_round(further_round)
                     

@@ -159,7 +159,7 @@ class Engine:
             topology = self.config.participant["mobility_args"]["topology_type"]
             topology = topology.lower()
             model_handler = "std" #self.config.participant["mobility_args"]["model_handler"]
-            acceleration_push = "slow" #self.config.participant["aggregation_args"]["aggregation_push"]
+            acceleration_push = "slow" #self.config.participant["mobility_args"]["push_strategy"]
             self._node_manager = NodeManager(topology, model_handler, acceleration_push, engine=self)
         
 
@@ -265,7 +265,9 @@ class Engine:
             self._sinchronized_status = status
     
     def set_round(self, new_round):
+        logging.info(f"🤖  Update round count | from: {self.round} | to round: {new_round}")
         self.round = new_round
+        self.trainer.set_current_round(new_round)
         
 
     @event_handler(nebula_pb2.DiscoveryMessage, nebula_pb2.DiscoveryMessage.Action.DISCOVER)
@@ -535,9 +537,10 @@ class Engine:
     
     def apply_weight_strategy(self, pending_models):
         #if self.mobility:
-        #    
+        #    self.nm.apply_weight_strategy(pending_models)
+        #    return pending_models
         #else:
-        return     
+        return pending_models    
         
     async def _start_learning_late(self):
         await self.learning_cycle_lock.acquire_async()
