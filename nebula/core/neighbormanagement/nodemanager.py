@@ -143,12 +143,7 @@ class NodeManager():
         )
         #self.engine.trainer.get_loss(), self.config.participant["molibity_args"]["weight_distance"], self.config.participant["molibity_args"]["weight_het"]
         #self.model_handler.set_config([self.engine.get_round(), self.engine.config.participant["training_args"]["epochs"]])
-    
-    def add_to_discarded_offers(self, addr_discarded):
-        self.discarded_offers_addr_lock.acquire()
-        self.discarded_offers_addr.append(addr_discarded)
-        self.discarded_offers_addr_lock.release()
-    
+  
     def get_timer(self):
         return self.timer_generator.get_timer(self.engine.get_round())
     
@@ -157,10 +152,12 @@ class NodeManager():
         
     def get_stop_condition(self):
         return self.timer_generator.get_stop_condition()
-    
-    async def receive_update_from_node(self, node_id, node_response_time):
-        await self.timer_generator.receive_update(node_id, node_response_time)   
-              
+      
+
+                                                        ##############################
+                                                        #       WEIGHT STRATEGY      #
+                                                        ##############################
+
     def add_weight_modifier(self, addr):
         self.weight_modifier_lock.acquire()
         if not addr in self.weight_modifier:
@@ -208,6 +205,12 @@ class NodeManager():
         wm = self.weight_modifier.get(addr, (1,0))      
         self.weight_modifier_lock.release()
         return wm
+
+
+                                                        ##############################
+                                                        #        CONNECTIONS         #
+                                                        ##############################
+
     
     def accept_connection(self, source, joining=False):
         if not joining:
@@ -216,6 +219,14 @@ class NodeManager():
                 return False
         else:
             return self.neighbor_policy.accept_connection(source)
+        
+    async def receive_update_from_node(self, node_id, node_response_time):
+        await self.timer_generator.receive_update(node_id, node_response_time)     
+    
+    def add_to_discarded_offers(self, addr_discarded):
+        self.discarded_offers_addr_lock.acquire()
+        self.discarded_offers_addr.append(addr_discarded)
+        self.discarded_offers_addr_lock.release()
     
     def need_more_neighbors(self):
         return self.neighbor_policy.need_more_neighbors()
@@ -269,17 +280,15 @@ class NodeManager():
         except asyncio.CancelledError as e:
             pass
 
-    async def start_late_connection_process(self):
+    #TODO NOT infinite loop, define n_tries
+    async def start_late_connection_process(self, connected=False, msg_type="discover_join", addrs_known=None):
         """
             This function represents the process of discovering the federation and stablish the first
-            connections with it. The first step is to send the DISCOVER_JOIN message to look for nodes,
-            the ones that receive that message will send back a OFFER_MODEL message. It contains info to do
+            connections with it. The first step is to send the DISCOVER_JOIN/NODES message to look for nodes,
+            the ones that receive that message will send back a OFFER_MODEL/METRIC message. It contains info to do
             a selection process among candidates to later on connect to the best ones. 
             The process will repeat until at least one candidate is found and the process will be locked
             to avoid concurrency.
-
-        Returns:
-            data neccesary to create trainer
         """
         logging.info("🌐  Initializing late connection process..")
         
@@ -288,7 +297,7 @@ class NodeManager():
         self.candidate_selector.remove_candidates()
         
         # find federation and send discover
-        await self.engine.cm.establish_connection_with_federation()
+        await self.engine.cm.stablish_connection_to_federation(msg_type, addrs_known)
            
         # wait offer
         logging.info(f"Waiting: {self.recieve_offer_timer}s to receive offers from federation")
@@ -299,8 +308,12 @@ class NodeManager():
         
         if self.candidate_selector.any_candidate():
             logging.info("Candidates found to connect to...")    
-            # create message to send to new neightbors
-            msg = self.engine.cm.mm.generate_connection_message(nebula_pb2.ConnectionMessage.Action.LATE_CONNECT)       
+            # create message to send to candidates selected
+            if not connected:
+                msg = self.engine.cm.mm.generate_connection_message(nebula_pb2.ConnectionMessage.Action.LATE_CONNECT)
+            else:
+                msg = self.engine.cm.mm.generate_connection_message(nebula_pb2.ConnectionMessage.Action.RESTRUCTURE)
+                        
             best_candidates = self.candidate_selector.select_candidates()
             logging.info(f"Candidates | {[addr for addr,_,_ in best_candidates]}")
             # candidates not choosen --> disconnect
@@ -311,54 +324,51 @@ class NodeManager():
                                     
             self.accept_candidates_lock.release()
             self.late_connection_process_lock.release()       
-                                                                                       
+            self.candidate_selector.remove_candidates()                                                                           
         # if no candidates, repeat process
         else:
             logging.info("No Candidates found | repeating process")
             self.accept_candidates_lock.release()
             self.late_connection_process_lock.release()
-            await self.start_late_connection_process()
+            await self.start_late_connection_process(connected, msg_type, addrs_known)
     
     
+                                                        ##############################
+                                                        #         ROBUSTNESS         #
+                                                        ##############################
     
-    """
-        Retopology in progress
-     """
     
     async def check_robustness(self):
-        logging.info("Analizing node network robustness...")
+        logging.info("🔄 Analizing node network robustness...")
         if len(self.engine.get_federation_nodes()) == 0:
             logging.info("No Neighbors left | reconnecting with Federation")
+            #await self.reconnect_to_federation()
         elif self.neighbor_policy.need_more_neighbors():
-            logging.info("Insufficient Robustness | searching for more connections")
+            logging.info("Insufficient Robustness | Upgrading robustness | Searching for more connections")
+            #asyncio.create_task(self.upgrade_connection_robustness())
         else:
             logging.info("Sufficient Robustness | no actions required")
             
-    
-    async def find_new_connections(self):
-        logging.info("🌐  Initializing restructure process from Node Manager")
+    async def reconnect_to_federation(self):
+        # If we got some refs, try to reconnect to them
         self._restructure_process_lock.acquire()
-        # Update the config params of candidate_selector
-        self.candidate_selector.set_config([self.engine.get_loss(), self.engine.weight_distance, self.engine.weight_het])
-        self.thread = threading.Thread(target=self._find_connections_thread, args=(self))
-        self.thread.start()
-        self.restructure = True
-        while self.restructure:
-            await asyncio.sleep(1)
+        if self.neighbor_policy.get_nodes_known() > 0:
+            logging.info("Reconnecting | Addrs availables")
+            await self.start_late_connection_process(connected=False, msg_type="discover_nodes", addrs_known=self.neighbor_policy.get_nodes_known())
+        # Otherwise stablish connection to federation sending discover nodes instead of join 
+        else:
+            logging.info("Reconnecting | NO Addrs availables")
+            await self.start_late_connection_process(connected=False, msg_type="discover_nodes")
         self._restructure_process_lock.release()
         
-    
-    async def _find_connections_thread(self):
-        posible_connections = self.get_nodes_known(neighbors_too=False)
-        while self.restructure:
-            # out of federation but got info about nodes inside
-            if len(posible_connections) > 0:
-                msg = self.engine.cm.mm.generate_discover_message(nebula_pb2.DiscoverMessage.Action.DISCOVER_NODE)
-                for addr in posible_connections:
-                    # send message to known nodes, wait for response and select
-                    pass
-            # im out of federation without info about any nodes inside of it
-            else:
-                await self.start_late_connection_process()  
-            
-            self.restructure = self.need_more_neighbors()      
+    async def upgrade_connection_robustness(self):
+        self._restructure_process_lock.acquire()
+        addrs_to_connect = self.neighbor_policy.get_nodes_known(neighbors_too=False)
+        # If we got some refs, try to connect to them
+        if len(addrs_to_connect) > 0:
+            await self.start_late_connection_process(connected=True, msg_type="discover_nodes", addrs_known=addrs_to_connect)
+        else:
+            await self.start_late_connection_process(connected=True, msg_type="discover_nodes")
+        self._restructure_process_lock.release()
+        
+                

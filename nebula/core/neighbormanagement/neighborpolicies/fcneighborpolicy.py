@@ -77,7 +77,7 @@ class FCNeighborPolicy(NeighborPolicy):
           
     
     def _disconnect_from(self):
-        return []
+        return ""
     
     def _connect_to(self):
         ct = ""

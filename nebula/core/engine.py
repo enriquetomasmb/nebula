@@ -389,19 +389,19 @@ class Engine:
             if len(ct_actions):            
                 for addr in ct_actions.split():
                     cnt_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.CONNECT_TO, addr)
-                    #await self.cm.send_message(source, cnt_msg)
+                    await self.cm.send_message(source, cnt_msg)
             
             if len(df_actions):    
                 for addr in df_actions.split():
                     df_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.DISCONNECT_FROM, addr)
-                    #await self.cm.send_message(source, df_msg) 
+                    await self.cm.send_message(source, df_msg) 
 
             await self.cm.connect(source, direct=True)
             self.nm.meet_node(source)
             self.nm.update_neighbors(source)
             await self.update_model_learning_rate()
         else:
-            logging.info(f"🔗  Late connection NOT accepted | source: {source}") 
+            logging.info(f"❗️  Late connection NOT accepted | source: {source}") 
 
     @event_handler(
         nebula_pb2.ConnectionMessage,
@@ -416,17 +416,15 @@ class Engine:
             if len(ct_actions):            
                 for addr in ct_actions.split():
                     cnt_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.CONNECT_TO, addr)
-                    pass
-                    #await self.cm.send_message(source, cnt_msg)
+                    await self.cm.send_message(source, cnt_msg)
             
             if len(df_actions):    
                 for addr in df_actions.split():
                     df_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.DISCONNECT_FROM, addr)
-                    #await self.cm.send_message(source, df_msg)      
+                    await self.cm.send_message(source, df_msg)      
         else:
-            logging.info(f"🔗  handle_connection_message | Trigger | restructure connection denied from {source}")
-            await self.cm.disconnect(source, mutual_disconnection=False)
-            self.nm.update_neighbors(source, remove=True) 
+            logging.info(f"❗️  handle_connection_message | Trigger | restructure connection denied from {source}")
+            await self.cm.disconnect(source, mutual_disconnection=False) 
     
     @event_handler(nebula_pb2.DiscoverMessage, nebula_pb2.DiscoverMessage.Action.DISCOVER_JOIN)
     async def _discover_discover_join_callback(self, source, message):
@@ -504,10 +502,10 @@ class Engine:
     async def _link_connect_to_callback(self, source, message):
         logging.info(f"🔗  handle_link_message | Trigger | Received connecto_to message from {source}")
         addrs = message.arguments
-        for addr in addrs:
-            await self.cm.connect(addr, direct=True)
-            self.nm.update_neighbors(addr)
-            self.nm.meet_node(source)
+        for addr in addrs.split():
+            #await self.cm.connect(addr, direct=True)
+            #self.nm.update_neighbors(addr)
+            self.nm.meet_node(addr)
             
     @event_handler(
         nebula_pb2.LinkMessage,
@@ -516,7 +514,7 @@ class Engine:
     async def _link_disconnect_from_callback(self, source, message):
         logging.info(f"🔗  handle_link_message | Trigger | Received disconnect_from message from {source}")
         addrs = message.arguments
-        for addr in addrs:
+        for addr in addrs.split():
             await self.cm.disconnect(source, mutual_disconnection=False)
             self.nm.update_neighbors(addr, remove=True)                
                     
@@ -817,7 +815,7 @@ class Engine:
         if not self.mobility:
             return
         logging.info("🔄 Starting additional mobility actions...")
-        #self.nm.update_weight_modifiers()
+        self.nm.check_robustness()
 
     def reputation_calculation(self, aggregated_models_weights):
         cossim_threshold = 0.5

@@ -388,18 +388,27 @@ class CommunicationsManager:
         self.ecs.stop()    
         
     def init_external_connection_service(self):
-        self.ecs = NebulaConnectionService(self.addr)
         self.start_external_connection_service()    
         
-    async def establish_connection_with_federation(self):
+    async def stablish_connection_to_federation(self, msg_type="discover_join", addrs_known=None):
         """
             Using ExternalConnectionService to get addrs on local network, after that
             stablishment of TCP connection and send the message broadcasted
         """
-        logging.info("Searching federation process beginning..")
-        addrs = self.ecs.find_federation()
-        logging.info(f"Found federation devices | addrs {addrs}")
-        msg = self.mm.generate_discover_message(nebula_pb2.DiscoverMessage.Action.DISCOVER_JOIN)
+        addrs = []
+        if addrs_known == None:
+            logging.info("Searching federation process beginning...")
+            addrs = self.ecs.find_federation()
+            logging.info(f"Found federation devices | addrs {addrs}")
+        else:
+            logging.info("Searching federation process beginning... | Using addrs previously known")
+            addrs = addrs_known
+            
+        if msg_type=="discover_join":
+            msg = self.mm.generate_discover_message(nebula_pb2.DiscoverMessage.Action.DISCOVER_JOIN)
+        elif msg_type=="discover_nodes":
+            msg = self.mm.generate_discover_message(nebula_pb2.DiscoverMessage.Action.DISCOVER_NODES)
+            
         logging.info("Starting communications with devices found")
         for addr in addrs:
             await self.connect(addr, direct=False)
@@ -409,10 +418,10 @@ class CommunicationsManager:
         current_connections = await self.get_addrs_current_connections()
         logging.info(f"Connections verified after searching: {current_connections}")
         for addr in addrs:
-            logging.info(f"Sending discover join to --> {addr}")
+            logging.info(f"Sending {msg_type} to ---> {addr}")
             asyncio.create_task(self.send_message(addr, msg))
-            await asyncio.sleep(1)        
-
+            await asyncio.sleep(1)
+                 
     def get_connections_lock(self):
         return self.connections_lock
 
