@@ -58,6 +58,9 @@ class NodeManager():
         
         self.synchronizing_rounds = False
         
+        self._fast_reboot = False
+        self._learning_rate=1e-3
+        
         #self.set_confings()
 
     @property
@@ -79,6 +82,12 @@ class NodeManager():
     @property
     def timer_generator(self):
         return self._timer_generator
+    
+    def get_learning_rate_increase(self):
+        return self._learning_rate
+    
+    def fast_reboot_on(self):
+        return self._fast_reboot
     
     def get_push_acceleration(self):
         return self._push_acceleration

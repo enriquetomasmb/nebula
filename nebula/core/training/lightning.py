@@ -353,3 +353,6 @@ class Lightning:
     def on_learning_cycle_end(self):
         self._logger.log_data({"A-Round": self.round})
         # self.reporter.enqueue_data("Round", self.round)
+        
+    def update_model_learning_rate(self, new_lr):
+        self.model.modify_learning_rate(new_lr)

@@ -34,4 +34,5 @@ class MNISTModelMLP(NebulaModel):
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        self._optimizer = optimizer
         return optimizer

@@ -52,4 +52,5 @@ class MNISTModelCNN(NebulaModel):
             betas=(self.config["beta1"], self.config["beta2"]),
             amsgrad=self.config["amsgrad"],
         )
+        self._optimizer = optimizer
         return optimizer

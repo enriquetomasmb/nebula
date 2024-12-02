@@ -399,6 +399,7 @@ class Engine:
             await self.cm.connect(source, direct=True)
             self.nm.meet_node(source)
             self.nm.update_neighbors(source)
+            await self.update_model_learning_rate()
         else:
             logging.info(f"🔗  Late connection NOT accepted | source: {source}") 
 
@@ -536,11 +537,16 @@ class Engine:
         self.nm.set_rounds_pushed(rounds_push)
     
     def apply_weight_strategy(self, pending_models):
-        #if self.mobility:
-        #    self.nm.apply_weight_strategy(pending_models)
-        #    return pending_models
-        #else:
-        return pending_models    
+        if self.mobility and self.nm.fast_reboot_on():
+            self.nm.apply_weight_strategy(pending_models)
+            return pending_models
+        else:
+            return pending_models
+    
+    async def update_model_learning_rate(self):
+        await self.trainning_in_progress_lock.acquire_async()
+        self.trainer.update_model_learning_rate(self.nm.get_learning_rate_increase())
+        await self.trainning_in_progress_lock.release_async()        
         
     async def _start_learning_late(self):
         await self.learning_cycle_lock.acquire_async()
