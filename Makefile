@@ -26,15 +26,26 @@ install-python: check-uv	## Install Python with uv
 .PHONY: install
 install: install-python		## Install core dependencies
 	@echo "📦 Installing core dependencies with uv"
-	@$(UV) sync --group core
+	@$(UV) sync --group controller --group core
 	@echo "🔧 Installing pre-commit hooks"
 	@$(UV) run pre-commit install
 	@echo ""
 	@$(MAKE) update
 	@echo ""
-	@$(MAKE) update-production
-	@echo ""
 	@$(MAKE) shell
+
+.PHONY: install-production
+install-production: install	## Install production dependencies
+	@echo "🐳 Updating production docker images..."
+	@echo "🐳 Building nebula-waf"
+	@docker build -t nebula-waf -f nebula/addons/waf/Dockerfile-waf --build-arg USER=$(USER) nebula/addons/waf
+	@echo "🐳 Building nebula-loki"
+	@docker build -t nebula-waf-loki -f nebula/addons/waf/Dockerfile-loki nebula/addons/waf
+	@echo "🐳 Building nebula-promtail"
+	@docker build -t nebula-waf-promtail -f nebula/addons/waf/Dockerfile-promtail --build-arg USER=$(USER) nebula/addons/waf
+	@echo "🐳 Building nebula-grafana"
+	@docker build -t nebula-waf-grafana -f nebula/addons/waf/Dockerfile-grafana --build-arg USER=$(USER) nebula/addons/waf
+	echo "🐳 Docker images updated."
 
 .PHONY: shell
 shell:				## Start a shell in the uv environment
@@ -70,19 +81,6 @@ update:				## Update docker images
 	else \
 		echo "Skipping nebula-core docker build."; \
 	fi
-	echo "🐳 Docker images updated."
-
-.PHONY: update-production
-update-production:		## Update production docker images
-	@echo "🐳 Updating production docker images..."
-	@echo "🐳 Building nebula-waf"
-	@docker build -t nebula-waf -f nebula/addons/waf/Dockerfile-waf --build-arg USER=$(USER) nebula/addons/waf
-	@echo "🐳 Building nebula-loki"
-	@docker build -t nebula-waf-loki -f nebula/addons/waf/Dockerfile-loki nebula/addons/waf
-	@echo "🐳 Building nebula-promtail"
-	@docker build -t nebula-waf-promtail -f nebula/addons/waf/Dockerfile-promtail --build-arg USER=$(USER) nebula/addons/waf
-	@echo "🐳 Building nebula-grafana"
-	@docker build -t nebula-waf-grafana -f nebula/addons/waf/Dockerfile-grafana --build-arg USER=$(USER) nebula/addons/waf
 	echo "🐳 Docker images updated."
 
 .PHONY: lock

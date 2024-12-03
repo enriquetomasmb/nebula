@@ -18,6 +18,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "
 
 
 class Settings:
+    controller_port: int = os.environ.get("NEBULA_CONTROLLER_PORT", 5000)
     port: int = os.environ.get("NEBULA_FRONTEND_PORT", 6060)
     production: bool = os.environ.get("NEBULA_PRODUCTION", "False") == "True"
     gpu_available: bool = os.environ.get("NEBULA_GPU_AVAILABLE", "False") == "True"
@@ -32,7 +33,7 @@ class Settings:
     statistics_port: int = os.environ.get("NEBULA_STATISTICS_PORT", 8080)
     PERMANENT_SESSION_LIFETIME: datetime.timedelta = datetime.timedelta(minutes=60)
     templates_dir: str = "templates"
-    server_log: str = os.environ.get("NEBULA_SERVER_LOG", "/nebula/app/logs/server.log")
+    frontend_log: str = os.environ.get("NEBULA_FRONTEND_LOG", "/nebula/app/logs/frontend.log")
 
 
 settings = Settings()
@@ -42,7 +43,7 @@ logging.basicConfig(
     format="[%(asctime)s] [%(levelname)s] %(message)s",
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler(settings.server_log, mode="w"),
+        logging.FileHandler(settings.frontend_log, mode="w"),
     ],
 )
 
@@ -50,7 +51,7 @@ uvicorn_loggers = ["uvicorn", "uvicorn.error", "uvicorn.access"]
 for logger_name in uvicorn_loggers:
     logger = logging.getLogger(logger_name)
     logger.propagate = False  # Prevent duplicate logs
-    handler = logging.FileHandler(settings.server_log, mode="a")
+    handler = logging.FileHandler(settings.frontend_log, mode="a")
     handler.setFormatter(logging.Formatter("[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s"))
     logger.addHandler(handler)
 

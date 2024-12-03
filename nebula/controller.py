@@ -10,7 +10,9 @@ import time
 
 import docker
 import psutil
+import uvicorn
 from dotenv import load_dotenv
+from fastapi import FastAPI
 from watchdog.events import PatternMatchingEventHandler
 from watchdog.observers import Observer
 
@@ -33,27 +35,19 @@ class TermEscapeCodeFormatter(logging.Formatter):
         return super().format(record)
 
 
-log_console_format = "[%(levelname)s] - %(asctime)s - Controller - %(message)s"
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO)
-# console_handler.setFormatter(logging.Formatter(log_console_format))
-console_handler.setFormatter(TermEscapeCodeFormatter(log_console_format))
-logging.basicConfig(
-    level=logging.DEBUG,
-    handlers=[
-        console_handler,
-    ],
-)
+# Initialize FastAPI app outside the Controller class
+app = FastAPI()
 
 
-# Detect ctrl+c and run killports
-def signal_handler(sig, frame):
-    Controller.stop()
-    sys.exit(0)
+# Define endpoints outside the Controller class
+@app.get("/")
+async def read_root():
+    return {"message": "Welcome to the NEBULA Controller API"}
 
 
-signal.signal(signal.SIGTERM, signal_handler)
-signal.signal(signal.SIGINT, signal_handler)
+@app.get("/status")
+async def get_status():
+    return {"status": "NEBULA Controller API is running"}
 
 
 class NebulaEventHandler(PatternMatchingEventHandler):
@@ -247,6 +241,7 @@ class Controller:
         self.start_date_scenario = None
         self.federation = args.federation if hasattr(args, "federation") else None
         self.topology = args.topology if hasattr(args, "topology") else None
+        self.controller_port = args.controllerport if hasattr(args, "controllerport") else 5000
         self.waf_port = args.wafport if hasattr(args, "wafport") else 6000
         self.frontend_port = args.webport if hasattr(args, "webport") else 6060
         self.grafana_port = args.grafanaport if hasattr(args, "grafanaport") else 6040
@@ -272,7 +267,13 @@ class Controller:
         self.network_subnet = args.network_subnet if hasattr(args, "network_subnet") else None
         self.network_gateway = args.network_gateway if hasattr(args, "network_gateway") else None
 
+        # Configure logger
+        self.configure_logger()
+
         # Check ports available
+        if not SocketUtils.is_port_open(self.controller_port):
+            self.controller_port = SocketUtils.find_free_port()
+
         if not SocketUtils.is_port_open(self.frontend_port):
             self.frontend_port = SocketUtils.find_free_port()
 
@@ -285,6 +286,33 @@ class Controller:
         self.mender = None if self.simulation else Mender()
         self.use_blockchain = args.use_blockchain if hasattr(args, "use_blockchain") else False
         self.gpu_available = False
+
+        # Reference the global app instance
+        self.app = app
+
+    def configure_logger(self):
+        log_console_format = "[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s"
+        console_handler = logging.StreamHandler()
+        console_handler.setLevel(logging.INFO)
+        console_handler.setFormatter(TermEscapeCodeFormatter(log_console_format))
+        console_handler_file = logging.FileHandler(os.path.join(self.log_dir, "controller.log"), mode="a")
+        console_handler_file.setLevel(logging.INFO)
+        console_handler_file.setFormatter(logging.Formatter("[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s"))
+        logging.basicConfig(
+            level=logging.DEBUG,
+            handlers=[
+                console_handler,
+                console_handler_file,
+            ],
+        )
+        uvicorn_loggers = ["uvicorn", "uvicorn.error", "uvicorn.access"]
+        for logger_name in uvicorn_loggers:
+            logger = logging.getLogger(logger_name)
+            logger.handlers = []  # Remove existing handlers
+            logger.propagate = False  # Prevent duplicate logs
+            handler = logging.FileHandler(os.path.join(self.log_dir, "controller.log"), mode="a")
+            handler.setFormatter(logging.Formatter("[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s"))
+            logger.addHandler(handler)
 
     def start(self):
         banner = """
@@ -319,6 +347,11 @@ class Controller:
         os.environ["NEBULA_STATISTICS_PORT"] = str(self.statistics_port)
         os.environ["NEBULA_ROOT_HOST"] = self.root_path
         os.environ["NEBULA_HOST_PLATFORM"] = self.host_platform
+
+        # Start the FastAPI app in a daemon thread
+        app_thread = threading.Thread(target=self.run_controller_api, daemon=True)
+        app_thread.start()
+        logging.info(f"NEBULA Controller is running at port {self.controller_port}")
 
         if self.production:
             self.run_waf()
@@ -363,6 +396,11 @@ class Controller:
             sys.exit(0)
 
         logging.info("Press Ctrl+C for exit from NEBULA (global exit)")
+
+        # Adjust signal handling inside the start method
+        signal.signal(signal.SIGTERM, self.signal_handler)
+        signal.signal(signal.SIGINT, self.signal_handler)
+
         try:
             while True:
                 time.sleep(1)
@@ -372,6 +410,20 @@ class Controller:
             self.stop()
 
         observer.join()
+
+    def signal_handler(self, sig, frame):
+        # Handle termination signals
+        logging.info("Received termination signal, shutting down...")
+        self.stop()
+        sys.exit(0)
+
+    def run_controller_api(self):
+        uvicorn.run(
+            self.app,
+            host="0.0.0.0",
+            port=self.controller_port,
+            log_config=None,  # Prevent Uvicorn from configuring logging
+        )
 
     def run_waf(self):
         network_name = f"{os.environ['USER']}-nebula-net-base"
@@ -516,7 +568,7 @@ class Controller:
             "NEBULA_PRODUCTION": self.production,
             "NEBULA_GPU_AVAILABLE": self.gpu_available,
             "NEBULA_ADVANCED_ANALYTICS": self.advanced_analytics,
-            "NEBULA_SERVER_LOG": "/nebula/app/logs/server.log",
+            "NEBULA_FRONTEND_LOG": "/nebula/app/logs/fronted.log",
             "NEBULA_LOGS_DIR": "/nebula/app/logs/",
             "NEBULA_CONFIG_DIR": "/nebula/app/config/",
             "NEBULA_CERTS_DIR": "/nebula/app/certs/",
@@ -526,6 +578,7 @@ class Controller:
             "NEBULA_DEFAULT_USER": "admin",
             "NEBULA_DEFAULT_PASSWORD": "admin",
             "NEBULA_FRONTEND_PORT": self.frontend_port,
+            "NEBULA_CONTROLLER_PORT": self.controller_port,
         }
 
         volumes = ["/nebula", "/var/run/docker.sock", "/etc/nginx/sites-available/default"]

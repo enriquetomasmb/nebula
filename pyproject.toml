@@ -61,6 +61,27 @@ docs = [
     "mkdocs-section-index<1.0.0,>=0.3.9",
     "mkdocstrings[python]<1.0.0,>=0.26.2",
 ]
+controller = [
+    "ansi2html==1.9.2",
+    "docker==7.1.0",
+    "fastapi[all]==0.114.0",
+    "geopy==2.4.1",
+    "gunicorn==23.0.0",
+    "jinja2==3.1.4",
+    "matplotlib==3.9.2",
+    "networkx==3.3",
+    "openpyxl==3.1.5",
+    "pandas==2.2.2",
+    "plotly==5.24.0",
+    "protobuf==4.25.3",
+    "psutil==6.0.0",
+    "pyopenssl==24.2.1",
+    "python-dotenv==1.0.1",
+    "requests==2.32.3",
+    "setuptools==74.1.2",
+    "uvicorn==0.30.6",
+    "wheel==0.44.0",
+]
 core = [
     "aiohttp==3.10.5",
     "ansi2html==1.9.2",
