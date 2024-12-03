@@ -1,10 +1,10 @@
+import json
 import logging
 import os
 import re
 import signal
 import subprocess
 import sys
-import textwrap
 import threading
 import time
 
@@ -98,6 +98,47 @@ class NebulaEventHandler(PatternMatchingEventHandler):
             if src_path in self.processing_files:
                 self.processing_files.remove(src_path)
 
+    def verify_nodes_ports(self, src_path):
+        parent_dir = os.path.dirname(src_path)
+        base_dir = os.path.basename(parent_dir)
+        scenario_path = os.path.join(os.path.dirname(parent_dir), base_dir)
+
+        try:
+            port_mapping = {}
+            new_port_start = 50001
+            for filename in os.listdir(scenario_path):
+                if filename.endswith(".json") and filename.startswith("participant"):
+                    file_path = os.path.join(scenario_path, filename)
+
+                    with open(file_path) as json_file:
+                        node = json.load(json_file)
+
+                    current_port = node["network_args"]["port"]
+                    port_mapping[current_port] = SocketUtils.find_free_port(start_port=new_port_start)
+                    new_port_start = port_mapping[current_port] + 1
+
+            for filename in os.listdir(scenario_path):
+                if filename.endswith(".json") and filename.startswith("participant"):
+                    file_path = os.path.join(scenario_path, filename)
+
+                    with open(file_path) as json_file:
+                        node = json.load(json_file)
+
+                    current_port = node["network_args"]["port"]
+                    node["network_args"]["port"] = port_mapping[current_port]
+                    neighbors = node["network_args"]["neighbors"]
+
+                    for old_port, new_port in port_mapping.items():
+                        neighbors = neighbors.replace(f":{old_port}", f":{new_port}")
+
+                    node["network_args"]["neighbors"] = neighbors
+
+                    with open(file_path, "w") as f:
+                        json.dump(node, f, indent=4)
+
+        except Exception as e:
+            print(f"Error processing JSON files: {e}")
+
     def on_created(self, event):
         """
         Handles the event when a file is created.
@@ -111,6 +152,7 @@ class NebulaEventHandler(PatternMatchingEventHandler):
             return
         logging.info("File created: %s" % src_path)
         try:
+            self.verify_nodes_ports(src_path)
             self.run_script(src_path)
         finally:
             self._processing_done(src_path)
@@ -292,7 +334,7 @@ class Controller:
         # Watchdog for running additional scripts in the host machine (i.e. during the execution of a federation)
         event_handler = NebulaEventHandler()
         observer = Observer()
-        observer.schedule(event_handler, path=self.config_dir, recursive=False)
+        observer.schedule(event_handler, path=self.config_dir, recursive=True)
         observer.start()
 
         if self.mender:
@@ -331,10 +373,10 @@ class Controller:
 
         observer.join()
 
-    def run_waf(self):       
+    def run_waf(self):
         network_name = f"{os.environ['USER']}-nebula-net-base"
         base = DockerUtils.create_docker_network(network_name)
-        
+
         client = docker.from_env()
 
         volumes_waf = ["/var/log/nginx"]
@@ -343,7 +385,7 @@ class Controller:
 
         host_config_waf = client.api.create_host_config(
             binds=[f"{os.environ['NEBULA_LOGS_DIR']}/waf/nginx:/var/log/nginx"],
-            privileged = True,
+            privileged=True,
             port_bindings={80: self.waf_port},
         )
 
@@ -362,17 +404,17 @@ class Controller:
         )
 
         client.api.start(container_id_waf)
-        
+
         environment = {
-            "GF_SECURITY_ADMIN_PASSWORD":"admin",
-            "GF_USERS_ALLOW_SIGN_UP":"false",
-            "GF_SERVER_HTTP_PORT":"3000",
-            "GF_SERVER_PROTOCOL":"http",
-            "GF_SERVER_DOMAIN":f"localhost:{self.grafana_port}",
-            "GF_SERVER_ROOT_URL":f"http://localhost:{self.grafana_port}/grafana/",
-            "GF_SERVER_SERVE_FROM_SUB_PATH":"true",
-            "GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH":"/var/lib/grafana/dashboards/dashboard.json",
-            "GF_METRICS_MAX_LIMIT_TSDB":"0",
+            "GF_SECURITY_ADMIN_PASSWORD": "admin",
+            "GF_USERS_ALLOW_SIGN_UP": "false",
+            "GF_SERVER_HTTP_PORT": "3000",
+            "GF_SERVER_PROTOCOL": "http",
+            "GF_SERVER_DOMAIN": f"localhost:{self.grafana_port}",
+            "GF_SERVER_ROOT_URL": f"http://localhost:{self.grafana_port}/grafana/",
+            "GF_SERVER_SERVE_FROM_SUB_PATH": "true",
+            "GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH": "/var/lib/grafana/dashboards/dashboard.json",
+            "GF_METRICS_MAX_LIMIT_TSDB": "0",
         }
 
         ports = [3000]
@@ -396,7 +438,7 @@ class Controller:
         )
 
         client.api.start(container_id)
-        
+
         command = ["-config.file=/mnt/config/loki-config.yml"]
 
         ports_loki = [3100]
@@ -420,13 +462,13 @@ class Controller:
         )
 
         client.api.start(container_id_loki)
-        
+
         volumes_promtail = ["/var/log/nginx"]
 
         host_config_promtail = client.api.create_host_config(
             binds=[
                 f"{os.environ['NEBULA_LOGS_DIR']}/waf/nginx:/var/log/nginx",
-                ],
+            ],
         )
 
         networking_config_promtail = client.api.create_networking_config({
@@ -528,6 +570,7 @@ class Controller:
         logging.info("Closing NEBULA (exiting from components)... Please wait")
         DockerUtils.remove_containers_by_prefix(f"{os.environ['USER']}")
         ScenarioManagement.stop_blockchain()
+        ScenarioManagement.stop_participants()
         Controller.stop_waf()
         DockerUtils.remove_docker_networks_by_prefix(f"{os.environ['USER']}")
         controller_pid_file = os.path.join(os.path.dirname(__file__), "controller.pid")

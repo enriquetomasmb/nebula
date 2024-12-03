@@ -126,7 +126,11 @@ else:
     logging.info("SECRET_KEY already set")
 
 app = FastAPI()
-app.add_middleware(SessionMiddleware, secret_key=os.environ.get("SECRET_KEY"), session_cookie=f"session_{os.environ.get('NEBULA_FRONTEND_PORT')}")
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.environ.get("SECRET_KEY"),
+    session_cookie=f"session_{os.environ.get('NEBULA_FRONTEND_PORT')}",
+)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -404,10 +408,10 @@ async def nebula_update_user(
     password: str = Form(...),
     role: str = Form(...),
 ):
-    if 'user' not in session or session['role'] != 'admin':
-        return RedirectResponse(url='/nebula', status_code=status.HTTP_302_FOUND)
+    if "user" not in session or session["role"] != "admin":
+        return RedirectResponse(url="/nebula", status_code=status.HTTP_302_FOUND)
     update_user(user, password, role)
-    return RedirectResponse(url='/nebula/admin', status_code=status.HTTP_302_FOUND)
+    return RedirectResponse(url="/nebula/admin", status_code=status.HTTP_302_FOUND)
 
 
 @app.get("/nebula/api/dashboard/runningscenario", response_class=JSONResponse)
@@ -790,7 +794,7 @@ def stop_scenario(scenario_name, user):
     from nebula.scenarios import ScenarioManagement
 
     logging.info(f"[FER] stopping scenario user {user}")
-    ScenarioManagement.stop_participants()
+    ScenarioManagement.stop_participants(scenario_name)
     DockerUtils.remove_containers_by_prefix(f"{os.environ.get('NEBULA_CONTROLLER_NAME')}-{user}-participant")
     DockerUtils.remove_docker_network(
         f"{(os.environ.get('NEBULA_CONTROLLER_NAME'))}-{str(user).lower()}-nebula-net-scenario"

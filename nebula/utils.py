@@ -18,19 +18,19 @@ class FileUtils:
 
 class SocketUtils:
     @classmethod
-    def is_port_open(cls, port):
+    def is_port_open(cls, port, hostname="127.0.0.1"):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            s.bind(("127.0.0.1", port))
+            result = s.connect_ex((hostname, port))
             s.close()
-            return True
+            return result != 0
         except OSError:
             return False
 
     @classmethod
-    def find_free_port(cls, start_port=49152, end_port=65535):
+    def find_free_port(cls, start_port=49152, end_port=65535, hostname="127.0.0.1"):
         for port in range(start_port, end_port + 1):
-            if SocketUtils.is_port_open(port):
+            if cls.is_port_open(port, hostname):
                 return port
         return None
 
@@ -46,7 +46,7 @@ class DockerUtils:
             # Obtain existing docker subnets
             existing_subnets = []
             networks = client.networks.list()
-            
+
             existing_network = next((n for n in networks if n.name == network_name), None)
 
             if existing_network:
@@ -57,8 +57,7 @@ class DockerUtils:
                     potential_base = ".".join(existing_subnet.split(".")[:3])  # Extract base from subnet
                     logging.info(f"Network '{network_name}' already exists with base {potential_base}")
                     return potential_base
-            
-            
+
             for network in networks:
                 ipam_config = network.attrs.get("IPAM", {}).get("Config", [])
                 if ipam_config:
@@ -77,7 +76,8 @@ class DockerUtils:
                     raise ValueError("No available subnets found.")
 
             # Create the Docker network
-            ipam_pool = docker.types.IPAMPool(subnet=subnet)
+            gateway = f"{subnet.split('/')[0].rsplit('.', 1)[0]}.1"
+            ipam_pool = docker.types.IPAMPool(subnet=subnet, gateway=gateway)
             ipam_config = docker.types.IPAMConfig(pool_configs=[ipam_pool])
             network = client.networks.create(name=network_name, driver="bridge", ipam=ipam_config)
 
@@ -129,11 +129,11 @@ class DockerUtils:
                     logging.info(f"Network {network.name} removed successfully.")
 
         except docker.errors.NotFound:
-            logging.exception(f"One or more networks with prefix {prefix} not found.")
+            logging.info(f"One or more networks with prefix {prefix} not found.")
         except docker.errors.APIError:
-            logging.exception("Error interacting with Docker")
+            logging.info("Error interacting with Docker")
         except Exception:
-            logging.exception("Unexpected error")
+            logging.info("Unexpected error")
 
     @classmethod
     def remove_containers_by_prefix(cls, prefix):

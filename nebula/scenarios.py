@@ -380,7 +380,7 @@ class ScenarioManagement:
                 logging.exception("Docker Compose failed to stop blockchain or blockchain already exited.")
 
     @staticmethod
-    def stop_participants():
+    def stop_participants(scenario_name=None):
         # When stopping the nodes, we need to remove the current_scenario_commands.sh file -> it will cause the nodes to stop using PIDs
         try:
             nebula_config_dir = os.environ.get("NEBULA_CONFIG_DIR")
@@ -389,48 +389,31 @@ class ScenarioManagement:
                 nebula_base_dir = os.path.abspath(os.path.join(current_dir, ".."))
                 nebula_config_dir = os.path.join(nebula_base_dir, "app", "config")
                 logging.info(f"NEBULA_CONFIG_DIR not found. Using default path: {nebula_config_dir}")
-            if os.environ.get("NEBULA_HOST_PLATFORM") == "windows":
-                scenario_commands_file = os.path.join(nebula_config_dir, "current_scenario_commands.ps1")
+
+            if scenario_name:
+                if os.environ.get("NEBULA_HOST_PLATFORM") == "windows":
+                    scenario_commands_file = os.path.join(
+                        nebula_config_dir, scenario_name, "current_scenario_commands.ps1"
+                    )
+                else:
+                    scenario_commands_file = os.path.join(
+                        nebula_config_dir, scenario_name, "current_scenario_commands.sh"
+                    )
+                if os.path.exists(scenario_commands_file):
+                    os.remove(scenario_commands_file)
             else:
-                scenario_commands_file = os.path.join(nebula_config_dir, "current_scenario_commands.sh")
-            if os.path.exists(scenario_commands_file):
-                os.remove(scenario_commands_file)
+                if os.environ.get("NEBULA_HOST_PLATFORM") == "windows":
+                    files = glob.glob(
+                        os.path.join(nebula_config_dir, "**/current_scenario_commands.ps1"), recursive=True
+                    )
+                else:
+                    files = glob.glob(
+                        os.path.join(nebula_config_dir, "**/current_scenario_commands.sh"), recursive=True
+                    )
+                for file in files:
+                    os.remove(file)
         except Exception as e:
             logging.exception(f"Error while removing current_scenario_commands.sh file: {e}")
-
-        # DockerUtils.remove_containers_by_prefix(f"{os.environ.get('NEBULA_CONTROLLER_NAME')}")
-
-        # if sys.platform == "win32":
-        #     try:
-        #         # kill all the docker containers which contain the word "nebula-core"
-        #         commands = [
-        #             """docker kill $(docker ps -q --filter ancestor=nebula-core) | Out-Null""",
-        #             """docker rm $(docker ps -a -q --filter ancestor=nebula-core) | Out-Null""",
-        #             r"""docker network rm $(docker network ls | Where-Object { ($_ -split '\s+')[1] -like 'nebula-net-scenario' } | ForEach-Object { ($_ -split '\s+')[0] }) | Out-Null""",
-        #         ]
-
-        #         for command in commands:
-        #             time.sleep(1)
-        #             exit_code = os.system(f'powershell.exe -Command "{command}"')
-        #             # logging.info(f"Windows Command '{command}' executed with exit code: {exit_code}")
-
-        #     except Exception as e:
-        #         raise Exception(f"Error while killing docker containers: {e}")
-        # else:
-        #     try:
-        #         commands = [
-        #             """docker kill $(docker ps -q --filter ancestor=nebula-core) > /dev/null 2>&1""",
-        #             """docker rm $(docker ps -a -q --filter ancestor=nebula-core) > /dev/null 2>&1""",
-        #             """docker network rm $(docker network ls | grep nebula-net-scenario | awk '{print $1}') > /dev/null 2>&1""",
-        #         ]
-
-        #         for command in commands:
-        #             time.sleep(1)
-        #             exit_code = os.system(command)
-        #             # logging.info(f"Linux Command '{command}' executed with exit code: {exit_code}")
-
-        #     except Exception as e:
-        #         raise Exception(f"Error while killing docker containers: {e}")
 
     @staticmethod
     def stop_nodes():
@@ -725,7 +708,7 @@ class ScenarioManagement:
             node["security_args"]["certfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_cert.pem"
             node["security_args"]["keyfile"] = f"/nebula/app/certs/participant_{node['device_args']['idx']}_key.pem"
             node["security_args"]["cafile"] = "/nebula/app/certs/ca_cert.pem"
-            node = json.loads(json.dumps(node).replace("192.168.50.", f"{base}."))
+            node = json.loads(json.dumps(node).replace("192.168.50.", f"{base}."))  # TODO change this
 
             # Write the config file in config directory
             with open(f"{self.config_dir}/participant_{node['device_args']['idx']}.json", "w") as f:
@@ -812,9 +795,9 @@ class ScenarioManagement:
 
                 commands += 'Write-Host "All nodes started. PIDs stored in $PID_FILE"\n'
 
-                with open("/nebula/app/config/current_scenario_commands.ps1", "w") as f:
+                with open(f"/nebula/app/config/{self.scenario_name}/current_scenario_commands.ps1", "w") as f:
                     f.write(commands)
-                os.chmod("/nebula/app/config/current_scenario_commands.ps1", 0o755)
+                os.chmod(f"/nebula/app/config/{self.scenario_name}/current_scenario_commands.ps1", 0o755)
             else:
                 commands = '#!/bin/bash\n\nPID_FILE="$(dirname "$0")/current_scenario_pids.txt"\n\n> $PID_FILE\n\n'
                 sorted_participants = sorted(
@@ -834,9 +817,9 @@ class ScenarioManagement:
 
                 commands += 'echo "All nodes started. PIDs stored in $PID_FILE"\n'
 
-                with open("/nebula/app/config/current_scenario_commands.sh", "w") as f:
+                with open(f"/nebula/app/config/{self.scenario_name}/current_scenario_commands.sh", "w") as f:
                     f.write(commands)
-                os.chmod("/nebula/app/config/current_scenario_commands.sh", 0o755)
+                os.chmod(f"/nebula/app/config/{self.scenario_name}/current_scenario_commands.sh", 0o755)
 
         except Exception as e:
             raise Exception(f"Error starting nodes as processes: {e}")
