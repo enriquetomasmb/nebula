@@ -204,7 +204,7 @@
                     <h5 class="step-number">Deployment <i class="fa fa-cloud-upload"></i></h5>
                     <h5 class="step-title">Deployment type</h5>
                     <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="radio" name="deploymentRadioOptions" id="process-radio" value="process" checked>
+                        <input class="form-check-input" type="radio" name="deploymentRadioOptions" id="process-radio" value="process">
                         <label class="form-check-label" for="process-radio">Processes</label>
                         <small id="processHelp" class="form-text text-muted"></small>
                             <i id="processHelpIcon" class="fa fa-info-circle" style="cursor: pointer;"></i>
@@ -212,7 +212,7 @@
                     </div>
                     <div class="form-check form-check-inline">
                         <input class="form-check-input" type="radio" name="deploymentRadioOptions" id="docker-radio"
-                            value="docker">
+                            value="docker" checked>
                         <label class="form-check-label" for="docker-radio">Docker containers</label>
                         <small id="dockerHelp" class="form-text text-muted"></small>
                             <i id="dockerHelpIcon" class="fa fa-info-circle" style="cursor: pointer;"></i>
@@ -545,6 +545,7 @@
                             <option>NoiseInjectionAttack</option>
                             <option>SwappingWeightsAttack</option>
                             <option>DelayerAttack</option>
+                            <option>FloodingAttack</option>
                         </select>
                         <h5 id="poisoned-node-title" class="step-title" style="margin-left: 11px; display: none;">% malicious nodes</h5>
                         <div class="form-check form-check-inline" style="display: none;" id="poisoned-node-percent-container">
@@ -2550,7 +2551,7 @@
                 document.getElementById("poisoned-noise-title").style.display = "block";
                 document.getElementById("poisoned-noise-percent-container").style.display = "block";
             }
-            else if(this.value == "GLLNeuronInversionAttack" || this.value == "NoiseInjectionAttack" || this.value == "SwappingWeightsAttack" || this.value == "DelayerAttack"){
+            else if(this.value == "GLLNeuronInversionAttack" || this.value == "NoiseInjectionAttack" || this.value == "SwappingWeightsAttack" || this.value == "DelayerAttack" || this.value == "FloodingAttack"){
                 document.getElementById("poisoned-node-title").style.display = "block";
                 document.getElementById("poisoned-node-percent-container").style.display = "block";
                 document.getElementById("poisoned-sample-title").style.display = "none";
