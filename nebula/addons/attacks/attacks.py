@@ -1,12 +1,14 @@
+import asyncio
 import logging
+import time
 from copy import deepcopy
 from typing import Any
 
 import numpy as np
 import torch
-import time
-import asyncio
 from torchmetrics.functional import pairwise_cosine_similarity
+
+from nebula.core.network.communications import CommunicationsManager
 
 # To take into account:
 # - Malicious nodes do not train on their own data
@@ -28,8 +30,8 @@ def create_attack(attack_name):
         return SwappingWeightsAttack()
     elif attack_name == "DelayerAttack":
         return DelayerAttack()
-    elif attack_name == "FloodAttack":
-        return FloodAttack()
+    elif attack_name == "FloodingAttack":
+        return FloodingAttack()
     else:
         return None
 
@@ -134,6 +136,29 @@ class SwappingWeightsAttack(Attack):
         return received_weights
 
 
+# class DelayerAttack(Attack):
+#     """
+#     Function to perform delayer attack on the received weights. It delays the
+#     weights for an indefinite number of rounds.
+#     """
+
+#     def __init__(self):
+#         super().__init__()
+#         self.weights = None
+
+#     def attack(self, received_weights):
+#         logging.info("[DelayerAttack] Performing delayer attack")
+
+#         logging.info("Delaying time from 15 seconds")
+#         time.sleep(15)
+#         logging.info("Delaying time finished")
+
+#         if self.weights is None:
+#             logging.info(f"Received weights: {received_weights}")
+#             self.weights = deepcopy(received_weights)
+#         return self.weights
+
+
 class DelayerAttack(Attack):
     """
     Function to perform delayer attack on the received weights. It delays the
@@ -144,18 +169,15 @@ class DelayerAttack(Attack):
         super().__init__()
         self.weights = None
 
-    def attack(self, received_weights):
+    async def attack(self):
         logging.info("[DelayerAttack] Performing delayer attack")
 
         logging.info("Delaying time from 15 seconds")
         time.sleep(15)
         logging.info("Delaying time finished")
 
-        if self.weights is None:
-            self.weights = deepcopy(received_weights)
-        return self.weights
-    
-class FloodAttack(Attack):
+
+class FloodingAttack(Attack):
     """
     Function to perform flood attack on the received weights. It floods the
     weights with a high value.
@@ -164,18 +186,18 @@ class FloodAttack(Attack):
     def __init__(self):
         super().__init__()
 
-    async def attack(self, repetitions=10, interval=0.05):
-        logging.info("[FloodAttack] Performing flood attack")
-        neighbors = set(await self.cm.get_addrs_current_connections(only_direct=True))
+    async def attack(self, cm: CommunicationsManager, addr, num_round, repetitions=20, interval=0.05):
+        logging.info("[FloodingAttack] Performing flood attack")
+        neighbors = set(await cm.get_addrs_current_connections(only_direct=True))
         for nei in neighbors:
             for i in range(repetitions):
-                message_data = self.cm.mm.generate_flood_attack_message(
-                    attacker_id=self.addr,
+                message_data = cm.mm.generate_flood_attack_message(
+                    attacker_id=addr,
                     frequency=int(i),
-                    duration=int(interval*1000),
+                    duration=int(interval * 1000),
                     target_node=nei,
                 )
-                await self.cm.send_message_to_neighbors(message_data, neighbors={nei})
+                await cm.send_message_to_neighbors(message_data, neighbors={nei})
                 logging.info(f"Flood attack message sent to {nei} - Attempt {i + 1}/{repetitions}.")
                 await asyncio.sleep(interval)
-                self.cm.store_send_timestamp(nei, self.round, "flood_attack")
+                cm.store_send_timestamp(nei, num_round, "flood_attack")
