@@ -649,7 +649,7 @@ class ScenarioManagement:
             logging.exception(
                 "Docker Compose failed to start Blockchain, please check if Docker Compose is installed (https://docs.docker.com/compose/install/) and Docker Engine is running."
             )
-            raise e
+            raise
 
     def start_nodes_docker(self):
         import subprocess
@@ -984,8 +984,7 @@ class ScenarioManagement:
             logging.warning("Files not found, nothing to remove")
         except Exception as e:
             logging.exception("Unknown error while removing files")
-            logging.exception(e)
-            raise e
+            raise
         try:
             shutil.rmtree(Utils.check_path(os.environ["NEBULA_LOGS_DIR"], scenario_name))
         except PermissionError:
@@ -1007,22 +1006,25 @@ class ScenarioManagement:
             logging.warning("Files not found, nothing to remove")
         except Exception as e:
             logging.exception("Unknown error while removing files")
-            logging.exception(e)
-            raise e
-        
+            
+            raise
+
         try:
-            nebula_reputation = os.path.join(os.environ["NEBULA_CORE"], "reputation", scenario_name)
+            nebula_reputation = os.path.join(
+                os.environ["NEBULA_LOGS_DIR"], "..", "..", "nebula", "core", "reputation", scenario_name
+            )
+            logging.info(f"Removing reputation folder {nebula_reputation}")
+            logging.info(f"nebula_reputation: {nebula_reputation}")
             if os.path.exists(nebula_reputation):
                 shutil.rmtree(nebula_reputation)
-                logging.info(f"Reputation folder {nebula_reputation} removed successfully")
+                # logging.info(f"Reputation folder {nebula_reputation} removed successfully")
             else:
                 logging.info(f"Reputation folder {nebula_reputation} not found")
         except FileNotFoundError:
             logging.warning("Files not found in reputation folder, nothing to remove")
         except Exception as e:
-            logging.error("Unknown error while removing files from reputation folder")
-            logging.error(e)
-            raise e
+            logging.exception("Unknown error while removing files from reputation folder")
+            raise
 
     def scenario_finished(self, timeout_seconds):
         client = docker.from_env()

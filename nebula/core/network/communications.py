@@ -5,13 +5,13 @@ import logging
 import os
 import subprocess
 import sys
-import traceback
 import time
-import torch
+import traceback
 from datetime import datetime
 from typing import TYPE_CHECKING
 
 import requests
+import torch
 
 from nebula.addons.mobility import Mobility
 from nebula.core.network.connection import Connection
@@ -20,6 +20,10 @@ from nebula.core.network.forwarder import Forwarder
 from nebula.core.network.messages import MessagesManager
 from nebula.core.network.propagator import Propagator
 from nebula.core.pb import nebula_pb2
+from nebula.core.reputation.Reputation import (
+    Reputation,
+    save_data,
+)
 from nebula.core.utils.helper import (
     cosine_metric,
     euclidean_metric,
@@ -29,10 +33,6 @@ from nebula.core.utils.helper import (
     pearson_correlation_metric,
 )
 from nebula.core.utils.locker import Locker
-from nebula.core.reputation.Reputation import (
-    Reputation,
-    save_data,
-)
 
 if TYPE_CHECKING:
     from nebula.core.engine import Engine
@@ -204,7 +204,7 @@ class CommunicationsManager:
         )
         try:
             await self.engine.event_manager.trigger_event(source, message)
-            self.store_receive_timestamp(source, "federation", message.round)
+            self.store_receive_timestamp(source, "federation")
         except Exception as e:
             logging.exception(
                 f"📝  handle_federation_message | Error while processing: {message.action} {message.arguments} | {e}"
@@ -257,9 +257,13 @@ class CommunicationsManager:
                     os.makedirs(directory, exist_ok=True)
                     if not os.path.isfile(file):
                         with open(file, "w") as f:
-                            f.write("timestamp,source_ip,round,current_round,cosine,euclidean,minkowski,manhattan,pearson_correlation,jaccard\n")
+                            f.write(
+                                "timestamp,source_ip,round,current_round,cosine,euclidean,minkowski,manhattan,pearson_correlation,jaccard\n"
+                            )
                     with open(file, "a") as f:
-                        f.write(f"{datetime.now()}, {source}, {message.round}, {current_round}, {cosine_value}, {euclidean_value}, {minkowski_value}, {manhattan_value}, {pearson_correlation_value}, {jaccard_value}\n")
+                        f.write(
+                            f"{datetime.now()}, {source}, {message.round}, {current_round}, {cosine_value}, {euclidean_value}, {minkowski_value}, {manhattan_value}, {pearson_correlation_value}, {jaccard_value}\n"
+                        )
 
                 if cosine_value < 0.6:
                     self.engine.rejected_nodes.add(source)
@@ -267,7 +271,7 @@ class CommunicationsManager:
                 # Manage communication latency
                 self.store_receive_timestamp(source, "model", message.round)
                 self.calculate_latency(source, "model")
-                
+
                 # Manage parameters of models
                 parameters_local = self.engine.trainer.get_model_parameters()
                 self.fraction_of_parameters_changed(source, parameters_local, decoded_model, current_round)
@@ -297,57 +301,56 @@ class CommunicationsManager:
                 # non-starting nodes receive the initialized model from the starting node
                 if not self.engine.get_federation_ready_lock().locked() or self.engine.get_initialization_status():
                     decoded_model = self.engine.trainer.deserialize_model(message.parameters)
-                #     if self.config.participant["adaptive_args"]["model_similarity"]:
-                #         logging.info("🤖  handle_model_message | Checking model similarity")
-                #         cosine_value = cosine_metric(
-                #             self.engine.trainer.get_model_parameters(),
-                #             decoded_model,
-                #             similarity=True,
-                #         )
-                #         euclidean_value = euclidean_metric(
-                #             self.engine.trainer.get_model_parameters(),
-                #             decoded_model,
-                #             similarity=True,
-                #         )
-                #         minkowski_value = minkowski_metric(
-                #             self.engine.trainer.get_model_parameters(),
-                #             decoded_model,
-                #             p=2,
-                #             similarity=True,
-                #         )
-                #         manhattan_value = manhattan_metric(
-                #             self.engine.trainer.get_model_parameters(),
-                #             decoded_model,
-                #             similarity=True,
-                #         )
-                #         pearson_correlation_value = pearson_correlation_metric(
-                #             self.engine.trainer.get_model_parameters(),
-                #             decoded_model,
-                #             similarity=True,
-                #         )
-                #         jaccard_value = jaccard_metric(
-                #             self.engine.trainer.get_model_parameters(),
-                #             decoded_model,
-                #             similarity=True,
-                #         )
-                #         file = f"{self.engine.log_dir}/participant_{self.engine.idx}_similarity.csv"
-                #         logging.info(f"self.engine.log_dir: {self.engine.log_dir}")
-                #         directory = os.path.dirname(file)
-                #         os.makedirs(directory, exist_ok=True)
-                #         if not os.path.isfile(file):
-                #             with open(file, "w") as f:
-                #                 f.write("timestamp,source_ip,round,current_round,cosine,euclidean,minkowski,manhattan,pearson_correlation,jaccard\n")
-                #         with open(file, "a") as f:
-                #             f.write(f"{datetime.now()}, {source}, {message.round}, {current_round}, {cosine_value}, {euclidean_value}, {minkowski_value}, {manhattan_value}, {pearson_correlation_value}, {jaccard_value}\n")
+                    #     if self.config.participant["adaptive_args"]["model_similarity"]:
+                    #         logging.info("🤖  handle_model_message | Checking model similarity")
+                    #         cosine_value = cosine_metric(
+                    #             self.engine.trainer.get_model_parameters(),
+                    #             decoded_model,
+                    #             similarity=True,
+                    #         )
+                    #         euclidean_value = euclidean_metric(
+                    #             self.engine.trainer.get_model_parameters(),
+                    #             decoded_model,
+                    #             similarity=True,
+                    #         )
+                    #         minkowski_value = minkowski_metric(
+                    #             self.engine.trainer.get_model_parameters(),
+                    #             decoded_model,
+                    #             p=2,
+                    #             similarity=True,
+                    #         )
+                    #         manhattan_value = manhattan_metric(
+                    #             self.engine.trainer.get_model_parameters(),
+                    #             decoded_model,
+                    #             similarity=True,
+                    #         )
+                    #         pearson_correlation_value = pearson_correlation_metric(
+                    #             self.engine.trainer.get_model_parameters(),
+                    #             decoded_model,
+                    #             similarity=True,
+                    #         )
+                    #         jaccard_value = jaccard_metric(
+                    #             self.engine.trainer.get_model_parameters(),
+                    #             decoded_model,
+                    #             similarity=True,
+                    #         )
+                    #         file = f"{self.engine.log_dir}/participant_{self.engine.idx}_similarity.csv"
+                    #         logging.info(f"self.engine.log_dir: {self.engine.log_dir}")
+                    #         directory = os.path.dirname(file)
+                    #         os.makedirs(directory, exist_ok=True)
+                    #         if not os.path.isfile(file):
+                    #             with open(file, "w") as f:
+                    #                 f.write("timestamp,source_ip,round,current_round,cosine,euclidean,minkowski,manhattan,pearson_correlation,jaccard\n")
+                    #         with open(file, "a") as f:
+                    #             f.write(f"{datetime.now()}, {source}, {message.round}, {current_round}, {cosine_value}, {euclidean_value}, {minkowski_value}, {manhattan_value}, {pearson_correlation_value}, {jaccard_value}\n")
 
+                    #     # Manage communication latency
+                    #     self.store_receive_timestamp(source, "model", message.round)
+                    #     self.calculate_latency(source, "model")
 
-                #     # Manage communication latency
-                #     self.store_receive_timestamp(source, "model", message.round)
-                #     self.calculate_latency(source, "model")
-                    
-                #     # Manage parameters of models
-                #     parameters_local = self.engine.trainer.get_model_parameters()
-                #     self.fraction_of_parameters_changed(source, parameters_local, decoded_model, current_round)
+                    #     # Manage parameters of models
+                    #     parameters_local = self.engine.trainer.get_model_parameters()
+                    #     self.fraction_of_parameters_changed(source, parameters_local, decoded_model, current_round)
 
                     await self.engine.aggregator.include_model_in_buffer(
                         decoded_model,
@@ -411,32 +414,40 @@ class CommunicationsManager:
 
     async def handle_reputation_message(self, source, message):
         try:
-            logging.info(f"handle_reputation_message | Reputation message received from {source} | Node: {message.node_id} | Score: {message.score} | Round: {message.round}")
-            
-            self.store_receive_timestamp(source, "reputation", message.round)
-            #self.calculate_latency(source, "reputation")
-            
-            current_node = self.addr
+            logging.info(
+                f"handle_reputation_message | Reputation message received from {source} | Node: {message.node_id} | Score: {message.score} | Round: {message.round}"
+            )
 
-            # Manage reputation 
-            if current_node != source:
-                key = (current_node, source, message.round)
+            self.store_receive_timestamp(source, "reputation", message.round)
+            # self.calculate_latency(source, "reputation")
+
+            current_node = self.addr
+            nei = message.node_id
+
+            # Manage reputation
+            if current_node != nei:
+                key = (current_node, nei, message.round)
 
                 if key not in self.reputation_with_all_feedback:
                     self.reputation_with_all_feedback[key] = []
 
                 self.reputation_with_all_feedback[key].append(message.score)
+                logging.info(
+                    f"handle_reputation_message | Reputation with all feedback: {self.reputation_with_all_feedback}"
+                )
 
         except Exception as e:
-            logging.error(f"Error handling reputation message: {e}")
-    
+            logging.exception(f"Error handling reputation message: {e}")
+
     async def handle_flooding_attack_message(self, source, message):
         try:
-            logging.info(f"🔥  handle_flooding_attack_message | Received flooding attack message from {source} | Attacker: {message.attacker_id} | Frequency: {message.frequency} | Duration: {message.duration} | Target node: {message.target_node}")
+            logging.info(
+                f"🔥  handle_flooding_attack_message | Received flooding attack message from {source} | Attacker: {message.attacker_id} | Frequency: {message.frequency} | Duration: {message.duration} | Target node: {message.target_node}"
+            )
             current_round = self.engine.get_round()
             self.store_receive_timestamp(source, "flooding_attack", current_round)
         except Exception as e:
-            logging.error(f"🔥  handle_flooding_attack_message | Error while processing: {e}")
+            logging.exception(f"🔥  handle_flooding_attack_message | Error while processing: {e}")
 
     def fraction_of_parameters_changed(self, source, parameters_local, parameters_received, current_round):
         # logging.info(f"🤖  fraction_of_parameters_changed | Managing parameters of models")
@@ -452,12 +463,12 @@ class CommunicationsManager:
             prev_threshold = self.fraction_of_params_changed[source][current_round - 1][-1]["threshold"]
 
         for key in parameters_local.keys():
-            #logging.info(f"🤖  fraction_of_parameters_changed | Key: {key}")
+            # logging.info(f"🤖  fraction_of_parameters_changed | Key: {key}")
             if key in parameters_received:
                 diff = torch.abs(parameters_local[key] - parameters_received[key])
                 differences.extend(diff.flatten().tolist())
                 total_params += diff.numel()
-                #logging.info(f"🤖  fraction_of_parameters_changed | Total params: {total_params}")
+                # logging.info(f"🤖  fraction_of_parameters_changed | Total params: {total_params}")
 
         if differences:
             mean_threshold = torch.mean(torch.tensor(differences)).item()
@@ -465,8 +476,7 @@ class CommunicationsManager:
         else:
             current_threshold = 0
 
-
-        for key in  parameters_local.keys():
+        for key in parameters_local.keys():
             if key in parameters_received:
                 diff = torch.abs(parameters_local[key] - parameters_received[key])
                 num_changed = torch.sum(diff > current_threshold).item()
@@ -486,19 +496,21 @@ class CommunicationsManager:
             "total_params": total_params,
             "changed_params": changed_params,
             "threshold": current_threshold,
-            "changes_record": changes_record
+            "changes_record": changes_record,
         })
 
-        save_data(self.config.participant['scenario_args']['name'], 
-                  'fraction_of_params_changed', 
-                  source, 
-                  self.addr, 
-                  current_round, 
-                  fraction_changed=fraction_changed, 
-                  total_params=total_params, 
-                  changed_params=changed_params, 
-                  threshold=current_threshold, 
-                  changes_record=changes_record)
+        save_data(
+            self.config.participant["scenario_args"]["name"],
+            "fraction_of_params_changed",
+            source,
+            self.addr,
+            current_round,
+            fraction_changed=fraction_changed,
+            total_params=total_params,
+            changed_params=changed_params,
+            threshold=current_threshold,
+            changes_record=changes_record,
+        )
 
     def get_connections_lock(self):
         return self.connections_lock
@@ -828,14 +840,26 @@ class CommunicationsManager:
             "receive": None,
             "latency": None,
             "round": round_number,
-            "type": type_message
+            "type": type_message,
         }
 
     def store_receive_timestamp(self, source, type_message, round=None):
         current_time = time.time()
+        current_round = self.get_round()
         if current_time:
-            save_data(self.config.participant['scenario_args']['name'], 'time_message', source, self.addr, round=round, time=current_time, type_message=type_message, current_round=self.get_round())
-        
+            if round is None:
+                round = self.get_round()
+            save_data(
+                self.config.participant["scenario_args"]["name"],
+                "time_message",
+                source,
+                self.addr,
+                round=round,
+                time=current_time,
+                type_message=type_message,
+                current_round=current_round,
+            )
+
         receive_timestamp = datetime.now().strftime("%H:%M:%S")
         if (self.addr, source, type_message) in self.message_timestamps:
             self.message_timestamps[(self.addr, source, type_message)]["receive"] = receive_timestamp
@@ -852,11 +876,22 @@ class CommunicationsManager:
                 receive_time = datetime.strptime(receive_time, "%H:%M:%S")
 
                 latency = (receive_time - send_time).total_seconds()
-                logging.info(f"🕒  Latency from {source} with type message {type_message} in round {round_number}: {latency}")
+                logging.info(
+                    f"🕒  Latency from {source} with type message {type_message} in round {round_number}: {latency}"
+                )
 
                 self.message_timestamps[(self.addr, source, type_message)]["latency"] = latency
-                save_data(self.config.participant['scenario_args']['name'], 'communication', source, self.addr, round_number, time=latency, type_message=type_message, current_round=current_round)
-                
+                save_data(
+                    self.config.participant["scenario_args"]["name"],
+                    "communication",
+                    source,
+                    self.addr,
+                    round_number,
+                    time=latency,
+                    type_message=type_message,
+                    current_round=current_round,
+                )
+
                 return latency
         return None
 
@@ -867,7 +902,7 @@ class CommunicationsManager:
                 if conn is None:
                     logging.info(f"❗️  Connection with {dest_addr} not found")
                     return
-                
+
                 if round != -1:
                     self.store_send_timestamp(dest_addr, round, "model")
 
