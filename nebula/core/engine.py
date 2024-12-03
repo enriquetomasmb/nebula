@@ -317,7 +317,11 @@ class Engine:
     @event_handler(nebula_pb2.ConnectionMessage, nebula_pb2.ConnectionMessage.Action.DISCONNECT)
     async def _connection_disconnect_callback(self, source, message):
         logging.info(f"🔗  handle_connection_message | Trigger | Received disconnection message from {source}")
+        if self.mobility:
+            if source in await self.cm.get_all_addrs_current_connections(only_direct=True):
+                self.nm.update_neighbors(source, remove=True)
         await self.cm.disconnect(source, mutual_disconnection=False)
+        
 
     @event_handler(
         nebula_pb2.FederationMessage,
@@ -527,6 +531,8 @@ class Engine:
         logging.info("Creating trainer service to start the federation process..")
         asyncio.create_task(self._start_learning_late())
         #decoded_model = self.trainer.deserialize_model(message.parameters)
+
+
 
     def get_push_acceleration(self):
         return self.nm.get_push_acceleration()
@@ -815,7 +821,10 @@ class Engine:
         if not self.mobility:
             return
         logging.info("🔄 Starting additional mobility actions...")
-        self.nm.check_robustness()
+        await self.nm.check_robustness()
+        action = await self.nm.check_external_connection_service_status()
+        if action:
+            action()
 
     def reputation_calculation(self, aggregated_models_weights):
         cossim_threshold = 0.5

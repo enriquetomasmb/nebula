@@ -242,8 +242,8 @@ class NodeManager():
         if not remove:
             self.neighbor_policy.meet_node(node)
     
-    def no_neighbors_left(self):
-        return len(self.engine.cm.get_addrs_current_connections(only_direct=True, myself=False))
+    async def neighbors_left(self):
+        return len(await self.engine.cm.get_addrs_current_connections(only_direct=True, myself=False)) > 0
     
     def meet_node(self, node):
         logging.info(f"Update nodes known | addr: {node}")
@@ -279,6 +279,17 @@ class NodeManager():
                 self.discarded_offers_addr = []
         except asyncio.CancelledError as e:
             pass
+
+    async def check_external_connection_service_status(self):
+        action = None
+        logging.info(f"🔄 Checking external connection service status...")
+        if not self.neighbors_left() and self.engine.cm.is_external_connection_service_running():
+            logging.info(f"❗️  Isolated node | Shutdowning service required")
+            action = lambda: self.engine.cm.stop_external_connection_service()
+        elif self.neighbors_left() and not self.engine.cm.is_external_connection_service_running() and self.engine.get_sinchronized_status():
+            logging.info(f"🔄 NOT isolated node | Service not running | Starting service...")
+            action = lambda: self.engine.cm.init_external_connection_service()
+        return action
 
     #TODO NOT infinite loop, define n_tries
     async def start_late_connection_process(self, connected=False, msg_type="discover_join", addrs_known=None):
@@ -327,10 +338,12 @@ class NodeManager():
             self.candidate_selector.remove_candidates()                                                                           
         # if no candidates, repeat process
         else:
-            logging.info("No Candidates found | repeating process")
+            logging.info("❗️  No Candidates found | repeating process")
             self.accept_candidates_lock.release()
             self.late_connection_process_lock.release()
-            await self.start_late_connection_process(connected, msg_type, addrs_known)
+            if not connected:
+                await self.start_late_connection_process(connected, msg_type, addrs_known)
+    
     
     
                                                         ##############################
@@ -340,7 +353,7 @@ class NodeManager():
     
     async def check_robustness(self):
         logging.info("🔄 Analizing node network robustness...")
-        if len(self.engine.get_federation_nodes()) == 0:
+        if self.no_neighbors_left():
             logging.info("No Neighbors left | reconnecting with Federation")
             #await self.reconnect_to_federation()
         elif self.neighbor_policy.need_more_neighbors():

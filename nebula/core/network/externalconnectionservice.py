@@ -10,6 +10,10 @@ class ExternalConnectionService(ABC):
     def stop(self):
         pass
     
+    @abstractmethod
+    def is_running(self):
+        pass
+    
     @abstractmethod 
     def find_federation(self):
         pass

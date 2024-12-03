@@ -381,14 +381,18 @@ class CommunicationsManager:
             logging.error(f"🔍  handle_link_message | Error while processing: {message.action} {message.arguments} | {e}")
             
     def start_external_connection_service(self):
-        self.ecs = NebulaConnectionService(self.addr)
+        if self.ecs == None:
+            self.ecs = NebulaConnectionService(self.addr)
         self.ecs.start()
         
     def stop_external_connection_service(self):
         self.ecs.stop()    
         
     def init_external_connection_service(self):
-        self.start_external_connection_service()    
+        self.start_external_connection_service()
+        
+    async def is_external_connection_service_running(self):
+        return self.ecs.is_running()        
         
     async def stablish_connection_to_federation(self, msg_type="discover_join", addrs_known=None):
         """

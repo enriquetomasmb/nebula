@@ -29,6 +29,9 @@ class NebulaServer(threading.Thread):
         self.interrupted = True
         logging.info("Nebula upnp server stop")
         
+    def is_running(self):
+        return not self.interrupted
+        
     def listen(self):
         """
         Listen on broadcast addr with standard 1900 port
@@ -163,6 +166,9 @@ class NebulaConnectionService(ExternalConnectionService):
         
     def stop(self):
         self.server.stop
+        
+    def is_running(self):
+        return self.server.is_running()
     
     def find_federation(self): 
         """
