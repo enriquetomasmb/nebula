@@ -568,7 +568,7 @@ class Controller:
             "NEBULA_PRODUCTION": self.production,
             "NEBULA_GPU_AVAILABLE": self.gpu_available,
             "NEBULA_ADVANCED_ANALYTICS": self.advanced_analytics,
-            "NEBULA_FRONTEND_LOG": "/nebula/app/logs/fronted.log",
+            "NEBULA_FRONTEND_LOG": "/nebula/app/logs/frontend.log",
             "NEBULA_LOGS_DIR": "/nebula/app/logs/",
             "NEBULA_CONFIG_DIR": "/nebula/app/config/",
             "NEBULA_CERTS_DIR": "/nebula/app/certs/",
