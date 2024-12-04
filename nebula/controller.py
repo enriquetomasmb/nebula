@@ -579,6 +579,7 @@ class Controller:
             "NEBULA_DEFAULT_PASSWORD": "admin",
             "NEBULA_FRONTEND_PORT": self.frontend_port,
             "NEBULA_CONTROLLER_PORT": self.controller_port,
+            "NEBULA_CONTROLLER_HOST": "host.docker.internal",
         }
 
         volumes = ["/nebula", "/var/run/docker.sock", "/etc/nginx/sites-available/default"]
@@ -591,6 +592,7 @@ class Controller:
                 "/var/run/docker.sock:/var/run/docker.sock",
                 f"{self.root_path}/nebula/frontend/config/nebula:/etc/nginx/sites-available/default",
             ],
+            extra_hosts={"host.docker.internal": "host-gateway"},
             port_bindings={80: self.frontend_port, 8080: self.statistics_port},
         )
 
