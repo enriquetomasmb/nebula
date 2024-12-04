@@ -18,19 +18,19 @@ class FileUtils:
 
 class SocketUtils:
     @classmethod
-    def is_port_open(cls, port, hostname="127.0.0.1"):
+    def is_port_open(cls, port):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            result = s.connect_ex((hostname, port))
+            s.bind(("127.0.0.1", port))
             s.close()
-            return result != 0
+            return True
         except OSError:
             return False
 
     @classmethod
-    def find_free_port(cls, start_port=49152, end_port=65535, hostname="127.0.0.1"):
+    def find_free_port(cls, start_port=49152, end_port=65535):
         for port in range(start_port, end_port + 1):
-            if cls.is_port_open(port, hostname):
+            if cls.is_port_open(port):
                 return port
         return None
 
