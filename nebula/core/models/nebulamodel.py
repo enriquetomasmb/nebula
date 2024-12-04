@@ -232,9 +232,14 @@ class NebulaModel(pl.LightningModule, ABC):
         return self._current_loss
     
     def modify_learning_rate(self, new_lr):
+        logging.info(f"Modifiying | learning rate, new value: {new_lr}")
         for param_group in self._optimizer.param_groups:
             param_group['lr'] = new_lr
     
+    def show_current_learning_rate(self):
+        for param_group in self._optimizer.param_groups:
+            logging.info(f"Showing | Learning rate current value: {param_group['lr']}")
+                
     def set_updated_round(self, round):
         self.round = round
         self.global_number = {

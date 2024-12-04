@@ -356,3 +356,6 @@ class Lightning:
         
     def update_model_learning_rate(self, new_lr):
         self.model.modify_learning_rate(new_lr)
+    
+    def show_current_learning_rate(self):
+        self.model.show_current_learning_rate()

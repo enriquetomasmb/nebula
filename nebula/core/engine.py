@@ -821,6 +821,7 @@ class Engine:
         if not self.mobility:
             return
         logging.info("🔄 Starting additional mobility actions...")
+        self.trainer.show_current_learning_rate()
         await self.nm.check_robustness()
         action = await self.nm.check_external_connection_service_status()
         if action:

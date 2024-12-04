@@ -379,8 +379,10 @@ class NodeManager():
         addrs_to_connect = self.neighbor_policy.get_nodes_known(neighbors_too=False)
         # If we got some refs, try to connect to them
         if len(addrs_to_connect) > 0:
+            logging.info("Reestructuring | Addrs availables")
             await self.start_late_connection_process(connected=True, msg_type="discover_nodes", addrs_known=addrs_to_connect)
         else:
+            logging.info("Reestructuring | NO Addrs availables")
             await self.start_late_connection_process(connected=True, msg_type="discover_nodes")
         self._restructure_process_lock.release()
         
