@@ -6,6 +6,12 @@ __pycache__/
 # C extensions
 *.so
 
+# Data escenarios reputation
+nebula/core/reputation/nebula_DFL_*
+
+# File uv.lock
+uv.lock
+
 # Distribution / packaging
 .Python
 docs/build/
