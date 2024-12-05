@@ -236,7 +236,7 @@ class Aggregator(ABC):
         else:
             logging.info("🔄  get_aggregation | All models accounted for, proceeding with aggregation.")
 
-        self._pending_models_to_aggregate = self.engine.apply_weight_strategy(self._pending_models_to_aggregate)
+        self._pending_models_to_aggregate = await self.engine.apply_weight_strategy(self._pending_models_to_aggregate)
         aggregated_result = self.run_aggregation(self._pending_models_to_aggregate)
         if not self.engine.get_sinchronized_status() and self.engine.get_push_acceleration() == "fast":
             await self._add_model_lock.release_async()
@@ -288,13 +288,15 @@ class Aggregator(ABC):
                         if push == "slow":
                             logging.info(f"❗️ FUTURE round: {further_round} is available | PUSH strategy ON")
                             logging.info("❗️ SLOW push selected | Start PUSHING slow")    
-                            self.engine.set_pushed_done(self.engine.get_round() - further_round)
+                            self.engine.set_pushed_done(further_round - self.engine.get_round())
                             # we wait until learning cycle reach aggregation point
                             while not self._aggregation_done_lock.locked_async():
                                 logging.info("🔄 Waiting | aggregation step not reached yet...")
                                 await asyncio.sleep(1)
                             # Unlock aggregation
                             logging.info("🔄 Releasing aggregation lock...")
+                            self.engine.update_sinchronized_status(False)
+                            self.engine.set_synchronizing_rounds(True)
                             await self._aggregation_done_lock.release_async()
                             return
                         
@@ -304,13 +306,15 @@ class Aggregator(ABC):
                     
                     if further_round == (self.engine.get_round()+1):
                         logging.info(f"🔄 Rounds jumped: {1}...")
-                        self.engine.set_pushed_done(self.engine.get_round() - further_round)
+                        self.engine.set_pushed_done(further_round - self.engine.get_round())
                         # we wait until learning cycle reach aggregation point
                         while not self._aggregation_done_lock.locked_async():
                             logging.info("🔄 Waiting | aggregation step not reached yet...")
                             await asyncio.sleep(1)
                         # Unlock aggregation
                         logging.info("🔄 Releasing aggregation lock...")
+                        self.engine.update_sinchronized_status(False)
+                        self.engine.set_synchronizing_rounds(True)
                         await self._aggregation_done_lock.release_async()
                         return
                     
@@ -338,8 +342,10 @@ class Aggregator(ABC):
                     for key in self._future_models_to_aggregate.keys():
                         if key <= further_round:
                             del self._future_models_to_aggregate[key]
-
-                    self.engine.set_pushed_done(self.engine.get_round() - further_round)
+                            
+                    self.engine.update_sinchronized_status(False)
+                    self.engine.set_synchronizing_rounds(True)
+                    self.engine.set_pushed_done(further_round - self.engine.get_round())
                     self.engine.set_round(further_round)
                     
                     # Unlock aggregation
@@ -351,6 +357,7 @@ class Aggregator(ABC):
                     
                 else:
                     self.engine.update_sinchronized_status(True)
+                    self.engine.set_synchronizing_rounds(False)
             else:
                 logging.info(f"All models updates are received | models number: {len(self.get_nodes_pending_models_to_aggregate())}")
         else:

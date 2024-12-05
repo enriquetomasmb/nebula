@@ -233,6 +233,7 @@ class NebulaModel(pl.LightningModule, ABC):
     
     def modify_learning_rate(self, new_lr):
         logging.info(f"Modifiying | learning rate, new value: {new_lr}")
+        self.learning_rate = new_lr
         for param_group in self._optimizer.param_groups:
             param_group['lr'] = new_lr
     

@@ -414,12 +414,13 @@ class CommunicationsManager:
             msg = self.mm.generate_discover_message(nebula_pb2.DiscoverMessage.Action.DISCOVER_NODES)
             
         logging.info("Starting communications with devices found")
+        #TODO filtrar para para quitar las que ya son vecinos
         for addr in addrs:
             await self.connect(addr, direct=False)
             await asyncio.sleep(1)
         while not self.verify_connections(addrs):
             await asyncio.sleep(1)
-        current_connections = await self.get_addrs_current_connections()
+        current_connections = await self.get_addrs_current_connections(only_undirected=True)
         logging.info(f"Connections verified after searching: {current_connections}")
         for addr in addrs:
             logging.info(f"Sending {msg_type} to ---> {addr}")

@@ -58,8 +58,8 @@ class NodeManager():
         
         self.synchronizing_rounds = False
         
-        self._fast_reboot = False
-        self._learning_rate=1e-3
+        self._fast_reboot = True
+        self._learning_rate=2e-3
         
         #self.set_confings()
 
@@ -173,25 +173,26 @@ class NodeManager():
             del self.weight_modifier[addr]
         self.weight_modifier_lock.release()
     
-    def apply_weight_strategy(self, updates):
-        logging.info(f"🔄 Applying weight Strategy...")
+    async def apply_weight_strategy(self, updates: dict):
+        logging.info(f"🔄  Applying weight Strategy...")
         # We must lower the weight_modifier value if a round jump has been occured
         # as many times as rounds have been jumped
         if self.rounds_pushed:
+            logging.info(f"🔄  There are rounds being pushed...")
             for i in range(0, self.rounds_pushed):
                 self._update_weight_modifiers()
-            self.rounds_pushed = 0
+            self.rounds_pushed = 0  
         for addr,update in updates.items():
-            weight_modifier, _ = self._get_weight_modifier(addr)
-            if weight_modifier != 1:
-                logging.info (f"📝 Appliying modified weight strategy | addr: {addr} | multiplier value: {weight_modifier}")
+            weightmodifier, rounds = self._get_weight_modifier(addr)
+            if weightmodifier != 1:
+                logging.info (f"📝 Appliying modified weight strategy | addr: {addr} | multiplier value: {weightmodifier}")
                 model, weight = update
-                updates.update({addr: (model, weight*weight_modifier)})
+                updates.update({addr: (model, weight*weightmodifier)})
         self._update_weight_modifiers()
       
     def _update_weight_modifiers(self):
         self.weight_modifier_lock.acquire() 
-        for addr,(weight,rounds) in self.weight_modifier.items():
+        for addr, (weight,rounds) in self.weight_modifier.items():
             new_weight = weight - 1/(rounds**2)
             rounds = rounds + 1
             if new_weight > 1:
@@ -202,7 +203,7 @@ class NodeManager():
     
     def _get_weight_modifier(self, addr):
         self.weight_modifier_lock.acquire()
-        wm = self.weight_modifier.get(addr, (1,0))      
+        wm = self.weight_modifier.get(addr, (1,0))     
         self.weight_modifier_lock.release()
         return wm
 
@@ -235,6 +236,7 @@ class NodeManager():
         return self.neighbor_policy.get_actions()
     
     def update_neighbors(self, node, remove=False):
+        logging.info(f"Update neighbor | node addr: {node} | remove: {remove}")
         self.neighbor_policy.update_neighbors(node, remove)
         #self.timer_generator.update_node(node, remove)
         if remove:
@@ -280,13 +282,17 @@ class NodeManager():
         except asyncio.CancelledError as e:
             pass
 
-    async def check_external_connection_service_status(self):
-        action = None
+    async def check_external_connection_service_status(self):   
         logging.info(f"🔄 Checking external connection service status...")
-        if not self.neighbors_left() and self.engine.cm.is_external_connection_service_running():
+        n = await self.neighbors_left()
+        ecs = await self.engine.cm.is_external_connection_service_running()
+        ss = self.engine.get_sinchronized_status()
+        action = None
+        logging.info(f"Stats | neighbos: {n} | service running: {ecs} | synchronized status: {ss}")
+        if not await self.neighbors_left() and await self.engine.cm.is_external_connection_service_running():
             logging.info(f"❗️  Isolated node | Shutdowning service required")
             action = lambda: self.engine.cm.stop_external_connection_service()
-        elif self.neighbors_left() and not self.engine.cm.is_external_connection_service_running() and self.engine.get_sinchronized_status():
+        elif await self.neighbors_left() and not await self.engine.cm.is_external_connection_service_running() and self.engine.get_sinchronized_status():
             logging.info(f"🔄 NOT isolated node | Service not running | Starting service...")
             action = lambda: self.engine.cm.init_external_connection_service()
         return action
@@ -331,6 +337,7 @@ class NodeManager():
             for addr, _, _ in best_candidates:
                 await self.engine.cm.connect(addr, direct=True)
                 await self.engine.cm.send_message(addr, msg)
+                self.update_neighbors(addr)
                 await asyncio.sleep(1) 
                                     
             self.accept_candidates_lock.release()
@@ -338,10 +345,11 @@ class NodeManager():
             self.candidate_selector.remove_candidates()                                                                           
         # if no candidates, repeat process
         else:
-            logging.info("❗️  No Candidates found | repeating process")
+            logging.info("❗️  No Candidates found...")
             self.accept_candidates_lock.release()
             self.late_connection_process_lock.release()
             if not connected:
+                logging.info("❗️  repeating process...")
                 await self.start_late_connection_process(connected, msg_type, addrs_known)
     
     
@@ -353,14 +361,20 @@ class NodeManager():
     
     async def check_robustness(self):
         logging.info("🔄 Analizing node network robustness...")
-        if self.no_neighbors_left():
-            logging.info("No Neighbors left | reconnecting with Federation")
-            #await self.reconnect_to_federation()
-        elif self.neighbor_policy.need_more_neighbors():
-            logging.info("Insufficient Robustness | Upgrading robustness | Searching for more connections")
-            #asyncio.create_task(self.upgrade_connection_robustness())
+        if not self._restructure_process_lock.locked():
+            if not self.neighbors_left():
+                logging.info("No Neighbors left | reconnecting with Federation")
+                #await self.reconnect_to_federation()
+            elif self.neighbor_policy.need_more_neighbors() and self.engine.get_sinchronized_status():
+                logging.info("Insufficient Robustness | Upgrading robustness | Searching for more connections")
+                asyncio.create_task(self.upgrade_connection_robustness())
+            else:
+                if self.engine.get_sinchronized_status():
+                    logging.info("Device not synchronized with federation")
+                else:
+                    logging.info("Sufficient Robustness | no actions required")
         else:
-            logging.info("Sufficient Robustness | no actions required")
+            logging.info("❗️ Reestructure/Reconnecting process already running...")
             
     async def reconnect_to_federation(self):
         # If we got some refs, try to reconnect to them
@@ -379,7 +393,7 @@ class NodeManager():
         addrs_to_connect = self.neighbor_policy.get_nodes_known(neighbors_too=False)
         # If we got some refs, try to connect to them
         if len(addrs_to_connect) > 0:
-            logging.info("Reestructuring | Addrs availables")
+            logging.info(f"Reestructuring | Addrs availables | addr list: {addrs_to_connect}")
             await self.start_late_connection_process(connected=True, msg_type="discover_nodes", addrs_known=addrs_to_connect)
         else:
             logging.info("Reestructuring | NO Addrs availables")

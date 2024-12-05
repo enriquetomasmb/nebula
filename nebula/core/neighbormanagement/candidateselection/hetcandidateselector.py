@@ -55,6 +55,7 @@ class HETCandidateSelector(CandidateSelector):
         self.candidates_lock.release()
         return any
     
+    #TODO hay q descontar los vecinos propios ya establecidos
     def __calculate_ideal_neighbors(self):
         """
         Returns:

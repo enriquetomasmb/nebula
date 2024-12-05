@@ -168,7 +168,10 @@ class NebulaConnectionService(ExternalConnectionService):
         self.server.stop
         
     def is_running(self):
-        return self.server.is_running()
+        if self.server:
+            return self.server.is_running()
+        else:
+            return False
     
     def find_federation(self): 
         """

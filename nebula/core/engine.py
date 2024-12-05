@@ -260,9 +260,12 @@ class Engine:
         
     def update_sinchronized_status(self, status):
         with self.sinchronized_status_lock:
-            if self.mobility:
-                self.nm.set_synchronizing_rounds(status)
+            logging.info(f"Update | synchronized status from: {self._sinchronized_status} to {status}")
             self._sinchronized_status = status
+    
+    def set_synchronizing_rounds(self, status):
+        if self.mobility:
+            self.nm.set_synchronizing_rounds(not status)
     
     def set_round(self, new_round):
         logging.info(f"🤖  Update round count | from: {self.round} | to round: {new_round}")
@@ -386,19 +389,19 @@ class Engine:
     async def _connection_late_connect_callback(self, source, message):
         logging.info(f"🔗  handle_connection_message | Trigger | Received late connect message from {source}")   
         if self.nm.accept_connection(source, joining=True):
-            logging.info(f"🔗  Late connection accepted | source: {source}") 
+            logging.info(f"🔗  handle_connection_message | Late connection accepted | source: {source}") 
             self.nm.add_weight_modifier(source) 
             ct_actions , df_actions = self.nm.get_actions()
             
             if len(ct_actions):            
-                for addr in ct_actions.split():
-                    cnt_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.CONNECT_TO, addr)
-                    await self.cm.send_message(source, cnt_msg)
+                #for addr in ct_actions.split():
+                cnt_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.CONNECT_TO, ct_actions)
+                await self.cm.send_message(source, cnt_msg)
             
             if len(df_actions):    
-                for addr in df_actions.split():
-                    df_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.DISCONNECT_FROM, addr)
-                    await self.cm.send_message(source, df_msg) 
+                #for addr in df_actions.split():
+                df_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.DISCONNECT_FROM, df_actions)
+                await self.cm.send_message(source, df_msg) 
 
             await self.cm.connect(source, direct=True)
             self.nm.meet_node(source)
@@ -418,17 +421,19 @@ class Engine:
             ct_actions , df_actions = self.nm.get_actions()
                      
             if len(ct_actions):            
-                for addr in ct_actions.split():
-                    cnt_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.CONNECT_TO, addr)
-                    await self.cm.send_message(source, cnt_msg)
+                cnt_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.CONNECT_TO, ct_actions)
+                await self.cm.send_message(source, cnt_msg)
             
             if len(df_actions):    
-                for addr in df_actions.split():
-                    df_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.DISCONNECT_FROM, addr)
-                    await self.cm.send_message(source, df_msg)      
+                df_msg = self.cm.mm.generate_link_message(nebula_pb2.LinkMessage.Action.DISCONNECT_FROM, df_actions)
+                await self.cm.send_message(source, df_msg)
+            
+            await self.cm.connect(source, direct=True)    
+            self.nm.meet_node(source)
+            self.nm.update_neighbors(source)      
         else:
             logging.info(f"❗️  handle_connection_message | Trigger | restructure connection denied from {source}")
-            await self.cm.disconnect(source, mutual_disconnection=False) 
+            await self.cm.disconnect(source, mutual_disconnection=True) 
     
     @event_handler(nebula_pb2.DiscoverMessage, nebula_pb2.DiscoverMessage.Action.DISCOVER_JOIN)
     async def _discover_discover_join_callback(self, source, message):
@@ -438,7 +443,6 @@ class Engine:
             await self.trainning_in_progress_lock.acquire_async()
             model, rounds, round = await self.cm.propagator.get_model_information(source, "stable") if self.get_round() > 0 else await self.cm.propagator.get_model_information(source, "initialization")
             await self.trainning_in_progress_lock.release_async()
-            #model, rounds, round = await self.cm.propagator.get_model_information(source, "initialization")
             if round != -1:
                 epochs = self.config.participant["training_args"]["epochs"]
                 msg = self.cm.mm.generate_offer_message(
@@ -464,8 +468,11 @@ class Engine:
     async def _discover_discover_nodes_callback(self, source, message):
         logging.info(f"🔍  handle_discover_message | Trigger | Received discover_node message from {source} ")
         self.nm.meet_node(source)
-        msg = self.cm.mm.generate_offer_message(nebula_pb2.OfferMessage.Action.OFFER_METRIC, len(self.get_federation_nodes()), self.trainer.get_current_loss())
-        await self.cm.send_message(source, msg)                
+        if len(self.get_federation_nodes()) > 0:
+            msg = self.cm.mm.generate_offer_message(nebula_pb2.OfferMessage.Action.OFFER_METRIC, len(self.get_federation_nodes()), self.trainer.get_current_loss())
+            await self.cm.send_message(source, msg)
+        else:
+            logging.info(f"🔗  Dissmissing discover nodes from {source} | no active connections at the moment")                
                     
     @event_handler(
         nebula_pb2.OfferMessage,
@@ -474,7 +481,7 @@ class Engine:
     async def _offer_offer_model_callback(self, source, message):
         logging.info(f"🔍  handle_offer_message | Trigger | Received offer_model message from {source}")
         self.nm.meet_node(source)
-        if not self.nm.get_restructure_process_lock().locked() and self.nm.still_waiting_for_candidates():
+        if self.nm.still_waiting_for_candidates():
             try:
                 model_compressed = message.parameters
                 if self.nm.accept_model_offer(source, model_compressed, message.rounds, message.round, message.epochs, message.n_neighbors, message.loss):
@@ -494,8 +501,9 @@ class Engine:
     )
     async def _offer_offer_metric_callback(self, source, message):
         logging.info(f"🔍  handle_offer_message | Trigger | Received offer_metric message from {source}")
-        if not self.nm.get_restructure_process_lock().locked():
-            n_neighbors, loss, _, _, _, _ = message.arguments
+        if self.nm.still_waiting_for_candidates():
+            n_neighbors = message.n_neighbors
+            loss = message.loss
             self.nm.add_candidate(source, n_neighbors, loss)
             self.nm.meet_node(source)
 
@@ -505,7 +513,7 @@ class Engine:
     )
     async def _link_connect_to_callback(self, source, message):
         logging.info(f"🔗  handle_link_message | Trigger | Received connecto_to message from {source}")
-        addrs = message.arguments
+        addrs = message.addrs
         for addr in addrs.split():
             #await self.cm.connect(addr, direct=True)
             #self.nm.update_neighbors(addr)
@@ -517,7 +525,7 @@ class Engine:
     )
     async def _link_disconnect_from_callback(self, source, message):
         logging.info(f"🔗  handle_link_message | Trigger | Received disconnect_from message from {source}")
-        addrs = message.arguments
+        addrs = message.addrs
         for addr in addrs.split():
             await self.cm.disconnect(source, mutual_disconnection=False)
             self.nm.update_neighbors(addr, remove=True)                
@@ -540,9 +548,9 @@ class Engine:
     def set_pushed_done(self, rounds_push):
         self.nm.set_rounds_pushed(rounds_push)
     
-    def apply_weight_strategy(self, pending_models):
+    async def apply_weight_strategy(self, pending_models):
         if self.mobility and self.nm.fast_reboot_on():
-            self.nm.apply_weight_strategy(pending_models)
+            await self.nm.apply_weight_strategy(pending_models)
             return pending_models
         else:
             return pending_models
@@ -736,7 +744,8 @@ class Engine:
 
     async def _waiting_model_updates(self):
         logging.info(f"💤  Waiting convergence in round {self.round}.")
-        await self.aggregator.aggregation_push_available()
+        if self.mobility:
+            await self.aggregator.aggregation_push_available()
         params = await self.aggregator.get_aggregation()
         if params is not None:
             logging.info(
