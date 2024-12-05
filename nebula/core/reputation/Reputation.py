@@ -112,8 +112,8 @@ class Reputation:
     previous_std_dev_freq: ClassVar[dict] = {}
     messages_chunk_latency: ClassVar[list] = []
     chunk_history: ClassVar[dict] = {}
-    previous_percentile_15_freq: ClassVar[dict] = {}
-    previous_percentile_85_freq: ClassVar[dict] = {}
+    previous_percentile_5_freq: ClassVar[dict] = {}
+    previous_percentile_95_freq: ClassVar[dict] = {}
 
     def __init__(self, engine: "Engine"):
         self._engine = engine
@@ -169,12 +169,12 @@ class Reputation:
                             time = metric["time_message"]["time"]
                             type_message = metric["time_message"]["type_message"]
                             if current_round_time == current_round:
-                                logging.info(f"Round: {round_time}, Time: {time}, Type message: {type_message}")
+                                logging.info(f"Round: {round_time}, current_round_time: {current_round_time}, Time: {time}, Type message: {type_message}")
                                 Reputation.messages_frequency.append({
                                     "time_message": time,
                                     "type_message": type_message,
                                     "round": round_time,
-                                    "current_round": current_round,
+                                    "current_round": current_round_time,
                                     "key": (addr, nei),
                                 })
                         if "fraction_of_params_changed" in metric:
@@ -205,7 +205,7 @@ class Reputation:
                                 Reputation.messages_chunk_latency.append({
                                     "message_id_decoded": message_id_decoded,
                                     "latency": latency,
-                                    "round": round,
+                                    "round": round_latency,
                                     "key": (addr, nei),
                                 })
 
@@ -338,7 +338,7 @@ class Reputation:
                     )
 
                     logging.info(f"Average reputation to node {nei}: {average_reputation}")
-                    return average_reputation
+            return average_reputation
         except Exception as e:
             logging.exception(f"Error calculating reputation. Type: {type(e).__name__}")
 
@@ -705,7 +705,7 @@ class Reputation:
         try:
             current_addr_nei = (addr, nei)
             relevant_messages = [
-                msg for msg in messages_frequency if msg["key"] == current_addr_nei and msg["round"] == current_round
+                msg for msg in messages_frequency if msg["key"] == current_addr_nei and msg["current_round"] == current_round
             ]
             messages_count = len(relevant_messages) if relevant_messages else 0
 
@@ -721,49 +721,50 @@ class Reputation:
             logging.info(f"Round {current_round}. Rounds to consider: {rounds_to_consider}")
 
             previous_counts = [
-                len([m for m in messages_frequency if m["key"] == current_addr_nei and m["round"] == r])
+                len([m for m in messages_frequency if m["key"] == current_addr_nei and m["current_round"] == r])
                 for r in rounds_to_consider
             ]
             logging.info(f"Round {current_round}. Previous counts: {previous_counts}")
 
             # Calculate the 25th and 75th percentiles based on the selected rounds
-            Reputation.previous_percentile_15_freq[current_addr_nei] = (
-                np.percentile(previous_counts, 15) * 1.10 if previous_counts else 0
+            Reputation.previous_percentile_5_freq[current_addr_nei] = (
+                np.percentile(previous_counts, 5) * 1.60 if previous_counts else 0
             )
-            Reputation.previous_percentile_85_freq[current_addr_nei] = (
-                np.percentile(previous_counts, 85) * 1.10 if previous_counts else 0
+            Reputation.previous_percentile_95_freq[current_addr_nei] = (
+                np.percentile(previous_counts, 95) * 1.60 if previous_counts else 0
             )
 
             normalized_messages = 0.0
 
             # Apply the normalizations using the percentiles
             if current_round >= 4:  # Ensure there's enough data to calculate percentiles
-                percentile_15 = Reputation.previous_percentile_15_freq.get(current_addr_nei, 0)
-                logging.info(f"Round {current_round}. Percentile 15: {percentile_15}")
-                percentile_85 = Reputation.previous_percentile_85_freq.get(current_addr_nei, 0)
-                logging.info(f"Round {current_round}. Percentile 85: {percentile_85}")
+                percentile_5 = Reputation.previous_percentile_5_freq.get(current_addr_nei, 0)
+                logging.info(f"Round {current_round}. Percentile 5: {percentile_5}")
+                percentile_95 = Reputation.previous_percentile_95_freq.get(current_addr_nei, 0)
+                logging.info(f"Round {current_round}. percentile 95: {percentile_95}")
 
                 logging.info(f"Round {current_round}. Messages count: {messages_count}")
-                if percentile_85 - percentile_15 == 0:
-                    relative_position = 0
+                if percentile_95 - percentile_5 == 0:
+                    relative_position = (messages_count - percentile_5) / (percentile_95 + 1e-6)
+                    logging.info(f"Round {current_round}. Relative position: {relative_position}")
                 else:
-                    relative_position = (messages_count - percentile_15) / (percentile_85 - percentile_15)
+                    relative_position = (messages_count - percentile_5) / (percentile_95 - percentile_5)
                     logging.info(f"Round {current_round}. Relative position: {relative_position}")
 
                 normalized_messages = 1 - 1 / (1 + np.exp(-(relative_position - 1)))
+                logging.info(f"Round {current_round}. Normalized messages sin max: {normalized_messages}")
+                normalized_messages = max(0.01, normalized_messages)
                 logging.info(f"Round {current_round}. Normalized messages: {normalized_messages}")
 
                 # Update the percentiles based on the last available rounds
-                Reputation.previous_percentile_15_freq[current_addr_nei] = (
-                    np.percentile([percentile_15] + previous_counts, 15) * 1.10
+                Reputation.previous_percentile_5_freq[current_addr_nei] = (
+                    np.percentile([percentile_5] + previous_counts, 5) * 1.60
                 )
-                Reputation.previous_percentile_85_freq[current_addr_nei] = (
-                    np.percentile([percentile_85] + previous_counts, 85) * 1.10
+                Reputation.previous_percentile_95_freq[current_addr_nei] = (
+                    np.percentile([percentile_95] + previous_counts, 95) * 1.60
                 )
 
-                return normalized_messages, messages_count
-            else:
-                return 0.0, 0
+            return normalized_messages, messages_count
         except Exception:
             logging.exception("Error managing metric frequency")
             return 0.0, 0
@@ -1021,11 +1022,11 @@ class Reputation:
                 # logging.info(f"Previous avg chunk latency: {previous_avg}")
 
                 avg_chunk_latency = previous_avg - (previous_avg * 0.1)
-                return avg_chunk_latency
             else:
-                return 0
+                avg_chunk_latency = 0
 
             Reputation.chunk_history[key]["avg_chunk_latency"] = avg_chunk_latency
+            return avg_chunk_latency
         except Exception:
             logging.exception("Error saving chunk history")
 
@@ -1064,7 +1065,6 @@ class Reputation:
                 # logging.info(f"Previous avg communication: {previous_avg}")
 
                 avg_communication = (communication + previous_avg) / 2 if previous_avg is not None else communication
-                return avg_communication
                 Reputation.communication_history[key][current_round]["avg_communication"] = avg_communication
             elif communication == -1 and current_round > 4:
                 previous_avg = (
@@ -1072,8 +1072,8 @@ class Reputation:
                 )
                 # logging.info(f"Previous avg communication: {previous_avg}")
                 avg_communication = previous_avg - (previous_avg * 0.1)
-                return avg_communication
 
+            return avg_communication
         except Exception:
             logging.exception("Error saving communication history")
             return -1

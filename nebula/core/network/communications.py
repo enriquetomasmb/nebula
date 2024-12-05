@@ -432,9 +432,9 @@ class CommunicationsManager:
                     self.reputation_with_all_feedback[key] = []
 
                 self.reputation_with_all_feedback[key].append(message.score)
-                logging.info(
-                    f"handle_reputation_message | Reputation with all feedback: {self.reputation_with_all_feedback}"
-                )
+                # logging.info(
+                #     f"handle_reputation_message | Reputation with all feedback: {self.reputation_with_all_feedback}"
+                # )
 
         except Exception as e:
             logging.exception(f"Error handling reputation message: {e}")
@@ -854,7 +854,7 @@ class CommunicationsManager:
                 "time_message",
                 source,
                 self.addr,
-                round=round,
+                num_round=round,
                 time=current_time,
                 type_message=type_message,
                 current_round=current_round,
@@ -886,7 +886,7 @@ class CommunicationsManager:
                     "communication",
                     source,
                     self.addr,
-                    round_number,
+                    num_round=round_number,
                     time=latency,
                     type_message=type_message,
                     current_round=current_round,
