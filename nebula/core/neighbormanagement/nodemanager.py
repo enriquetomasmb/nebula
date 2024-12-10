@@ -60,7 +60,7 @@ class NodeManager():
         
         self.synchronizing_rounds = False
         
-        self._fast_reboot = True
+        self._fast_reboot = False
         self._learning_rate=2e-3
         
         #self.set_confings()
