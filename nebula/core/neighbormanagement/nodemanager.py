@@ -38,6 +38,8 @@ class NodeManager():
         logging.info("Initializing Model Handler")
         self._model_handler = factory_ModelHandler(model_handler)
         self.late_connection_process_lock = Locker(name="late_connection_process_lock")
+        self.pending_confirmation_from_nodes = []
+        self.pending_confirmation_from_nodes_lock = Locker(name="pending_confirmation_from_nodes_lock")
         self.weight_modifier = {}
         self.weight_modifier_lock = Locker(name="weight_modifier_lock")
         self.new_node_weight_multiplier = 3
@@ -180,6 +182,7 @@ class NodeManager():
         if self.rounds_pushed:
             logging.info(f"🔄  There are rounds being pushed...")
             for i in range(0, self.rounds_pushed):
+                logging.info(f"🔄  Update | weights being updated cause of push...")
                 self._update_weight_modifiers()
             self.rounds_pushed = 0  
         for addr,update in updates.items():
@@ -220,6 +223,24 @@ class NodeManager():
                 return False
         else:
             return self.neighbor_policy.accept_connection(source)
+        
+    def add_pending_connection_confirmation(self, addr):
+        logging.info(f" Addition | pending connection confirmation from: {addr}")
+        with self.pending_confirmation_from_nodes_lock:
+            self.pending_confirmation_from_nodes.append(addr)
+     
+    def waiting_confirmation_from(self, addr):
+        with self.pending_confirmation_from_nodes_lock:
+            return addr in self.pending_confirmation_from_nodes  
+            
+    async def confirmation_received(self, addr, confirmation=False):
+        logging.info(f" Update | connection confirmation received from: {addr} | confirmation: {confirmation}")
+        if confirmation:
+            await self.engine.cm.connect(addr, direct=True)    
+            self.update_neighbors(addr)
+        else:
+            with self.pending_confirmation_from_nodes_lock:
+                self.pending_confirmation_from_nodes.remove(addr)  
         
     async def receive_update_from_node(self, node_id, node_response_time):
         await self.timer_generator.receive_update(node_id, node_response_time)     
@@ -273,7 +294,9 @@ class NodeManager():
 
     async def stop_not_selected_connections(self):
         try:
+            await asyncio.sleep(20)
             if len(self.discarded_offers_addr) > 0:
+                self.discarded_offers_addr = self.discarded_offers_addr - self.engine.get_federation_nodes()
                 logging.info(f"Interrupting connections | discarded offers | nodes discarded: {self.discarded_offers_addr}")
                 for addr in self.discarded_offers_addr:
                     await self.engine.cm.disconnect(addr, mutual_disconnection=True)
@@ -334,12 +357,16 @@ class NodeManager():
             best_candidates = self.candidate_selector.select_candidates()
             logging.info(f"Candidates | {[addr for addr,_,_ in best_candidates]}")
             # candidates not choosen --> disconnect
-            for addr, _, _ in best_candidates:
-                await self.engine.cm.connect(addr, direct=True)
-                await self.engine.cm.send_message(addr, msg)
-                self.update_neighbors(addr)
-                await asyncio.sleep(1) 
-                                    
+            try:
+                for addr, _, _ in best_candidates:
+                    await self.engine.cm.send_message(addr, msg)
+                    self.add_pending_connection_confirmation(addr)
+                    #await self.engine.cm.connect(addr, direct=True)    
+                    #self.update_neighbors(addr)
+                    await asyncio.sleep(1) 
+            except asyncio.CancelledError as e:
+                self.update_neighbors(addr, remove=True)
+                pass                        
             self.accept_candidates_lock.release()
             self.late_connection_process_lock.release()       
             self.candidate_selector.remove_candidates()                                                                           
