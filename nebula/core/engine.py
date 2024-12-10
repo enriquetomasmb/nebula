@@ -316,8 +316,6 @@ class Engine:
         if source not in current_connections:
             logging.info(f"🔗  handle_connection_message | Trigger | Connecting to {source}")
             await self.cm.connect(source, direct=True)
-            if self.mobility and self.nm.waiting_confirmation_from(source):
-                self.nm.confirmation_received(source, confirmation=True)
 
     @event_handler(nebula_pb2.ConnectionMessage, nebula_pb2.ConnectionMessage.Action.DISCONNECT)
     async def _connection_disconnect_callback(self, source, message):
@@ -391,11 +389,18 @@ class Engine:
         nebula_pb2.ConnectionMessage.Action.LATE_CONNECT,
     )
     async def _connection_late_connect_callback(self, source, message):
-        logging.info(f"🔗  handle_connection_message | Trigger | Received late connect message from {source}")   
-        if self.nm.accept_connection(source, joining=True):
+        logging.info(f"🔗  handle_connection_message | Trigger | Received late connect message from {source}")
+        # Verify if it's a confirmation message from a previous late connection message sent to source
+        if self.nm.waiting_confirmation_from(source):
+            await self.nm.confirmation_received(source, confirmation=True)          
+        elif self.nm.accept_connection(source, joining=True):
             logging.info(f"🔗  handle_connection_message | Late connection accepted | source: {source}") 
             self.nm.add_weight_modifier(source) 
             await self.cm.connect(source, direct=True)
+            
+            # Verify conenction is accepted
+            conf_msg = self.cm.mm.generate_connection_message(nebula_pb2.ConnectionMessage.Action.LATE_CONNECT)
+            await self.cm.send_message(source, conf_msg)
             
             ct_actions , df_actions = self.nm.get_actions()         
             if len(ct_actions):            
@@ -420,9 +425,15 @@ class Engine:
     )
     async def _connection_restructure_callback(self, source, message):
         logging.info(f"🔗  handle_connection_message | Trigger | Received restructure message from {source}")
-        if self.nm.accept_connection(source, joining=False):
+        # Verify if it's a confirmation message from a previous restructure connection message sent to source
+        if self.nm.waiting_confirmation_from(source):
+            await self.nm.confirmation_received(source, confirmation=True)
+        elif self.nm.accept_connection(source, joining=False):
             logging.info(f"🔗  handle_connection_message | Trigger | restructure connection accepted from {source}")
             await self.cm.connect(source, direct=True)
+            
+            conf_msg = self.cm.mm.generate_connection_message(nebula_pb2.ConnectionMessage.Action.RESTRUCTURE)
+            await self.cm.send_message(source, conf_msg)
             
             ct_actions , df_actions = self.nm.get_actions()                         
             if len(ct_actions):            
@@ -438,7 +449,7 @@ class Engine:
         else:
             logging.info(f"❗️  handle_connection_message | Trigger | restructure connection denied from {source}")
             await asyncio.sleep(1)
-            await self.cm.disconnect(source, mutual_disconnection=True) 
+            #await self.cm.disconnect(source, mutual_disconnection=True) 
     
     @event_handler(nebula_pb2.DiscoverMessage, nebula_pb2.DiscoverMessage.Action.DISCOVER_JOIN)
     async def _discover_discover_join_callback(self, source, message):
@@ -506,11 +517,12 @@ class Engine:
     )
     async def _offer_offer_metric_callback(self, source, message):
         logging.info(f"🔍  handle_offer_message | Trigger | Received offer_metric message from {source}")
+        self.nm.meet_node(source)
         if self.nm.still_waiting_for_candidates():
             n_neighbors = message.n_neighbors
             loss = message.loss
             self.nm.add_candidate(source, n_neighbors, loss)
-            self.nm.meet_node(source)
+            
 
     @event_handler(
         nebula_pb2.LinkMessage,

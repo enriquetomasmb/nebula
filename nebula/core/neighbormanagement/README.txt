@@ -42,9 +42,13 @@ It is important to note that the receiving node can reject the connection.
 
 2) Select Candidates and connect to them
 
- __________            ____________________                          ___________                   
-| New node | -------> | Candidate Selector | ----> *CONNECT* ---->  | Candidate |
-|__________|          | __________________ |                   	    | _________ |
+ __________            ____________________                               ___________                   
+| New node | -------> | Candidate Selector | ----> *LATE_CONNECT* ---->  | Candidate |
+|__________|          | __________________ |                   	         | _________ |
+
+ ___________                                   __________                   
+| Candidate | ------->  *LATE_CONNECT* ---->  | New Node |
+|___________|                            	  | _________|
 
 Retopology works the same way but with diferent arguments on the messages.
 

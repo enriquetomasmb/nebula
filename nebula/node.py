@@ -347,7 +347,7 @@ async def main(config):
     # In order to do that, it should request the current round to the controller
     if additional_node_status:
         logging.info(f"Waiting for round {additional_node_round} to start")
-        logging.info("Waiting 60s to start finding federation")
+        logging.info("Waiting time to start finding federation")
         time.sleep(70)
         #time.sleep(6000)  # DEBUG purposes
         #import requests

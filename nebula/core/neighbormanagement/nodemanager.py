@@ -221,6 +221,8 @@ class NodeManager():
             if self.get_restructure_process_lock().locked():
                 logging.info("NOT accepting connections | Currently upgrading network Robustness")
                 return False
+            else:
+                return self.neighbor_policy.accept_connection(source)
         else:
             return self.neighbor_policy.accept_connection(source)
         
@@ -228,6 +230,10 @@ class NodeManager():
         logging.info(f" Addition | pending connection confirmation from: {addr}")
         with self.pending_confirmation_from_nodes_lock:
             self.pending_confirmation_from_nodes.append(addr)
+     
+    def clear_pending_confirmations(self):
+        with self.pending_confirmation_from_nodes_lock:
+            self.pending_confirmation_from_nodes.clear()
      
     def waiting_confirmation_from(self, addr):
         with self.pending_confirmation_from_nodes_lock:
@@ -295,13 +301,14 @@ class NodeManager():
     async def stop_not_selected_connections(self):
         try:
             await asyncio.sleep(20)
-            if len(self.discarded_offers_addr) > 0:
-                self.discarded_offers_addr = self.discarded_offers_addr - self.engine.get_federation_nodes()
-                logging.info(f"Interrupting connections | discarded offers | nodes discarded: {self.discarded_offers_addr}")
-                for addr in self.discarded_offers_addr:
-                    await self.engine.cm.disconnect(addr, mutual_disconnection=True)
-                    await asyncio.sleep(1) 
-                self.discarded_offers_addr = []
+            with self.discarded_offers_addr_lock:
+                if len(self.discarded_offers_addr) > 0:
+                    self.discarded_offers_addr = set(self.discarded_offers_addr) - await self.engine.cm.get_addrs_current_connections(only_direct=True, myself=False)
+                    logging.info(f"Interrupting connections | discarded offers | nodes discarded: {self.discarded_offers_addr}")
+                    for addr in self.discarded_offers_addr:
+                        await self.engine.cm.disconnect(addr, mutual_disconnection=True)
+                        await asyncio.sleep(1) 
+                    self.discarded_offers_addr = []
         except asyncio.CancelledError as e:
             pass
 
@@ -311,7 +318,7 @@ class NodeManager():
         ecs = await self.engine.cm.is_external_connection_service_running()
         ss = self.engine.get_sinchronized_status()
         action = None
-        logging.info(f"Stats | neighbos: {n} | service running: {ecs} | synchronized status: {ss}")
+        logging.info(f"Stats | neighbors: {n} | service running: {ecs} | synchronized status: {ss}")
         if not await self.neighbors_left() and await self.engine.cm.is_external_connection_service_running():
             logging.info(f"❗️  Isolated node | Shutdowning service required")
             action = lambda: self.engine.cm.stop_external_connection_service()
@@ -335,6 +342,7 @@ class NodeManager():
         self.late_connection_process_lock.acquire()
         best_candidates = []
         self.candidate_selector.remove_candidates()
+        self.clear_pending_confirmations()
         
         # find federation and send discover
         await self.engine.cm.stablish_connection_to_federation(msg_type, addrs_known)
@@ -396,7 +404,7 @@ class NodeManager():
                 logging.info("Insufficient Robustness | Upgrading robustness | Searching for more connections")
                 asyncio.create_task(self.upgrade_connection_robustness())
             else:
-                if self.engine.get_sinchronized_status():
+                if not self.engine.get_sinchronized_status():
                     logging.info("Device not synchronized with federation")
                 else:
                     logging.info("Sufficient Robustness | no actions required")
