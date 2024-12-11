@@ -348,7 +348,7 @@ async def main(config):
     if additional_node_status:
         logging.info(f"Waiting for round {additional_node_round} to start")
         logging.info("Waiting time to start finding federation")
-        time.sleep(500)
+        time.sleep(550)
         #time.sleep(6000)  # DEBUG purposes
         #import requests
 

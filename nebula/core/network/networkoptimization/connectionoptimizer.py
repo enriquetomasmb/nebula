@@ -1,11 +1,12 @@
 import asyncio
 import logging
 from nebula.core.network.connection import Connection
+from nebula.core.network.networkoptimization.networkoptimizer import NetworkOptimizer
 from nebula.core.utils.locker import Locker
 import heapq
 import time
 
-PRIORITIES = {'HIGH': 1, 'MEDIUM': 2, 'LOW': 3}
+PRIORITIES = {'HIGH': 30, 'MEDIUM': 20, 'LOW': 10}
 
 
 class ConnectionOptimizer:
@@ -13,17 +14,19 @@ class ConnectionOptimizer:
         self.connection_heap = []  # Heap: (expire_time, priority, connection)
         self.active_connections = {}  
         self.connection_heap_lock = Locker(name="connection_heap_lock", async_lock=True)  
-        self._wake_up_event = asyncio.Event()  
+        self._wake_up_event = asyncio.Event()
+        self._running = True  
 
-    async def update_connection_activity(self, connection: Connection, priority):
+    async def update_connection_activity(self, connection: Connection):
         """
             Add new connection timeout to heap
         """
+        priority = connection.get_prio()
         timeout = self._get_timeout_for_priority(priority)
         expire_time = time.time() + timeout
         async with self.connection_heap_lock:
             self.active_connections[connection] = (expire_time, priority, True)  # Activa
-            heapq.heappush(self.connection_heap, (expire_time, PRIORITIES[priority], connection))
+            heapq.heappush(self.connection_heap, (expire_time, priority, connection))
             self._wake_up_event.set()
 
     async def set_connection_inactivity(self, connection):
@@ -36,8 +39,12 @@ class ConnectionOptimizer:
                 self.active_connections[connection] = (*self.active_connections[connection][:2], False)  
             self._wake_up_event.set()  
 
+    async def stop_daemon(self):
+        self._running = False
+    
     async def start_daemon(self):
-        while True:
+        self._running = True
+        while self._running:
             logging.info("Wake up | Connection optimizer deamon...")
             await self._check_timeouts()
             await self._wait_for_next_expiration()
@@ -81,9 +88,8 @@ class ConnectionOptimizer:
         """
             Priority timeouts
         """
-        if priority == 'HIGH':
-            return 30  # HIGH = 30s
-        elif priority == 'MEDIUM':
-            return 20  # MEDIUM = 20s
-        elif priority == 'LOW':
-            return 10  # LOW = 10s
+        try:
+            return PRIORITIES[priority]
+        except KeyError:
+            logging.info(f"Not allowed: {priority}. PRIORITIES: {list(PRIORITIES.keys())}")
+            raise ValueError()

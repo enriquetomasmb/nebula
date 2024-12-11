@@ -39,6 +39,7 @@ class Connection:
         active=True,
         compression="zlib",
         config=None,
+        prio="MEDIUM"
     ):
         self.cm = cm
         self.reader = reader
@@ -61,6 +62,7 @@ class Connection:
         self.process_task = None
         self.pending_messages_queue = asyncio.Queue(maxsize=100)
         self.message_buffers: dict[bytes, dict[int, MessageChunk]] = {}
+        self._prio = prio
 
         self.EOT_CHAR = b"\x00\x00\x00\x04"
         self.COMPRESSION_CHAR = b"\x00\x00\x00\x01"
@@ -89,6 +91,9 @@ class Connection:
 
     def get_addr(self):
         return self.addr
+    
+    def get_prio(self):
+        return self._prio
 
     def get_federated_round(self):
         return self.federated_round

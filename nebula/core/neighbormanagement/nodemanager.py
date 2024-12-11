@@ -8,7 +8,6 @@ from nebula.core.utils.locker import Locker
 from nebula.core.neighbormanagement.candidateselection.candidateselector import factory_CandidateSelector
 from nebula.core.neighbormanagement.modelhandlers.modelhandler import factory_ModelHandler
 from nebula.core.neighbormanagement.neighborpolicies.neighborpolicy import factory_NeighborPolicy
-from nebula.core.neighbormanagement.timergenerator import TimerGenerator
 from nebula.core.pb import nebula_pb2
 from nebula.core.network.communications import CommunicationsManager
 from nebula.addons.functions import print_msg_box
@@ -48,19 +47,14 @@ class NodeManager():
         self._restructure_process_lock = Locker(name="restructure_process_lock")
         self.restructure = False
         self.discarded_offers_addr_lock = Locker(name="discarded_offers_addr_lock")
-        self.discarded_offers_addr = []
-        
-        self.max_time_to_wait = 20
-        logging.info("Initializing Timer generator")
-        self._timer_generator = None #TimerGenerator(self.engine.cm.get_addrs_current_connections(only_direct=True, myself=False), self.max_time_to_wait, 80)
-        
+        self.discarded_offers_addr = [] 
         self._push_acceleration = push_acceleration
         self.rounds_pushed_lock = Locker(name="rounds_pushed_lock")
         self.rounds_pushed = 0
         
         self.synchronizing_rounds = False
         
-        self._fast_reboot = False
+        self._fast_reboot = True
         self._learning_rate=2e-3
         
         #self.set_confings()
@@ -80,10 +74,6 @@ class NodeManager():
     @property
     def model_handler(self):
         return self._model_handler
-    
-    @property
-    def timer_generator(self):
-        return self._timer_generator
     
     def get_learning_rate_increase(self):
         return self._learning_rate
@@ -146,15 +136,6 @@ class NodeManager():
         #self.engine.trainer.get_loss(), self.config.participant["molibity_args"]["weight_distance"], self.config.participant["molibity_args"]["weight_het"]
         #self.model_handler.set_config([self.engine.get_round(), self.engine.config.participant["training_args"]["epochs"]])
   
-    def get_timer(self):
-        return self.timer_generator.get_timer(self.engine.get_round())
-    
-    def adjust_timer(self):
-        self.timer_generator.adjust_timer()
-        
-    def get_stop_condition(self):
-        return self.timer_generator.get_stop_condition()
-      
 
                                                         ##############################
                                                         #       WEIGHT STRATEGY      #
@@ -248,9 +229,6 @@ class NodeManager():
             with self.pending_confirmation_from_nodes_lock:
                 self.pending_confirmation_from_nodes.remove(addr)  
         
-    async def receive_update_from_node(self, node_id, node_response_time):
-        await self.timer_generator.receive_update(node_id, node_response_time)     
-    
     def add_to_discarded_offers(self, addr_discarded):
         self.discarded_offers_addr_lock.acquire()
         self.discarded_offers_addr.append(addr_discarded)

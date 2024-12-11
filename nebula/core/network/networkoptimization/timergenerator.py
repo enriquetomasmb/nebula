@@ -35,13 +35,13 @@ class TimerGenerator():
     def get_stop_condition(self):
         return True #self.all_updates_received     
         
-    def get_timer(self, round):
+    async def get_timer(self, round):
         self.round = round
         sm = time.time()
         self.start_moment = round(sm, 2)
         return self.waiting_time
 
-    def update_node(self, node, remove=False):
+    async def update_node(self, node, remove=False):
         if remove:
             self.nodes_historic.pop(node, None)
             self.max_updates_number -= 1
@@ -51,8 +51,7 @@ class TimerGenerator():
 
     async def receive_update(self, node_id, node_response_time):
         """
-            In this function the response time is saved in the historic, structures are updated and
-            condition is checked to stop the process because al responses are being received
+            In this function the response time is saved in the historic, structures are updated
             
         Args:
             node_id : node addr
@@ -69,7 +68,7 @@ class TimerGenerator():
                 #async with self.all_updates_received:               
                 #    self.all_updates_received.notify_all() 
 
-    def adjust_timer(self):
+    async def adjust_timer(self):
         """
             The process of adjusting the timer is simple. if adaptative is not set up it will use the MAX_TIMER all the time.
             If not, the strategy will depend on the percent of updates receive the last round.
