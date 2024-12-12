@@ -21,7 +21,7 @@ class TimerGenerator():
         self.max_timer_value = max_timer_value
         self.acceptable_percent = acceptable_percent
         self.max_historic_size = max_historic_size
-        self.round = round
+        self.round_completed = round
         self.nodes_historic = {node_id: deque(maxlen=self.max_historic_size) for node_id in nodes} 
         self.adaptative = adaptative
         self.max_updates_number = len(self.nodes_historic)
@@ -35,8 +35,8 @@ class TimerGenerator():
     def get_stop_condition(self):
         return True #self.all_updates_received     
         
-    async def get_timer(self, round):
-        self.round = round
+    async def get_timer(self):
+        self.round_completed = self.round_completed + 1
         sm = time.time()
         self.start_moment = round(sm, 2)
         return self.waiting_time
@@ -68,7 +68,10 @@ class TimerGenerator():
                 #async with self.all_updates_received:               
                 #    self.all_updates_received.notify_all() 
 
-    async def adjust_timer(self):
+    async def on_round_end(self):
+        await self._adjust_timer()
+
+    async def _adjust_timer(self):
         """
             The process of adjusting the timer is simple. if adaptative is not set up it will use the MAX_TIMER all the time.
             If not, the strategy will depend on the percent of updates receive the last round.
@@ -112,12 +115,12 @@ class TimerGenerator():
                         ema = self._exponential_moving_average(times_deque, alpha=0.1)
                         max_ema = max(max_ema, ema)                          
                     if percentile < self.acceptable_percent:
-                        if not self.round >= self.max_historic_size:
+                        if not self.round_completed >= self.max_historic_size:
                             self.waiting_time = self._change_timer_value(self.waiting_time*1.2)    # timer + 20% from max
                         else:
                             self.waiting_time = self._change_timer_value(max_ema*1.25)             # if enough data for historic EMA, EMA*1.25                               
                     else:
-                        if not self.round >= self.max_historic_size:
+                        if not self.round_completed >= self.max_historic_size:
                             self.waiting_time = self._change_timer_value(self.waiting_time*1.05)   # timer + 5% from max
                         else:
                             self.waiting_time = self._change_timer_value(max_ema*1.15)             # if enough data for historic EMA, EMA*1.15         

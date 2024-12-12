@@ -172,17 +172,22 @@ class NodeManager():
                 logging.info (f"📝 Appliying modified weight strategy | addr: {addr} | multiplier value: {weightmodifier}")
                 model, weight = update
                 updates.update({addr: (model, weight*weightmodifier)})
-        self._update_weight_modifiers()
+        await self._update_weight_modifiers()
       
-    def _update_weight_modifiers(self):
-        self.weight_modifier_lock.acquire() 
-        for addr, (weight,rounds) in self.weight_modifier.items():
-            new_weight = weight - 1/(rounds**2)
-            rounds = rounds + 1
-            if new_weight > 1:
-                self.weight_modifier[addr] = (new_weight, rounds)            
-            else:
-                self.remove_weight_modifier(addr)
+    async def _update_weight_modifiers(self):
+        self.weight_modifier_lock.acquire()
+        logging.info(f"🔄  Update | weights being updated")
+        if self.weight_modifier:
+            for addr, (weight,rounds) in self.weight_modifier.items():
+                new_weight = weight - 1/(rounds**2)
+                rounds = rounds + 1
+                if new_weight > 1 and rounds <= 20:
+                    self.weight_modifier[addr] = (new_weight, rounds)            
+                else:
+                    self.remove_weight_modifier(addr)
+        else:
+            self._learning_rate = 1e-3
+            await self.engine.update_model_learning_rate()
         self.weight_modifier_lock.release()
     
     def _get_weight_modifier(self, addr):
@@ -207,6 +212,7 @@ class NodeManager():
         else:
             return self.neighbor_policy.accept_connection(source)
         
+    #TODO añadir un remove    
     def add_pending_connection_confirmation(self, addr):
         logging.info(f" Addition | pending connection confirmation from: {addr}")
         with self.pending_confirmation_from_nodes_lock:

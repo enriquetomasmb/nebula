@@ -10,12 +10,20 @@ PRIORITIES = {'HIGH': 30, 'MEDIUM': 20, 'LOW': 10}
 
 
 class ConnectionOptimizer:
-    def __init__(self):
+    def __init__(
+        self,
+        network_optimizer : NetworkOptimizer
+    ):
+        self._network_optimizer = network_optimizer
         self.connection_heap = []  # Heap: (expire_time, priority, connection)
         self.active_connections = {}  
         self.connection_heap_lock = Locker(name="connection_heap_lock", async_lock=True)  
         self._wake_up_event = asyncio.Event()
         self._running = True  
+
+    @property
+    def no(self):
+        return self._network_optimizer
 
     async def update_connection_activity(self, connection: Connection):
         """
@@ -45,7 +53,7 @@ class ConnectionOptimizer:
     async def start_daemon(self):
         self._running = True
         while self._running:
-            logging.info("Wake up | Connection optimizer deamon...")
+            logging.info("Wake up | Connection optimizer daemon...")
             await self._check_timeouts()
             await self._wait_for_next_expiration()
 
@@ -91,5 +99,5 @@ class ConnectionOptimizer:
         try:
             return PRIORITIES[priority]
         except KeyError:
-            logging.info(f"Not allowed: {priority}. PRIORITIES: {list(PRIORITIES.keys())}")
+            logging.error(f"Not allowed: {priority}. PRIORITIES: {list(PRIORITIES.keys())}")
             raise ValueError()

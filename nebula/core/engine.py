@@ -574,7 +574,8 @@ class Engine:
     
     async def update_model_learning_rate(self):
         await self.trainning_in_progress_lock.acquire_async()
-        self.trainer.update_model_learning_rate(self.nm.get_learning_rate_increase())
+        if self.get_round() < self.total_rounds:
+            self.trainer.update_model_learning_rate(self.nm.get_learning_rate_increase())
         await self.trainning_in_progress_lock.release_async()        
         
     async def _start_learning_late(self):
