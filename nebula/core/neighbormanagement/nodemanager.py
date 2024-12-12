@@ -150,11 +150,9 @@ class NodeManager():
         self.weight_modifier_lock.release()
     
     def remove_weight_modifier(self, addr):
-        self.weight_modifier_lock.acquire()
         if addr in self.weight_modifier:
             logging.info(f"📝 Removing | weight modifier registered for source {addr}")
             del self.weight_modifier[addr]
-        self.weight_modifier_lock.release()
     
     async def apply_weight_strategy(self, updates: dict):
         logging.info(f"🔄  Applying weight Strategy...")
@@ -169,7 +167,7 @@ class NodeManager():
         for addr,update in updates.items():
             weightmodifier, rounds = self._get_weight_modifier(addr)
             if weightmodifier != 1:
-                logging.info (f"📝 Appliying modified weight strategy | addr: {addr} | multiplier value: {weightmodifier}")
+                logging.info (f"📝 Appliying modified weight strategy | addr: {addr} | multiplier value: {weightmodifier}, rounds applied: {rounds}")
                 model, weight = update
                 updates.update({addr: (model, weight*weightmodifier)})
         await self._update_weight_modifiers()
@@ -178,16 +176,22 @@ class NodeManager():
         self.weight_modifier_lock.acquire()
         logging.info(f"🔄  Update | weights being updated")
         if self.weight_modifier:
+            remove_addrs = []
             for addr, (weight,rounds) in self.weight_modifier.items():
                 new_weight = weight - 1/(rounds**2)
                 rounds = rounds + 1
                 if new_weight > 1 and rounds <= 20:
                     self.weight_modifier[addr] = (new_weight, rounds)            
                 else:
-                    self.remove_weight_modifier(addr)
+                    remove_addrs.append(addr)
+                    #self.remove_weight_modifier(addr)
+            for a in remove_addrs:
+                self.remove_weight_modifier(a)
         else:
-            self._learning_rate = 1e-3
-            await self.engine.update_model_learning_rate()
+            if self._learning_rate == (2e-3):
+                logging.info(f"🔄  Finishing | weight strategy is completed")
+                self._learning_rate = 1e-3
+                await self.engine.update_model_learning_rate()
         self.weight_modifier_lock.release()
     
     def _get_weight_modifier(self, addr):
