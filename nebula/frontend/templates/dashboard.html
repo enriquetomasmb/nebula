@@ -142,7 +142,7 @@
                         </tr>
                     </thead>
                     {% for name, start_time, end_time, title, description, status, network_subnet, model, dataset,
-                    rounds, role, username in scenarios %}
+                    rounds, role, username, gpu_id in scenarios %}
                     <tr id="scenario-vars">
                         {% if user_role == "admin" %}
                         <td id="username">{{ username|lower }}</td>

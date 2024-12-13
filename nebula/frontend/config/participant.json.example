@@ -22,6 +22,7 @@
     "malicious": false,
     "start": false,
     "accelerator": "cpu",
+    "gpu_id" : null,
     "devices": 2,
     "strategy": "ddp",
     "logging": false

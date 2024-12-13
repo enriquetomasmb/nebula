@@ -43,6 +43,7 @@ class Scenario:
         logginglevel,
         report_status_data_queue,
         accelerator,
+        gpu_id,
         network_subnet,
         network_gateway,
         epochs,
@@ -89,6 +90,7 @@ class Scenario:
             logginglevel (str): Logging level.
             report_status_data_queue (bool): Indicator to report information about the nodes of the scenario
             accelerator (str): Accelerator used.
+            gpu_id (int) : Id of the used gpu
             network_subnet (str): Network subnet.
             network_gateway (str): Network gateway.
             epochs (int): Number of epochs.
@@ -129,6 +131,7 @@ class Scenario:
         self.logginglevel = logginglevel
         self.report_status_data_queue = report_status_data_queue
         self.accelerator = accelerator
+        self.gpu_id = gpu_id
         self.network_subnet = network_subnet
         self.network_gateway = network_gateway
         self.epochs = epochs
@@ -338,6 +341,7 @@ class ScenarioManagement:
             participant_config["model_args"]["model"] = self.scenario.model
             participant_config["training_args"]["epochs"] = int(self.scenario.epochs)
             participant_config["device_args"]["accelerator"] = self.scenario.accelerator
+            participant_config["device_args"]["gpu_id"] = self.scenario.gpu_id
             participant_config["device_args"]["logging"] = self.scenario.logginglevel
             participant_config["aggregator_args"]["algorithm"] = self.scenario.agg_algorithm
             participant_config["adversarial_args"]["attacks"] = node_config["attacks"]
@@ -656,27 +660,22 @@ class ScenarioManagement:
             image = "nebula-core"
             name = f"{os.environ.get('NEBULA_CONTROLLER_NAME')}-{self.user}-participant{node['device_args']['idx']}"
 
-            try:
-                if node["device_args"]["accelerator"] == "gpu":
-                    environment = {"NVIDIA_DISABLE_REQUIRE": True}
-                    host_config = client.api.create_host_config(
-                        binds=[f"{self.root_path}:/nebula", "/var/run/docker.sock:/var/run/docker.sock"],
-                        privileged=True,
-                        device_requests=[docker.types.DeviceRequest(driver="nvidia", count=-1, capabilities=[["gpu"]])],
-                    )
-                else:
-                    environment = ""
-                    host_config = client.api.create_host_config(
-                        binds=[f"{self.root_path}:/nebula", "/var/run/docker.sock:/var/run/docker.sock"],
-                        privileged=True,
-                        device_requests=[],
-                    )
-            except Exception as e:
-                logging.info(f"[FER] create_host_config: {e}")
+            if node["device_args"]["accelerator"] == "gpu":
+                environment = {"NVIDIA_DISABLE_REQUIRE": True}
+                host_config = client.api.create_host_config(
+                    binds=[f"{self.root_path}:/nebula", "/var/run/docker.sock:/var/run/docker.sock"],
+                    privileged=True,
+                    device_requests=[docker.types.DeviceRequest(driver="nvidia", count=-1, capabilities=[["gpu"]])],
+                )
+            else:
+                environment = ""
+                host_config = client.api.create_host_config(
+                    binds=[f"{self.root_path}:/nebula", "/var/run/docker.sock:/var/run/docker.sock"],
+                    privileged=True,
+                    device_requests=[],
+                )
 
             volumes = ["/nebula", "/var/run/docker.sock"]
-
-            logging.info(f"[FER] participant {name}")
 
             start_command = "sleep 10" if node["device_args"]["start"] else "sleep 0"
             command = [
@@ -726,15 +725,13 @@ class ScenarioManagement:
                     networking_config=networking_config,
                 )
             except Exception as e:
-                logging.info(f"[FER] create_container: {e}")
-            logging.info(f"[FER] creating participant {name}")
+                logging.exception(f"Creating container {name}: {e}")
 
             try:
                 client.api.start(container_id)
                 container_ids.append(container_id)
-
             except Exception as e:
-                logging.info(f"[FER] starting participant {name} error: {e}")
+                logging.exception(f"Starting participant {name} error: {e}")
             i += 1
 
     def start_nodes_process(self):

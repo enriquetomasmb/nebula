@@ -175,7 +175,12 @@ class Lightning:
         self.create_logger()
         num_gpus = torch.cuda.device_count()
         if self.config.participant["device_args"]["accelerator"] == "gpu" and num_gpus > 0:
-            gpu_index = self.config.participant["device_args"]["idx"] % num_gpus
+            # Use all available GPUs
+            if self.config.participant["device_args"]["gpu_id"] == -1:
+                gpu_index = self.config.participant["device_args"]["idx"] % num_gpus
+            # Use the selected GPU
+            else:
+                gpu_index = self.config.participant["device_args"]["gpu_id"]
             logging_training.info(f"Creating trainer with accelerator GPU ({gpu_index})")
             self._trainer = Trainer(
                 callbacks=[ModelSummary(max_depth=1), NebulaProgressBar()],

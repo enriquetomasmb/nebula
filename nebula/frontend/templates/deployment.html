@@ -2141,7 +2141,7 @@
                             document.getElementById("spinner").style.display = "none";
                             // If the user is a demo, show a modal with a message
                             $('#confirm-modal').on('hidden.bs.modal', function () {
-                                $('#info-modal-body').html('You are not allowed to run a scenario. You have a limited functionality or a scenario is already running');
+                                $('#info-modal-body').html('You are not authorized to run a scenario. Your access is limited, or you may need to wait until more scenarios can be launched');
                                 $('#info-modal').modal('show');
                             });
                         }

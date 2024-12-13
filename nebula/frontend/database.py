@@ -109,7 +109,8 @@ async def initialize_databases():
                 dataset TEXT,
                 rounds TEXT,
                 role TEXT,
-                username TEXT
+                username TEXT,
+                gpu_id INTEGER
             );
             """
         )
@@ -126,6 +127,7 @@ async def initialize_databases():
             "rounds": "TEXT",
             "role": "TEXT",
             "username": "TEXT",
+            "gpu_id" : "INTEGER",
         }
         await ensure_columns(conn, "scenarios", desired_columns)
 
@@ -453,6 +455,7 @@ def scenario_update_record(
     dataset,
     rounds,
     role,
+    gpu_id
 ):
     _conn = sqlite3.connect(scenario_db_file_location)
     _c = _conn.cursor()
@@ -464,7 +467,7 @@ def scenario_update_record(
     if result is None:
         # Create a new record
         _c.execute(
-            "INSERT INTO scenarios VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO scenarios VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 scenario_name,
                 start_time,
@@ -478,6 +481,7 @@ def scenario_update_record(
                 rounds,
                 role,
                 username,
+                gpu_id,
             ),
         )
     else:
@@ -541,12 +545,21 @@ def scenario_set_status_to_completed(scenario_name):
         print(f"Database error: {e}")
 
 
-def get_running_scenario():
+def get_running_scenario(username=None):
     with sqlite3.connect(scenario_db_file_location) as conn:
         conn.row_factory = sqlite3.Row
         c = conn.cursor()
-        command = "SELECT * FROM scenarios WHERE status = ? OR status = ?;"
-        c.execute(command, ("running", "completed"))
+        
+        if username:
+            command = """
+                SELECT * FROM scenarios 
+                WHERE (status = ? OR status = ?) AND username = ?;
+            """
+            c.execute(command, ("running", "completed", username))
+        else:
+            command = "SELECT * FROM scenarios WHERE status = ? OR status = ?;"
+            c.execute(command, ("running", "completed"))
+        
         result = c.fetchone()
 
     return result
