@@ -113,9 +113,9 @@ async def get_least_memory_gpu():
     }
     
     
-@app.get("/available_gpu")
+@app.get("/available_gpus/")
 async def get_available_gpu():
-    available_gpu_index = None
+    available_gpus = []
       
     if importlib.util.find_spec("pynvml") is not None:
         try:
@@ -130,15 +130,14 @@ async def get_available_gpu():
                 memory_used_percent = (memory_info.used / memory_info.total) * 100
                 
                 # Obtain available GPUs
-                if memory_used_percent < 5 and available_gpu_index is None:
-                    available_gpu_index = i
-                                    
+                if memory_used_percent < 5:
+                    available_gpus.append(i)
+                        
+            return {
+                "available_gpus": available_gpus,
+            }                       
         except Exception:  # noqa: S110
             pass
-
-    return {
-        "available_gpu_index": available_gpu_index,
-    }
 
 
 class NebulaEventHandler(PatternMatchingEventHandler):

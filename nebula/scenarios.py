@@ -90,7 +90,7 @@ class Scenario:
             logginglevel (str): Logging level.
             report_status_data_queue (bool): Indicator to report information about the nodes of the scenario
             accelerator (str): Accelerator used.
-            gpu_id (int) : Id of the used gpu
+            gpu_id (list) : Id list of the used gpu
             network_subnet (str): Network subnet.
             network_gateway (str): Network gateway.
             epochs (int): Number of epochs.

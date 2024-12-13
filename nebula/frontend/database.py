@@ -110,7 +110,7 @@ async def initialize_databases():
                 rounds TEXT,
                 role TEXT,
                 username TEXT,
-                gpu_id INTEGER
+                gpu_id TEXT
             );
             """
         )
@@ -127,7 +127,7 @@ async def initialize_databases():
             "rounds": "TEXT",
             "role": "TEXT",
             "username": "TEXT",
-            "gpu_id" : "INTEGER",
+            "gpu_id" : "TEXT",
         }
         await ensure_columns(conn, "scenarios", desired_columns)
 

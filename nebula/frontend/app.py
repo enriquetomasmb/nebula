@@ -442,8 +442,8 @@ async def get_host_resources():
                 return None
             
             
-async def get_available_gpu():
-    url = f"http://{settings.controller_host}:{settings.controller_port}/available_gpu"
+async def get_available_gpus():
+    url = f"http://{settings.controller_host}:{settings.controller_port}/available_gpus"
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             if response.status == 200:
@@ -1229,15 +1229,18 @@ async def node_stopped(scenario_name: str, request: Request):
 
 async def assign_available_gpu(scenario_data, role):    
     if scenario_data["accelerator"] == "cpu":
-        scenario_data["gpu_id"] = None
+        scenario_data["gpu_id"] = []
     else:
+        available_gpus = await get_available_gpus()
+        
         if role == "user":
-            gpu = await get_available_gpu()
-            scenario_data["gpu_id"] = gpu.get("available_gpu_index")
+            json_available_gpus = available_gpus.pop()
+            scenario_data["gpu_id"] = json_available_gpus
         elif role == "admin":
-            scenario_data["gpu_id"] = -1
+            json_available_gpus = available_gpus
+            scenario_data["gpu_id"] = json_available_gpus
         else:
-            scenario_data["gpu_id"] = None
+            scenario_data["gpu_id"] = []
     
     return scenario_data
 
@@ -1266,7 +1269,7 @@ async def run_scenario(scenario_data, role, user):
         dataset=scenario_data["dataset"],
         rounds=scenario_data["rounds"],
         role=role,
-        gpu_id=scenario_data["gpu_id"]
+        gpu_id=json.dumps(scenario_data["gpu_id"])
     )
 
     # Run the actual scenario
