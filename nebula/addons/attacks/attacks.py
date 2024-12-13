@@ -186,7 +186,7 @@ class FloodingAttack(Attack):
     def __init__(self):
         super().__init__()
 
-    async def attack(self, cm: CommunicationsManager, addr, num_round, repetitions=20, interval=0.05):
+    async def attack(self, cm: CommunicationsManager, addr, num_round, repetitions=5, interval=0.1):
         logging.info("[FloodingAttack] Performing flood attack")
         neighbors = set(await cm.get_addrs_current_connections(only_direct=True))
         logging.info(f"Neighbors: {neighbors}")
