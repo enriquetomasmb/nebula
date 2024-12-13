@@ -666,6 +666,7 @@ class ScenarioManagement:
                     binds=[f"{self.root_path}:/nebula", "/var/run/docker.sock:/var/run/docker.sock"],
                     privileged=True,
                     device_requests=[docker.types.DeviceRequest(driver="nvidia", count=-1, capabilities=[["gpu"]])],
+                    extra_hosts={"host.docker.internal": "host-gateway"},
                 )
             else:
                 environment = ""
@@ -673,6 +674,7 @@ class ScenarioManagement:
                     binds=[f"{self.root_path}:/nebula", "/var/run/docker.sock:/var/run/docker.sock"],
                     privileged=True,
                     device_requests=[],
+                    extra_hosts={"host.docker.internal": "host-gateway"},
                 )
 
             volumes = ["/nebula", "/var/run/docker.sock"]

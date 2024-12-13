@@ -177,7 +177,7 @@ class Lightning:
         if self.config.participant["device_args"]["accelerator"] == "gpu" and num_gpus > 0:
             # Use all available GPUs
             if num_gpus > 1:
-                gpu_index = self.config.participant["device_args"]["idx"] % num_gpus
+                gpu_index = [self.config.participant["device_args"]["idx"] % num_gpus]
             # Use the selected GPU
             else:
                 gpu_index = self.config.participant["device_args"]["gpu_id"]
@@ -186,7 +186,7 @@ class Lightning:
                 callbacks=[ModelSummary(max_depth=1), NebulaProgressBar()],
                 max_epochs=self.epochs,
                 accelerator=self.config.participant["device_args"]["accelerator"],
-                devices=[gpu_index],
+                devices=gpu_index,
                 logger=self._logger,
                 enable_checkpointing=False,
                 enable_model_summary=False,

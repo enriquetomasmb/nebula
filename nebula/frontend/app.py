@@ -1233,12 +1233,13 @@ async def assign_available_gpu(scenario_data, role):
     else:
         response = await get_available_gpus()
         available_gpus = response.get("available_gpus")
-        if role == "user":
-            scenario_data["gpu_id"] = available_gpus.pop()
-        elif role == "admin":
-            scenario_data["gpu_id"] = available_gpus
-        else:
-            scenario_data["gpu_id"] = []
+        if len(available_gpus) > 0:
+            if role == "user":
+                scenario_data["gpu_id"] = [available_gpus.pop()]
+            elif role == "admin":
+                scenario_data["gpu_id"] = available_gpus
+            else:
+                scenario_data["gpu_id"] = []
     
     return scenario_data
 

@@ -67,7 +67,7 @@ class DockerUtils:
 
             # If no subnet is provided or it exists, find the next available one
             if not subnet or subnet in existing_subnets:
-                for i in range(2, 255):  # Iterate over 192.168.2.0 to 192.168.254.0
+                for i in range(50, 255):  # Iterate over 192.168.50.0 to 192.168.254.0
                     subnet = f"{base_subnet}.{i}.0/{prefix}"
                     potential_base = f"{base_subnet}.{i}"
                     if subnet not in existing_subnets:
