@@ -125,7 +125,7 @@ frontend, controller, and nodes.
 
 ## Possible issues during the installation or execution
 
-If frontend is not working, check the logs in app/logs/server.log
+If frontend is not working, check the logs in app/logs/frontend.log
 
 If any of the following errors appear, take a look at the docker logs of
 the nebula-frontend container:

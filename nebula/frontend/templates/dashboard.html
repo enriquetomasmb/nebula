@@ -59,12 +59,36 @@
                 <p style="color: #772953; font-weight: bold">The federation is currently running</p>
             </div>
             {% endif %}
-            {% if scenarios_list_length > 1 %}
+            <div class="table-responsive">
+                <table id="table-queue" class="table small">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>scenarios_finished</th>
+                            <th>/</th>
+                            <th>scenarios_list_length</th>
+                        </tr>
+                    </thead>
+                    {% for user, user_data in user_data_store.items() %}
+                        <tr>
+                            <td id="user">{{ user}}</td>
+                            <td id="scenarios_finished" style="text-align: center;">{{ user_data.scenarios_finished }}</td>
+                            <td id="bar">{{ "/" }}</td>
+                            <td id="scenarios_list_length" style="text-align: center;">{{ user_data.scenarios_list_length }}</td>
+                            <!-- <td class="td-icons">
+                                <a href="{{ url_for('nebula_stop_scenario', scenario_name=scenario_running[0], stop_all=True) }}"
+                                class="label btn btn-danger">Stop scenario queue</a>
+                            </td> -->
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            {% if scenario_running %}
             <div style="text-align: center; display: flex;justify-content: center;" class="col">
                 <p style="color: #772953; font-weight: bold; padding-top: 6px;">Scenarios queue {{ scenarios_finished
                     }}/{{ scenarios_list_length }}</p>
                 {% if scenarios_finished != scenarios_list_length %}
-                <a href="{{ url_for('nebula_stop_scenario', scenario_name='all', stop_all=True) }}"
+                <a href="{{ url_for('nebula_stop_scenario', scenario_name=scenario_running[0], stop_all=True) }}"
                     class="label btn btn-danger" style="float: left; margin-left: 10px; margin-bottom: 10px;">Stop
                     scenario queue</a>
                 {% endif %}
@@ -91,17 +115,6 @@
                 <a href="{{ url_for('nebula_dashboard_statistics') }}" class="btn btn-dark">Compare scenarios</a>
                 {% endif %}
             </div>
-            {% if scenarios_list_length is defined and scenarios_list_length > 1 %}
-            <div style="text-align: center; display: flex;justify-content: center;" class="col">
-                <p style="color: #772953; font-weight: bold; padding-top: 6px;">Scenarios queue {{ scenarios_finished
-                    }}/{{ scenarios_list_length }}</p>
-                {% if scenarios_finished != scenarios_list_length %}
-                <a href="{{ url_for('nebula_stop_scenario', scenario_name='all', stop_all=True) }}"
-                    class="label btn btn-danger" style="float: left; margin-left: 10px; margin-bottom: 10px;">Stop
-                    scenario queue</a>
-                {% endif %}
-            </div>
-            {% endif %}
             {% endif %}
         </div>
     </div>
@@ -116,6 +129,9 @@
                 <table id="table-scenarios" class="table small">
                     <thead>
                         <tr>
+                            {% if user_role == "admin" %}
+                            <th>User</th>
+                            {% endif %}
                             <th>Title</th>
                             <th>Start time</th>
                             <th>Model</th>
@@ -126,8 +142,11 @@
                         </tr>
                     </thead>
                     {% for name, start_time, end_time, title, description, status, network_subnet, model, dataset,
-                    rounds, role in scenarios %}
+                    rounds, role, username, gpu_id in scenarios %}
                     <tr id="scenario-vars">
+                        {% if user_role == "admin" %}
+                        <td id="username">{{ username|lower }}</td>
+                        {% endif %}
                         <td id="title">{{ title }}</td>
                         <td id="start_time">{{ start_time }}</td>
                         <td id="model">{{ model }}</td>
@@ -155,7 +174,7 @@
                             {% elif status == "completed" %}
                             <a href="{{ url_for('nebula_stop_scenario', scenario_name=name, stop_all=False) }}"
                                 class="label btn btn-danger">Stop scenario</a>
-                            <a href="{{ url_for('nebula_stop_scenario', scenario_name='all', stop_all=True) }}"
+                            <a href="{{ url_for('nebula_stop_scenario', scenario_name=name, stop_all=True) }}"
                                 class="label btn btn-danger">Stop scenario queue</a>
                             {% else %}
                             <a id="relaunch-btn" title="Relaunch Scenario" data-scenario-name="{{ name }}" data-scenario-title="{{ title }}" class="label btn btn-dark"><i

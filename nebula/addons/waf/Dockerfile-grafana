@@ -1,5 +1,10 @@
 FROM grafana/grafana:latest
 
+ARG USER
+ENV USER=${USER}
+
 COPY ./grafana/dashboard_config.yml /etc/grafana/provisioning/dashboards/local.yml
 COPY ./grafana/automatic.yml /etc/grafana/provisioning/datasources/automatic.yml
 COPY ./grafana/dashboard.json /var/lib/grafana/dashboards/dashboard.json
+
+RUN sed -i "s|http://nebula|http://$USER|g" /etc/grafana/provisioning/datasources/automatic.yml

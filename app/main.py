@@ -10,6 +10,14 @@ from nebula.scenarios import ScenarioManagement
 argparser = argparse.ArgumentParser(description="Controller of NEBULA platform", add_help=False)
 
 argparser.add_argument(
+    "-cp",
+    "--controllerport",
+    dest="controllerport",
+    default=5000,
+    help="Controller port (default: 5000)",
+)
+
+argparser.add_argument(
     "--grafanaport",
     dest="grafanaport",
     default=6040,
@@ -38,6 +46,14 @@ argparser.add_argument(
     help="Frontend port (default: 6060)",
 )
 
+argparser.add_argument(
+    "-sp",
+    "--statsport",
+    dest="statsport",
+    default=8080,
+    help="Statistics port (default: 8080)",
+)
+
 argparser.add_argument("-t", "--test", dest="test", action="store_true", default=False, help="Run tests")
 
 argparser.add_argument(
@@ -49,14 +65,9 @@ argparser.add_argument(
     default=None,
     help="Stop NEBULA platform or nodes only (use '--stop nodes' to stop only the nodes)",
 )
-argparser.add_argument(
-    "-sp",
-    "--statsport",
-    dest="statsport",
-    default=8080,
-    help="Statistics port (default: 8080)",
-)
+
 argparser.add_argument("-s", "--simulation", action="store_false", dest="simulation", help="Run simulation")
+
 argparser.add_argument(
     "-c",
     "--config",
@@ -64,6 +75,7 @@ argparser.add_argument(
     default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "config"),
     help="Config directory path",
 )
+
 argparser.add_argument(
     "-l",
     "--logs",
@@ -71,6 +83,7 @@ argparser.add_argument(
     default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs"),
     help="Logs directory path",
 )
+
 argparser.add_argument(
     "-ce",
     "--certs",
@@ -78,6 +91,7 @@ argparser.add_argument(
     default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "certs"),
     help="Certs directory path",
 )
+
 argparser.add_argument(
     "-e",
     "--env",
@@ -85,6 +99,7 @@ argparser.add_argument(
     default=os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env"),
     help=".env file path",
 )
+
 argparser.add_argument(
     "-p",
     "--production",
@@ -93,6 +108,7 @@ argparser.add_argument(
     default=False,
     help="Production mode",
 )
+
 argparser.add_argument(
     "-ad",
     "--advanced",
@@ -101,6 +117,7 @@ argparser.add_argument(
     default=False,
     help="Advanced analytics",
 )
+
 argparser.add_argument(
     "-v",
     "--version",
@@ -108,6 +125,7 @@ argparser.add_argument(
     version="%(prog)s " + nebula.__version__,
     help="Show version",
 )
+
 argparser.add_argument(
     "-a",
     "--about",
@@ -115,6 +133,7 @@ argparser.add_argument(
     version="Created by Enrique Tomás Martínez Beltrán",
     help="Show author",
 )
+
 argparser.add_argument("-h", "--help", action="help", default=argparse.SUPPRESS, help="Show help")
 
 args = argparser.parse_args()

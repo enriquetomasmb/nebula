@@ -3,13 +3,6 @@ PYTHON_VERSION := 3.11
 UV_INSTALL_SCRIPT := https://astral.sh/uv/install.sh
 PATH := $(HOME)/.local/bin:$(PATH)
 
-command_exists = $(shell command -v $(1) >/dev/null 2>&1 && echo true || echo false)
-
-define install_uv
-	@echo "📦 uv is not installed. Installing uv..."
-	@curl -LsSf $(UV_INSTALL_SCRIPT) | sh
-endef
-
 .PHONY: check-uv
 check-uv:		## Check and install uv if necessary
 	@if command -v $(UV) >/dev/null 2>&1; then \
@@ -33,33 +26,26 @@ install-python: check-uv	## Install Python with uv
 .PHONY: install
 install: install-python		## Install core dependencies
 	@echo "📦 Installing core dependencies with uv"
-	@$(UV) sync --group core
+	@$(UV) sync --group controller --group core
 	@echo "🔧 Installing pre-commit hooks"
 	@$(UV) run pre-commit install
 	@echo ""
-	@echo "🐳 Building nebula-frontend docker image. Do you want to continue (overrides existing image)? (y/n)"
-	@read ans; if [ "$${ans:-N}" = y ]; then \
-		docker build -t nebula-frontend -f nebula/frontend/Dockerfile .; \
-	else \
-		echo "Skipping nebula-frontend docker build."; \
-	fi
-	@echo ""
-	@echo "🐳 Building nebula-core docker image. Do you want to continue? (overrides existing image)? (y/n)"
-	@read ans; if [ "$${ans:-N}" = y ]; then \
-		docker build -t nebula-core .; \
-	else \
-		echo "Skipping nebula-core docker build."; \
-	fi
+	@$(MAKE) update
 	@echo ""
 	@$(MAKE) shell
 
-.PHONY: full-install
-full-install: install-python	## Install all dependencies (core, docs)
-	@echo "📦 Installing all dependencies with uv"
-	@$(UV) sync --group core --group docs
-	@echo "🔧 Installing pre-commit hooks"
-	@$(UV) run pre-commit install
-	@$(MAKE) shell
+.PHONY: install-production
+install-production: install	## Install production dependencies
+	@echo "🐳 Updating production docker images..."
+	@echo "🐳 Building nebula-waf"
+	@docker build -t nebula-waf -f nebula/addons/waf/Dockerfile-waf --build-arg USER=$(USER) nebula/addons/waf
+	@echo "🐳 Building nebula-loki"
+	@docker build -t nebula-waf-loki -f nebula/addons/waf/Dockerfile-loki nebula/addons/waf
+	@echo "🐳 Building nebula-promtail"
+	@docker build -t nebula-waf-promtail -f nebula/addons/waf/Dockerfile-promtail --build-arg USER=$(USER) nebula/addons/waf
+	@echo "🐳 Building nebula-grafana"
+	@docker build -t nebula-waf-grafana -f nebula/addons/waf/Dockerfile-grafana --build-arg USER=$(USER) nebula/addons/waf
+	echo "🐳 Docker images updated."
 
 .PHONY: shell
 shell:				## Start a shell in the uv environment
@@ -79,19 +65,30 @@ shell:				## Start a shell in the uv environment
 		echo "🚀 Created by \033[1;34mEnrique Tomás Martínez Beltrán\033[0m <\033[1;34menriquetomas@um.es\033[0m>"; \
 	fi
 
+.PHONY: update
+update:				## Update docker images
+	@echo "🐳 Updating docker images..."
+	@echo "🐳 Building nebula-frontend docker image. Do you want to continue (overrides existing image)? (y/n)"
+	@read ans; if [ "$${ans:-N}" = y ]; then \
+		docker build -t nebula-frontend -f nebula/frontend/Dockerfile .; \
+	else \
+		echo "Skipping nebula-frontend docker build."; \
+	fi
+	@echo ""
+	@echo "🐳 Building nebula-core docker image. Do you want to continue? (overrides existing image)? (y/n)"
+	@read ans; if [ "$${ans:-N}" = y ]; then \
+		docker build -t nebula-core .; \
+	else \
+		echo "Skipping nebula-core docker build."; \
+	fi
+	echo "🐳 Docker images updated."
+
 .PHONY: lock
 lock:				## Update the lock file
 	@echo "🔒 This will update the lock file. Do you want to continue? (y/n)"
 	@read ans && [ $${ans:-N} = y ] || { echo "Lock cancelled."; exit 1; }
 	@echo "🔒 Locking dependencies..."
 	@$(UV) lock
-
-.PHONY: update-libs
-update-libs:			## Update libraries to the latest version
-	@echo "🔧 This will override the versions of current libraries. Do you want to continue? (y/n)"
-	@read ans && [ $${ans:-N} = y ] || { echo "Update cancelled."; exit 1; }
-	@echo "📦 Updating libraries..."
-	@$(UV) update
 
 .PHONY: check
 check:				## Run code quality tools
@@ -127,6 +124,12 @@ publish:			## Publish a release to PyPI
 .PHONY: build-and-publish
 build-and-publish: build publish	## Build and publish the package
 
+.PHONY: doc-install
+full-install: install-python	## Install dependencies for documentation
+	@echo "📦 Installing doc dependencies with uv"
+	@$(UV) sync --group core --group docs
+	@$(MAKE) shell
+
 .PHONY: doc-test
 doc-test:			## Test if documentation can be built without errors
 	@$(UV) run mkdocs build -f docs/mkdocs.yml -d _build -s
@@ -138,12 +141,6 @@ doc-build:			## Build the documentation
 .PHONY: doc-serve
 doc-serve:			## Serve the documentation locally
 	@$(UV) run mkdocs serve -f docs/mkdocs.yml
-
-.PHONY: format
-format:				## Format code with black and isort
-	@echo "🎨 Formatting code"
-	@$(UV) run black .
-	@$(UV) run isort .
 
 .PHONY: clean
 clean: clean-build		## Clean up build artifacts and caches
