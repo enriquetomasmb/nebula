@@ -19,6 +19,7 @@ class MNISTDataset(NebulaDataset):
         partition_parameter=0.5,
         seed=42,
         config=None,
+        additional=False
     ):
         super().__init__(
             num_classes=num_classes,
@@ -31,6 +32,7 @@ class MNISTDataset(NebulaDataset):
             partition_parameter=partition_parameter,
             seed=seed,
             config=config,
+            additional=additional
         )
         if partition_id < 0 or partition_id >= partitions_number:
             raise ValueError(f"partition_id {partition_id} is out of range for partitions_number {partitions_number}")
@@ -83,6 +85,9 @@ class MNISTDataset(NebulaDataset):
             self.plot_data_distribution(dataset, partitions_map)
             self.plot_all_data_distribution(dataset, partitions_map)
 
+        if self.additional:
+            self.plot_data_distribution_for_additional_node(dataset, partitions_map)
+        
         return partitions_map[self.partition_id]
 
     def generate_iid_map(self, dataset, partition="balancediid", partition_parameter=2):

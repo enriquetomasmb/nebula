@@ -40,6 +40,7 @@ class NebulaDataset(Dataset, ABC):
         partition_parameter=0.5,
         seed=42,
         config=None,
+        additional=False
     ):
         super().__init__()
 
@@ -56,7 +57,8 @@ class NebulaDataset(Dataset, ABC):
         self.partition_parameter = partition_parameter
         self.seed = seed
         self.config = config
-
+        self.additional = additional
+        
         self.train_set = None
         self.train_indices_map = None
         self.test_set = None
@@ -196,6 +198,73 @@ class NebulaDataset(Dataset, ABC):
 
         # Saves the distribution display with circles of different size
         path_to_save = f"{self.config.participant['tracking_args']['log_dir']}/{self.config.participant['scenario_args']['name']}/class_distribution_{'iid' if self.iid else 'non_iid'}{'_' + self.partition if not self.iid else ''}.png"
+        plt.savefig(path_to_save, dpi=300, bbox_inches="tight")
+        plt.close()
+
+        if hasattr(self, "tsne") and self.tsne:
+            self.visualize_tsne(dataset)
+
+    def plot_data_distribution_for_additional_node(self, dataset, partitions_map):
+        sns.set()
+        sns.set_style("whitegrid", {"axes.grid": False})
+        sns.set_context("paper", font_scale=1.5)
+        sns.set_palette("Set2")
+        
+        indices = partitions_map[self.partition_id]
+        class_counts = [0] * self.num_classes
+        for idx in indices:
+            label = dataset.targets[idx]
+            class_counts[label] += 1
+        logging_training.info(f"Participant {self.partition_id + 1} class distribution: {class_counts}")
+        plt.figure()
+        plt.bar(range(self.num_classes), class_counts)
+        plt.xlabel("Class")
+        plt.ylabel("Number of samples")
+        plt.xticks(range(self.num_classes))
+        if self.iid:
+            plt.title(f"Participant {self.partition_id + 1} class distribution (IID)")
+        else:
+            plt.title(
+                f"Participant {self.partition_id + 1} class distribution (Non-IID - {self.partition}) - {self.partition_parameter}"
+            )
+        plt.tight_layout()
+        path_to_save = f"{self.config.participant['tracking_args']['log_dir']}/{self.config.participant['scenario_args']['name']}/participant_{self.partition_id}_class_distribution_{'iid' if self.iid else 'non_iid'}{'_' + self.partition if not self.iid else ''}.png"
+        plt.savefig(path_to_save, dpi=300, bbox_inches="tight")
+        plt.close()
+        
+        plt.figure()
+        max_point_size = 500
+        min_point_size = 0
+
+        for i in range(self.partitions_number):
+            class_counts = [0] * self.num_classes
+            indices = partitions_map[i]
+            for idx in indices:
+                label = dataset.targets[idx]
+                class_counts[label] += 1
+
+            # Normalize the point sizes for this partition
+            max_samples_partition = max(class_counts)
+            sizes = [
+                (size / max_samples_partition) * (max_point_size - min_point_size) + min_point_size
+                for size in class_counts
+            ]
+            plt.scatter([i] * self.num_classes, range(self.num_classes), s=sizes, alpha=0.5)
+
+        plt.xlabel("Participant")
+        plt.ylabel("Class")
+        plt.xticks(range(self.partitions_number))
+        plt.yticks(range(self.num_classes))
+        if self.iid:
+            plt.title(f"Participant {i + 1} class distribution (IID)")
+        else:
+            plt.title(
+                f"Participant {i + 1} class distribution (Non-IID - {self.partition}) - {self.partition_parameter}"
+            )
+        plt.tight_layout()
+
+        # Saves the distribution display with circles of different size
+        path_to_save = f"{self.config.participant['tracking_args']['log_dir']}/{self.config.participant['scenario_args']['name']}/class_distribution_additionals_{'iid' if self.iid else 'non_iid'}{'_' + self.partition if not self.iid else ''}.png"
         plt.savefig(path_to_save, dpi=300, bbox_inches="tight")
         plt.close()
 

@@ -120,6 +120,7 @@ async def main(config):
             partition_parameter=partition_parameter,
             seed=42,
             config=config,
+            additional=additional_node_status
         )
         if model_name == "MLP":
             model = MNISTModelMLP()
@@ -351,7 +352,7 @@ async def main(config):
         logging.info("Waiting time to start finding federation")
         # 385 r30
         # 615 r50
-        time.sleep(385)
+        time.sleep(70)
         #time.sleep(6000)  # DEBUG purposes
         #import requests
 
