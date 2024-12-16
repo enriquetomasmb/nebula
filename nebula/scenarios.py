@@ -459,11 +459,13 @@ class ScenarioManagement:
         # Update participants configuration
         is_start_node = False
         config_participants = []
+        ap = len(additional_participants) if additional_participants else 0
+        logging.info(f"######## nodes: {self.n_nodes} + additionals: {ap}")
         for i in range(self.n_nodes):
             with open(f"{self.config_dir}/participant_" + str(i) + ".json") as f:
                 participant_config = json.load(f)
             participant_config["scenario_args"]["federation"] = self.scenario.federation
-            participant_config["scenario_args"]["n_nodes"] = self.n_nodes
+            participant_config["scenario_args"]["n_nodes"] = self.n_nodes + ap
             participant_config["network_args"]["neighbors"] = self.topologymanager.get_neighbors_string(i)
             participant_config["scenario_args"]["name"] = self.scenario_name
             participant_config["scenario_args"]["start_time"] = self.start_date_scenario

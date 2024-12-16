@@ -109,6 +109,7 @@ async def main(config):
     dataset_str = config.participant["data_args"]["dataset"]
     num_workers = config.participant["data_args"]["num_workers"]
     model = None
+    logging.info(f"Number of nodes on the scenario: {n_nodes}")
     if dataset_str == "MNIST":
         dataset = MNISTDataset(
             num_classes=10,
