@@ -274,7 +274,7 @@ class CommunicationsManager:
 
                 # Manage parameters of models
                 parameters_local = self.engine.trainer.get_model_parameters()
-                self.fraction_of_parameters_changed(source, parameters_local, decoded_model, current_round)
+                self.fraction_of_parameters_changed(source, parameters_local, decoded_model, message.round)
 
             if message.round != current_round and message.round != -1:
                 logging.info(
@@ -301,57 +301,7 @@ class CommunicationsManager:
                 # non-starting nodes receive the initialized model from the starting node
                 if not self.engine.get_federation_ready_lock().locked() or self.engine.get_initialization_status():
                     decoded_model = self.engine.trainer.deserialize_model(message.parameters)
-                    #     if self.config.participant["adaptive_args"]["model_similarity"]:
-                    #         logging.info("🤖  handle_model_message | Checking model similarity")
-                    #         cosine_value = cosine_metric(
-                    #             self.engine.trainer.get_model_parameters(),
-                    #             decoded_model,
-                    #             similarity=True,
-                    #         )
-                    #         euclidean_value = euclidean_metric(
-                    #             self.engine.trainer.get_model_parameters(),
-                    #             decoded_model,
-                    #             similarity=True,
-                    #         )
-                    #         minkowski_value = minkowski_metric(
-                    #             self.engine.trainer.get_model_parameters(),
-                    #             decoded_model,
-                    #             p=2,
-                    #             similarity=True,
-                    #         )
-                    #         manhattan_value = manhattan_metric(
-                    #             self.engine.trainer.get_model_parameters(),
-                    #             decoded_model,
-                    #             similarity=True,
-                    #         )
-                    #         pearson_correlation_value = pearson_correlation_metric(
-                    #             self.engine.trainer.get_model_parameters(),
-                    #             decoded_model,
-                    #             similarity=True,
-                    #         )
-                    #         jaccard_value = jaccard_metric(
-                    #             self.engine.trainer.get_model_parameters(),
-                    #             decoded_model,
-                    #             similarity=True,
-                    #         )
-                    #         file = f"{self.engine.log_dir}/participant_{self.engine.idx}_similarity.csv"
-                    #         logging.info(f"self.engine.log_dir: {self.engine.log_dir}")
-                    #         directory = os.path.dirname(file)
-                    #         os.makedirs(directory, exist_ok=True)
-                    #         if not os.path.isfile(file):
-                    #             with open(file, "w") as f:
-                    #                 f.write("timestamp,source_ip,round,current_round,cosine,euclidean,minkowski,manhattan,pearson_correlation,jaccard\n")
-                    #         with open(file, "a") as f:
-                    #             f.write(f"{datetime.now()}, {source}, {message.round}, {current_round}, {cosine_value}, {euclidean_value}, {minkowski_value}, {manhattan_value}, {pearson_correlation_value}, {jaccard_value}\n")
-
-                    #     # Manage communication latency
-                    #     self.store_receive_timestamp(source, "model", message.round)
-                    #     self.calculate_latency(source, "model")
-
-                    #     # Manage parameters of models
-                    #     parameters_local = self.engine.trainer.get_model_parameters()
-                    #     self.fraction_of_parameters_changed(source, parameters_local, decoded_model, current_round)
-
+                    
                     await self.engine.aggregator.include_model_in_buffer(
                         decoded_model,
                         message.weight,
