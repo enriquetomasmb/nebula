@@ -9,30 +9,18 @@
     </div>
 </section>
 
-{# Display error message if any #}
-{% if id_to_add_is_duplicated or id_to_add_is_invalid or id_to_change_password_not_exists %}
-<div class="alert alert-dismissible alert-danger mt-3">
-    <button type="button" class="close" data-dismiss="alert">&times;</button>
-    <strong>Warning!</strong>
-    {% if id_to_add_is_duplicated %}
-    The account name already exists.
-    {% elif id_to_add_is_invalid %}
-    The account name is invalid.
-    {% endif %}
-</div>
-{% endif %}
-
 <!-- Modal -->
 <div class="modal fade" id="user-modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="user-modal-title">Modal title</h5>
+                <h5 class="modal-title" id="user-modal-title"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body" id="user-modal-content"></div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-dark" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -47,19 +35,17 @@
 
                 <form action="{{ url_for('nebula_add_user') }}" method='post'>
                     <div class="form-group">
-                        <label for="user">User</label>
-                        <input type="text" class="form-control" name="user" id="user" data-toggle="tooltip" title="Enter the username">
+                        <label for="user">Username</label>
+                        <input type="text" class="form-control" name="user" id="user" placeholder="Enter username" required>
                     </div>
                     <div class="form-group">
                         <label for="password">Password</label>
-                        <input type="password" class="form-control" name="password" id="password" data-toggle="tooltip" title="Enter a strong password">
+                        <input type="password" class="form-control" name="password" id="password" placeholder="Enter password" required>
                     </div>
                     <div class="form-group">
                         <label for="role">Role</label>
                         <select class="form-control" name="role" id="role">
-                            <option value="user" selected>Select a role</option>
-                            <option value="user">User</option>
-                            <option value="demo">Demo</option>
+                            <option value="user" selected>User</option>
                             <option value="admin">Admin</option>
                         </select>
                     </div>
@@ -111,31 +97,29 @@
     $(document).on('click', '#update-btn', function () {
         var user = $(this).data('user-name');
         var role = $(this).data('user-role');
-        $('#user-modal-title').text('Update user ' + user);
+        $('#user-modal-title').text('Update Account');
         $('#user-modal-content').html(
             '<form action="/nebula/user/update" method="POST">' +
             '<div class="form-group">' +
-            '<label for="user">User</label>' +
-            '<input type="text" class="form-control" name="user" id="user" value="' + user + '" readonly>' +
+            '<label>Username:</label>' +
+            '<p>' + user + '</p>' +
+            '<input type="hidden" name="user" value="' + user + '">' +
             '</div>' +
             '<div class="form-group">' +
             '<label for="role">Role</label>' +
-            '<input type="text" class="form-control" name="oldrole" id="oldrole" value="' + role.charAt(0).toUpperCase() + role.slice(1) + '" readonly>' +
-            '</div>' +
-            '<div class="form-group">' +
-            '<label for="role">New Role</label>' +
             '<select class="form-control" name="role" id="role">' +
-            '<option value="user">User</option>' +
-            '<option value="demo">Demo</option>' +
-            '<option value="admin">Admin</option>' +
+            '<option value="user"' + (role === 'user' ? ' selected' : '') + '>User</option>' +
+            '<option value="admin"' + (role === 'admin' ? ' selected' : '') + '>Admin</option>' +
             '</select>' +
             '</div>' +
             '<div class="form-group">' +
-            '<label for="password">New Password</label>' +
-            '<input type="password" class="form-control" name="password" id="password" data-toggle="tooltip" title="Enter a strong password">' +
+            '<label for="password">Password</label>' +
+            '<div class="input-group mb-3">' +
+            '<input type="password" class="form-control" name="password" id="password" placeholder="Enter password">' +
+            '</div>' +
             '</div>' +
             '<div class="form-group">' +
-            '<button type="submit" class="btn btn-dark">Submit</button>' +
+            '<button type="submit" class="btn btn-dark">Update</button>' +
             '</div>' +
             '</form>'
         );

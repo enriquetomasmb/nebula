@@ -18,7 +18,6 @@ logging.getLogger("requests").setLevel(logging.WARNING)
 logging.getLogger("urllib3").setLevel(logging.WARNING)
 logging.getLogger("fsspec").setLevel(logging.WARNING)
 logging.getLogger("matplotlib").setLevel(logging.ERROR)
-logging.getLogger("aim").setLevel(logging.ERROR)
 logging.getLogger("plotly").setLevel(logging.ERROR)
 
 import pdb
@@ -160,14 +159,10 @@ class Engine:
         )
 
         # Register additional callbacks
-        self._event_manager.register_event(
-            (
-                nebula_pb2.FederationMessage,
-                nebula_pb2.FederationMessage.Action.REPUTATION,
-            ),
+        self._event_manager.register_callback(
             self._reputation_callback,
+            # ... add more callbacks here
         )
-        # ... add more callbacks here
 
         # Reputation
         self.reputation_instance = Reputation(self)

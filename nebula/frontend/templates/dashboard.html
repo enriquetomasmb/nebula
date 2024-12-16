@@ -59,12 +59,36 @@
                 <p style="color: #772953; font-weight: bold">The federation is currently running</p>
             </div>
             {% endif %}
-            {% if scenarios_list_length > 1 %}
+            <div class="table-responsive">
+                <table id="table-queue" class="table small">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>scenarios_finished</th>
+                            <th>/</th>
+                            <th>scenarios_list_length</th>
+                        </tr>
+                    </thead>
+                    {% for user, user_data in user_data_store.items() %}
+                        <tr>
+                            <td id="user">{{ user}}</td>
+                            <td id="scenarios_finished" style="text-align: center;">{{ user_data.scenarios_finished }}</td>
+                            <td id="bar">{{ "/" }}</td>
+                            <td id="scenarios_list_length" style="text-align: center;">{{ user_data.scenarios_list_length }}</td>
+                            <!-- <td class="td-icons">
+                                <a href="{{ url_for('nebula_stop_scenario', scenario_name=scenario_running[0], stop_all=True) }}"
+                                class="label btn btn-danger">Stop scenario queue</a>
+                            </td> -->
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+            {% if scenario_running %}
             <div style="text-align: center; display: flex;justify-content: center;" class="col">
                 <p style="color: #772953; font-weight: bold; padding-top: 6px;">Scenarios queue {{ scenarios_finished
                     }}/{{ scenarios_list_length }}</p>
                 {% if scenarios_finished != scenarios_list_length %}
-                <a href="{{ url_for('nebula_stop_scenario', scenario_name='all', stop_all=True) }}"
+                <a href="{{ url_for('nebula_stop_scenario', scenario_name=scenario_running[0], stop_all=True) }}"
                     class="label btn btn-danger" style="float: left; margin-left: 10px; margin-bottom: 10px;">Stop
                     scenario queue</a>
                 {% endif %}
@@ -91,17 +115,6 @@
                 <a href="{{ url_for('nebula_dashboard_statistics') }}" class="btn btn-dark">Compare scenarios</a>
                 {% endif %}
             </div>
-            {% if scenarios_list_length is defined and scenarios_list_length > 1 %}
-            <div style="text-align: center; display: flex;justify-content: center;" class="col">
-                <p style="color: #772953; font-weight: bold; padding-top: 6px;">Scenarios queue {{ scenarios_finished
-                    }}/{{ scenarios_list_length }}</p>
-                {% if scenarios_finished != scenarios_list_length %}
-                <a href="{{ url_for('nebula_stop_scenario', scenario_name='all', stop_all=True) }}"
-                    class="label btn btn-danger" style="float: left; margin-left: 10px; margin-bottom: 10px;">Stop
-                    scenario queue</a>
-                {% endif %}
-            </div>
-            {% endif %}
             {% endif %}
         </div>
     </div>
@@ -116,7 +129,10 @@
                 <table id="table-scenarios" class="table small">
                     <thead>
                         <tr>
-                            <th>Name</th>
+                            {% if user_role == "admin" %}
+                            <th>User</th>
+                            {% endif %}
+                            <th>Title</th>
                             <th>Start time</th>
                             <th>Model</th>
                             <th>Dataset</th>
@@ -126,9 +142,12 @@
                         </tr>
                     </thead>
                     {% for name, start_time, end_time, title, description, status, network_subnet, model, dataset,
-                    rounds, role in scenarios %}
+                    rounds, role, username, gpu_id in scenarios %}
                     <tr id="scenario-vars">
-                        <td id="name">{{ name }}</td>
+                        {% if user_role == "admin" %}
+                        <td id="username">{{ username|lower }}</td>
+                        {% endif %}
+                        <td id="title">{{ title }}</td>
                         <td id="start_time">{{ start_time }}</td>
                         <td id="model">{{ model }}</td>
                         <td id="dataset">{{ dataset }}</td>
@@ -145,18 +164,22 @@
                                 class="label btn btn-dark">Monitor</a>
                             <a href="{{ url_for('nebula_dashboard_statistics', scenario_name=name) }}"
                                 class="label btn btn-dark">Real-time metrics</a>
-                            <a id="note-btn-{{ name }}" data-scenario-name="{{ name }}" class="label btn btn-dark"><i
+                            <a id="note-btn-{{ name }}" title="Save Note" data-scenario-name="{{ name }}" class="label btn btn-dark"><i
                                     class="fa fa-sticky-note" style="color: white;"></i></a>
+                            <a id="config-btn-{{ name }}" title="Scenario Config" data-scenario-name="{{ name }}" class="label btn btn-dark"><i
+                                class="fa fa-sliders" style="color: white;"></i></a>
                             {% if status == "running" %}
                             <a href="{{ url_for('nebula_stop_scenario', scenario_name=name, stop_all=False) }}"
                                 class="label btn btn-danger">Stop scenario</a>
                             {% elif status == "completed" %}
                             <a href="{{ url_for('nebula_stop_scenario', scenario_name=name, stop_all=False) }}"
                                 class="label btn btn-danger">Stop scenario</a>
-                            <a href="{{ url_for('nebula_stop_scenario', scenario_name='all', stop_all=True) }}"
+                            <a href="{{ url_for('nebula_stop_scenario', scenario_name=name, stop_all=True) }}"
                                 class="label btn btn-danger">Stop scenario queue</a>
                             {% else %}
-                            <a id="remove-btn" data-scenario-name="{{ name }}" class="label btn btn-danger"><i
+                            <a id="relaunch-btn" title="Relaunch Scenario" data-scenario-name="{{ name }}" data-scenario-title="{{ title }}" class="label btn btn-dark"><i
+                                class="fa fa-rotate-right" style="color: white;"></i></a>
+                            <a id="remove-btn" title="Delete Scenario" data-scenario-name="{{ name }}" class="label btn btn-danger"><i
                                     class="fa fa-trash"></i></a>
                             {% endif %}
                         </td>
@@ -169,6 +192,12 @@
                                 class="btn btn-dark mt-2 save-note-btn" style="float: right;">Save</button>
                         </td>
                     </tr>
+                    <tr id="config-row-{{ name }}" class="config-row" style="display: none;">
+                        <td colspan="4">
+                            <textarea id="config-text-{{ name }}" class="form-control" rows="20"
+                                style="font-size: small; width: 100%;"></textarea>
+                        </td>
+                    </tr>
                     {% endfor %}
                 </table>
             </div>
@@ -177,6 +206,37 @@
 </section>
 {% endif %}
 
+<style>
+        /* Tooltips */
+        a[title] {
+            position: relative;
+        }
+
+        a[title]:hover::after {
+            content: attr(title);
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 14px;
+            white-space: nowrap;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease, top 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        a[title]:hover::after {
+            opacity: 1;
+            top: -50px;
+        }
+</style>
+
 
 {% if not user_logged_in %}
 <script>
@@ -184,7 +244,7 @@
 </script>
 {% endif %}
 
-<script>
+<!-- <script>
     setInterval(function () {
         fetch('/nebula/api/dashboard/runningscenario')
             .then(response => response.json())
@@ -195,6 +255,35 @@
             })
             .catch(error => console.error('Error:', error));
     }, 10000);
+</script> -->
+
+<script>
+    $(document).on('click', '#relaunch-btn', function () {
+        var scenario_name = $(this).data('scenario-name');
+        var scenario_title = $(this).data('scenario-title');
+        $('#confirm-modal').modal('show');
+        $('#confirm-modal .modal-title').text('Relaunch scenario');
+        $('#confirm-modal #confirm-modal-body').html('Are you sure you want to relaunch the scenario ' + scenario_title + '?');
+
+        $('#confirm-modal #yes-button').off('click').on('click', function () {
+            const response = fetch('/nebula/dashboard/' + scenario_name + '/relaunch', {
+                method: 'GET'
+            })
+                .then(response => {
+                    console.log(response)
+                    if (response.redirected) {
+                        window.location.href = response.url; // Manually redirect to the URL provided by the server
+                    } else {
+                        $('#confirm-modal').modal('hide');
+                        $('#confirm-modal').on('hidden.bs.modal', function () {
+                            $('#info-modal-body').html('You are not allowed to relaunch a scenario with demo role.');
+                            $('#info-modal').modal('show');
+                        });
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    });
 </script>
 
 <script>
@@ -238,6 +327,12 @@
                 saveNotes(this.dataset.scenarioName);
             });
         });
+
+        document.querySelectorAll('[id^=config-btn]').forEach(button => {
+            button.addEventListener('click', function () {
+                toggleConfigRow(this.dataset.scenarioName);
+            });
+        });
     });
 
     async function toggleNotesRow(scenarioName) {
@@ -265,6 +360,29 @@
         notesRow.style.display = notesRow.style.display === 'none' ? '' : 'none';
     }
 
+    async function toggleConfigRow(scenarioName) {
+        const configRow = document.getElementById('config-row-' + scenarioName);
+        const configTextElement = document.getElementById('config-text-' + scenarioName);
+
+        if (configRow.style.display === 'none') {
+            try {
+                const response = await fetch(`/nebula/dashboard/${scenarioName}/config`);
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    configTextElement.value = JSON.stringify(data.config, null, 2);
+                } else {
+                    configTextElement.value = 'No configuration available.';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred while retrieving the configuration.');
+                return;
+            }
+        }
+        configRow.style.display = configRow.style.display === 'none' ? '' : 'none';
+    }
+
     async function saveNotes(scenarioName) {
         const notesText = document.getElementById('notes-text-' + scenarioName).value;
 
@@ -288,44 +406,6 @@
             }
         }
     }
-</script>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var scenarios_finished = parseInt("{{scenarios_finished}}");
-        var scenarios_list_length = parseInt("{{scenarios_list_length}}");
-
-        var newScenarioBtn = document.getElementById("new-scenario-btn");
-        var aScenarioBtn = document.getElementById("a-scenario-btn");
-
-        if (scenarios_finished < scenarios_list_length) {
-            if (newScenarioBtn) {
-                newScenarioBtn.style.pointerEvents = 'none';
-                newScenarioBtn.style.backgroundColor = 'grey';
-                newScenarioBtn.style.borderColor = 'grey';
-                newScenarioBtn.style.cursor = 'default';
-            }
-
-            if (aScenarioBtn) {
-                aScenarioBtn.style.pointerEvents = 'none';
-                aScenarioBtn.style.backgroundColor = 'grey';
-                aScenarioBtn.style.borderColor = 'grey';
-                aScenarioBtn.style.cursor = 'default';
-            }
-        } else {
-            if (newScenarioBtn) {
-                newScenarioBtn.style.pointerEvents = 'auto';
-                newScenarioBtn.style.backgroundColor = '';
-                newScenarioBtn.style.cursor = 'pointer';
-            }
-
-            if (aScenarioBtn) {
-                aScenarioBtn.style.pointerEvents = 'auto';
-                aScenarioBtn.style.backgroundColor = '';
-                aScenarioBtn.style.cursor = 'pointer';
-            }
-        }
-    });
 </script>
 
 {% endblock %}

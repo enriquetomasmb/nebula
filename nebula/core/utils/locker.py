@@ -64,8 +64,19 @@ class Locker:
         if not self._async_lock:
             raise RuntimeError("Use 'acquire' for acquiring non-async locks")
         if self._verbose:
-            logging.debug(f"🔒  Acquiring async lock [{self._name}] from {filename}:{lineno}")
-        await self._lock.acquire()
+            if "timeout" in kwargs:
+                logging.debug(
+                    f"🔒  Acquiring async lock [{self._name}] from {filename}:{lineno} with timeout {kwargs['timeout']}"
+                )
+            else:
+                logging.debug(f"🔒  Acquiring async lock [{self._name}] from {filename}:{lineno}")
+        if "timeout" in kwargs:
+            try:
+                await asyncio.wait_for(self._lock.acquire(), timeout=kwargs["timeout"])
+            except Exception as e:
+                raise e
+        else:
+            await self._lock.acquire()
 
     async def release_async(self, *args, **kwargs):
         caller = inspect.stack()[1]

@@ -221,7 +221,7 @@ class Connection:
             await self._send_chunks(message_id, data_to_send)
         except Exception as e:
             logging.exception(f"Error sending data: {e}")
-            await self.reconnect()
+            # await self.reconnect()
 
     def _prepare_data(self, data: Any, pb: bool, encoding_type: str) -> tuple[bytes, bytes]:
         if pb:
@@ -338,7 +338,7 @@ class Connection:
             logging.info("Message handling cancelled")
         except ConnectionError as e:
             logging.exception(f"Connection closed while reading: {e}")
-            await self.reconnect()
+            # await self.reconnect()
         except Exception as e:
             logging.exception(f"Error handling incoming message: {e}")
 

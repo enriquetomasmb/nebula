@@ -326,19 +326,19 @@ class Reporter:
         current_connections = await self.cm.get_addrs_current_connections(only_direct=True)
 
         resources = {
-            "CPU/CPU global (%)": cpu_percent,
-            "CPU/CPU process (%)": cpu_percent_process,
-            "CPU/CPU temperature (°)": cpu_temp,
-            "RAM/RAM global (%)": memory_percent,
-            "RAM/RAM global (MB)": memory_used,
-            "RAM/RAM process (%)": memory_percent_process,
-            "RAM/RAM process (MB)": memory_process,
-            "Disk/Disk (%)": disk_percent,
-            "Network/Network (bytes sent)": round(self.acc_bytes_sent / (1024**2), 3),
-            "Network/Network (bytes received)": round(self.acc_bytes_recv / (1024**2), 3),
-            "Network/Network (packets sent)": self.acc_packets_sent,
-            "Network/Network (packets received)": self.acc_packets_recv,
-            "Network/Connections": len(current_connections),
+            "W-CPU/CPU global (%)": cpu_percent,
+            "W-CPU/CPU process (%)": cpu_percent_process,
+            "W-CPU/CPU temperature (°)": cpu_temp,
+            "Z-RAM/RAM global (%)": memory_percent,
+            "Z-RAM/RAM global (MB)": memory_used,
+            "Z-RAM/RAM process (%)": memory_percent_process,
+            "Z-RAM/RAM process (MB)": memory_process,
+            "Y-Disk/Disk (%)": disk_percent,
+            "X-Network/Network (bytes sent)": round(self.acc_bytes_sent / (1024**2), 3),
+            "X-Network/Network (bytes received)": round(self.acc_bytes_recv / (1024**2), 3),
+            "X-Network/Network (packets sent)": self.acc_packets_sent,
+            "X-Network/Network (packets received)": self.acc_packets_recv,
+            "X-Network/Connections": len(current_connections),
         }
         self.trainer.logger.log_data(resources)
 
@@ -365,13 +365,13 @@ class Reporter:
                     )
                     gpu_fan_speed = await asyncio.to_thread(pynvml.nvmlDeviceGetFanSpeed, handle)
                     gpu_info = {
-                        f"GPU/GPU{i} (%)": gpu_percent,
-                        f"GPU/GPU{i} temperature (°)": gpu_temp,
-                        f"GPU/GPU{i} memory (%)": gpu_mem_percent,
-                        f"GPU/GPU{i} power": gpu_power,
-                        f"GPU/GPU{i} clocks": gpu_clocks,
-                        f"GPU/GPU{i} memory clocks": gpu_memory_clocks,
-                        f"GPU/GPU{i} fan speed": gpu_fan_speed,
+                        f"W-GPU/GPU{i} (%)": gpu_percent,
+                        f"W-GPU/GPU{i} temperature (°)": gpu_temp,
+                        f"W-GPU/GPU{i} memory (%)": gpu_mem_percent,
+                        f"W-GPU/GPU{i} power": gpu_power,
+                        f"W-GPU/GPU{i} clocks": gpu_clocks,
+                        f"W-GPU/GPU{i} memory clocks": gpu_memory_clocks,
+                        f"W-GPU/GPU{i} fan speed": gpu_fan_speed,
                     }
                     self.trainer.logger.log_data(gpu_info)
             except Exception:  # noqa: S110

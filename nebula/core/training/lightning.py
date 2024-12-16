@@ -16,14 +16,9 @@ from lightning.pytorch.callbacks import ModelSummary, ProgressBar
 from lightning.pytorch.loggers import CSVLogger
 from torch.nn import functional as F
 
+from nebula.config.config import TRAINING_LOGGER
 from nebula.core.utils.deterministic import enable_deterministic
 from nebula.core.utils.nebulalogger_tensorboard import NebulaTensorBoardLogger
-
-try:
-    from nebula.core.utils.nebulalogger import NebulaLogger
-except:
-    pass
-from nebula.config.config import TRAINING_LOGGER
 
 logging_training = logging.getLogger(TRAINING_LOGGER)
 
@@ -170,23 +165,6 @@ class Lightning:
             )
             # Restore logger configuration
             nebulalogger.set_logger_config(logger_config)
-        elif self.config.participant["tracking_args"]["local_tracking"] == "advanced":
-            nebulalogger = NebulaLogger(
-                config=self.config,
-                engine=self,
-                scenario_start_time=self.config.participant["scenario_args"]["start_time"],
-                repo=f"{self.config.participant['tracking_args']['log_dir']}",
-                experiment=self.experiment_name,
-                run_name=f"participant_{self.idx}",
-                train_metric_prefix="train_",
-                test_metric_prefix="test_",
-                val_metric_prefix="val_",
-                log_system_params=False,
-            )
-            # nebulalogger_aim = NebulaLogger(config=self.config, engine=self, scenario_start_time=self.config.participant["scenario_args"]["start_time"], repo=f"aim://nebula-frontend:8085",
-            #                                     experiment=self.experiment_name, run_name=f"participant_{self.idx}",
-            #                                     train_metric_prefix='train_', test_metric_prefix='test_', val_metric_prefix='val_', log_system_params=False)
-            self.config.participant["tracking_args"]["run_hash"] = nebulalogger.experiment.hash
         else:
             nebulalogger = None
 
@@ -195,15 +173,20 @@ class Lightning:
     def create_trainer(self):
         # Create a new trainer and logger for each round
         self.create_logger()
-        num_gpus = torch.cuda.device_count()
+        num_gpus = len(self.config.participant["device_args"]["gpu_id"])
         if self.config.participant["device_args"]["accelerator"] == "gpu" and num_gpus > 0:
-            gpu_index = self.config.participant["device_args"]["idx"] % num_gpus
+            # Use all available GPUs
+            if num_gpus > 1:
+                gpu_index = [self.config.participant["device_args"]["idx"] % num_gpus]
+            # Use the selected GPU
+            else:
+                gpu_index = self.config.participant["device_args"]["gpu_id"]
             logging_training.info(f"Creating trainer with accelerator GPU ({gpu_index})")
             self._trainer = Trainer(
                 callbacks=[ModelSummary(max_depth=1), NebulaProgressBar()],
                 max_epochs=self.epochs,
                 accelerator=self.config.participant["device_args"]["accelerator"],
-                devices=[gpu_index],
+                devices=gpu_index,
                 logger=self._logger,
                 enable_checkpointing=False,
                 enable_model_summary=False,
@@ -353,7 +336,7 @@ class Lightning:
 
     def on_round_start(self):
         self.data.setup()
-        self._logger.log_data({"Round": self.round})
+        self._logger.log_data({"A-Round": self.round})
         # self.reporter.enqueue_data("Round", self.round)
 
     def on_round_end(self):
@@ -365,5 +348,5 @@ class Lightning:
         self.cleanup()
 
     def on_learning_cycle_end(self):
-        self._logger.log_data({"Round": self.round})
+        self._logger.log_data({"A-Round": self.round})
         # self.reporter.enqueue_data("Round", self.round)
