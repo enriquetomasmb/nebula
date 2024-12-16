@@ -885,11 +885,12 @@ class ScenarioManagement:
     @classmethod
     def generate_statistics(cls, path):
         try:
-            # Generate statistics
-            logging.info(f"Generating statistics for scenario {path}")
-
             # Define input directories
             input_event_dirs = sorted(glob.glob(os.path.join(path, "metrics/*")))
+            if not input_event_dirs:
+                return False
+            # Generate statistics
+            logging.info(f"Generating statistics for scenario {path}")
             # Where to write reduced TB events
             tb_events_output_dir = os.path.join(path, "metrics", "reduced-data")
             csv_out_path = os.path.join(path, "metrics", "reduced-data-as.csv")
