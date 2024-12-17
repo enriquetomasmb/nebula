@@ -253,7 +253,7 @@ class ScenarioManagement:
 
         # Assign the controller endpoint
         if self.scenario.deployment == "docker":
-            self.controller = f"{os.environ.get('NEBULA_CONTROLLER_NAME')}-nebula-frontend"
+            self.controller = f"{os.environ.get('NEBULA_CONTROLLER_NAME')}_nebula-frontend"
         else:
             self.controller = f"127.0.0.1:{os.environ.get('NEBULA_FRONTEND_PORT')}"
 
@@ -646,7 +646,7 @@ class ScenarioManagement:
         logging.info("Starting nodes using Docker Compose...")
         logging.info(f"env path: {self.env_path}")
 
-        network_name = f"{os.environ.get('NEBULA_CONTROLLER_NAME')}-{str(self.user).lower()}-nebula-net-scenario"
+        network_name = f"{os.environ.get('NEBULA_CONTROLLER_NAME')}_{str(self.user).lower()}-nebula-net-scenario"
 
         # Create the Docker network
         base = DockerUtils.create_docker_network(network_name)
@@ -658,7 +658,7 @@ class ScenarioManagement:
         container_ids = []
         for idx, node in enumerate(self.config.participants):
             image = "nebula-core"
-            name = f"{os.environ.get('NEBULA_CONTROLLER_NAME')}-{self.user}-participant{node['device_args']['idx']}"
+            name = f"{os.environ.get('NEBULA_CONTROLLER_NAME')}_{self.user}-participant{node['device_args']['idx']}"
 
             if node["device_args"]["accelerator"] == "gpu":
                 environment = {"NVIDIA_DISABLE_REQUIRE": True}
@@ -691,7 +691,7 @@ class ScenarioManagement:
                     f"{network_name}": client.api.create_endpoint_config(
                         ipv4_address=f"{base}.{i}",
                     ),
-                    f"{os.environ.get('NEBULA_CONTROLLER_NAME')}-nebula-net-base": client.api.create_endpoint_config(),
+                    f"{os.environ.get('NEBULA_CONTROLLER_NAME')}_nebula-net-base": client.api.create_endpoint_config(),
                     "chainnet": client.api.create_endpoint_config(),
                 })
             else:
@@ -699,7 +699,7 @@ class ScenarioManagement:
                     f"{network_name}": client.api.create_endpoint_config(
                         ipv4_address=f"{base}.{i}",
                     ),
-                    f"{os.environ.get('NEBULA_CONTROLLER_NAME')}-nebula-net-base": client.api.create_endpoint_config(),
+                    f"{os.environ.get('NEBULA_CONTROLLER_NAME')}_nebula-net-base": client.api.create_endpoint_config(),
                 })
 
             node["tracking_args"]["log_dir"] = "/nebula/app/logs"

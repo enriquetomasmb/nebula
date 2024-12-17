@@ -77,6 +77,14 @@ argparser.add_argument(
 )
 
 argparser.add_argument(
+    "-d",
+    "--database",
+    dest="databases",
+    default="/opt/nebula",
+    help="Nebula databases path",
+)
+
+argparser.add_argument(
     "-l",
     "--logs",
     dest="logs",

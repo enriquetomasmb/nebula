@@ -339,6 +339,7 @@ class Controller:
         self.statistics_port = args.statsport if hasattr(args, "statsport") else 8080
         self.simulation = args.simulation
         self.config_dir = args.config
+        self.db_dir = args.databases if hasattr(args, "databases") else "/opt/nebula"
         self.test = args.test if hasattr(args, "test") else False
         self.log_dir = args.logs
         self.cert_dir = args.certs
@@ -453,6 +454,7 @@ class Controller:
         else:
             self.run_frontend()
             logging.info(f"NEBULA Frontend is running at http://localhost:{self.frontend_port}")
+            logging.info(f"NEBULA Databases created in {self.db_dir}")
 
         # Watchdog for running additional scripts in the host machine (i.e. during the execution of a federation)
         event_handler = NebulaEventHandler()
@@ -516,7 +518,7 @@ class Controller:
         )
 
     def run_waf(self):
-        network_name = f"{os.environ['USER']}-nebula-net-base"
+        network_name = f"{os.environ['USER']}_nebula-net-base"
         base = DockerUtils.create_docker_network(network_name)
 
         client = docker.from_env()
@@ -537,7 +539,7 @@ class Controller:
 
         container_id_waf = client.api.create_container(
             image="nebula-waf",
-            name=f"{os.environ['USER']}-nebula-waf",
+            name=f"{os.environ['USER']}_nebula-waf",
             detach=True,
             volumes=volumes_waf,
             host_config=host_config_waf,
@@ -571,7 +573,7 @@ class Controller:
 
         container_id = client.api.create_container(
             image="nebula-waf-grafana",
-            name=f"{os.environ['USER']}-nebula-waf-grafana",
+            name=f"{os.environ['USER']}_nebula-waf-grafana",
             detach=True,
             environment=environment,
             host_config=host_config,
@@ -595,7 +597,7 @@ class Controller:
 
         container_id_loki = client.api.create_container(
             image="nebula-waf-loki",
-            name=f"{os.environ['USER']}-nebula-waf-loki",
+            name=f"{os.environ['USER']}_nebula-waf-loki",
             detach=True,
             command=command,
             host_config=host_config_loki,
@@ -619,7 +621,7 @@ class Controller:
 
         container_id_promtail = client.api.create_container(
             image="nebula-waf-promtail",
-            name=f"{os.environ['USER']}-nebula-waf-promtail",
+            name=f"{os.environ['USER']}_nebula-waf-promtail",
             detach=True,
             volumes=volumes_promtail,
             host_config=host_config_promtail,
@@ -646,7 +648,7 @@ class Controller:
         except Exception:
             logging.info("No GPU available for the frontend, nodes will be deploy in CPU mode")
 
-        network_name = f"{os.environ['USER']}-nebula-net-base"
+        network_name = f"{os.environ['USER']}_nebula-net-base"
 
         # Create the Docker network
         base = DockerUtils.create_docker_network(network_name)
@@ -681,6 +683,7 @@ class Controller:
                 f"{self.root_path}:/nebula",
                 "/var/run/docker.sock:/var/run/docker.sock",
                 f"{self.root_path}/nebula/frontend/config/nebula:/etc/nginx/sites-available/default",
+                f"{self.db_dir}/databases:/nebula/nebula/frontend/databases"
             ],
             extra_hosts={"host.docker.internal": "host-gateway"},
             port_bindings={80: self.frontend_port, 8080: self.statistics_port},
@@ -692,7 +695,7 @@ class Controller:
 
         container_id = client.api.create_container(
             image="nebula-frontend",
-            name=f"{os.environ['USER']}-nebula-frontend",
+            name=f"{os.environ['USER']}_nebula-frontend",
             detach=True,
             environment=environment,
             volumes=volumes,
@@ -708,16 +711,17 @@ class Controller:
 
     @staticmethod
     def stop_waf():
-        DockerUtils.remove_containers_by_prefix(f"{os.environ['USER']}-nebula-waf")
+        DockerUtils.remove_containers_by_prefix(f"{os.environ['USER']}_nebula-waf")
 
     @staticmethod
     def stop():
         logging.info("Closing NEBULA (exiting from components)... Please wait")
-        DockerUtils.remove_containers_by_prefix(f"{os.environ['USER']}")
+        DockerUtils.remove_containers_by_prefix(f"{os.environ['USER']}_nebula")
+        DockerUtils.remove_containers_by_prefix(f"nebula_")
         ScenarioManagement.stop_blockchain()
         ScenarioManagement.stop_participants()
         Controller.stop_waf()
-        DockerUtils.remove_docker_networks_by_prefix(f"{os.environ['USER']}")
+        DockerUtils.remove_docker_networks_by_prefix(f"{os.environ['USER']}_")
         controller_pid_file = os.path.join(os.path.dirname(__file__), "controller.pid")
         try:
             with open(controller_pid_file) as f:

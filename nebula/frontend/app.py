@@ -472,15 +472,15 @@ async def check_enough_resources():
     resources = await get_host_resources()
     
     mem_percent = resources.get("memory_percent")
-    gpu_memory_percent = resources.get("gpu_memory_percent", [])
+    # gpu_memory_percent = resources.get("gpu_memory_percent", [])
 
     # if cpu_percent >= settings.resources_threshold or mem_percent >= settings.resources_threshold:
     if mem_percent >= settings.resources_threshold:
         return False
-    elif len(gpu_memory_percent) > 0:
-        for gpu_mem in gpu_memory_percent:
-            if gpu_mem >= settings.resources_threshold:
-                return False
+    # elif len(gpu_memory_percent) > 0:
+    #     for gpu_mem in gpu_memory_percent:
+    #         if gpu_mem >= settings.resources_threshold:
+    #             return False
         
     return True
     
@@ -493,17 +493,17 @@ async def monitor_resources(user):
         if not enough_resources:
             running_scenario = get_running_scenario(user)
             if running_scenario:
-                # Wich card has big memory consumption
-                gpu = await get_least_memory_gpu()
-                # Stop scenario if is using the high memory gpu
+                # # Wich card has big memory consumption
+                # gpu = await get_least_memory_gpu()
+                # # Stop scenario if is using the high memory gpu
                 running_scenario_as_dict = dict(running_scenario)
-                if running_scenario_as_dict["gpu_id"] == gpu.get("available_gpu_index"):
-                    scenario_name = running_scenario_as_dict["name"]
-                    stop_scenario(scenario_name, user)
-                    user_data.scenarios_list_length -= 1
-                    user_data.finish_scenario_event.set()
+                scenario_name = running_scenario_as_dict["name"]
+                # if running_scenario_as_dict["gpu_id"] == gpu.get("available_gpu_index"):
+                stop_scenario(scenario_name, user)
+                user_data.scenarios_list_length -= 1
+                user_data.finish_scenario_event.set()
                     
-        await asyncio.sleep(5)
+        await asyncio.sleep(20)
 
     
 
@@ -876,9 +876,9 @@ def stop_scenario(scenario_name, user):
     from nebula.scenarios import ScenarioManagement
 
     ScenarioManagement.stop_participants(scenario_name)
-    DockerUtils.remove_containers_by_prefix(f"{os.environ.get('NEBULA_CONTROLLER_NAME')}-{user}-participant")
+    DockerUtils.remove_containers_by_prefix(f"{os.environ.get('NEBULA_CONTROLLER_NAME')}_{user}-participant")
     DockerUtils.remove_docker_network(
-        f"{(os.environ.get('NEBULA_CONTROLLER_NAME'))}-{str(user).lower()}-nebula-net-scenario"
+        f"{(os.environ.get('NEBULA_CONTROLLER_NAME'))}_{str(user).lower()}-nebula-net-scenario"
     )
     ScenarioManagement.stop_blockchain()
     scenario_set_status_to_finished(scenario_name)
@@ -1227,19 +1227,42 @@ async def node_stopped(scenario_name: str, request: Request):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
 
 
-async def assign_available_gpu(scenario_data, role):    
+async def assign_available_gpu(scenario_data, role):
+    available_gpus = []
+
     if scenario_data["accelerator"] == "cpu":
         scenario_data["gpu_id"] = []
     else:
         response = await get_available_gpus()
-        available_gpus = response.get("available_gpus")
-        if len(available_gpus) > 0:
-            if role == "user":
-                scenario_data["gpu_id"] = [available_gpus.pop()]
-            elif role == "admin":
-                scenario_data["gpu_id"] = available_gpus
-            else:
-                scenario_data["gpu_id"] = []
+        # Obtain available system_gpus
+        available_system_gpus = response.get("available_gpus")
+        running_scenarios = get_running_scenario(get_all=True)
+        # Obtain currently used gpus
+        if running_scenarios:
+            running_gpus = []
+            for scenario in running_scenarios:
+                scenario_gpus = json.loads(scenario["gpu_id"])
+                for gpu in scenario_gpus:
+                    if gpu not in running_gpus:
+                        running_gpus.append(gpu)
+
+            # Obtain gpus that are not in use
+            for gpu in available_system_gpus:
+                if gpu not in running_gpus:
+                    available_gpus.append(gpu)
+        else:
+            available_gpus = available_system_gpus
+
+    # Assign gpus based in user role
+    if len(available_gpus) > 0:
+        if role == "user":
+            scenario_data["gpu_id"] = [available_gpus.pop()]
+        elif role == "admin":
+            scenario_data["gpu_id"] = available_gpus
+        else:
+            scenario_data["gpu_id"] = []
+    else:
+        scenario_data["gpu_id"] = []
     
     return scenario_data
 

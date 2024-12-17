@@ -36,7 +36,7 @@ RUN cp nginx-modules/nginx-1.24.0/objs/ngx_http_geoip2_module.so /usr/lib/nginx/
 RUN cp nginx-modules/nginx-1.24.0/objs/ngx_stream_geoip2_module.so /usr/lib/nginx/modules
 
 # geoip2 database downloaded
-RUN wget https://git.io/GeoLite2-Country.mmdb -P /usr/share/GeoIP/
+RUN wget https://github.com/P3TERX/GeoLite.mmdb/raw/download/GeoLite2-Country.mmdb -P /usr/share/GeoIP/
 
 # nginx configuration files
 COPY default.conf /etc/nginx/templates/conf.d/default.conf.template

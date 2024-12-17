@@ -185,7 +185,7 @@ class Lightning:
             self._trainer = Trainer(
                 callbacks=[ModelSummary(max_depth=1), NebulaProgressBar()],
                 max_epochs=self.epochs,
-                accelerator=self.config.participant["device_args"]["accelerator"],
+                accelerator="gpu",
                 devices=gpu_index,
                 logger=self._logger,
                 enable_checkpointing=False,
@@ -197,7 +197,7 @@ class Lightning:
             self._trainer = Trainer(
                 callbacks=[ModelSummary(max_depth=1), NebulaProgressBar()],
                 max_epochs=self.epochs,
-                accelerator=self.config.participant["device_args"]["accelerator"],
+                accelerator="cpu",
                 devices="auto",
                 logger=self._logger,
                 enable_checkpointing=False,
