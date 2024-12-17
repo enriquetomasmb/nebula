@@ -460,8 +460,8 @@ class ScenarioManagement:
         is_start_node = False
         config_participants = []
         #ap = len(additional_participants) if additional_participants else 0
-        ap = 1
-        logging.info(f"######## nodes: {self.n_nodes} + additionals: {ap}")
+        ap = len(additional_participants) if additional_participants else 0
+        logging.info(f"######## nodes: {self.n_nodes} + additionals: {ap} ######")
         for i in range(self.n_nodes):
             with open(f"{self.config_dir}/participant_" + str(i) + ".json") as f:
                 participant_config = json.load(f)
@@ -533,14 +533,18 @@ class ScenarioManagement:
                     participant_config = json.load(f)
 
                 logging.info(f"Configuration | additional nodes |  participant: {self.n_nodes + i + 1}")
+                logging.info("Mensaje de prueba de modificación")
+                logging.info(f"Valores de la ultima ip: ( {participant_config["network_args"]["ip"]} )")
                 participant_config["scenario_args"]["n_nodes"] = self.n_nodes + i + 1
                 participant_config["device_args"]["idx"] = last_participant_index + i
                 participant_config["network_args"]["neighbors"] = ""
                 participant_config["network_args"]["ip"] = (
                     participant_config["network_args"]["ip"].rsplit(".", 1)[0]
                     + "."
-                    + str(int(participant_config["network_args"]["ip"].rsplit(".", 1)[1]) + 1)
+                    + str(int(participant_config["network_args"]["ip"].rsplit(".", 1)[1]) + i + 1)
                 )
+                ip = str(participant_config["network_args"]["ip"])
+                logging.info(f"El valor almacenado en json es: {ip}")
                 participant_config["device_args"]["uid"] = hashlib.sha1(
                     (
                         str(participant_config["network_args"]["ip"])
