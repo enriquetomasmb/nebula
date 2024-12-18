@@ -694,7 +694,10 @@ def update_topology(scenario_name, nodes_list, nodes_config):
 
     tm = TopologyManager(n_nodes=len(nodes_list), topology=matrix, scenario_name=scenario_name)
     tm.update_nodes(nodes_config)
-    tm.draw_graph(path=os.path.join(settings.config_dir, scenario_name, "topology.png"))
+    try:
+        tm.draw_graph(path=os.path.join(settings.config_dir, scenario_name, "topology.png"))
+    except FileNotFoundError:
+        logging.exception("Topology.png not found in config dir")
 
 
 @app.post("/nebula/dashboard/{scenario_name}/node/update")
