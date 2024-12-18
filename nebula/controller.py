@@ -366,7 +366,7 @@ class Controller:
             self.controller_port = SocketUtils.find_free_port()
 
         if not SocketUtils.is_port_open(self.frontend_port):
-            self.frontend_port = SocketUtils.find_free_port()
+            self.frontend_port = SocketUtils.find_free_port(self.controller_port + 1)
 
         if not SocketUtils.is_port_open(self.statistics_port):
             self.statistics_port = SocketUtils.find_free_port(self.frontend_port + 1)
@@ -716,8 +716,7 @@ class Controller:
     @staticmethod
     def stop():
         logging.info("Closing NEBULA (exiting from components)... Please wait")
-        DockerUtils.remove_containers_by_prefix(f"{os.environ['USER']}_nebula")
-        DockerUtils.remove_containers_by_prefix(f"nebula_")
+        DockerUtils.remove_containers_by_prefix(f"{os.environ['USER']}_")
         ScenarioManagement.stop_blockchain()
         ScenarioManagement.stop_participants()
         Controller.stop_waf()
