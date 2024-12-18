@@ -133,7 +133,7 @@ async def initialize_databases():
             "rounds": "TEXT",
             "role": "TEXT",
             "username": "TEXT",
-            "gpu_id" : "TEXT",
+            "gpu_id": "TEXT",
         }
         await ensure_columns(conn, "scenarios", desired_columns)
 
@@ -461,7 +461,7 @@ def scenario_update_record(
     dataset,
     rounds,
     role,
-    gpu_id
+    gpu_id,
 ):
     _conn = sqlite3.connect(scenario_db_file_location)
     _c = _conn.cursor()
@@ -555,14 +555,14 @@ def get_running_scenario(username=None, get_all=False):
     with sqlite3.connect(scenario_db_file_location) as conn:
         conn.row_factory = sqlite3.Row
         c = conn.cursor()
-        
+
         if username:
             command = """
-                SELECT * FROM scenarios 
+                SELECT * FROM scenarios
                 WHERE (status = ? OR status = ?) AND username = ?;
             """
             c.execute(command, ("running", "completed", username))
-            
+
             result = c.fetchone()
         else:
             command = "SELECT * FROM scenarios WHERE status = ? OR status = ?;"

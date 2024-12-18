@@ -389,7 +389,8 @@ section {
 
 .alerts {
     z-index: 100;
-    position: absolute;
+    position: fixed;
+    max-width: 100% !important;
     text-align: center;
 }
 

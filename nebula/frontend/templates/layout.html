@@ -79,14 +79,6 @@
             // Append the alert in the top of the page
             const container = document.querySelector('.alerts');
             container.insertBefore(alert, container.firstChild);
-
-            // Hide the alert after 3 seconds
-            setTimeout(() => {
-                alert.classList.remove('show');
-                setTimeout(() => {
-                    alert.remove();
-                }, 300);
-            }, 10000);
         }
     </script>
 
@@ -157,6 +149,9 @@
                         </ul>
                     </li>
                     {% else %}
+                    {% for key, value in request.session.items() %}
+                    <input type="hidden" id="session_{{ key }}" value="{{ value }}">
+                    {% endfor %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarUserDropdown">Account <i
                                 class="fa fa-user"></i></a>
@@ -248,6 +243,34 @@
         document.getElementById("btn-up").onclick = function () {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
+    </script>
+
+    <script>
+        // Check if WebSocket is supported by the browser
+        if ("WebSocket" in window) {
+            console.log("WebSocket is supported by your Browser!");
+        } else {
+            console.log("WebSocket NOT supported by your Browser!");
+        }
+        var client_id = Math.floor(Math.random() * 1000000);
+        var host = window.location.hostname;
+        var port = window.location.port ? ':' + window.location.port : '';
+        var protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        var socket = new WebSocket(protocol + '//' + host + port + '/nebula/ws/' + client_id);
+    </script>
+
+    <script>
+        socket.onmessage = function (event) {
+            try {
+                var data = JSON.parse(event.data);
+            } catch (e) {
+                console.log("Error parsing JSON data");
+                return;
+            }
+            if (data.type === "exceed_resources") {
+                showAlert("danger", "Scenario of user " + data.user + " stopped due to limited resources")
+            }
+        }
     </script>
 
     <script src="{{ url_for('static', path='js/custom.js') }}"></script>

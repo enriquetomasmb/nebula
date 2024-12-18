@@ -12,7 +12,6 @@ import time
 
 import docker
 import psutil
-import torch
 import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI
@@ -52,90 +51,94 @@ async def read_root():
 async def get_status():
     return {"status": "NEBULA Controller API is running"}
 
+
 @app.get("/resources")
 async def get_resources():
     devices = 0
     gpu_memory_percent = []
-    
+
     # Obtain available RAM
     memory_info = await asyncio.to_thread(psutil.virtual_memory)
-    
+
     if importlib.util.find_spec("pynvml") is not None:
         try:
             import pynvml
+
             await asyncio.to_thread(pynvml.nvmlInit)
             devices = await asyncio.to_thread(pynvml.nvmlDeviceGetCount)
-            
+
             # Obtain GPU info
             for i in range(devices):
                 handle = await asyncio.to_thread(pynvml.nvmlDeviceGetHandleByIndex, i)
                 memory_info_gpu = await asyncio.to_thread(pynvml.nvmlDeviceGetMemoryInfo, handle)
                 memory_used_percent = (memory_info_gpu.used / memory_info_gpu.total) * 100
                 gpu_memory_percent.append(memory_used_percent)
-                
+
         except Exception:  # noqa: S110
             pass
 
     return {
         # "cpu_percent": psutil.cpu_percent(),
-        "gpus" : devices,
-        "memory_percent" : memory_info.percent,
+        "gpus": devices,
+        "memory_percent": memory_info.percent,
         "gpu_memory_percent": gpu_memory_percent,
     }
-    
+
 
 @app.get("/least_memory_gpu")
 async def get_least_memory_gpu():
     gpu_with_least_memory_index = None
-    
+
     if importlib.util.find_spec("pynvml") is not None:
         try:
             import pynvml
+
             await asyncio.to_thread(pynvml.nvmlInit)
             devices = await asyncio.to_thread(pynvml.nvmlDeviceGetCount)
-            
+
             # Obtain GPU info
             for i in range(devices):
                 handle = await asyncio.to_thread(pynvml.nvmlDeviceGetHandleByIndex, i)
                 memory_info = await asyncio.to_thread(pynvml.nvmlDeviceGetMemoryInfo, handle)
                 memory_used_percent = (memory_info.used / memory_info.total) * 100
-                
+
                 # Obtain GPU with less memory available
                 if memory_used_percent > max_memory_used_percent:
                     max_memory_used_percent = memory_used_percent
                     gpu_with_least_memory_index = i
-                
+
         except Exception:  # noqa: S110
             pass
 
     return {
         "gpu_with_least_memory_index": gpu_with_least_memory_index,
     }
-    
-    
+
+
 @app.get("/available_gpus/")
 async def get_available_gpu():
     available_gpus = []
-      
+
     if importlib.util.find_spec("pynvml") is not None:
         try:
             import pynvml
+
             await asyncio.to_thread(pynvml.nvmlInit)
             devices = await asyncio.to_thread(pynvml.nvmlDeviceGetCount)
-            
+
             # Obtain GPU info
             for i in range(devices):
                 handle = await asyncio.to_thread(pynvml.nvmlDeviceGetHandleByIndex, i)
                 memory_info = await asyncio.to_thread(pynvml.nvmlDeviceGetMemoryInfo, handle)
                 memory_used_percent = (memory_info.used / memory_info.total) * 100
-                
+
                 # Obtain available GPUs
                 if memory_used_percent < 5:
                     available_gpus.append(i)
-                        
+
             return {
                 "available_gpus": available_gpus,
-            }                       
+            }
         except Exception:  # noqa: S110
             pass
 
@@ -683,7 +686,7 @@ class Controller:
                 f"{self.root_path}:/nebula",
                 "/var/run/docker.sock:/var/run/docker.sock",
                 f"{self.root_path}/nebula/frontend/config/nebula:/etc/nginx/sites-available/default",
-                f"{self.db_dir}/databases:/nebula/nebula/frontend/databases"
+                f"{self.db_dir}/databases:/nebula/nebula/frontend/databases",
             ],
             extra_hosts={"host.docker.internal": "host-gateway"},
             port_bindings={80: self.frontend_port, 8080: self.statistics_port},

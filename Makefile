@@ -93,9 +93,6 @@ lock:				## Update the lock file
 .PHONY: check
 check:				## Run code quality tools
 	@echo "🛠️ Running code quality checks"
-	@echo "🔍 Checking uv lock file consistency"
-	@$(UV) sync
-	@echo "🚨 Linting code with pre-commit"
 	@$(UV) run pre-commit run -a
 
 .PHONY: check-plus

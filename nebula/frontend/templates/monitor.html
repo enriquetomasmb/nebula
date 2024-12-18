@@ -181,20 +181,6 @@
 {% endif %}
 
 <script>
-    // Check if WebSocket is supported by the browser
-    if ("WebSocket" in window) {
-        console.log("WebSocket is supported by your Browser!");
-    } else {
-        console.log("WebSocket NOT supported by your Browser!");
-    }
-    var client_id = Date.now()
-    var host = window.location.hostname;
-    var port = window.location.port ? ':' + window.location.port : '';
-    var protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    var socket = new WebSocket(protocol + '//' + host + port + '/nebula/ws/' + client_id);
-</script>
-
-<script>
     var downloadLinks = document.getElementsByClassName('download');
     // Loop through the tags and add event listeners. When user click to a tag, do a fetch request to the link and get the response. If the response is 200, then the file exists and the link is enabled. If the response is 404, then the file does not exist and the link is disabled.
     for (var i = 0; i < downloadLinks.length; i++) {
