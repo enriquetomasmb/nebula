@@ -85,8 +85,8 @@ class MNISTDataset(NebulaDataset):
             self.plot_data_distribution(dataset, partitions_map)
             self.plot_all_data_distribution(dataset, partitions_map)
 
-        if self.additional:
-            self.plot_data_distribution_for_additional_node(dataset, partitions_map)
+        #if self.additional:
+        #    self.plot_data_distribution_for_additional_node(dataset, partitions_map)
         
         return partitions_map[self.partition_id]
 

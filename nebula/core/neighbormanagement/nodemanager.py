@@ -16,6 +16,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from nebula.core.engine import Engine
 
+VANILLA_LEARNING_RATE = 1e-3
+FT_LEARNING_RATE = 2e-3
+
 class NodeManager():
     
     def __init__(
@@ -55,7 +58,8 @@ class NodeManager():
         self.synchronizing_rounds = False
         
         self._fast_reboot = True
-        self._learning_rate=2e-3
+        self._learning_rate = VANILLA_LEARNING_RATE
+        self.learning_rate_lock =  Locker(name="learning_rate_lock", async_lock=True)
         
         #self.set_confings()
 
@@ -75,8 +79,11 @@ class NodeManager():
     def model_handler(self):
         return self._model_handler
     
-    def get_learning_rate_increase(self):
-        return self._learning_rate
+    async def get_learning_rate_increase(self):
+        await self.learning_rate_lock.acquire_async()
+        lr = self._learning_rate
+        await self.learning_rate_lock.release_async()
+        return lr
     
     def fast_reboot_on(self):
         return self._fast_reboot
@@ -96,6 +103,11 @@ class NodeManager():
     def set_rounds_pushed(self, rp):
         with self.rounds_pushed_lock:
             self.rounds_pushed = rp
+    
+    async def _set_learning_rate(self, lr):
+        await self.learning_rate_lock.acquire_async()
+        self._learning_rate = lr
+        await self.learning_rate_lock.release_async()
     
     def still_waiting_for_candidates(self):
         return not self.accept_candidates_lock.locked()
@@ -141,12 +153,13 @@ class NodeManager():
                                                         #       WEIGHT STRATEGY      #
                                                         ##############################
 
-    def add_weight_modifier(self, addr):
+    async def add_weight_modifier(self, addr):
         self.weight_modifier_lock.acquire()
         if not addr in self.weight_modifier:
             wm = self.new_node_weight_multiplier 
             logging.info(f"📝 Registering | Weight modifier registered for source {addr} | round: {self.engine.get_round()} | value: {wm}")
             self.weight_modifier[addr] = (wm,1)
+            await self._set_learning_rate(FT_LEARNING_RATE)
         self.weight_modifier_lock.release()
     
     def remove_weight_modifier(self, addr):
@@ -188,9 +201,9 @@ class NodeManager():
             for a in remove_addrs:
                 self.remove_weight_modifier(a)
         else:
-            if len(self.weight_modifier) == 0 and self._learning_rate == (2e-3):
+            if len(self.weight_modifier) == 0 and await self.get_learning_rate_increase() == FT_LEARNING_RATE:
                 logging.info(f"🔄  Finishing | weight strategy is completed")
-                self._learning_rate = 1e-3
+                await self._set_learning_rate(VANILLA_LEARNING_RATE)
                 await self.engine.update_model_learning_rate()
         self.weight_modifier_lock.release()
     

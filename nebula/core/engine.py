@@ -395,7 +395,7 @@ class Engine:
             await self.nm.confirmation_received(source, confirmation=True)          
         elif self.nm.accept_connection(source, joining=True):
             logging.info(f"🔗  handle_connection_message | Late connection accepted | source: {source}") 
-            self.nm.add_weight_modifier(source) 
+            await self.nm.add_weight_modifier(source) 
             await self.cm.connect(source, direct=True)
             
             # Verify conenction is accepted
@@ -576,7 +576,8 @@ class Engine:
         await self.trainning_in_progress_lock.acquire_async()
         if self.get_round() < self.total_rounds:
             logging.info("Update | learning rate modified...")
-            self.trainer.update_model_learning_rate(self.nm.get_learning_rate_increase())
+            new_lr = await self.nm.get_learning_rate_increase()
+            self.trainer.update_model_learning_rate(new_lr)
         await self.trainning_in_progress_lock.release_async()        
         
     async def _start_learning_late(self):
