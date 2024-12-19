@@ -352,7 +352,12 @@ async def main(config):
         logging.info("Waiting time to start finding federation")
         # 385 r30
         # 615 r50
-        time.sleep(70)
+        if config.participant["network_args"]["ip"] == "192.168.50.9":
+            logging.info("Sleeping 385s...")
+            time.sleep(385)
+        elif config.participant["network_args"]["ip"] == "192.168.50.10":
+            logging.info("Sleeping 800s...")
+            time.sleep(615)
         #time.sleep(6000)  # DEBUG purposes
         #import requests
 

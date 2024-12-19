@@ -188,7 +188,7 @@ class NodeManager():
             for a in remove_addrs:
                 self.remove_weight_modifier(a)
         else:
-            if self._learning_rate == (2e-3):
+            if len(self.weight_modifier) == 0 and self._learning_rate == (2e-3):
                 logging.info(f"🔄  Finishing | weight strategy is completed")
                 self._learning_rate = 1e-3
                 await self.engine.update_model_learning_rate()
@@ -271,6 +271,7 @@ class NodeManager():
     
     def accept_model_offer(self, source, decoded_model, rounds, round, epochs, n_neighbors, loss): 
         if not self.accept_candidates_lock.locked():
+            logging.info(f"🔄 Processing offer from {source}...")
             model_accepted = self.model_handler.accept_model(decoded_model)
             self.model_handler.set_config(config=(rounds, round, epochs))
             if model_accepted:      

@@ -1,5 +1,6 @@
 from nebula.core.neighbormanagement.modelhandlers.modelhandler import ModelHandler
 from nebula.core.utils.locker import Locker
+import logging
 
 class STDModelHandler(ModelHandler):
     
@@ -30,6 +31,7 @@ class STDModelHandler(ModelHandler):
             save only first model received to set up own model later
         """
         if not self.model_lock.locked():
+            logging.info(" ### First model acquire ###")
             self.model_lock.acquire()
             self.model = model
         return True

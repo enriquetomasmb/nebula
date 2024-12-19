@@ -533,8 +533,8 @@ class ScenarioManagement:
                     participant_config = json.load(f)
 
                 logging.info(f"Configuration | additional nodes |  participant: {self.n_nodes + i + 1}")
-                logging.info("Mensaje de prueba de modificación")
-                logging.info(f"Valores de la ultima ip: ( {participant_config["network_args"]["ip"]} )")
+                last_ip = participant_config["network_args"]["ip"]
+                logging.info(f"Valores de la ultima ip: ({last_ip})")
                 participant_config["scenario_args"]["n_nodes"] = self.n_nodes + i + 1
                 participant_config["device_args"]["idx"] = last_participant_index + i
                 participant_config["network_args"]["neighbors"] = ""
