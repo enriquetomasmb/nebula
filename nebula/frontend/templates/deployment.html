@@ -489,25 +489,6 @@
                             style="display:inline; width: 20%">
                     </div>
                 </div>
-                <!-- Advanced Communications -->
-                <div class="form-group row container-shadow tiny grey">
-                    <h5 class="step-number">Advanced Communications <i class="fa fa-wifi"></i>
-                        <input type="checkbox" id="comms-lock" onchange="lock('network-subnet', 'network-gateway', checked)" style="display: none;">
-                        <label for="comms-lock" class="icon-container" style="float: right;">
-                            <i class="fa fa-lock"></i>
-                        </label>
-                    </h5>
-                    <h5 class="step-title">Network address</h5>
-                    <div class="form-check form-check-inline">
-                        <input type="text" class="form-control" id="network-subnet" style="width: 80%"
-                            value="192.168.50.0/24">
-                    </div>
-                    <h5 class="step-title">Network gateway</h5>
-                    <div class="form-check form-check-inline">
-                        <input type="text" class="form-control" id="network-gateway" style="width: 80%"
-                            value="192.168.50.1">
-                    </div>
-                </div>
                 <!-- Advanced Training -->
                 <div class="form-group row container-shadow tiny grey">
                     <h5 class="step-number">Advanced Training <i class="fa fa-cogs"></i>
@@ -1068,22 +1049,22 @@
             data["report_status_data_queue"] = document.getElementById("reportingSwitch").checked
             // Step 9
             data["accelerator"] = document.getElementById("resourceUsage").value
-            // Step 10-11
-            data["network_subnet"] = document.getElementById("network-subnet").value
-            data["network_gateway"] = document.getElementById("network-gateway").value
-            // Step 12
+            // Step 10
+            data["network_subnet"] = "192.168.50.0/24"
+            data["network_gateway"] = "192.168.50.1"
+            // Step 11
             data["epochs"] = document.getElementById("epochs").value
-            // Step 13
+            // Step 12
             data["attacks"] = document.getElementById("poisoning-attack-select").value
             data["poisoned_node_percent"] = document.getElementById("poisoned-node-percent").value
             data["poisoned_sample_percent"] = document.getElementById("poisoned-sample-percent").value
             data["poisoned_noise_percent"] = document.getElementById("poisoned-noise-percent").value
-            // Step 14
+            // Step 13
             data["with_reputation"] = document.getElementById("with-reputation-btn").checked ? true : false
             data["is_dynamic_topology"] = document.getElementById("dynamic-topology-btn").checked ? true : false
             data["is_dynamic_aggregation"] = document.getElementById("dynamic-aggregation-btn").checked ? true : false
             data["target_aggregation"] = document.getElementById("dynamic-aggregation-btn").checked ? document.getElementById("targetAggregationSelect").value : false
-            // Step 15
+            // Step 14
             data["random_geo"] = document.getElementById("random-geo-btn").checked ? true : false
             data["latitude"] = parseFloat(document.getElementById("latitude").value)
             data["longitude"] = parseFloat(document.getElementById("longitude").value)
@@ -1170,12 +1151,9 @@
                 }
                 // Step 9
                 document.getElementById("resourceUsage").value = data["accelerator"];
-                // Step 10-11
-                document.getElementById("network-subnet").value = data["network_subnet"];
-                document.getElementById("network-gateway").value = data["network_gateway"];
-                // Step 12
+                // Step 11
                 document.getElementById("epochs").value = data["epochs"];
-                // Step 13
+                // Step 12
                 var selectElement = document.getElementById("poisoning-attack-select");
                 selectElement.value = data["attacks"];
                 selectElement.dispatchEvent(new Event('change'));
@@ -1193,7 +1171,7 @@
                 }
                 document.getElementById("poisoned-sample-percent").value = data["poisoned_sample_percent"];
                 document.getElementById("poisoned-noise-percent").value = data["poisoned_noise_percent"];
-                // Step 14
+                // Step 13
                 document.getElementById("with-reputation-btn").checked = data["with_reputation"];
                 if (data["with_reputation"]) {
                     document.getElementById("mtd-strategy").style.display = "block";
@@ -1201,7 +1179,7 @@
                 document.getElementById("dynamic-topology-btn").checked = data["is_dynamic_topology"];
                 document.getElementById("dynamic-aggregation-btn").checked = data["is_dynamic_aggregation"];
                 document.getElementById("targetAggregationSelect").value = data["target_aggregation"];
-                // Step 15
+                // Step 14
                 document.getElementById("random-geo-btn").checked = data["random_geo"];
                 document.getElementById("latitude").value = data["latitude"];
                 document.getElementById("longitude").value = data["longitude"];
@@ -1749,15 +1727,10 @@
                 document.getElementById("distanceValue").value = document.getElementById("distanceValue").defaultValue;
             }
             // Step 11
-            if(!document.getElementById("comms-lock").checked){
-                document.getElementById("network-subnet").value = document.getElementById("network-subnet").defaultValue;
-                document.getElementById("network-gateway").value = document.getElementById("network-gateway").defaultValue;
-            }
-            // Step 12
             if(!document.getElementById("epochs-lock").checked){
                 document.getElementById("epochs").value = document.getElementById("epochs").defaultValue;
             }
-            // Step 13
+            // Step 12
             if(!document.getElementById("robustness-lock").checked){
                 var selectElement = document.getElementById("poisoning-attack-select");
                 selectElement.value = "No Attack";
@@ -1766,7 +1739,7 @@
                 document.getElementById("poisoned-noise-percent").value = document.getElementById("poisoned-noise-percent").defaultValue;
                 document.getElementById("poisoned-node-percent").value = document.getElementById("poisoned-node-percent").defaultValue;
             }
-            // Step 14
+            // Step 13
             if(!document.getElementById("defense-lock").checked){
                 document.getElementById("without-reputation-btn").checked = true;
                 document.getElementById("dynamic-aggregation-btn").checked = false;
@@ -1775,7 +1748,7 @@
                 document.getElementById("without-reputation-btn").click();
                 document.getElementById("dynamic-topology-btn").checked = false;
             }
-            // Step 15
+            // Step 14
             if(!document.getElementById("mobility-lock").checked){
                 document.getElementById("random-geo-btn").checked = true;
                 document.getElementById("longitude").value =  document.getElementById("longitude").defaultValue;
@@ -2746,14 +2719,6 @@
     </script>
 
     <script>
-        // Detect if input network-subnet is changed, if it is changed, update the graph
-        document.getElementById("network-subnet").addEventListener("change", function () {
-            // Update the graph
-            updateGraph();
-        });
-    </script>
-
-    <script>
         // Create the graph object
 
         function updateGraph() {
@@ -2800,7 +2765,7 @@
 
             // All nodes have to have the IP from the input docker-options-network-address. Each node have the IP plus 1, starting from the IP in the input plus 1
             var nodes = gData.nodes;
-            var ip = document.getElementById("network-subnet").value;
+            var ip = "192.168.50.0/24"
             var ip_split = ip.split("/");
             ip_split = ip_split[0].split(".");
             var ip_last = parseInt(ip_split[3]);
