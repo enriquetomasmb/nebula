@@ -1279,12 +1279,11 @@ async def node_stopped(scenario_name: str, request: Request):
 async def assign_available_gpu(scenario_data, role):
     available_gpus = []
 
-    if scenario_data["accelerator"] == "cpu":
-        scenario_data["gpu_id"] = []
-    else:
-        response = await get_available_gpus()
-        # Obtain available system_gpus
-        available_system_gpus = response.get("available_gpus")
+    response = await get_available_gpus()
+    # Obtain available system_gpus
+    available_system_gpus = response.get("available_gpus", None) if response is not None else None
+
+    if available_system_gpus:
         running_scenarios = get_running_scenario(get_all=True)
         # Obtain currently used gpus
         if running_scenarios:
@@ -1307,12 +1306,16 @@ async def assign_available_gpu(scenario_data, role):
     # Assign gpus based in user role
     if len(available_gpus) > 0:
         if role == "user":
+            scenario_data["accelerator"] = "gpu"
             scenario_data["gpu_id"] = [available_gpus.pop()]
         elif role == "admin":
+            scenario_data["accelerator"] = "gpu"
             scenario_data["gpu_id"] = available_gpus
         else:
+            scenario_data["accelerator"] = "cpu"
             scenario_data["gpu_id"] = []
     else:
+        scenario_data["accelerator"] = "cpu"
         scenario_data["gpu_id"] = []
 
     return scenario_data

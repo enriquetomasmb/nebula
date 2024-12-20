@@ -452,27 +452,6 @@
                     <h5 class="step-title">Individual participants</h5>
                     <div id="participant-items" class="row"></div>
                 </div>
-                <!-- Advanced Deployment -->
-                <div class="form-group row container-shadow tiny grey">
-                    <h5 class="step-number">Advanced Deployment <i class="fa fa-cloud-upload"></i>
-                        <input type="checkbox" id="accelerator-lock" onchange="lock('resourceUsage', checked)" style="display: none;">
-                        <label for="accelerator-lock" class="icon-container" style="float: right;">
-                            <i class="fa fa-lock"></i>
-                        </label>
-                    </h5>
-                    <h5 class="step-title">Accelerator definition</h5>
-                    <div class="form-check">
-                        <select class="form-control" id="resourceUsage" name="resources"
-                            style="display: inline; width: 20%">
-                            {% if gpu_available %}
-                            <option value="gpu" selected>GPU</option>
-                            <option value="cpu">CPU</option>
-                            {% else %}
-                            <option value="cpu" selected>CPU</option>
-                            {% endif %}
-                        </select>
-                    </div>
-                </div>
                 <!-- Advanced Topology -->
                 <div class="form-group row container-shadow tiny grey">
                     <h5 class="step-number">Advanced Topology <i class="fa fa-sitemap"></i>
@@ -1048,7 +1027,7 @@
             data["logginglevel"] = document.getElementById("loggingLevel").value === "true"
             data["report_status_data_queue"] = document.getElementById("reportingSwitch").checked
             // Step 9
-            data["accelerator"] = document.getElementById("resourceUsage").value
+            data["accelerator"] = ""
             // Step 10
             data["network_subnet"] = "192.168.50.0/24"
             data["network_gateway"] = "192.168.50.1"
@@ -1149,11 +1128,9 @@
                 } else {
                     document.getElementById("reportingSwitch").disabled = false;
                 }
-                // Step 9
-                document.getElementById("resourceUsage").value = data["accelerator"];
-                // Step 11
+                // Step 10
                 document.getElementById("epochs").value = data["epochs"];
-                // Step 12
+                // Step 11
                 var selectElement = document.getElementById("poisoning-attack-select");
                 selectElement.value = data["attacks"];
                 selectElement.dispatchEvent(new Event('change'));
@@ -1171,7 +1148,7 @@
                 }
                 document.getElementById("poisoned-sample-percent").value = data["poisoned_sample_percent"];
                 document.getElementById("poisoned-noise-percent").value = data["poisoned_noise_percent"];
-                // Step 13
+                // Step 12
                 document.getElementById("with-reputation-btn").checked = data["with_reputation"];
                 if (data["with_reputation"]) {
                     document.getElementById("mtd-strategy").style.display = "block";
@@ -1179,7 +1156,7 @@
                 document.getElementById("dynamic-topology-btn").checked = data["is_dynamic_topology"];
                 document.getElementById("dynamic-aggregation-btn").checked = data["is_dynamic_aggregation"];
                 document.getElementById("targetAggregationSelect").value = data["target_aggregation"];
-                // Step 14
+                // Step 13
                 document.getElementById("random-geo-btn").checked = data["random_geo"];
                 document.getElementById("latitude").value = data["latitude"];
                 document.getElementById("longitude").value = data["longitude"];
@@ -1718,19 +1695,15 @@
                 document.getElementById("loggingLevel").value = false;
             }
             // Step 9
-            if(!document.getElementById("accelerator-lock").checked){
-                document.getElementById("resourceUsage").value = "cpu";
-            }
-            // Step 10
             if(!document.getElementById("distance-lock").checked){
                 document.getElementById("distanceInput").value = document.getElementById("distanceInput").defaultValue;
                 document.getElementById("distanceValue").value = document.getElementById("distanceValue").defaultValue;
             }
-            // Step 11
+            // Step 10
             if(!document.getElementById("epochs-lock").checked){
                 document.getElementById("epochs").value = document.getElementById("epochs").defaultValue;
             }
-            // Step 12
+            // Step 11
             if(!document.getElementById("robustness-lock").checked){
                 var selectElement = document.getElementById("poisoning-attack-select");
                 selectElement.value = "No Attack";
@@ -1739,7 +1712,7 @@
                 document.getElementById("poisoned-noise-percent").value = document.getElementById("poisoned-noise-percent").defaultValue;
                 document.getElementById("poisoned-node-percent").value = document.getElementById("poisoned-node-percent").defaultValue;
             }
-            // Step 13
+            // Step 12
             if(!document.getElementById("defense-lock").checked){
                 document.getElementById("without-reputation-btn").checked = true;
                 document.getElementById("dynamic-aggregation-btn").checked = false;
@@ -1748,7 +1721,7 @@
                 document.getElementById("without-reputation-btn").click();
                 document.getElementById("dynamic-topology-btn").checked = false;
             }
-            // Step 14
+            // Step 13
             if(!document.getElementById("mobility-lock").checked){
                 document.getElementById("random-geo-btn").checked = true;
                 document.getElementById("longitude").value =  document.getElementById("longitude").defaultValue;
@@ -1931,15 +1904,6 @@
 
         //Generate a scenario
         function generateScenarios(){
-
-            //selected accelerator
-            if(document.getElementById("mod-cpu").checked){
-                document.getElementById("resourceUsage").value = "cpu";
-            }
-            else{
-                document.getElementById("resourceUsage").value = "gpu";
-            }
-
             //One or more options selected in every case
             var aggregation_methods = ['mod-fedavg', 'mod-krum', 'mod-trimmed', 'mod-median'];
             if (!atLeastOneChecked(aggregation_methods)) {
